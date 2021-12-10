@@ -1,3 +1,5 @@
 package cold
 
-const Version = `0.0.0`
+// Version of package
+const Version = "0.0.0"
+

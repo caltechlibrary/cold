@@ -17,7 +17,17 @@ for name in [ 'people', 'group' ]:
         field_names = []
         reader = csv.DictReader(csvfile)
         for obj in reader:
-            l.append(obj)
+            o = {}
+            for field in obj:
+                   # skip the field.
+                if field in [ 'caltech', 'jpl', 'faculty', 'alumn' ]:
+                    if field in obj:
+                        if obj[field] == 'True':
+                            o[field] = True
+                elif not field in [ 'thesis_count', 'advisor_count', 'authors_count', 'editor_count', 'data_count' ]:
+                    if isinstance(obj[field], str) and len(obj[field]) > 0:
+                       o[field] = obj[field]
+            l.append(o)
     print(f'Writing {o_name}')
     with open(o_name, 'w') as f:
         f.write(json.dumps(l, indent = '   '))

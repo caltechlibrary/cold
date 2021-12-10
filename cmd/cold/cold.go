@@ -11,6 +11,6 @@ import (
 
 func main() {
 	appName := path.Base(os.Args[0])
-	fmt.Printf("%s %s not implemented.", appName, cold.Version)
+	fmt.Printf("%s %s not implemented.\n", appName, cold.Version)
 	os.Exit(1)
 }

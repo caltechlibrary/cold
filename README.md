@@ -28,7 +28,7 @@ Caltech Library maintains a list of people, groups and funders and their related
 } 
 ~~~
 
-Some objects may have more attributes others less. A simple table schema containing a row id, an internal identifier (e.g. cl_people_id, cl_group_id, cl_funder_id), a "field" and a "value" can be used to represent all the types of fields associated with a given object.  A separate table can be used for person, group and finder. This is well suited to a data collection that has sparse consistency (e.g. one person might have an ORCID but not a research id, the next might have a viaf or wikidata id but not a ORCID).
+Some objects may have more attributes others less. A simple table schema containing a row id, an internal identifier (e.g. cl_people_id, cl_group_id, cl_funder_id), a "field" and a "value" can be used to represent all the types of fields associated with a given object.  A separate table can be used for person, group and finder with the individual objects stored as a JSON type. This is well suited to a data collection that has sparse consistency (e.g. one person might have an ORCID but not a research id, the next might have a viaf or wikidata id but not a ORCID).
 
 ~~~
 CREATE TABLE people (cl_people_id VARCHAR(255) PRIMARY KEY, object JSON);
@@ -36,9 +36,87 @@ CREATE TABLE local_group (cl_group_id VARCHAR(255) PRIMARY KEY, object JSON);
 CREATE TABLE funder (cl_funder_id VARCHAR(255) PRIMARY KEY, object JSON);
 ~~~
 
-Another advantage of this approach (rather than separate columns per pid) is it allows us to handle the edge case where someone managed to acquire more than one "unique identifier".
+Approach
+--------
+
+This service, like ep3apid and datasetd is intended to run on localhost on a known port (e.g. localhost:8486). It is a simple with relying on access control from the operating system or front-end web service (e.g. a Bottle application).  The goal of the service is to provide a light weight layer between the database storing the objects and the applications that need to work with them.  Also like ep3apid and datasetd *cold* is configured using a simple JSON "settings.json" file. Typically this would be stored in a sub-folder of "etc" on the system (e.g. /usr/local/etc/cold/settings.json).
+
+End Points
+----------
+
+Plain text help is built in by adding a `/help` to the URL path. The defined end points are formed as the following. The following end point descriptions support the GET method.
+
+`/`
+: Plain text description of the service
+
+`/version`
+: Returns the version number of the service
+
+`/people`
+: Returns a list of "cl_people_id" managed by *cold*
+
+`/people/{CL_PEOPLE_ID}`
+: For a GET returns a people object, a PUT will create the people object, POST will replace the people object and DELETE will remove the people object
+
+`/group`
+: Returns a list of "cl_group_id" managed by *cold*
+
+`/group/{CL_GROUP_ID}`
+: For a GET returns a group object, a PUT will create the group object, POST will replace the group object and DELETE will remove the group object
+
+`/funder`
+: Returns a list of "cl_funder" managed by *cold*
+
+`/funder/{CL_funder_ID}`
+: For a GET returns a funder object, a PUT will create the funder object, POST will replace the funder object and DELETE will remove the funder object
 
 
+`/crosswalk`
+: Returns help on how to crosswalk from one identifier to the internal identifier
 
+`/crosswalk/people`
+: Returns a list of identifiers available for "people" objects
+
+`/crosswalk/people/{IDENTIFIER_NAME}/{IDENTIFIER}`
+: Returns a list of "cl_people_id" assocated with that identifier
+
+`/crosswalk/group`
+: Returns a list of identifiers available for "group" objects
+
+`/crosswalk/group/{IDENTIFIER_NAME}/{IDENTIFIER}`
+: Returns a list of "cl_group__id" assocated with that identifier
+
+`/crosswalk/funder`
+: Returns a list of identifiers available for "funder" objects
+
+`/crosswalk/funder/{IDENTIFIER_NAME}/{IDENTIFIER}`
+: Returns a list of "cl_funder_id" assocated with that identifier
+
+
+*cold* takes a REST approach to updates for managed objects.  PUT will create a new object, POST will update it, GET will retrieve it and DELETE Will replace it.
+
+Vocabularies
+------------
+
+*cold* also supports end points for stable vocabularies mapping an indentifier to a normalized name. These are set at compile time because they are so slow changing. 
+
+`/subject`
+: Returns a list of all the subject ids (codes)
+
+`/subject/{SUBJECT_ID}`
+: Returns the normalized text string for that subject id
+
+`/issn`
+: Returns a list of issn that are mapped to a publisher name
+
+`/issn/{ISSN}`
+: Returns the normalized publisher name for that ISSN
+
+
+`/doi-prefix`
+: Returns a list of DOI prefixes that map to a normalize name
+
+`/doi-prefix/{DOI_PREFIX}`
+: Returns the normalized publisher name for that DOI prefix
 
 

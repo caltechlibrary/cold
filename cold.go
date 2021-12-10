@@ -20,11 +20,12 @@ type Person struct {
 	AuthorsID           string    `json:"authors_id,omitempty"`
 	ContributorID       string    `json:"contributor_id,omitempty"`
 	EditorID            string    `json:"editor_id,omitempty"`
-	ThesisID            string    `json:"thesis_id,omitempty"`
-	AdvisorID           string    `json:"advisor_id,omitempty"`
+	ThesisAuthorID      string    `json:"thesis_author_id,omitempty"`
+	ThesisAdvisorID     string    `json:"thesis_advisor_id,omitempty"`
+	ThesisCommitteeID   string    `json:"thesis_committee_id,omitempty"`
 	ArchivesSpaceID     string    `json:"archivesspace_id,omitempty"`
 	DirectoryID         string    `json:"directory_id,omitempty"`
-	Viaf                string    `json:"viaf_id,omitempty"`
+	VIAF                string    `json:"viaf_id,omitempty"`
 	ISNI                string    `json:"lcnaf,omitempty"`
 	WikiData            string    `json:"wikidata,omitempty"`
 	SNAC                string    `json:"snac,omitempty"`
@@ -39,13 +40,8 @@ type Person struct {
 	Title               string    `json:"title,omitempty"`
 	Bio                 string    `json:"bio,omitempty"`
 	Division            string    `json:"division,omitempty"`
-	AuthorsCount        int       `json:"authors_count,omitempty"`
-	ThesisCount         int       `json:"thesis_count,omitempty"`
-	DataCount           int       `json:"data_count,omitempty"`
-	AdvisorCount        int       `json:"advisor_count,omitempty"`
-	EditorCount         int       `json:"editor_count,omitempty"`
 	Created             time.Time `json:"created,omitempty"`
-	Updated             time.Time `json:"created,omitempty"`
+	Updated             time.Time `json:"updated,omitempty"`
 }
 
 type Group struct {
