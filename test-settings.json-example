@@ -1,0 +1,6 @@
+{
+    "logfile": "cold-test.logs",
+    "dsn": "USERNAME:PASSWORD@/DATABASE",
+    "write": true,
+    "secret": "SOME_SECRET_KEY_TO_ALLOW_UPDATES"
+}

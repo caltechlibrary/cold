@@ -1,0 +1,57 @@
+# Compiled Object files, Static and Dynamic libs (Shared Objects)
+*.o
+*.a
+*.so
+
+# Folders
+_obj
+_test
+
+# Architecture specific extensions/prefixes
+*.[568vq]
+[568vq].out
+
+*.cgo1.go
+*.cgo2.c
+_cgo_defun.c
+_cgo_gotypes.go
+_cgo_export.*
+
+_testmain.go
+
+*.exe
+*.test
+*.prof
+
+# project ignore stuff
+.DS_Store
+*.zip
+*.tar.gz
+*.tgz
+*-demoset
+etc/*
+dist/*
+dataset/*
+testdata/*
+testout/*
+bin/*
+demos/*
+*.swp
+*.bleve
+*.ds
+*.dataset
+*.dylib
+*.h
+test*.json
+idxdefs/*
+*.bak
+*.pdf
+man
+credentials.json
+token.json
+client_id.json
+client_secret.json
+gsheet_test.json
+__pycache__
+settings.*
+pandoc.*.json

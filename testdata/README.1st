@@ -1,0 +1,5 @@
+
+This directory is where you hold test data used to test cold.
+Currently that means grabbing a lastest groups.csv person.csv from
+feeds and converting those using csv_to_object_list.py
+
