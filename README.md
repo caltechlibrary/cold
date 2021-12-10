@@ -24,16 +24,16 @@ Caltech Library maintains a list of people, groups and funders and their related
     },
     "email": "rsdoiel@caltech.edu",
     "orcid: "0000-0003-0900-6903",
-    "@affiliation": "https://ror.org/05dxps055"
+    "ror": "https://ror.org/05dxps055"
 } 
 ~~~
 
 Some objects may have more attributes others less. A simple table schema containing a row id, an internal identifier (e.g. cl_people_id, cl_group_id, cl_funder_id), a "field" and a "value" can be used to represent all the types of fields associated with a given object.  A separate table can be used for person, group and finder. This is well suited to a data collection that has sparse consistency (e.g. one person might have an ORCID but not a research id, the next might have a viaf or wikidata id but not a ORCID).
 
 ~~~
-CREATE TABLE people_ids (id VARCHAR PRIMARY KEY, cl_people_id VARCHAR(255) DEFAULT NOT NULL; field VARHCAR(255) DEFAULT NOT NULL, value VARCHAR(255) DEFAULT NOT NULL);
-CREATE TABLE group_ids (id VARCHAR PRIMARY KEY, cl_group_id VARCHAR(255) DEFAULT NOT NULL; field VARHCAR(255) DEFAULT NOT NULL, value VARCHAR(255) DEFAULT NOT NULL);
-CREATE TABLE funder_ids (id VARCHAR PRIMARY KEY, cl_funder_id VARCHAR(255) DEFAULT NOT NULL; field VARHCAR(255) DEFAULT NOT NULL, value VARCHAR(255) DEFAULT NOT NULL);
+CREATE TABLE people (cl_people_id VARCHAR(255) PRIMARY KEY, object JSON);
+CREATE TABLE local_group (cl_group_id VARCHAR(255) PRIMARY KEY, object JSON);
+CREATE TABLE funder (cl_funder_id VARCHAR(255) PRIMARY KEY, object JSON);
 ~~~
 
 Another advantage of this approach (rather than separate columns per pid) is it allows us to handle the edge case where someone managed to acquire more than one "unique identifier".

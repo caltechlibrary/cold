@@ -16,6 +16,7 @@ type Person struct {
 	ORCID               string    `json:"orcid,omitempty"`
 	ROR                 string    `json:"ror,omitempty"`
 	DOI                 string    `json:"doi,omitempty"`
+	Email               string    `json:"email,omitempty"`
 	AuthorsID           string    `json:"authors_id,omitempty"`
 	ContributorID       string    `json:"contributor_id,omitempty"`
 	EditorID            string    `json:"editor_id,omitempty"`
