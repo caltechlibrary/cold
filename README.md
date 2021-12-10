@@ -1,4 +1,4 @@
-cold - _c_ontrolled _o_bject _l_ist _d_aemon
+cold - __c__ontrolled __o__bject __l__ist __d__aemon
 ============================================
 
 This repository implements a service to maintain a controlled list of objects such as Caltech Library uses for crosswalking data using pid associated with a person, group or funding source.
