@@ -32,7 +32,8 @@ _testmain.go
 etc/*
 dist/*
 dataset/*
-testdata/*
+testdata/*.json
+testdata/*.csv
 testout/*
 bin/*
 demos/*

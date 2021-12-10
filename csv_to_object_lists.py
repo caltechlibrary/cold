@@ -7,6 +7,21 @@ import sys
 import os
 import csv
 import json
+from datetime import datetime
+
+ymdhms = '%Y-%m-%d %H:%M:%S'
+# 2006-01-02T15:04:05Z07:00"
+ymdhms = '%Y-%m-%d %H:%M:%S'
+
+def normalize_time(s):
+    if len(s) == 16:
+        s += ':00'
+    elif len(s) == 10:
+        s += ' 00:00:00'
+    else:
+        s = '1001-01-01 01:01:01'
+    t = datetime.strptime(s, ymdhms)
+    return f'''{t.strftime(ymdhms)}'''
 
 for name in [ 'people', 'group' ]:
     i_name = os.path.join('testdata', f'{name}.csv')
@@ -24,6 +39,8 @@ for name in [ 'people', 'group' ]:
                     if field in obj:
                         if obj[field] == 'True':
                             o[field] = True
+                elif field in ['created', 'updated']:
+                    o[field] = normalize_time(obj[field])
                 elif not field in [ 'thesis_count', 'advisor_count', 'authors_count', 'editor_count', 'data_count' ]:
                     if isinstance(obj[field], str) and len(obj[field]) > 0:
                        o[field] = obj[field]

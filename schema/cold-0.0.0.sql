@@ -6,8 +6,8 @@
 --
 -- people holds person objects
 --
-DROP TABLE IF EXISTS people;
-CREATE TABLE people (
+DROP TABLE IF EXISTS person;
+CREATE TABLE person (
     cl_people_id VARCHAR(255) PRIMARY KEY,
     object JSON
 );

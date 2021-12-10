@@ -6,6 +6,7 @@ package cold
 import (
 	"database/sql"
 	"fmt"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -42,7 +43,7 @@ func CloseConnection(config *Config) error {
 	return nil
 }
 
-// sqlQueryStringIDs takes a repostory ID, a SQL statement and applies
+// sqlQueryStringIDs takes a SQL statement and applies
 // the args returning a list of string type id or error.
 func sqlQueryStringIDs(config *Config, stmt string, args ...interface{}) ([]string, error) {
 	db := config.Connection
@@ -70,39 +71,76 @@ func sqlQueryStringIDs(config *Config, stmt string, args ...interface{}) ([]stri
 	return values, nil
 }
 
-// GetAllPersonID returns a list of cl_people_id in the people table
+// sqlQueryObject takes a SQL statement, populates an object and returns an error value
+func sqlQueryObject(config *Config, stmt string, id string, obj interface{}) error {
+	db := config.Connection
+	rows, err := db.Query(stmt, id)
+	if err != nil {
+		return fmt.Errorf("ERROR: query error, %s", err)
+	}
+	defer rows.Close()
+	value := ``
+	for rows.Next() {
+		err := rows.Scan(&value)
+		if err != nil {
+			return fmt.Errorf("ERROR: scan error, %q, %s", stmt, err)
+		}
+		break
+	}
+	if err := rows.Err(); err != nil {
+		return fmt.Errorf("ERROR: rows error, %s", err)
+	}
+	if err != nil {
+		return fmt.Errorf("ERROR: query error, %s", err)
+	}
+	return jsonDecode([]byte(value), &obj)
+}
+
+// GetAllPersonID returns a list of cl_people_id in the person table
 func GetAllPersonID(config *Config) ([]string, error) {
-	stmt := `SELECT cl_people_id FROM people ORDER BY cl_people_id GROUP BY cl_people_id`
+	stmt := `SELECT cl_people_id FROM person ORDER BY cl_people_id GROUP BY cl_people_id`
 	return sqlQueryStringIDs(config, stmt)
 }
 
 // GetPerson returns a list of all usernames in a repository
-func GetPerson(config *Config, clPersonID string) ([]string, error) {
-	stmt := `SELECT cl_people_id, object FROM people WHERE cl_people_id = ?`
-	return sqlQueryStringIDs(config, stmt, clPersonID)
+func GetPerson(config *Config, clPeopleID string) ([]string, error) {
+	stmt := `SELECT object FROM person WHERE cl_people_id = ?`
+	return sqlQueryStringIDs(config, stmt, clPeopleID)
 }
 
+// SQLCreatePerson will add a "person" to the database. It
+// has a side effect of populating .Created if it was empty.
 func SQLCreatePerson(config *Config, person *Person) error {
 	db := config.Connection
-	stmt := fmt.Sprintf(`INSERT INTO people (cl_people_id, object) VALUES (?,?)`)
+	if person.Created == `` {
+		person.Created = time.Now().Format(timestamp)
+	}
+	stmt := fmt.Sprintf(`INSERT INTO person (cl_people_id, object) VALUES (?,?)`)
 	_, err := db.Exec(stmt, person.CLPeopleID, person.String())
 	return err
 }
 
+// SQLUpdatePerson will update a "person" in the database. It
+// has a side effect of populating/updating .Updated attribute.
 func SQLUpdatePerson(config *Config, person *Person) error {
 	db := config.Connection
-	stmt := fmt.Sprintf(`REPLACE INTO people (cl_people_id, object) VALUES (?, ?)`)
+	person.Updated = time.Now().Format(timestamp)
+	stmt := fmt.Sprintf(`REPLACE INTO person (cl_people_id, object) VALUES (?,?)`)
 	_, err := db.Exec(stmt, person.CLPeopleID, person.String())
 	return err
 }
 
-func SQLReadPerson(config *Config, clPersonID string) (*Person, error) {
-	return nil, fmt.Errorf(`SQLReadPerson(%+v, %s) not implememented`, config, clPersonID)
+func SQLReadPerson(config *Config, clPeopleID string) (*Person, error) {
+	stmt := `SELECT object FROM person WHERE cl_people_id = ?`
+	obj := new(Person)
+	obj.Name = new(Name)
+	err := sqlQueryObject(config, stmt, clPeopleID, &obj)
+	return obj, err
 }
 
 func SQLDeletePerson(config *Config, clPeopleID string) error {
 	db := config.Connection
-	stmt := `DELETE FROM people WHERE cl_people_id = ?`
+	stmt := `DELETE FROM person WHERE cl_people_id = ?`
 	_, err := db.Exec(stmt, clPeopleID)
 	return err
 }
@@ -119,20 +157,40 @@ func GetGroup(config *Config, clGroupID string) ([]string, error) {
 	return sqlQueryStringIDs(config, stmt, clGroupID)
 }
 
+// SQLCreateGroup will add a "group" to the database. It
+// has a side effect of populating .Created if it was empty.
 func SQLCreateGroup(config *Config, group *Group) error {
-	return fmt.Errorf(`SQLCreateGroup(%+v, %s) not implememented`, config, group)
+	db := config.Connection
+	if group.Created == `` {
+		group.Created = time.Now().Format(timestamp)
+	}
+	stmt := fmt.Sprintf(`INSERT INTO local_group (cl_group_id, object) VALUES (?,?)`)
+	_, err := db.Exec(stmt, group.CLGroupID, group.String())
+	return err
 }
 
+// SQLUpdateGroup will update a "group" in the database. It
+// has a side effect of populating/updating .Updated attribute.
 func SQLUpdateGroup(config *Config, group *Group) error {
-	return fmt.Errorf(`SQLUpdateGroup(%+v, %s) not implememented`, config, group)
+	db := config.Connection
+	group.Updated = time.Now().Format(timestamp)
+	stmt := fmt.Sprintf(`REPLACE INTO local_group (cl_group_id, object) VALUES (?,?)`)
+	_, err := db.Exec(stmt, group.CLGroupID, group.String())
+	return err
 }
 
 func SQLReadGroup(config *Config, clGroupID string) (*Group, error) {
-	return nil, fmt.Errorf(`SQLReadGroup(%+v, %s) not implememented`, config, clGroupID)
+	stmt := `SELECT object FROM group WHERE cl_group_id = ?`
+	obj := new(Group)
+	err := sqlQueryObject(config, stmt, clGroupID, &obj)
+	return obj, err
 }
 
 func SQLDeleteGroup(config *Config, clGroupID string) error {
-	return fmt.Errorf(`SQLDeleteGroup(%+v, %s) not implememented`, config, clGroupID)
+	db := config.Connection
+	stmt := `DELETE FROM group WHERE cl_group_id = ?`
+	_, err := db.Exec(stmt, clGroupID)
+	return err
 }
 
 // GetAllFunderID returns a list of cl_group_id in the group table
@@ -143,22 +201,42 @@ func GetAllFunderID(config *Config, clFunderID string) ([]string, error) {
 
 // GetFunder takes a username and returns a list of userid
 func GetFunder(config *Config, clFunderID string) ([]string, error) {
-	stmt := `SELECT id, cl_funder_id, field, value FROM funder WHERE cl_funder_id = ? ORDER BY cl_funder_id, field`
+	stmt := `SELECT object FROM funder WHERE cl_funder_id = ?`
 	return sqlQueryStringIDs(config, stmt, clFunderID)
 }
 
+// SQLCreateFunder will add a "funder" to the database. It
+// has a side effect of populating .Created if it was empty.
 func SQLCreateFunder(config *Config, funder *Funder) error {
-	return fmt.Errorf(`SQLCreateFunder(%+v, %s) not implememented`, config, funder)
+	db := config.Connection
+	if funder.Created == `` {
+		funder.Created = time.Now().Format(timestamp)
+	}
+	stmt := fmt.Sprintf(`INSERT INTO funder (cl_funder_id, object) VALUES (?,?)`)
+	_, err := db.Exec(stmt, funder.CLFunderID, funder.String())
+	return err
 }
 
+// SQLUpdateFunder will update a "funder" in the database. It
+// has a side effect of populating/updating .Updated attribute.
 func SQLUpdateFunder(config *Config, funder *Funder) error {
-	return fmt.Errorf(`SQLUpdateFunder(%+v, %s) not implememented`, config, funder)
+	db := config.Connection
+	funder.Updated = time.Now().Format(timestamp)
+	stmt := fmt.Sprintf(`REPLACE INTO funder (cl_funder_id, object) VALUES (?,?)`)
+	_, err := db.Exec(stmt, funder.CLFunderID, funder.String())
+	return err
 }
 
 func SQLReadFunder(config *Config, clFunderID string) (*Funder, error) {
-	return nil, fmt.Errorf(`SQLReadFunder(%+v, %s) not implememented`, config, clFunderID)
+	stmt := `SELECT object FROM funder WHERE cl_funder_id = ?`
+	obj := new(Funder)
+	err := sqlQueryObject(config, stmt, clFunderID, &obj)
+	return obj, err
 }
 
 func SQLDeleteFunder(config *Config, clFunderID string) error {
-	return fmt.Errorf(`SQLDeleteFunder(%+v, %s) not implememented`, config, clFunderID)
+	db := config.Connection
+	stmt := `DELETE FROM funder WHERE cl_funder_id = ?`
+	_, err := db.Exec(stmt, clFunderID)
+	return err
 }

@@ -59,6 +59,7 @@ website: page.tmpl README.md nav.md INSTALL.md LICENSE css/site.css
 	bash mk-website.bash
 
 test: clean build
+	python3 csv_to_object_lists.py	
 	go test
 	@if [ -f test_cmd.bash ]; then bash test_cmd.bash; fi
 
