@@ -50,13 +50,14 @@ type Group struct {
 }
 
 type Funder struct {
-	CLFunderID  string   `json:"cl_funder_id,required"`
-	Name        string   `json:"name,omitempty"`
-	ROR         string   `json:"ror,omitempty"`
-	DOI         string   `json:"doi,omitempty"`
-	GrantNumber []string `json:"grant_number,omitempty"`
-	Created     string   `json:"created,omitempty"`
-	Updated     string   `json:"updated,omitempty"`
+	CLFunderID       string   `json:"cl_funder_id,required"`
+	Agency           string   `json:"agency,omitempty"`
+	CrossRefFunderID string   `json:"crossref_funder_id,omitempty"`
+	ROR              string   `json:"ror,omitempty"`
+	DOI              string   `json:"doi,omitempty"`
+	GrantNumber      []string `json:"grant_number,omitempty"`
+	Created          string   `json:"created,omitempty"`
+	Updated          string   `json:"updated,omitempty"`
 }
 
 func (n *Name) String() string {

@@ -23,6 +23,14 @@ def normalize_time(s):
     t = datetime.strptime(s, ymdhms)
     return f'''{t.strftime(ymdhms)}'''
 
+def sluggify(s):
+    s = s.casefold().strip()
+    # collapse the follow chars
+    for c in [ '(', ')', '!', '[', ']', ':', '.', "\t", "\r" ]:
+        if c in s:
+            s = s.replace(c, '')
+    return s.replace(' ', '-')
+
 for name in [ 'people', 'group' ]:
     i_name = os.path.join('testdata', f'{name}.csv')
     o_name = os.path.join('testdata', f'{name}.json')
@@ -49,4 +57,36 @@ for name in [ 'people', 'group' ]:
     with open(o_name, 'w') as f:
         f.write(json.dumps(l, indent = '   '))
 
+# Pivot funders table on grant number to agency name into
+# A funder object
+name = "grant-numbers"
+i_name = os.path.join('testdata', f'{name}.csv')
+name = "funders"
+o_name = os.path.join('testdata', f'{name}.json')
+l = []
+print(f'Reading {i_name}')
+with open(i_name, newline = '') as csvfile:
+    field_names = []
+    reader = csv.DictReader(csvfile)
+    o = {}
+    for obj in reader:
+        if not 'funders_agency' in obj or obj['funders_agency'] == None:
+            obj['funders_agency'] = 'unknown'
+        key = sluggify(obj['funders_agency'])
+        agency = sluggify(obj['funders_agency'])
+        grant_number = obj['funders_grant_number']
+        if not key in o:
+            o[key] = {}
+            o[key]['cl_funder_id'] = key
+            o[key]['grant_number'] = []
+            o[key]['agency'] = agency
+        if len(grant_number) > 0:
+            o[key]['grant_number'].append(grant_number)
+    # Now build our list from our map
+    l = []
+    for key in o:
+        l.append(o[key])
+print(f'Writing {o_name}')
+with open(o_name, 'w') as f:
+    f.write(json.dumps(l, indent = '   '))
 

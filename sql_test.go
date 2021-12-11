@@ -113,6 +113,65 @@ func assertSamePerson(t *testing.T, expected *Person, got *Person) {
 	}
 }
 
+func assertSameFunder(t *testing.T, expected *Funder, got *Funder) {
+	if expected.CLFunderID != got.CLFunderID {
+		t.Errorf("expected CLFunderID %q, got %q", expected.CLFunderID, got.CLFunderID)
+	}
+
+	if expected.Agency != got.Agency {
+		t.Errorf("expected Agency %q, got %q", expected.Agency, got.Agency)
+	}
+
+	if expected.CrossRefFunderID != got.CrossRefFunderID {
+		t.Errorf("expected CrossRefFunderID %q, got %q", expected.CrossRefFunderID, got.CrossRefFunderID)
+	}
+
+	if expected.ROR != got.ROR {
+		t.Errorf("expected ROR %q, got %q", expected.ROR, got.ROR)
+	}
+
+	if expected.DOI != got.DOI {
+		t.Errorf("expected DOI %q, got %q", expected.DOI, got.DOI)
+	}
+
+	if len(expected.GrantNumber) != len(got.GrantNumber) {
+		t.Errorf("expected GrantNumber length %d, got %d", len(expected.GrantNumber), len(got.GrantNumber))
+	}
+
+	if expected.Created != got.Created {
+		t.Errorf("expected Created %q, got %q", expected.Created, got.Created)
+	}
+
+	if expected.Updated != got.Updated {
+		t.Errorf("expected Updated %q, got %q", expected.Updated, got.Updated)
+	}
+}
+
+func assertSameGroup(t *testing.T, expected *Group, got *Group) {
+	if expected.CLGroupID != got.CLGroupID {
+		t.Errorf("expected CLGroupID %q, got %q", expected.CLGroupID, got.CLGroupID)
+	}
+
+	if expected.Name != got.Name {
+		t.Errorf("expected Name %q, got %q", expected.Name, got.Name)
+	}
+
+	if expected.ROR != got.ROR {
+		t.Errorf("expected ROR %q, got %q", expected.ROR, got.ROR)
+	}
+
+	if expected.DOI != got.DOI {
+		t.Errorf("expected DOI %q, got %q", expected.DOI, got.DOI)
+	}
+	if expected.Created != got.Created {
+		t.Errorf("expected Created %q, got %q", expected.Created, got.Created)
+	}
+	if expected.Updated != got.Updated {
+		t.Errorf("expected Updated %q, got %q", expected.Updated, got.Updated)
+	}
+
+}
+
 func TestPersonSQL(t *testing.T) {
 	settings := `test-settings.json`
 	if _, err := os.Stat(settings); os.IsNotExist(err) {
@@ -211,7 +270,65 @@ func TestFunderSQL(t *testing.T) {
 	defer CloseConnection(cfg)
 
 	clearTable(t, cfg, `funder`)
-	t.Errorf(`test for TestFunderSQL not implemented`)
+	fName := path.Join("testdata", "funders.json")
+	src, err := ioutil.ReadFile(fName)
+	if err != nil {
+		t.Errorf("Can't load test data %q, %s", fName, err)
+	}
+	funderList := []*Funder{}
+	if err := jsonDecode(src, &funderList); err != nil {
+		t.Errorf("Can't unmarshal person list, %s", err)
+	}
+	// Test Creating funder
+	for i, funder := range funderList {
+		if err := SQLCreateFunder(cfg, funder); err != nil {
+			t.Errorf(`(%d) create failed, %q, %s`, i, funder.String(), err)
+		}
+	}
+	// Test SQLReadFunder
+	for i, funder := range funderList {
+		if obj, err := SQLReadFunder(cfg, funder.CLFunderID); err != nil {
+			t.Errorf(`(%d) read failed, %q, %s`, i, funder.String(), err)
+		} else {
+			assertSameFunder(t, funder, obj)
+		}
+	}
+	// Test SQLUpdateFunder
+	var obj *Funder
+	for i, funder := range funderList {
+		funder.Created = `1801-01-01 01:00:00`
+		funder.Updated = `1901-01-01 01:00:00`
+		if err := SQLUpdateFunder(cfg, funder); err != nil {
+			t.Errorf(`(%d) update failed, %q, %s`, i, funder.String(), err)
+		}
+
+		obj, err = SQLReadFunder(cfg, funder.CLFunderID)
+		if err != nil {
+			t.Errorf(`(%d) read back failed, %q, %s`, i, funder.String(), err)
+		}
+		if &obj == &funder {
+			t.Errorf(`(%d) should have had a new object for funder and obj, not have same address`, i)
+			t.FailNow()
+		}
+		if funder.Created != obj.Created {
+			t.Errorf(`(%d) cl_people_id: %q, expected same created %q, got %q`, i, funder.CLFunderID, funder.Created, obj.Created)
+			t.FailNow()
+		}
+		if obj.Updated == `` {
+			t.Errorf(`(%d) cl_people_id: %q, expected populated .Update, funder.Updated %q, got obj.Updated %q`, i, funder.CLFunderID, funder.Updated, obj.Updated)
+			t.FailNow()
+		}
+		if obj.Created == obj.Updated {
+			t.Errorf(`(%d) cl_people_id: %q, expected obj.Created != obj.Updated, got  %q and %q`, i, obj.CLFunderID, obj.Created, obj.Updated)
+			t.FailNow()
+		}
+	}
+	// Test SQLDeleteFunder
+	for i, funder := range funderList {
+		if err := SQLDeleteFunder(cfg, funder.CLFunderID); err != nil {
+			t.Errorf("(%d) explected to delete funder %q but error, %s", i, funder.CLFunderID, err)
+		}
+	}
 }
 
 func TestGroupSQL(t *testing.T) {
@@ -231,6 +348,64 @@ func TestGroupSQL(t *testing.T) {
 	}
 	defer CloseConnection(cfg)
 
-	clearTable(t, cfg, `local_group`)
-	t.Errorf(`test for TestGroupSQL not implemented`)
+	clearTable(t, cfg, `group`)
+	fName := path.Join("testdata", "groups.json")
+	src, err := ioutil.ReadFile(fName)
+	if err != nil {
+		t.Errorf("Can't load test data %q, %s", fName, err)
+	}
+	groupList := []*Group{}
+	if err := jsonDecode(src, &groupList); err != nil {
+		t.Errorf("Can't unmarshal person list, %s", err)
+	}
+	// Test Creating group
+	for i, group := range groupList {
+		if err := SQLCreateGroup(cfg, group); err != nil {
+			t.Errorf(`(%d) create failed, %q, %s`, i, group.String(), err)
+		}
+	}
+	// Test SQLReadGroup
+	for i, group := range groupList {
+		if obj, err := SQLReadGroup(cfg, group.CLGroupID); err != nil {
+			t.Errorf(`(%d) read failed, %q, %s`, i, group.String(), err)
+		} else {
+			assertSameGroup(t, group, obj)
+		}
+	}
+	// Test SQLUpdateGroup
+	var obj *Group
+	for i, group := range groupList {
+		group.Created = `1801-01-01 01:00:00`
+		group.Updated = `1901-01-01 01:00:00`
+		if err := SQLUpdateGroup(cfg, group); err != nil {
+			t.Errorf(`(%d) update failed, %q, %s`, i, group.String(), err)
+		}
+
+		obj, err = SQLReadGroup(cfg, group.CLGroupID)
+		if err != nil {
+			t.Errorf(`(%d) read back failed, %q, %s`, i, group.String(), err)
+		}
+		if &obj == &group {
+			t.Errorf(`(%d) should have had a new object for group and obj, not have same address`, i)
+			t.FailNow()
+		}
+		if group.Created != obj.Created {
+			t.Errorf(`(%d) cl_group_id: %q, expected same created %q, got %q`, i, group.CLGroupID, group.Created, obj.Created)
+			t.FailNow()
+		}
+		if obj.Updated == `` {
+			t.Errorf(`(%d) cl_group_id: %q, expected populated .Update, group.Updated %q, got obj.Updated %q`, i, group.CLGroupID, group.Updated, obj.Updated)
+			t.FailNow()
+		}
+		if obj.Created == obj.Updated {
+			t.Errorf(`(%d) cl_group_id: %q, expected obj.Created != obj.Updated, got  %q and %q`, i, obj.CLGroupID, obj.Created, obj.Updated)
+			t.FailNow()
+		}
+	}
+	// Test SQLDeleteGroup
+	for i, group := range groupList {
+		if err := SQLDeleteGroup(cfg, group.CLGroupID); err != nil {
+			t.Errorf("(%d) explected to delete group %q but error, %s", i, group.CLGroupID, err)
+		}
+	}
 }
