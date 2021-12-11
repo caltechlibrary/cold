@@ -5,7 +5,8 @@ Action items
 next
 ----
 
-- [ ] Add Makefile
+- [ ] funder id need to be normalize and converted to utf-8 below sluggify
+- [x] Add Makefile
 - [ ] Finish implement non-API tests
 - [ ] Implement http API
 - [ ] Document setup, configuration and database requirements
