@@ -39,7 +39,9 @@ CREATE TABLE funder (cl_funder_id VARCHAR(255) PRIMARY KEY, object JSON);
 Approach
 --------
 
-This service, like ep3apid and datasetd is intended to run on localhost on a known port (e.g. localhost:8486). It is a simple with relying on access control from the operating system or front-end web service (e.g. a Bottle application).  The goal of the service is to provide a light weight layer between the database storing the objects and the applications that need to work with them.  Also like ep3apid and datasetd *cold* is configured using a simple JSON "settings.json" file. Typically this would be stored in a sub-folder of "etc" on the system (e.g. /usr/local/etc/cold/settings.json).
+This service, like ep3apid and datasetd is intended to run on localhost on a known port (e.g. localhost:8486). It is a mininal service relying on access control from the operating system or front-end web service (e.g. a Bottle application, Apache 2 with Shibboleth).  The goal of the service is to provide a light weight layer between the database storing the objects and the applications that need to work with them.  Also like ep3apid and datasetd *cold* is configured using a simple JSON "settings.json" file. Typically this would be stored in a sub-folder of "etc" on the system (e.g. /usr/local/etc/cold/settings.json).
+
+The service is made up of two parts, a set of "End Points" for managing and retrieving controlled object lists and vocabularies as JSON expressions and a set of static files providing the user interface to manage and display the vocabularies and controlled object lists.  The static website is build from HTML, CSS, JavaScript leveraging Web Components for providing a sufficient interface.
 
 End Points
 ----------
@@ -119,4 +121,14 @@ Vocabularies
 `/doi-prefix/{DOI_PREFIX}`
 : Returns the normalized publisher name for that DOI prefix
 
+Widgets
+-------
+
+Widgets provide the user interface for humans to manage and view the objects. While **cold** can directly host these it is equally possible to integrate the static components into another system, web service or web site. They are only static web assets.  The public facing web service needs to control access to **cold** and the static content does not contain anything that is priviliged.
+
+`/widgets/display-person.js`
+: This widget privides a consistent display for our Person Object. Markup example `<display-person honorific="Mr." given="R. S." family="Doiel" lineage="" orcid="0000-0003-0900-6903"></display-person>`
+
+`/widgets/input-person.js`
+: This widget privides a consistent input interface for our Person Object. Markup example `<input-person honorific="Mr." given="R. S." family="Doiel" lineage="" orcid="0000-0003-0900-6903"></input-person>`
 

@@ -35,6 +35,7 @@ for name in [ 'people', 'group' ]:
     i_name = os.path.join('testdata', f'{name}.csv')
     o_name = os.path.join('testdata', f'{name}.json')
     l = []
+    cl_id = f'cl_{name}_id'
     print(f'Reading {i_name}')
     with open(i_name, newline = '') as csvfile:
         field_names = []
@@ -42,7 +43,9 @@ for name in [ 'people', 'group' ]:
         for obj in reader:
             o = {}
             for field in obj:
-                   # skip the field.
+                # skip the field.
+                if field == 'key' and cl_id not in obj:
+                    o[cl_id] = obj[field]
                 if field in [ 'caltech', 'jpl', 'faculty', 'alumn' ]:
                     if field in obj:
                         if obj[field] == 'True':
