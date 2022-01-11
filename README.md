@@ -132,3 +132,9 @@ Widgets provide the user interface for humans to manage and view the objects. Wh
 `/widgets/input-person.js`
 : This widget privides a consistent input interface for our Person Object. Markup example `<input-person honorific="Mr." given="R. S." family="Doiel" lineage="" orcid="0000-0003-0900-6903"></input-person>`
 
+`/widgets/display-group.js`
+: This widget privides a consistent display for our Group Object. Markup example `<display-group name="GALCIT" ror=""></display-person>`
+
+`/widgets/input-group.js`
+: This widget privides a consistent input interface for our Group Object. Markup example `<input-group  name="GALCIT" ror="" label=""></input-person>`
+
