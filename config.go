@@ -16,6 +16,9 @@ type Config struct {
 	// Hostname (and port) for running service, e.g. localhost:8486
 	Hostname string `json:"hostname"`
 
+	// Htdocs holds static pages, help and Widgets
+	Htdocs string `json:"htdocs"`
+
 	// Logfile
 	Logfile string `json:"logfile,omitempty"`
 
@@ -27,6 +30,13 @@ type Config struct {
 
 	// Connection holds database connection
 	Connection *sql.DB `json:"-"`
+}
+
+func CheckConfig(cfg *Config) error {
+	if cfg.DSN == "" {
+		return fmt.Errorf(`"dsn" not set, required`)
+	}
+	return nil
 }
 
 // LoadConfig reads a JSON file and returns a Config structure
@@ -45,6 +55,9 @@ func LoadConfig(fname string) (*Config, error) {
 		}
 		if config.DSType == "" {
 			config.DSType = "mysql"
+		}
+		if config.Htdocs == "" {
+			config.Htdocs = "htdocs"
 		}
 	}
 	return config, nil

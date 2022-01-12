@@ -1,5 +1,9 @@
 package cold
 
+import (
+	"fmt"
+)
+
 type Name struct {
 	Family  string `json:"family,omitempty"`
 	Given   string `json:"given,omitempty"`
@@ -60,6 +64,13 @@ type Funder struct {
 	Updated          string   `json:"updated,omitempty"`
 }
 
+// Publisher maps a PID (e.g. ISSN, DOI Prefix) and a cononical publisher name
+type Publisher struct {
+	Name      string `json:"name"`
+	DOIPrefix string `json:"doi_prefix"`
+	ISSN      string `json:"issn"`
+}
+
 func (n *Name) String() string {
 	src, _ := jsonEncode(n)
 	return string(src)
@@ -107,5 +118,28 @@ func (f *Funder) ToMap() (map[string]interface{}, error) {
 		return nil, err
 	}
 	err = jsonDecode(src, &m)
+	return m, err
+}
+
+func (pub *Publisher) String() string {
+	src, _ := jsonEncode(pub)
+	return string(src)
+}
+
+func (pub *Publisher) ToMap() (map[string]interface{}, error) {
+	m := map[string]interface{}{}
+	if pub.Name != `` {
+		return m, fmt.Errorf(`No publisher name`)
+	}
+	if pub.DOIPrefix != `` {
+		m[pub.DOIPrefix] = pub.Name
+	}
+	if pub.ISSN != `` {
+		m[pub.ISSN] = pub.Name
+	}
+	var err error
+	if len(m) == 0 {
+		err = fmt.Errorf(`No DOI prefix or ISSN`)
+	}
 	return m, err
 }
