@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Caltech Library's Digital Library Development Sandbox</title>
+    <link rel="stylesheet" href="/css/site.css">
+</head>
+<body>
+<header>
+<a href="http://library.caltech.edu"><img src="/assets/liblogo.gif" alt="Caltech Library logo"></a>
+</header>
+<nav>
+<ul>
+<li>
+<a href="/app/">Home</a>
+</li>
+<li>
+<a href="/api/version">Version</a>
+</li>
+</ul>
+</nav>
+
+<section>
+<h1>
+cold - (C)ontrolled (o)bject (l)ist (d)aemon
+</h1>
+<p>
+This repository implements a service to maintain a controlled list of objects such as Caltech Library uses for crosswalking data using pid associated with a person, group or funding source.
+</p>
+<h1>
+Requirements
+</h1>
+<ul>
+<li>
+MySQL 8
+</li>
+<li>
+Golang (for compiling the service)
+</li>
+</ul>
+<h2>
+Overview
+</h2>
+<p>
+Caltech Library maintains a list of people, groups and funders and their related pids. This started being managed in Google Sheets, then in CSV files but the number of objects in envoled has increased and it make sense to provide a more robust implementation allowing for easier curation of the list. The objects are relatively flat with the exception of the name attribute. Here’s an example JSON object representing R. S. Doiel showing the internal identifier named “cl_people_id”, name object, email, orcid and ‘<span class="citation" data-cites="affiliation">@affiliation</span>’ which contains a ROR.
+</p>
+<pre><code>{
+    &quot;cl_people_id&quot;: &quot;Doiel-R-S&quot;,
+    &quot;name&quot;: {
+        &quot;family&quot;: &quot;Doiel&quot;,
+        &quot;given&quot;: &quot;Robert&quot;,
+        &quot;display_name&quot;: &quot;R. S. Doiel&quot;
+    },
+    &quot;email&quot;: &quot;rsdoiel@caltech.edu&quot;,
+    &quot;orcid: &quot;0000-0003-0900-6903&quot;,
+    &quot;ror&quot;: &quot;https://ror.org/05dxps055&quot;
+} </code></pre>
+<p>
+Some objects may have more attributes others less. A simple table schema containing a row id, an internal identifier (e.g. cl_people_id, cl_group_id, cl_funder_id), a “field” and a “value” can be used to represent all the types of fields associated with a given object. A separate table can be used for person, group and finder with the individual objects stored as a JSON type. This is well suited to a data collection that has sparse consistency (e.g. one person might have an ORCID but not a research id, the next might have a viaf or wikidata id but not a ORCID).
+</p>
+<pre><code>CREATE TABLE people (cl_people_id VARCHAR(255) PRIMARY KEY, object JSON);
+CREATE TABLE local_group (cl_group_id VARCHAR(255) PRIMARY KEY, object JSON);
+CREATE TABLE funder (cl_funder_id VARCHAR(255) PRIMARY KEY, object JSON);</code></pre>
+<h2>
+Approach
+</h2>
+<p>
+This service, like ep3apid and datasetd is intended to run on localhost on a known port (e.g. localhost:8486). It is a mininal service relying on access control from the operating system or front-end web service (e.g. a Bottle application, Apache 2 with Shibboleth). The goal of the service is to provide a light weight layer between the database storing the objects and the applications that need to work with them. Also like ep3apid and datasetd <em>cold</em> is configured using a simple JSON “settings.json” file. Typically this would be stored in a sub-folder of “etc” on the system (e.g. /usr/local/etc/cold/settings.json).
+</p>
+<p>
+The service is made up of two parts, a set of “End Points” for managing and retrieving controlled object lists and vocabularies as JSON expressions and a set of static files providing the user interface to manage and display the vocabularies and controlled object lists. The static website is build from HTML, CSS, JavaScript leveraging Web Components for providing a sufficient interface.
+</p>
+<h2>
+End Points
+</h2>
+<p>
+Plain text help is built in by adding a <code>/help</code> to the URL path. The defined end points are formed as the following. The following end point descriptions support the GET method.
+</p>
+<p>
+<code>/</code> : Plain text description of the service
+</p>
+<p>
+<code>/version</code> : Returns the version number of the service
+</p>
+<p>
+<code>/people</code> : Returns a list of “cl_people_id” managed by <em>cold</em>
+</p>
+<p>
+<code>/people/{CL_PEOPLE_ID}</code> : For a GET returns a people object, a PUT will create the people object, POST will replace the people object and DELETE will remove the people object
+</p>
+<p>
+<code>/group</code> : Returns a list of “cl_group_id” managed by <em>cold</em>
+</p>
+<p>
+<code>/group/{CL_GROUP_ID}</code> : For a GET returns a group object, a PUT will create the group object, POST will replace the group object and DELETE will remove the group object
+</p>
+<p>
+<code>/funder</code> : Returns a list of “cl_funder” managed by <em>cold</em>
+</p>
+<p>
+<code>/funder/{CL_funder_ID}</code> : For a GET returns a funder object, a PUT will create the funder object, POST will replace the funder object and DELETE will remove the funder object
+</p>
+<p>
+<code>/crosswalk</code> : Returns help on how to crosswalk from one identifier to the internal identifier
+</p>
+<p>
+<code>/crosswalk/people</code> : Returns a list of identifiers available for “people” objects
+</p>
+<p>
+<code>/crosswalk/people/{IDENTIFIER_NAME}/{IDENTIFIER}</code> : Returns a list of “cl_people_id” assocated with that identifier
+</p>
+<p>
+<code>/crosswalk/group</code> : Returns a list of identifiers available for “group” objects
+</p>
+<p>
+<code>/crosswalk/group/{IDENTIFIER_NAME}/{IDENTIFIER}</code> : Returns a list of “cl_group__id” assocated with that identifier
+</p>
+<p>
+<code>/crosswalk/funder</code> : Returns a list of identifiers available for “funder” objects
+</p>
+<p>
+<code>/crosswalk/funder/{IDENTIFIER_NAME}/{IDENTIFIER}</code> : Returns a list of “cl_funder_id” assocated with that identifier
+</p>
+<p>
+<em>cold</em> takes a REST approach to updates for managed objects. PUT will create a new object, POST will update it, GET will retrieve it and DELETE Will replace it.
+</p>
+<h2>
+Vocabularies
+</h2>
+<p>
+<em>cold</em> also supports end points for stable vocabularies mapping an indentifier to a normalized name. These are set at compile time because they are so slow changing.
+</p>
+<p>
+<code>/subject</code> : Returns a list of all the subject ids (codes)
+</p>
+<p>
+<code>/subject/{SUBJECT_ID}</code> : Returns the normalized text string for that subject id
+</p>
+<p>
+<code>/issn</code> : Returns a list of issn that are mapped to a publisher name
+</p>
+<p>
+<code>/issn/{ISSN}</code> : Returns the normalized publisher name for that ISSN
+</p>
+<p>
+<code>/doi-prefix</code> : Returns a list of DOI prefixes that map to a normalize name
+</p>
+<p>
+<code>/doi-prefix/{DOI_PREFIX}</code> : Returns the normalized publisher name for that DOI prefix
+</p>
+<h2>
+Widgets
+</h2>
+<p>
+Widgets provide the user interface for humans to manage and view the objects. While <strong>cold</strong> can directly host these it is equally possible to integrate the static components into another system, web service or web site. They are only static web assets. The public facing web service needs to control access to <strong>cold</strong> and the static content does not contain anything that is priviliged. The Widgets can be loaded indepentently in the page using the following end points.
+</p>
+<p>
+<code>/widgets/display-person.js</code> : This widget provides a consistent display for our Person Object. Markup example <code>&lt;display-person honorific=“Mr.” given=“R. S.” family=“Doiel” lineage=“” orcid=“0000-0003-0900-6903”&gt;&lt;/display-person&gt;</code>
+</p>
+<p>
+<code>/widgets/input-person.js</code> : This widget provides a consistent input interface for our Person Object. Markup example <code>&lt;input-person honorific=“Mr.” given=“R. S.” family=“Doiel” lineage=“” orcid=“0000-0003-0900-6903”&gt;&lt;/input-person&gt;</code>
+</p>
+<p>
+<code>/widgets/display-group.js</code> : This widget provides a consistent display for our Group Object. Markup example <code>&lt;display-group name=“GALCIT” ror=““&gt;&lt;/display-person&gt;</code>
+</p>
+<p>
+<code>/widgets/input-group.js</code> : This widget provides a consistent input interface for our Group Object. Markup example <code>&lt;input-group name=“GALCIT” ror=“” label=““&gt;&lt;/input-person&gt;</code>
+</p>
+<p>
+<code>/widgets/display-subject.js</code> : This widget provides a consistent display of a Subject Object, example <code>&lt;display-subject name=“biology” label=“Biology”&gt;&lt;/display-subject&gt;</code>
+</p>
+<p>
+<code>/widgets/input-subject.js</code> : This widget provides a consistent input interface for our Subject Object, example <code>&lt;input-subject name=“biology”&gt;&lt;/input-subject&gt;</code>
+</p>
+<p>
+<code>/widget/display-issn-publisher.js</code> : This widget provides a consistent display of ISSN and publisher, example <code>&lt;display-issn-publisher issn=“XXXXXXXXXX”&gt;&lt;/display-issn-publisher&gt;</code>
+</p>
+<p>
+<code>/widget/input-issn-publisher.js</code> : This widget provides a consistent input interface for our ISSN/Publisher Object, example <code>&lt;input-issn-publisher issn=“XXXXXXXXXX” publisher=“Publisher Name”&gt;&lt;/input-issn-publisher&gt;</code>
+</p>
+<p>
+<code>/widget/display-doi-prefix.js</code> : This widget lists a DOI-prefix and publisher, example <code>&lt;display-doi-prefix doi=“XXXXXX/XXXXXX.X”&gt;&lt;/display-doi-prefix&gt;</code>
+</p>
+<p>
+<code>/widget/input-doi-prefix.js</code> : This widget provides a consistent input interface for our DOI Prefix/Publisher Object, example <code>&lt;input-doi-prefix doi=“XXXXXX/XXXXX.X” publisher=“Publisher Name Here”&gt;&lt;/input-doi-prefix&gt;</code>
+</p>
+</section>
+
+<footer>
+<span><h1><A href="http://caltech.edu">Caltech</a></h1></span>
+<span>&copy; 2022 <a href="https://www.library.caltech.edu/copyright">Caltech library</a></span>
+<address>1200 E California Blvd, Mail Code 1-32, Pasadena, CA 91125-3200</address> 
+<span>Phone: <a href="tel:+1-626-395-3405">(626)395-3405</a></span>
+<span><a href="mailto:library@caltech.edu">Email Us</a></span>
+<a class="cl-hide" href="sitemap.xml">Site Map</a>
+</footer>
+</body>
+</html>
