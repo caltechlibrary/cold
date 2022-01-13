@@ -11,6 +11,12 @@ CODEMETA2CFF = $(shell which codemeta2cff)
 
 PROGRAMS = $(shell ls -1 cmd)
 
+MD_PAGES = $(shell ls -1 htdocs/*.md)
+
+PAGES = $(basename $(MD_PAGES))
+
+HTML_PAGES = $(addsuffix .html, $(PAGES))
+
 PACKAGE = $(shell ls -1 *.go)
 
 #PREFIX = /usr/local/bin
@@ -27,7 +33,7 @@ ifeq ($(OS), Windows)
 	EXT = .exe
 endif
 
-build: $(PKGASSETS) version.go $(PROGRAMS)
+build: $(PKGASSETS) version.go $(PROGRAMS) $(HTML_PAGES) htdocs/index.html
 
 
 version.go: .FORCE
@@ -43,6 +49,13 @@ version.go: .FORCE
 $(PROGRAMS): cmd/*/*.go $(PACKAGE)
 	@mkdir -p bin
 	go build -o bin/$@$(EXT) cmd/$@/*.go
+
+htdocs/index.html: README.md nav.md
+	mkpage body=README.md nav=nav.md page.tmpl > htdocs/index.html
+
+$(HTML_PAGES): $(MD_PAGES)
+	@echo "PAGE html: "$@" PAGE md: "$(basename $@).md
+	mkpage body=$(basename $@).md nav=nav.md page.tmpl >$@
 
 install: build
 	@if [ ! -d $(PREFIX)/bin ]; then mkdir -p $(PREFIX)/bin; fi
@@ -67,6 +80,7 @@ cleanweb:
 	@if [ -f index.html ]; then rm *.html; fi
 
 clean: 
+	@if [ -d htdocs ]; then rm htdocs/*.html; fi
 	@if [ -d bin ]; then rm -fR bin; fi
 	@if [ -d dist ]; then rm -fR dist; fi
 	@if [ -d testout ]; then rm -fR testout; fi

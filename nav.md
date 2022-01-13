@@ -1,2 +1,3 @@
 - [Home](/app/)
+- [Dashboard](/app/dashboard.html)
 - [Version](/api/version)

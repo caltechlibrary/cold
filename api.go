@@ -20,6 +20,18 @@ type API struct {
 	log      *log.Logger
 }
 
+// packageJSON takes a writer, request, src and error packing up
+// the http response.
+func (api *API) packageJSON(w http.ResponseWriter, r *http.Request, src []byte, err error) {
+	if err != nil {
+		http.NotFound(w, r)
+		api.logResponse(r, 404, fmt.Errorf(`Not found, %s`, err))
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	fmt.Fprintf(w, "%s", src)
+}
+
 // isDotPath checks to see if a path is requested with a dot file (e.g. docs/.git/* or docs/.htaccess)
 func (api *API) isDotPath(p string) bool {
 	for _, part := range strings.Split(path.Clean(p), "/") {
@@ -88,15 +100,85 @@ func (api *API) staticRouter(next http.Handler) http.Handler {
 	})
 }
 
+// PeopleAPI handles the people/person requests
+func (api *API) PeopleAPI(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "PeopleAPI not implemented")
+}
+
+func (api *API) VocabularyAPI(w http.ResponseWriter, r *http.Request) {
+	var (
+		err        error
+		src        []byte
+		args       []string
+		voc, vocId string
+	)
+	args = strings.Split(r.URL.Path, "/")[1:]
+	if len(args) < 2 {
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		api.logResponse(r, 400, fmt.Errorf(`Bad Request`))
+		return
+	}
+	voc, vocId = args[1], ``
+	if len(args) > 2 {
+		vocId = args[2]
+	}
+	switch voc {
+	case "subject":
+		if vocId == "" {
+			src, err = jsonEncode(Subject)
+		} else if item, ok := Subject[vocId]; ok {
+			src, err = jsonEncode(item)
+		} else {
+			http.NotFound(w, r)
+			api.logResponse(r, 404, fmt.Errorf(`Not Found`))
+		}
+	case "issn":
+		if vocId == "" {
+			src, err = jsonEncode(ISSN)
+		} else if item, ok := ISSN[vocId]; ok {
+			src, err = jsonEncode(item)
+		} else {
+			http.NotFound(w, r)
+			api.logResponse(r, 404, fmt.Errorf(`Not Found`))
+		}
+	case "doi-prefix":
+		if vocId == "" {
+			src, err = jsonEncode(DoiPrefixes)
+		} else if item, ok := DoiPrefixes[vocId]; ok {
+			src, err = jsonEncode(item)
+		} else {
+			http.NotFound(w, r)
+			api.logResponse(r, 404, fmt.Errorf(`Not Found`))
+		}
+	default:
+		http.NotFound(w, r)
+		api.logResponse(r, 404, fmt.Errorf(`Not Found`))
+		return
+	}
+	api.packageJSON(w, r, src, err)
+}
+
 func (api *API) RouteHandler(w http.ResponseWriter, r *http.Request) {
 	api.logRequest(w, r)
 	switch {
 	case r.URL.Path == "/" || r.URL.Path == "/index.html":
 		http.Redirect(w, r, "/app/", 301)
 		api.logResponse(r, 301, fmt.Errorf(`Redirected to "/app/"`))
+	case strings.HasSuffix(r.URL.Path, "/help"):
+		http.Redirect(w, r, "/app/index.html", 301)
+		api.logResponse(r, 301, fmt.Errorf(`Redirected to "/app/index.html"`))
 	case strings.HasPrefix(r.URL.Path, "/api/version"):
 		fmt.Fprintf(w, "%s %s\n", api.AppName, Version)
 		api.logResponse(r, 202, nil)
+	case strings.HasPrefix(r.URL.Path, "/api/people"):
+		api.PeopleAPI(w, r)
+	//case strings.HasPrefix(r.URL.Path, "/api/group"):
+	case strings.HasPrefix(r.URL.Path, "/api/subject"):
+		api.VocabularyAPI(w, r)
+	case strings.HasPrefix(r.URL.Path, "/api/issn"):
+		api.VocabularyAPI(w, r)
+	case strings.HasPrefix(r.URL.Path, "/api/doi-prefix"):
+		api.VocabularyAPI(w, r)
 	default:
 		http.NotFound(w, r)
 		api.logResponse(r, 404, fmt.Errorf(`Not Found`))

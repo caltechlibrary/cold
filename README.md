@@ -7,7 +7,11 @@ Requirements
 ============
 
 - MySQL 8
-- Golang (for compiling the service)
+- To build UI and compile **cold**
+    - GNU Make
+    - [MkPage](https://github.com/caltechlibrary/mkpage) (to build UI)
+    - [Pandoc](https://pandoc.org) (to build UI)
+    - Golang (for compiling the service)
 
 Overview
 --------
@@ -39,87 +43,90 @@ CREATE TABLE funder (cl_funder_id VARCHAR(255) PRIMARY KEY, object JSON);
 Approach
 --------
 
-This service, like ep3apid and datasetd is intended to run on localhost on a known port (e.g. localhost:8486). It is a mininal service relying on access control from the operating system or front-end web service (e.g. a Bottle application, Apache 2 with Shibboleth).  The goal of the service is to provide a light weight layer between the database storing the objects and the applications that need to work with them.  Also like ep3apid and datasetd *cold* is configured using a simple JSON "settings.json" file. Typically this would be stored in a sub-folder of "etc" on the system (e.g. /usr/local/etc/cold/settings.json).
+This service is intended to run on localhost on a known port (e.g. localhost:8486). It is a mininal service relying on access control from the operating system or front-end web service (e.g. a Bottle application, Apache 2 with Shibboleth).  The goal of the service is to provide a light weight layer between the database storing the objects and the applications that need to work with them.  Also like ep3apid and datasetd *cold* is configured using a simple JSON "settings.json" file. Typically this would be stored in a sub-folder of "etc" on the system (e.g. /usr/local/etc/cold/settings.json).
 
 The service is made up of two parts, a set of "End Points" for managing and retrieving controlled object lists and vocabularies as JSON expressions and a set of static files providing the user interface to manage and display the vocabularies and controlled object lists.  The static website is build from HTML, CSS, JavaScript leveraging Web Components for providing a sufficient interface.
 
 End Points
 ----------
 
-Plain text help is built in by adding a `/help` to the URL path. The defined end points are formed as the following. The following end point descriptions support the GET method.
+JSON service defined end points are formed as the following. The following end point descriptions support the GET method.
 
 `/`
-: Plain text description of the service
+: A description of the service
 
-`/version`
+`/api/version`
 : Returns the version number of the service
 
-`/people`
-: Returns a list of "cl_people_id" managed by *cold*
+`/api/people`
+: Returns a list of "cl_people_id" managed by *cold* 
 
-`/people/{CL_PEOPLE_ID}`
+`/api/people/{CL_PEOPLE_ID}`
 : For a GET returns a people object, a PUT will create the people object, POST will replace the people object and DELETE will remove the people object
 
-`/group`
+`/api/group`
 : Returns a list of "cl_group_id" managed by *cold*
 
-`/group/{CL_GROUP_ID}`
+`/api/group/{CL_GROUP_ID}`
 : For a GET returns a group object, a PUT will create the group object, POST will replace the group object and DELETE will remove the group object
 
-`/funder`
+`/api/funder`
 : Returns a list of "cl_funder" managed by *cold*
 
-`/funder/{CL_funder_ID}`
+`/api/funder/{CL_funder_ID}`
 : For a GET returns a funder object, a PUT will create the funder object, POST will replace the funder object and DELETE will remove the funder object
 
-
-`/crosswalk`
+`/api/crosswalk`
 : Returns help on how to crosswalk from one identifier to the internal identifier
 
-`/crosswalk/people`
+`/api/crosswalk/people`
 : Returns a list of identifiers available for "people" objects
 
-`/crosswalk/people/{IDENTIFIER_NAME}/{IDENTIFIER}`
+`/api/crosswalk/people/{IDENTIFIER_NAME}/{IDENTIFIER}`
 : Returns a list of "cl_people_id" assocated with that identifier
 
-`/crosswalk/group`
+`/api/crosswalk/group`
 : Returns a list of identifiers available for "group" objects
 
-`/crosswalk/group/{IDENTIFIER_NAME}/{IDENTIFIER}`
+`/api/crosswalk/group/{IDENTIFIER_NAME}/{IDENTIFIER}`
 : Returns a list of "cl_group__id" assocated with that identifier
 
-`/crosswalk/funder`
+`/api/crosswalk/funder`
 : Returns a list of identifiers available for "funder" objects
 
-`/crosswalk/funder/{IDENTIFIER_NAME}/{IDENTIFIER}`
+`/api/crosswalk/funder/{IDENTIFIER_NAME}/{IDENTIFIER}`
 : Returns a list of "cl_funder_id" assocated with that identifier
 
-
-*cold* takes a REST approach to updates for managed objects.  PUT will create a new object, POST will update it, GET will retrieve it and DELETE Will replace it.
+*cold* takes a REST approach to updates for managed objects.  PUT will create a new object, POST will update it, GET will retrieve it and DELETE will remove it.
 
 Vocabularies
 ------------
 
 *cold* also supports end points for stable vocabularies mapping an indentifier to a normalized name. These are set at compile time because they are so slow changing. 
 
-`/subject`
+`/api/subject`
 : Returns a list of all the subject ids (codes)
 
-`/subject/{SUBJECT_ID}`
+`/api/subject/{SUBJECT_ID}`
 : Returns the normalized text string for that subject id
 
-`/issn`
+`/api/issn`
 : Returns a list of issn that are mapped to a publisher name
 
-`/issn/{ISSN}`
+`/api/issn/{ISSN}`
 : Returns the normalized publisher name for that ISSN
 
 
-`/doi-prefix`
+`/api/doi-prefix`
 : Returns a list of DOI prefixes that map to a normalize name
 
-`/doi-prefix/{DOI_PREFIX}`
+`/api/doi-prefix/{DOI_PREFIX}`
 : Returns the normalized publisher name for that DOI prefix
+
+Manage interface
+================
+
+The management inteface is avialable at `/app/dashboard.html` path. This provides a dashboard which then interacts with the JSON side of the service to update content. The manage interface is built from Web Components and requires JavaScript to be enabled in the browser.
 
 Widgets
 -------
