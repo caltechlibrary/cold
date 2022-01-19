@@ -2,7 +2,7 @@
 DOI Prefix
 ==========
 
-<ul id="doi-prefix-list">Fetching doi-prefix list</ul>
+<div id="doi-prefix-list">Fetching doi-prefix list</div>
 
 <script type="module" src="/widgets/vocabulary.js"></script>
 
@@ -20,13 +20,13 @@ function updatePage() {
 
     keys.sort();
     for (let i = 0; i < keys.length; i++) {
-        let li = document.createElement('li'),
-            elem = document.createElement('vocabularly-map'),
+        let div = document.createElement('div'),
+            elem = document.createElement('vocabularly-span'),
             key = keys[i],
             val = data[key];
-        elem.value = {'identifier': key, 'name': val};
-        li.appendChild(elem);
-        doi_prefix_list.appendChild(li);
+        elem.value = { 'identifier': key, 'name': val };
+        div.appendChild(elem);
+        doi_prefix_list.appendChild(div);
     }
 }
 

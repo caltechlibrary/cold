@@ -3,18 +3,22 @@
  */
 "use strict";
 
-const template = document.createElement('template');
+const pair_template = document.createElement('template');
 
-template.innerHTML = `
-<span id="identifier"></span> <span id="name"></span>
+pair_template.innerHTML = `<style>@import "/css/vocabulary.css";</style>
+<span id="identifier" class="vocabulary-identifier"></span>
+<style>@import "/css/vocabulary.css";</style>
+<span id="name" class="vocabulary-name"></span>
 `;
 
-/* VocabularyMap component extends HTMLElement */
-class VocabularyMap extends HTMLElement {
+
+
+/* VocabularyPair component extends HTMLElement displaying a single identifier/name pair in spans. */
+class VocabularyPair extends HTMLElement {
     constructor() {
         super();
         this.attachShadow({mode: "open"});
-        this.shadowRoot.append(template.content.cloneNode(true));
+        this.shadowRoot.append(pair_template.content.cloneNode(true));
         this.elem_identifier = this.shadowRoot.getElementById('identifier');
         this.elem_name = this.shadowRoot.getElementById('name');
     }
@@ -45,6 +49,7 @@ class VocabularyMap extends HTMLElement {
         }
     }
 }
-export { VocabularyMap };
-window.customElements.define('vocabularly-map', VocabularyMap);
 
+
+export { VocabularyPair };
+window.customElements.define('vocabulary-pair', VocabularyPair);

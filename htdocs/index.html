@@ -38,7 +38,7 @@ Requirements
 MySQL 8
 </li>
 <li>
-To build UI and compile <strong>cold</strong>
+To build the UI and compile the <strong>cold</strong> daemon
 <ul>
 <li>
 GNU Make
@@ -178,34 +178,16 @@ Widgets
 Widgets provide the user interface for humans to manage and view the objects. While <strong>cold</strong> can directly host these it is equally possible to integrate the static components into another system, web service or web site. They are only static web assets. The public facing web service needs to control access to <strong>cold</strong> and the static content does not contain anything that is priviliged. The Widgets can be loaded indepentently in the page using the following end points.
 </p>
 <p>
-<code>/widgets/display-person.js</code> : This widget provides a consistent display for our Person Object. Markup example <code>&lt;display-person honorific=“Mr.” given=“R. S.” family=“Doiel” lineage=“” orcid=“0000-0003-0900-6903”&gt;&lt;/display-person&gt;</code>
+<code>/widgets/person.js</code> : This JavaScript file provides a display and input set of web components for our Person Object. Markup example <code>&lt;person-display honorific=“Mr.” given=“R. S.” family=“Doiel” lineage=“” orcid=“0000-0003-0900-6903”&gt;&lt;/person-display&gt;</code> and <code>&lt;person-input honorific=“Mr.” given=“R. S.” family=“Doiel” lineage=“” orcid=“0000-0003-0900-6903”&gt;&lt;/person-input&gt;</code>
 </p>
 <p>
-<code>/widgets/input-person.js</code> : This widget provides a consistent input interface for our Person Object. Markup example <code>&lt;input-person honorific=“Mr.” given=“R. S.” family=“Doiel” lineage=“” orcid=“0000-0003-0900-6903”&gt;&lt;/input-person&gt;</code>
+<code>/widgets/group.js</code> : This JavaScript file provides a display and input set of web components for our Markup example <code>&lt;group-display name=“GALCIT” ror=““&gt;&lt;/group-display&gt;</code> and <code>&lt;group-input name=”GALCIT” ror=“” label=““&gt;&lt;/group-input&gt;</code>
 </p>
 <p>
-<code>/widgets/display-group.js</code> : This widget provides a consistent display for our Group Object. Markup example <code>&lt;display-group name=“GALCIT” ror=““&gt;&lt;/display-person&gt;</code>
+<code>/widgets/funder.js</code> : This JavaScript file provides a display and input set of web components for our Markup example <code>&lt;funder-display name=“NSF” grant_number=“1.203221” ror=“” doi=““&gt;&lt;/funder-display&gt;</code> and <code>&lt;funder-input name=”NSF” grant_number=“1.203221” doi=“” ror=“” label=“Grant details”&gt;&lt;/funder-input&gt;</code>
 </p>
 <p>
-<code>/widgets/input-group.js</code> : This widget provides a consistent input interface for our Group Object. Markup example <code>&lt;input-group name=“GALCIT” ror=“” label=““&gt;&lt;/input-person&gt;</code>
-</p>
-<p>
-<code>/widgets/display-subject.js</code> : This widget provides a consistent display of a Subject Object, example <code>&lt;display-subject name=“biology” label=“Biology”&gt;&lt;/display-subject&gt;</code>
-</p>
-<p>
-<code>/widgets/input-subject.js</code> : This widget provides a consistent input interface for our Subject Object, example <code>&lt;input-subject name=“biology”&gt;&lt;/input-subject&gt;</code>
-</p>
-<p>
-<code>/widget/display-issn-publisher.js</code> : This widget provides a consistent display of ISSN and publisher, example <code>&lt;display-issn-publisher issn=“XXXXXXXXXX”&gt;&lt;/display-issn-publisher&gt;</code>
-</p>
-<p>
-<code>/widget/input-issn-publisher.js</code> : This widget provides a consistent input interface for our ISSN/Publisher Object, example <code>&lt;input-issn-publisher issn=“XXXXXXXXXX” publisher=“Publisher Name”&gt;&lt;/input-issn-publisher&gt;</code>
-</p>
-<p>
-<code>/widget/display-doi-prefix.js</code> : This widget lists a DOI-prefix and publisher, example <code>&lt;display-doi-prefix doi=“XXXXXX/XXXXXX.X”&gt;&lt;/display-doi-prefix&gt;</code>
-</p>
-<p>
-<code>/widget/input-doi-prefix.js</code> : This widget provides a consistent input interface for our DOI Prefix/Publisher Object, example <code>&lt;input-doi-prefix doi=“XXXXXX/XXXXX.X” publisher=“Publisher Name Here”&gt;&lt;/input-doi-prefix&gt;</code>
+<code>/widgets/vocabulary.js</code> : This JavaScript file provides a identifier/name web component suitable for displaying subjects, issn/publisher info and doi-prefix/publisher info.
 </p>
 </section>
 

@@ -7,7 +7,7 @@ Requirements
 ============
 
 - MySQL 8
-- To build UI and compile **cold**
+- To build the UI and compile the **cold** daemon
     - GNU Make
     - [MkPage](https://github.com/caltechlibrary/mkpage) (to build UI)
     - [Pandoc](https://pandoc.org) (to build UI)
@@ -133,33 +133,17 @@ Widgets
 
 Widgets provide the user interface for humans to manage and view the objects. While **cold** can directly host these it is equally possible to integrate the static components into another system, web service or web site. They are only static web assets.  The public facing web service needs to control access to **cold** and the static content does not contain anything that is priviliged. The Widgets can be loaded indepentently in the page using the following end points.
 
-`/widgets/display-person.js`
-: This widget provides a consistent display for our Person Object. Markup example `<display-person honorific="Mr." given="R. S." family="Doiel" lineage="" orcid="0000-0003-0900-6903"></display-person>`
+`/widgets/person.js`
+: This JavaScript file provides a display and input set of web components for our Person Object. Markup example `<person-display honorific="Mr." given="R. S." family="Doiel" lineage="" orcid="0000-0003-0900-6903"></person-display>` and `<person-input honorific="Mr." given="R. S." family="Doiel" lineage="" orcid="0000-0003-0900-6903"></person-input>`
 
-`/widgets/input-person.js`
-: This widget provides a consistent input interface for our Person Object. Markup example `<input-person honorific="Mr." given="R. S." family="Doiel" lineage="" orcid="0000-0003-0900-6903"></input-person>`
+`/widgets/group.js`
+: This JavaScript file provides a display and input set of web components for our Markup example `<group-display name="GALCIT" ror=""></group-display>` and `<group-input  name="GALCIT" ror="" label=""></group-input>`
 
-`/widgets/display-group.js`
-: This widget provides a consistent display for our Group Object. Markup example `<display-group name="GALCIT" ror=""></display-person>`
+`/widgets/funder.js`
+: This JavaScript file provides a display and input set of web components for our Markup example `<funder-display name="NSF" grant_number="1.203221" ror="" doi=""></funder-display>` and `<funder-input  name="NSF" grant_number="1.203221" doi="" ror="" label="Grant details"></funder-input>`
 
-`/widgets/input-group.js`
-: This widget provides a consistent input interface for our Group Object. Markup example `<input-group  name="GALCIT" ror="" label=""></input-person>`
+`/widgets/vocabulary.js`
+: This JavaScript file provides a identifier/name web component suitable for displaying subjects, issn/publisher info and doi-prefix/publisher info.
 
-`/widgets/display-subject.js`
-: This widget provides a consistent display of a Subject Object, example `<display-subject name="biology" label="Biology"></display-subject>`
 
-`/widgets/input-subject.js`
-: This widget provides a consistent input interface for our Subject Object, example `<input-subject name="biology"></input-subject>`
-
-`/widget/display-issn-publisher.js`
-: This widget provides a consistent display of ISSN and publisher, example `<display-issn-publisher issn="XXXXXXXXXX"></display-issn-publisher>`
-
-`/widget/input-issn-publisher.js`
-: This widget provides a consistent input interface for our ISSN/Publisher Object, example `<input-issn-publisher issn="XXXXXXXXXX" publisher="Publisher Name"></input-issn-publisher>`
-
-`/widget/display-doi-prefix.js`
-: This widget lists a DOI-prefix and publisher, example `<display-doi-prefix doi="XXXXXX/XXXXXX.X"></display-doi-prefix>`
-
-`/widget/input-doi-prefix.js`
-: This widget provides a consistent input interface for our DOI Prefix/Publisher Object, example `<input-doi-prefix doi="XXXXXX/XXXXX.X" publisher="Publisher Name Here"></input-doi-prefix>`
 

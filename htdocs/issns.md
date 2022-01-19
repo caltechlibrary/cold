@@ -1,8 +1,8 @@
 
-ISSNs
-=====
+ISSN
+====
 
-<ul id="issns-list">Fetching ISSN to Publisher list</ul>
+<div id="issns-list">Fetching ISSN to Publisher list</div>
 
 <script type="module" src="/widgets/vocabulary.js"></script>
 
@@ -20,13 +20,13 @@ function updatePage() {
 
     keys.sort();
     for (let i = 0; i < keys.length; i++) {
-        let li = document.createElement('li'),
-            elem = document.createElement('vocabularly-map'),
+        let div = document.createElement('div'),
+            elem = document.createElement('vocabularly-span'),
             key = keys[i],
             val = data[key];
-        elem.value = {'identifier': key, 'name': val};
-        li.appendChild(elem);
-        issns_list.appendChild(li);
+        elem.value = { 'identifier': key, 'name': val };
+        div.appendChild(elem);
+        issns_list.appendChild(div);
     }
 }
 

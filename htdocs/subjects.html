@@ -25,55 +25,41 @@
 
 <section>
 <h1>
-Funders
+Subjects
 </h1>
 <p>
-This page provides a widget demonstrating display and editing options for funder web components.
+This page lists the subjects by subject id and the text description (i.e. name).
 </p>
-<h2>
-Display
-</h2>
-<div id="funder-list">
-Fetch funder data and display here
+<div id="subject-list">
+Fetching subject list
 </div>
-<h2>
-Input
-</h2>
-<div id="funder-manage">
-Funder management UI is displayed here.
-</div>
-<script type="module" src="/widgets/funder.js"></script>
-<script>
-let funder_list = document.getElementById('funder-list'),
-    funder_manage = document.getElementById('funder-manage'),
+<script type="module" src="/widgets/vocabulary.js"></script>
+<script type="module">
+let subject_list = document.getElementById('subject-list'),
     oReq = new XMLHttpRequest(),
     u = window.location;
 
-funder_list.innerHTML = ``;
-funder_manage.innerHTML = ``;
+subject_list.innerHTML = ``;
 
-function updateFunders() {
-    /* Iterate through the fetched data, generate a funder-display element
-       and link to form for editing funder data */
+function updatePage() {
     let src = this.responseText,
-            data = JSON.parse(src),
-            keys = Object.keys(data);
+        data = JSON.parse(src),
+        keys = Object.keys(data);
 
     keys.sort();
     for (let i = 0; i < keys.length; i++) {
-        let funder_display = document.createElement('funder-display'),
-            funder_input = document.createElement('funder-input'),
+    console.log("DEBUG keys ", i);
+        let elem = document.createElement('vocabulary-pair'),
             key = keys[i],
             val = data[key];
-        funder_display.value = [];
-        funder_list.appendChild(funder_display);
-        funder_input.value = [];
-        funder_manage.appendChild(funder_input);
+        elem.value = { 'identifier': key, 'name': val };
+        subject_list.appendChild(elem);
+        subject_list.appendChild(document.createElement('br'));
     }
 }
 
-oReq.addEventListener('load', updateFunders);
-oReq.open('GET', '/api/funder');
+oReq.addEventListener('load', updatePage);
+oReq.open('GET', '/api/subject');
 oReq.send();
 </script>
 </section>
