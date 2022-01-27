@@ -32,3 +32,16 @@ CREATE TABLE funder (
     object JSON
 );
 
+--
+-- vocabularies
+--
+-- DROP TABLE IF EXISTS vocabulary;
+-- CREATE TABLE vocabulary (
+--  key VARCHAR(255) PRIMARY KEY,
+--  value VARCHAR(255) DEFAULT '',
+--  description TEXT DEFAULT '',
+--  collection VARCHAR(255) NOT NULL 
+-- );
+
+
+

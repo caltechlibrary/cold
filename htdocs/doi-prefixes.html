@@ -46,7 +46,7 @@ function updatePage() {
     keys.sort();
     for (let i = 0; i < keys.length; i++) {
         let div = document.createElement('div'),
-            elem = document.createElement('vocabularly-span'),
+            elem = document.createElement('vocabulary-pair'),
             key = keys[i],
             val = data[key];
         elem.value = { 'identifier': key, 'name': val };

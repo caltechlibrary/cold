@@ -1,0 +1,8 @@
+/**
+ * funder.css is the CSS for defining the display of the funder
+ * custom web component.
+ */
+
+label {
+    text-transform: uppercase;
+}
