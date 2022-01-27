@@ -49,8 +49,12 @@ type Group struct {
 	Name      string `json:"name,omitempty"`
 	ROR       string `json:"ror,omitempty"`
 	DOI       string `json:"doi,omitempty"`
-	Created   string `json:"created,omitempty"`
-	Updated   string `json:"updated,omitempty"`
+	// Started maybe an approx date
+	Started string `json:"started,omitempty"`
+	// Ended maybe an approx date
+	Ended   string `json:"ended,omitempty"`
+	Created string `json:"created,omitempty"`
+	Updated string `json:"updated,omitempty"`
 }
 
 type Funder struct {

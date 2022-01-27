@@ -1,5 +1,5 @@
 /**
- * groups.js implements a common display and editing widgets for group objects.
+ * people.js implements a common display and editing widgets for person objects.
  */
 "use strict";
 
@@ -11,37 +11,39 @@ const display_template = document.createElement('template'),
  */
 display_template.innerHTML = `<style>
 /* Default CSS */
-@import "groups.css";
+@import "people.css";
 /* Site overrides */
-@import "/css/groups.css";
+@import "/css/people.css";
 </style>
-<div class="group-display">
-  <div class="group-cl_group_id"><label for="cl_group_id">Group ID:</label> <span id="cl_group_id" /></div>
-  <div class="group-name"><label for="name">Name:</label> <span id="name" /></div>
-  <div class="group-started"><label for="started">Started:</label> <span id="started" /></div>
-  <div class="group-ended"><label for="ended">Ended:</label> <span id="ended" /></div>
-  <div class="group-ror"><label for="ror">ROR:</label> <span id="ror" /></div>
-  <div class="group-doi"><label for="doi">DOI:</label> <span id="doi" /></div>
-  <div class="group-created no-display"><label for="created"> <span id="created" /></div>
-  <div class="group-updated no-display"><label for="updated"> <span id="updated" /></div>
+<div class="person-display">
+  <div class="person-cl_person_id"><label for="cl_person_id">Person ID:</label> <span id="cl_person_id" /></div>
+  <div class="person-family"><label for="family">Family Name:</label> <span id="family" /></div>
+  <div class="person-given"><label for="given">Given Name:</label> <span id="given" /></div>
+  <div class="person-honorific"><label for="honorific">Honorific:</label> <span id="honorific" /></div>
+  <div class="person-lineage"><label for="lineaged">Lineage:</label> <span id="lineage" /></div>
+  <div class="person-orcid"><label for="orcid">ORCID:</label> <span id="orcid" /></div>
+  <div class="person-ror"><label for="ror">ROR:</label> <span id="ror" /></div>
+  <div class="person-created no-display"><label for="created"> <span id="created" /></div>
+  <div class="person-updated no-display"><label for="updated"> <span id="updated" /></div>
 </div>
 `;
 
 input_template.innerHTML = `<style>
 /* Default CSS */
-@import "groups.css";
+@import "people.css";
 /* Site overrides */
-@import "/css/groups.css";
+@import "/css/people.css";
 </style>
-<div class="group-input">
-  <div class="group-cl_group_id"><label for="cl_group_id">Group ID:</label> <input id="cl_group_id" name="cl_group_id" type="text" /></div>
-  <div class="group-name"><label for="name">Name:</label> <input id="name" name="name" type="text" /></div>
-  <div class="group-started"><label for="started">Started:</label> <input id="started" started="started" type="text" /></div>
-  <div class="group-ended"><label for="ended">Ended:</label> <input id="ended" ended="ended" type="text" /></div>
-  <div class="group-ror"><label for="ror">ROR:</label> <input id="ror" name="ror" type="text" /></div>
-  <div class="group-doi"><label for="doi">DOI:</label> <input id="doi" name="doi" type="text" size="18" /></div>
-  <div class="group-created"><label for="created">Created:</label> <input id="created" name="created" type="date" /></div>
-  <div class="group-updated"><label for="updated">Updated:</label> <input id="updated" name="updated" type="date" /></div>
+<div class="person-input">
+  <div class="person-cl_person_id"><label for="cl_person_id">Person ID:</label> <input id="cl_person_id" name="cl_person_id" type="text" /></div>
+  <div class="person-family"><label for="family">Family Name:</label> <input id="family" name="family" type="text" /></div>
+  <div class="person-given"><label for="given">Given Name:</label> <input id="given" name="given" type="text" /></div>
+  <div class="person-honorific"><label for="honorific">Honorific:</label> <input id="honorific" honorific="honorific" type="text" /></div>
+  <div class="person-lineage"><label for="lineage">Lineage:</label> <input id="lineage" name="lineage" type="text" /></div>
+  <div class="person-orcid"><label for="orcid">ORCID:</label> <input id="orcid" name="orcid" type="text" size="18" /></div>
+  <div class="person-ror"><label for="ror">ROR:</label> <input id="ror" name="ror" type="text" size="18" /></div>
+  <div class="person-created"><label for="created">Created:</label> <input id="created" name="created" type="date" /></div>
+  <div class="person-updated"><label for="updated">Updated:</label> <input id="updated" name="updated" type="date" /></div>
 </div>`;
 
 /*
@@ -67,18 +69,18 @@ function mmddyyyy(date) {
  ******************************/
 
 /**
- * Group is a minimalist implementation of a Group object
+ * Person is a minimalist implementation of a Person object
  * without any component elements.
  */
-class Group {
+class Person {
     constructor() {
-        this.cl_group_id = '';
-        this.name = '';
+        this.cl_person_id = '';
+        this.family = '';
+        this.given = '';
+        this.honorific = '';
+        this.lineage = '';
+        this.orcid = '';
         this.ror = '';
-        this.doi = '';
-        // started and ended should be aprox. dates not dates.
-        this.started = '';
-        this.ended = '';
         this.created = '';
         this.updated = '';
     }
@@ -94,12 +96,13 @@ class Group {
            updated = yyymmdd(now)
         }
         return {
-            'cl_group_id': this.cl_group_id,
-            'name': this.name,
+            'cl_person_id': this.cl_person_id,
+            'family': this.family,
+            'given': this.given,
+            'honorific': this.honorific,
+            'lineage': this.lineage,
+            'orcid': this.orcid,
             'ror': this.ror,
-            'doi': this.doi,
-            'started': this.started,
-            'ended': this.ended,
             'created': created,
             'updated': updated
         };
@@ -107,7 +110,7 @@ class Group {
 
     set value(obj) {
         let self = this;
-        for (const attr_name of [ 'cl_group_id', 'agency', 'crossref_group_id', 'ror', 'doi', 'grant_number' ]) {
+        for (const attr_name of [ 'cl_person_id', 'family', 'given', 'honorific', 'lineage', 'orcid', 'ror' ]) {
             if (obj[attr_name] !== undefined) {
                 self[attr_name] = obj[attr_name];
             }
@@ -127,13 +130,13 @@ class Group {
  ************************************/
 
 /**
- * GroupDisplay is a web component for displaying a single group's
+ * PersonDisplay is a web component for displaying a single person's
  * metadata.
  */
-class GroupDisplay extends HTMLElement {
+class PersonDisplay extends HTMLElement {
     constructor () {
         super();
-        this.managed_attributes = Object.keys(new Group);
+        this.managed_attributes = Object.keys(new Person);
 
         this.attachShadow({mode: 'open'});
         this.shadowRoot.appendChild(display_template.content.cloneNode(true));
@@ -195,7 +198,7 @@ class GroupDisplay extends HTMLElement {
             let val = this.getAttribute(key),
                 elem_name = `${key}_input`,
                 fnNameOnChange = `onchange_${key}`,
-                wrapper = this.shadowRoot.querySelector(`.group-${key}`);
+                wrapper = this.shadowRoot.querySelector(`.person-${key}`);
             if ((val === undefined) || (val == null) || (val === '')) {
                 wrapper.classList.add('no-display');
                 val = '';
@@ -217,10 +220,10 @@ class GroupDisplay extends HTMLElement {
     }
 }
 
-class GroupInput extends HTMLElement {
+class PersonInput extends HTMLElement {
     constructor () {
         super();
-        this.managed_attributes = Object.keys(new Group);
+        this.managed_attributes = Object.keys(new Person);
 
         this.attachShadow({mode: 'open'});
         this.shadowRoot.appendChild(input_template.content.cloneNode(true));
@@ -307,6 +310,6 @@ class GroupInput extends HTMLElement {
 }
 
 
-export { Group, GroupDisplay, GroupInput };
-window.customElements.define('group-display', GroupDisplay);
-window.customElements.define('group-input', GroupInput);
+export { Person, PersonDisplay, PersonInput };
+window.customElements.define('person-display', PersonDisplay);
+window.customElements.define('person-input', PersonInput);
