@@ -20,3 +20,9 @@ These can not be edited via **cold**, they are generated when the **cold** appli
 - [ISSN/Publishers](/app/issns.html)
 - [DOI Prefix/Publishers](/app/doi-prefixes.html)
 
+
+Testing and development
+-----------------------
+
+- [test funder widget](/app/widgets/test_funders.html)
+- [test group widget](/app/widgets/test_groups.html)

@@ -32,14 +32,15 @@ function updateFunders() {
             keys = Object.keys(data);
 
     keys.sort();
-    for (let i = 0; i < keys.length; i++) {
+    for (const key of keys) {
         let funder_display = document.createElement('funder-display'),
             funder_input = document.createElement('funder-input'),
             key = keys[i],
-            val = data[key];
-        funder_display.value = [];
+            obj = data[key];
+            obj.cl_funder_id = key;
+        funder_display.value = obj;
         funder_list.appendChild(funder_display);
-        funder_input.value = [];
+        funder_input.value = obj; 
         funder_manage.appendChild(funder_input);
     }
 }

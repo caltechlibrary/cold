@@ -1,0 +1,11 @@
+/**
+ * groups.css this is the default styling for our custom web component.
+ * It can be augmented by the stylesheet in `/css/groups.css`.
+ */
+.no-display {
+    display: none;
+}
+
+.group-display {
+    border: 1px solid blue;
+}

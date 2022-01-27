@@ -1,5 +1,5 @@
 /**
- * funders.js implements a common display and editing widgets for funder objects.
+ * groups.js implements a common display and editing widgets for group objects.
  */
 "use strict";
 
@@ -11,37 +11,33 @@ const display_template = document.createElement('template'),
  */
 display_template.innerHTML = `<style>
 /* Default CSS */
-@import "funders.css";
+@import "groups.css";
 /* Site overrides */
-@import "/css/funders.css";
+@import "/css/groups.css";
 </style>
-<div class="funder-display">
-  <div class="funder-cl_funder_id"><label for="cl_funder_id">Funder ID:</label> <span id="cl_funder_id" /></div>
-  <div class="funder-grant_number"><label for="grant_number">Grant Number:</label> <span id="grant_number" /></div>
-  <div class="funder-agency"><label for="agency">Agency:</label> <span id="agency" /></div>
-  <div class="funder-crossref_funder_id"><label for="crossref_funder_id">CrossRef Funder ID:</label> <span id="crossref_funder_id" /></div>
-  <div class="funder-ror"><label for="ror">ROR:</label> <span id="ror" /></div>
-  <div class="funder-doi"><label for="doi">DOI:</label> <span id="doi" /></div>
-  <div class="funder-created no-display"><label for="created"> <span id="created" /></div>
-  <div class="funder-updated no-display"><label for="updated"> <span id="updated" /></div>
+<div class="group-display">
+  <div class="group-cl_group_id"><label for="cl_group_id">Group ID:</label> <span id="cl_group_id" /></div>
+  <div class="group-name"><label for="name">Name:</label> <span id="name" /></div>
+  <div class="group-ror"><label for="ror">ROR:</label> <span id="ror" /></div>
+  <div class="group-doi"><label for="doi">DOI:</label> <span id="doi" /></div>
+  <div class="group-created no-display"><label for="created"> <span id="created" /></div>
+  <div class="group-updated no-display"><label for="updated"> <span id="updated" /></div>
 </div>
 `;
 
 input_template.innerHTML = `<style>
 /* Default CSS */
-@import "funders.css";
+@import "groups.css";
 /* Site overrides */
-@import "/css/funders.css";
+@import "/css/groups.css";
 </style>
-<div class="funder-input">
-  <div class="funder-cl_funder_id"><label for="cl_funder_id">Funder ID:</label> <input id="cl_funder_id" name="cl_funder_id" type="text" /></div>
-  <div class="funder-grant_number"><label for="grant_number">Grant Number:</label> <input id="grant_number" name="grant_number" type="text" /></div>
-  <div class="funder-agency"><label for="agency">Agency:</label> <input id="agency" name="agency" type="text" size="80"/></div>
-  <div class="funder-crossref_funder_id"><label for="crossref_funder_id">CrossRef Funder ID:</label> <input id="crossref_funder_id" name="crossref_funder_id" type="text" /></div>
-  <div class="funder-ror"><label for="ror">ROR:</label> <input id="ror" name="ror" type="text" /></div>
-  <div class="funder-doi"><label for="doi">DOI:</label> <input id="doi" name="doi" type="text" size="18" /></div>
-  <div class="funder-created"><label for="created">Created:</label> <input id="created" name="created" type="date" /></div>
-  <div class="funder-updated"><label for="updated">Updated:</label> <input id="updated" name="updated" type="date" /></div>
+<div class="group-input">
+  <div class="group-cl_group_id"><label for="cl_group_id">Group ID:</label> <input id="cl_group_id" name="cl_group_id" type="text" /></div>
+  <div class="group-name"><label for="name">Name:</label> <input id="name" name="name" type="text" /></div>
+  <div class="group-ror"><label for="ror">ROR:</label> <input id="ror" name="ror" type="text" /></div>
+  <div class="group-doi"><label for="doi">DOI:</label> <input id="doi" name="doi" type="text" size="18" /></div>
+  <div class="group-created"><label for="created">Created:</label> <input id="created" name="created" type="date" /></div>
+  <div class="group-updated"><label for="updated">Updated:</label> <input id="updated" name="updated" type="date" /></div>
 </div>`;
 
 /*
@@ -54,22 +50,28 @@ function yyyymmdd(date) {
     return `${year}-${month}-${day}`
 }
 
+function mmddyyyy(date) {
+    let day = `${date.getDate()}`.padStart(2, '0'),
+        month = `${date.getMonth() + 1}`.padStart(2, '0'),
+        year = `${date.getFullYear()}`;
+    return `${month}/${day}/${year}`
+}
+
+
 /******************************
  * Web worker classes
  ******************************/
 
 /**
- * Funder is a minimalist implementation of a Funder object
+ * Group is a minimalist implementation of a Group object
  * without any component elements.
  */
-class Funder {
+class Group {
     constructor() {
-        this.cl_funder_id = '';
-        this.agency = '';
-        this.crossref_funder_id = '';
+        this.cl_group_id = '';
+        this.name = '';
         this.ror = '';
         this.doi = '';
-        this.grant_number = '';
         this.created = '';
         this.updated = '';
     }
@@ -85,12 +87,10 @@ class Funder {
            updated = yyymmdd(now)
         }
         return {
-            'cl_funder_id': this.cl_funder_id,
-            'agency': this.agency,
-            'crossref_funder_id': this.crossref_funder_id,
+            'cl_group_id': this.cl_group_id,
+            'name': this.name,
             'ror': this.ror,
             'doi': this.doi,
-            'grant_number': this.grant_number,
             'created': created,
             'updated': updated
         };
@@ -98,7 +98,7 @@ class Funder {
 
     set value(obj) {
         let self = this;
-        for (const attr_name of [ 'cl_funder_id', 'agency', 'crossref_funder_id', 'ror', 'doi', 'grant_number' ]) {
+        for (const attr_name of [ 'cl_group_id', 'agency', 'crossref_group_id', 'ror', 'doi', 'grant_number' ]) {
             if (obj[attr_name] !== undefined) {
                 self[attr_name] = obj[attr_name];
             }
@@ -118,13 +118,13 @@ class Funder {
  ************************************/
 
 /**
- * FunderDisplay is a web component for displaying a single funder's
+ * GroupDisplay is a web component for displaying a single group's
  * metadata.
  */
-class FunderDisplay extends HTMLElement {
+class GroupDisplay extends HTMLElement {
     constructor () {
         super();
-        this.managed_attributes = Object.keys(new Funder());
+        this.managed_attributes = Object.keys(new Group);
 
         this.attachShadow({mode: 'open'});
         this.shadowRoot.appendChild(display_template.content.cloneNode(true));
@@ -186,7 +186,7 @@ class FunderDisplay extends HTMLElement {
             let val = this.getAttribute(key),
                 elem_name = `${key}_input`,
                 fnNameOnChange = `onchange_${key}`,
-                wrapper = this.shadowRoot.querySelector(`.funder-${key}`);
+                wrapper = this.shadowRoot.querySelector(`.group-${key}`);
             if ((val === undefined) || (val == null) || (val === '')) {
                 wrapper.classList.add('no-display');
                 val = '';
@@ -208,10 +208,10 @@ class FunderDisplay extends HTMLElement {
     }
 }
 
-class FunderInput extends HTMLElement {
+class GroupInput extends HTMLElement {
     constructor () {
         super();
-        this.managed_attributes = Object.keys(new Funder());
+        this.managed_attributes = Object.keys(new Group);
 
         this.attachShadow({mode: 'open'});
         this.shadowRoot.appendChild(input_template.content.cloneNode(true));
@@ -298,6 +298,6 @@ class FunderInput extends HTMLElement {
 }
 
 
-export { Funder, FunderDisplay, FunderInput };
-window.customElements.define('funder-display', FunderDisplay);
-window.customElements.define('funder-input', FunderInput);
+export { Group, GroupDisplay, GroupInput };
+window.customElements.define('group-display', GroupDisplay);
+window.customElements.define('group-input', GroupInput);
