@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -25,17 +26,21 @@ type API struct {
 func (api *API) packageJSON(w http.ResponseWriter, r *http.Request, src []byte, err error) {
 	if err != nil {
 		http.NotFound(w, r)
-		api.logResponse(r, 404, fmt.Errorf(`Not found, %s`, err))
+		api.logResponse(r, http.StatusNotFound, fmt.Errorf(`not found, %s`, err))
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
+	if r.Method == `HEAD` {
+		fmt.Fprintf(w, "")
+		return
+	}
 	fmt.Fprintf(w, "%s", src)
 }
 
 // isDotPath checks to see if a path is requested with a dot file (e.g. docs/.git/* or docs/.htaccess)
 func (api *API) isDotPath(p string) bool {
 	for _, part := range strings.Split(path.Clean(p), "/") {
-		if strings.HasPrefix(part, "..") == false && strings.HasPrefix(part, ".") == true && len(part) > 1 {
+		if (!strings.HasPrefix(part, "..")) && strings.HasPrefix(part, ".") && len(part) > 1 {
 			return true
 		}
 	}
@@ -68,20 +73,26 @@ func (api *API) requestLogger(next http.Handler) http.Handler {
 
 // logResponse logs the response based on a request, status and error message
 func (api *API) logResponse(r *http.Request, status int, err error) {
+	var statusMsg string
 	//FIXME: Need to implement log levels and log output accordingly.
 	q := r.URL.Query()
+	if err == nil {
+		statusMsg = http.StatusText(status)
+	} else {
+		statusMsg = fmt.Sprintf("%s, %s", http.StatusText(status), err)
+	}
 	if status <= 200 && status >= 300 {
 		if len(q) > 0 {
-			api.log.Printf("Response: %s Path: %s RemoteAddr: %s UserAgent: %s Query: %+v Status: %d, %s %q\n", r.Method, r.URL.Path, r.RemoteAddr, r.UserAgent(), q, status, http.StatusText(status), err)
+			api.log.Printf("Response: %s Path: %s RemoteAddr: %s UserAgent: %s Query: %+v Status: %d, %s %q\n", r.Method, r.URL.Path, r.RemoteAddr, r.UserAgent(), q, status, statusMsg, err)
 		} else {
-			api.log.Printf("Response: %s Path: %s RemoteAddr: %s UserAgent: %s Status: %d, %s %q\n", r.Method, r.URL.Path, r.RemoteAddr, r.UserAgent(), status, http.StatusText(status), err)
+			api.log.Printf("Response: %s Path: %s RemoteAddr: %s UserAgent: %s Status: %d, %s %q\n", r.Method, r.URL.Path, r.RemoteAddr, r.UserAgent(), status, statusMsg, err)
 		}
 	} else {
 		//FIXME: This is excessive, only useful in debugging
 		if len(q) > 0 {
-			api.log.Printf("Response: %s Path: %s RemoteAddr: %s UserAgent: %s Query: %+v Status: %d, %s\n", r.Method, r.URL.Path, r.RemoteAddr, r.UserAgent(), q, status, http.StatusText(status))
+			api.log.Printf("Response: %s Path: %s RemoteAddr: %s UserAgent: %s Query: %+v Status: %d, %s\n", r.Method, r.URL.Path, r.RemoteAddr, r.UserAgent(), q, status, statusMsg)
 		} else {
-			api.log.Printf("Response: %s Path: %s RemoteAddr: %s UserAgent: %s Status: %d, %s\n", r.Method, r.URL.Path, r.RemoteAddr, r.UserAgent(), status, http.StatusText(status))
+			api.log.Printf("Response: %s Path: %s RemoteAddr: %s UserAgent: %s Status: %d, %s\n", r.Method, r.URL.Path, r.RemoteAddr, r.UserAgent(), status, statusMsg)
 		}
 	}
 }
@@ -90,9 +101,9 @@ func (api *API) logResponse(r *http.Request, status int, err error) {
 func (api *API) staticRouter(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// If given a dot file path, send forbidden
-		if api.isDotPath(r.URL.Path) == true {
-			http.Error(w, "Forbidden", 403)
-			api.logResponse(r, 403, fmt.Errorf("Forbidden, requested a dot path"))
+		if api.isDotPath(r.URL.Path) {
+			http.Error(w, "Forbidden", http.StatusForbidden)
+			api.logResponse(r, http.StatusForbidden, fmt.Errorf("forbidden, requested a dot path"))
 			return
 		}
 		// If we make it this far, fall back to the default handler
@@ -102,7 +113,252 @@ func (api *API) staticRouter(next http.Handler) http.Handler {
 
 // PeopleAPI handles the people/person requests
 func (api *API) PeopleAPI(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "PeopleAPI not implemented")
+	var (
+		src []byte
+		err error
+	)
+	args := strings.Split(r.URL.Path, "/")
+	if r.Method == `GET` || r.Method == `HEAD` {
+		if len(args) <= 3 {
+			clPersonIDs, err := GetAllPersonID(api.Cfg)
+			if err != nil {
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				api.logResponse(r, http.StatusInternalServerError, fmt.Errorf("GetAllPersonID: %s", err))
+				return
+			}
+			src, err = jsonEncode(clPersonIDs)
+			api.packageJSON(w, r, src, err)
+		} else {
+			obj, err := GetPerson(api.Cfg, args[3])
+			if err != nil {
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				api.logResponse(r, http.StatusInternalServerError, fmt.Errorf("GetPerson(%q): %s", args[3], err))
+				return
+			}
+			if obj == nil {
+				http.Error(w, "Not Found", http.StatusNotFound)
+				api.logResponse(r, http.StatusNotFound, fmt.Errorf("GetPeople(%q): %s", args[3], "not found"))
+				return
+			}
+			src, err = jsonEncode(obj)
+			api.packageJSON(w, r, src, err)
+		}
+		return
+	}
+	if r.Method == `PUT` || r.Method == `POST` {
+		src, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			api.logResponse(r, http.StatusInternalServerError, fmt.Errorf("id: %q, read body %s", args[3], err))
+			return
+		}
+		defer r.Body.Close()
+		obj := new(Person)
+		err = jsonDecode(src, &obj)
+		if err != nil {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			api.logResponse(r, http.StatusInternalServerError, fmt.Errorf("id: %q, json decode %s", args[3], err))
+			return
+		}
+		switch r.Method {
+		case `PUT`:
+			err = CreatePerson(api.Cfg, obj)
+			if err != nil {
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				api.logResponse(r, http.StatusInternalServerError, fmt.Errorf("id: %q, create person %s", args[3], err))
+				return
+			}
+		case `POST`:
+			err = UpdatePerson(api.Cfg, obj)
+			if err != nil {
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				api.logResponse(r, http.StatusInternalServerError, fmt.Errorf("id: %q, update person %s", args[3], err))
+				return
+			}
+
+		}
+		api.logResponse(r, http.StatusOK, nil)
+		http.Error(w, "OK", http.StatusOK)
+		return
+	}
+	//FIXME: need to apply REST actions DELETE
+	if r.Method == `DELETE` {
+		err = fmt.Errorf("PeopleAPI: %s not implemented", r.Method)
+		api.logResponse(r, http.StatusNotImplemented, fmt.Errorf("PeopleAPI: %s", err))
+		http.Error(w, "Method Not Implemented", http.StatusNotImplemented)
+		return
+	}
+	// Method is not implemented or not supported
+	err = fmt.Errorf("PersonAPI: %s not allowed", r.Method)
+	api.logResponse(r, http.StatusMethodNotAllowed, fmt.Errorf("PersonAPI: %s", err))
+	http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+}
+
+// GroupAPI handles the group requests
+func (api *API) GroupAPI(w http.ResponseWriter, r *http.Request) {
+	var (
+		src []byte
+		err error
+	)
+	args := strings.Split(r.URL.Path, "/")
+	if r.Method == `GET` || r.Method == `HEAD` {
+		if len(args) <= 3 {
+			clGroupIDs, err := GetAllGroupID(api.Cfg)
+			if err != nil {
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				api.logResponse(r, http.StatusInternalServerError, fmt.Errorf("GetAllGroupID: %s", err))
+				return
+			}
+			src, err = jsonEncode(clGroupIDs)
+			api.packageJSON(w, r, src, err)
+		} else {
+			obj, err := GetGroup(api.Cfg, args[3])
+			if err != nil {
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				api.logResponse(r, http.StatusInternalServerError, fmt.Errorf("GetGroup(%q): %s", args[3], err))
+				return
+			}
+			if obj == nil {
+				http.Error(w, "Not Found", http.StatusNotFound)
+				api.logResponse(r, http.StatusNotFound, fmt.Errorf("GetGroup(%q): %s", args[3], "not found"))
+				return
+			}
+			src, err = jsonEncode(obj)
+			api.packageJSON(w, r, src, err)
+		}
+		return
+	}
+	if r.Method == `PUT` || r.Method == `POST` {
+		src, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			api.logResponse(r, http.StatusInternalServerError, fmt.Errorf("id: %q, read body %s", args[3], err))
+			return
+		}
+		defer r.Body.Close()
+		obj := new(Group)
+		err = jsonDecode(src, &obj)
+		if err != nil {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			api.logResponse(r, http.StatusInternalServerError, fmt.Errorf("id: %q, json decode %s", args[3], err))
+			return
+		}
+		switch r.Method {
+		case `PUT`:
+			err = CreateGroup(api.Cfg, obj)
+			if err != nil {
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				api.logResponse(r, http.StatusInternalServerError, fmt.Errorf("id: %q, create group %s", args[3], err))
+				return
+			}
+		case `POST`:
+			err = UpdateGroup(api.Cfg, obj)
+			if err != nil {
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				api.logResponse(r, http.StatusInternalServerError, fmt.Errorf("id: %q, update group %s", args[3], err))
+				return
+			}
+
+		}
+		api.logResponse(r, http.StatusOK, nil)
+		http.Error(w, "OK", http.StatusOK)
+		return
+	}
+	//FIXME: need to apply REST actions DELETE
+	if r.Method == `DELETE` {
+		err = fmt.Errorf("GroupAPI: %s not implemented", r.Method)
+		api.logResponse(r, http.StatusNotImplemented, fmt.Errorf("GroupAPI: %s", err))
+		http.Error(w, "Method Not Implemented", http.StatusNotImplemented)
+		return
+	}
+
+	// Method is not implemented or not supported
+	err = fmt.Errorf("GroupAPI: %s not allowed", r.Method)
+	api.logResponse(r, http.StatusMethodNotAllowed, fmt.Errorf("GroupAPI: %s", err))
+	http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+}
+
+// FunderAPI handles the funder requests
+func (api *API) FunderAPI(w http.ResponseWriter, r *http.Request) {
+	var (
+		src []byte
+		err error
+	)
+	//FIXME: need to apply REST actions GET, PUT, POST, DELETE
+	args := strings.Split(r.URL.Path, "/")
+	if r.Method == `GET` || r.Method == `HEAD` {
+		if len(args) <= 3 {
+			clFunderIDs, err := GetAllFunderID(api.Cfg)
+			if err != nil {
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				api.logResponse(r, http.StatusInternalServerError, fmt.Errorf("GetAllFunderID: %s", err))
+				return
+			}
+			src, err = jsonEncode(clFunderIDs)
+			api.packageJSON(w, r, src, err)
+		} else {
+			obj, err := GetFunder(api.Cfg, args[3])
+			if err != nil {
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				api.logResponse(r, http.StatusInternalServerError, fmt.Errorf("GetFunder(%q): %s", args[3], err))
+				return
+			}
+			if obj == nil {
+				http.Error(w, "Not Found", http.StatusNotFound)
+				api.logResponse(r, http.StatusNotFound, fmt.Errorf("GetGroup(%q): %s", args[3], "not found"))
+				return
+			}
+			src, err = jsonEncode(obj)
+			api.packageJSON(w, r, src, err)
+		}
+		return
+	}
+	if r.Method == `PUT` || r.Method == `POST` {
+		src, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			api.logResponse(r, http.StatusInternalServerError, fmt.Errorf("id: %q, read body %s", args[3], err))
+			return
+		}
+		defer r.Body.Close()
+		obj := new(Funder)
+		err = jsonDecode(src, &obj)
+		if err != nil {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			api.logResponse(r, http.StatusInternalServerError, fmt.Errorf("id: %q, json decode %s", args[3], err))
+			return
+		}
+		switch r.Method {
+		case `PUT`:
+			err = CreateFunder(api.Cfg, obj)
+			if err != nil {
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				api.logResponse(r, http.StatusInternalServerError, fmt.Errorf("id: %q, create funder %s", args[3], err))
+				return
+			}
+		case `POST`:
+			err = UpdateFunder(api.Cfg, obj)
+			if err != nil {
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				api.logResponse(r, http.StatusInternalServerError, fmt.Errorf("id: %q, update funder %s", args[3], err))
+				return
+			}
+
+		}
+		api.logResponse(r, http.StatusOK, nil)
+		http.Error(w, "OK", http.StatusOK)
+		return
+	}
+	if r.Method == `DELETE` {
+		err = fmt.Errorf("FunderAPI: %s not implemented", r.Method)
+		api.logResponse(r, http.StatusNotImplemented, fmt.Errorf("FunderAPI: %s", err))
+		http.Error(w, "Method Not Implemented", http.StatusNotImplemented)
+		return
+	}
+	// Method is not implemented or not supported
+	err = fmt.Errorf("FunderAPI: %s not allowed", r.Method)
+	api.logResponse(r, http.StatusMethodNotAllowed, fmt.Errorf("FunderAPI: %s", err))
+	http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 }
 
 func (api *API) VocabularyAPI(w http.ResponseWriter, r *http.Request) {
@@ -115,7 +371,7 @@ func (api *API) VocabularyAPI(w http.ResponseWriter, r *http.Request) {
 	args = strings.Split(r.URL.Path, "/")[1:]
 	if len(args) < 2 {
 		http.Error(w, "Bad Request", http.StatusBadRequest)
-		api.logResponse(r, 400, fmt.Errorf(`Bad Request`))
+		api.logResponse(r, http.StatusBadRequest, fmt.Errorf(`bad request`))
 		return
 	}
 	voc, vocId = args[1], ``
@@ -130,7 +386,7 @@ func (api *API) VocabularyAPI(w http.ResponseWriter, r *http.Request) {
 			src, err = jsonEncode(item)
 		} else {
 			http.NotFound(w, r)
-			api.logResponse(r, 404, fmt.Errorf(`Not Found`))
+			api.logResponse(r, http.StatusNotFound, fmt.Errorf(`not found`))
 		}
 	case "issn":
 		if vocId == "" {
@@ -139,7 +395,7 @@ func (api *API) VocabularyAPI(w http.ResponseWriter, r *http.Request) {
 			src, err = jsonEncode(item)
 		} else {
 			http.NotFound(w, r)
-			api.logResponse(r, 404, fmt.Errorf(`Not Found`))
+			api.logResponse(r, http.StatusNotFound, fmt.Errorf(`not found`))
 		}
 	case "doi-prefix":
 		if vocId == "" {
@@ -148,11 +404,11 @@ func (api *API) VocabularyAPI(w http.ResponseWriter, r *http.Request) {
 			src, err = jsonEncode(item)
 		} else {
 			http.NotFound(w, r)
-			api.logResponse(r, 404, fmt.Errorf(`Not Found`))
+			api.logResponse(r, http.StatusNotFound, fmt.Errorf(`not found`))
 		}
 	default:
 		http.NotFound(w, r)
-		api.logResponse(r, 404, fmt.Errorf(`Not Found`))
+		api.logResponse(r, http.StatusNotFound, fmt.Errorf(`not found`))
 		return
 	}
 	api.packageJSON(w, r, src, err)
@@ -162,17 +418,20 @@ func (api *API) RouteHandler(w http.ResponseWriter, r *http.Request) {
 	api.logRequest(w, r)
 	switch {
 	case r.URL.Path == "/" || r.URL.Path == "/index.html":
-		http.Redirect(w, r, "/app/", 301)
-		api.logResponse(r, 301, fmt.Errorf(`Redirected to "/app/"`))
+		http.Redirect(w, r, "/app/", http.StatusMovedPermanently)
+		api.logResponse(r, 301, fmt.Errorf(`redirected to "/app/"`))
 	case strings.HasSuffix(r.URL.Path, "/help"):
-		http.Redirect(w, r, "/app/index.html", 301)
-		api.logResponse(r, 301, fmt.Errorf(`Redirected to "/app/index.html"`))
+		http.Redirect(w, r, "/app/api-help.md", http.StatusMovedPermanently)
+		api.logResponse(r, 301, fmt.Errorf(`redirected to "/app/index.html"`))
 	case strings.HasPrefix(r.URL.Path, "/api/version"):
 		fmt.Fprintf(w, "%s %s\n", api.AppName, Version)
-		api.logResponse(r, 202, nil)
+		api.logResponse(r, http.StatusOK, nil)
 	case strings.HasPrefix(r.URL.Path, "/api/people"):
 		api.PeopleAPI(w, r)
-	//case strings.HasPrefix(r.URL.Path, "/api/group"):
+	case strings.HasPrefix(r.URL.Path, "/api/group"):
+		api.GroupAPI(w, r)
+	case strings.HasPrefix(r.URL.Path, "/api/funder"):
+		api.FunderAPI(w, r)
 	case strings.HasPrefix(r.URL.Path, "/api/subject"):
 		api.VocabularyAPI(w, r)
 	case strings.HasPrefix(r.URL.Path, "/api/issn"):
@@ -181,12 +440,12 @@ func (api *API) RouteHandler(w http.ResponseWriter, r *http.Request) {
 		api.VocabularyAPI(w, r)
 	default:
 		http.NotFound(w, r)
-		api.logResponse(r, 404, fmt.Errorf(`Not Found`))
+		api.logResponse(r, http.StatusNotFound, fmt.Errorf(`not found`))
 	}
 }
 
 func DisplayLicense(out io.Writer, appName string, license string) {
-	fmt.Fprintf(out, strings.ReplaceAll(strings.ReplaceAll(license, "{app_name}", appName), "{version}", Version))
+	fmt.Fprintln(out, strings.ReplaceAll(strings.ReplaceAll(license, "{app_name}", appName), "{version}", Version))
 }
 
 func DisplayVersion(out io.Writer, appName string) {
@@ -196,13 +455,13 @@ func DisplayVersion(out io.Writer, appName string) {
 func DisplayUsage(out io.Writer, appName string, flagSet *flag.FlagSet, description string, examples string, license string) {
 	// Convert {app_name} and {version} in description
 	if description != "" {
-		fmt.Fprintf(out, strings.ReplaceAll(description, "{app_name}", appName))
+		fmt.Fprintln(out, strings.ReplaceAll(description, "{app_name}", appName))
 	}
 	flagSet.SetOutput(out)
 	flagSet.PrintDefaults()
 
 	if examples != "" {
-		fmt.Fprintf(out, strings.ReplaceAll(examples, "{app_name}", appName))
+		fmt.Fprintln(out, strings.ReplaceAll(examples, "{app_name}", appName))
 	}
 	if license != "" {
 		DisplayLicense(out, appName, license)
@@ -240,7 +499,7 @@ func (api *API) Reload(sigName string) error {
 	settings := api.Settings
 	exitCode := api.Shutdown(sigName)
 	if exitCode != 0 {
-		return fmt.Errorf("Reload failed, could not shutdown the current processes")
+		return fmt.Errorf("reload failed, could not shutdown the current processes")
 	}
 	fmt.Fprintf(os.Stderr, "Restarting %s using %s", api.AppName, settings)
 	return api.Init(api.AppName, settings)
@@ -267,7 +526,7 @@ func (api *API) Init(appName string, settings string) error {
 		api.Cfg.Hostname = `localhost:8486`
 	}
 	if err := OpenConnection(api.Cfg); err != nil {
-		return fmt.Errorf(`Failed to open database connections, %s`, err)
+		return fmt.Errorf(`failed to open database connections, %s`, err)
 	}
 	return nil
 }
@@ -308,7 +567,7 @@ Press ctl-c to terminate.
 		}
 	}()
 
-	fs := api.requestLogger(http.FileServer(http.Dir(api.Cfg.Htdocs)))
+	fs := api.requestLogger(api.staticRouter(http.FileServer(http.Dir(api.Cfg.Htdocs))))
 	http.Handle("/app/", http.StripPrefix("/app/", fs))
 	http.Handle("/css/", fs)
 	http.Handle("/assets/", fs)

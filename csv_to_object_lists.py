@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 #
-# csv_to_object_lists.py converts the CSV files from feeds into a JSON array of objects for person and groups.
+# csv_to_object_lists.py converts the CSV files from feeds into a JSON array of objects for person, groups and funders.
 #
 import sys
 import os
@@ -31,7 +31,7 @@ def sluggify(s):
             s = s.replace(c, '')
     return s.replace(' ', '-')
 
-for name in [ 'people', 'group' ]:
+for name in [ 'people', 'groups' ]:
     i_name = os.path.join('testdata', f'{name}.csv')
     o_name = os.path.join('testdata', f'{name}.json')
     l = []
@@ -62,7 +62,7 @@ for name in [ 'people', 'group' ]:
 
 # Pivot funders table on grant number to agency name into
 # A funder object
-name = "grant-numbers"
+name = "grant_numbers"
 i_name = os.path.join('testdata', f'{name}.csv')
 name = "funders"
 o_name = os.path.join('testdata', f'{name}.json')

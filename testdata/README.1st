@@ -3,3 +3,7 @@ This directory is where you hold test data used to test cold.
 Currently that means grabbing a lastest groups.csv person.csv from
 feeds and converting those using csv_to_object_list.py
 
+- groups.csv is from https://feeds.library.caltech.edu/groups/groups.csv
+- people.csv is from https://feeds.library.caltech.edu/people/people.csv
+- grant_numbers.csv is generate with harvest_funders.bash
+
