@@ -159,13 +159,13 @@ func DeletePerson(config *Config, clPeopleID string) error {
 
 // GetAllGroupID returns a list of cl_group_id in the group table
 func GetAllGroupID(config *Config) ([]string, error) {
-	stmt := `SELECT cl_group_id FROM group ORDER BY cl_group_id`
+	stmt := `SELECT cl_group_id FROM local_group ORDER BY cl_group_id`
 	return sqlQueryStringIDs(config, stmt)
 }
 
 // GetGroup takes a group id and returns a group object and error
 func GetGroup(config *Config, clGroupID string) (*Group, error) {
-	stmt := `SELECT object FROM group WHERE cl_group_id = ?`
+	stmt := `SELECT object FROM local_group WHERE cl_group_id = ?`
 	obj := new(Group)
 	err := sqlQueryObject(config, stmt, clGroupID, &obj)
 	if isErrorMsg(err, "not found") {
@@ -198,7 +198,7 @@ func UpdateGroup(config *Config, group *Group) error {
 
 func DeleteGroup(config *Config, clGroupID string) error {
 	db := config.Connection
-	stmt := `DELETE FROM group WHERE cl_group_id = ?`
+	stmt := `DELETE FROM local_group WHERE cl_group_id = ?`
 	_, err := db.Exec(stmt, clGroupID)
 	return err
 }

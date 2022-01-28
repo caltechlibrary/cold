@@ -57,6 +57,9 @@ $(HTML_PAGES): $(MD_PAGES)
 	@echo "PAGE html: "$@" PAGE md: "$(basename $@).md
 	mkpage body=$(basename $@).md nav=nav.md page.tmpl >$@
 
+harvest: .FORCE
+	./harvest_testdata.bash
+
 install: build
 	@if [ ! -d $(PREFIX)/bin ]; then mkdir -p $(PREFIX)/bin; fi
 	@echo "Installing programs in $(PREFIX)/bin"

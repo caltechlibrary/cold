@@ -226,6 +226,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	debugLogs bool
 
 	logFile string
+	logMode int
 )
 
 func checkConfig(cfg *cold.Config) {
@@ -242,6 +243,7 @@ func main() {
 	flagSet.BoolVar(&showHelp, "help", false, "Display this help message")
 	flagSet.BoolVar(&showVersion, "version", false, "Display software version")
 	flagSet.BoolVar(&showLicense, "license", false, "Display software license")
+	flagSet.IntVar(&logMode, "log-mode", cold.LogRequests, fmt.Sprintf("set log level, %d (quiet) to %d (verbose)", cold.LogQuiet, cold.LogVerbose))
 
 	flagSet.Parse(os.Args[1:])
 	args := flagSet.Args()
@@ -258,6 +260,9 @@ func main() {
 		cold.DisplayLicense(os.Stdout, appName, license)
 		os.Exit(0)
 	}
+	if flag.ErrHelp != nil {
+		os.Exit(1)
+	}
 
 	/* Looking settings.json */
 	settings := "settings.json"
@@ -267,7 +272,7 @@ func main() {
 
 	/* Initialize Cold API web service */
 	api := new(cold.API)
-	if err := api.Init(appName, settings); err != nil {
+	if err := api.Init(appName, settings, logMode); err != nil {
 		fmt.Fprintf(os.Stderr, "Init(%q, %q) failed, %s\n", appName, settings, err)
 		os.Exit(1)
 	}
