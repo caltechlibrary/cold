@@ -11,7 +11,7 @@ const display_template = document.createElement('template'),
  */
 display_template.innerHTML = `<style>
 /* Default CSS */
-@import "groups.css";
+@import "/app/widgets/groups.css";
 /* Site overrides */
 @import "/css/groups.css";
 </style>
@@ -22,14 +22,14 @@ display_template.innerHTML = `<style>
   <div class="group-ended"><label for="ended">Ended:</label> <span id="ended" /></div>
   <div class="group-ror"><label for="ror">ROR:</label> <span id="ror" /></div>
   <div class="group-doi"><label for="doi">DOI:</label> <span id="doi" /></div>
-  <div class="group-created no-display"><label for="created"> <span id="created" /></div>
-  <div class="group-updated no-display"><label for="updated"> <span id="updated" /></div>
+  <div class="group-created no-display"><label for="created">Created:</label> <span id="created" /></div>
+  <div class="group-updated no-display"><label for="updated">Updated:</label> <span id="updated" /></div>
 </div>
 `;
 
 input_template.innerHTML = `<style>
 /* Default CSS */
-@import "groups.css";
+@import "/app/widgets/groups.css";
 /* Site overrides */
 @import "/css/groups.css";
 </style>
@@ -107,8 +107,11 @@ class Group {
 
     set value(obj) {
         let self = this;
+        if (obj == undefined) {
+            obj = new Group();
+        }
         for (const attr_name of [ 'cl_group_id', 'agency', 'crossref_group_id', 'ror', 'doi', 'grant_number' ]) {
-            if (obj[attr_name] !== undefined) {
+            if (obj.hasOwnProperty(attr_name)) {
                 self[attr_name] = obj[attr_name];
             }
         }
@@ -139,7 +142,7 @@ class GroupDisplay extends HTMLElement {
         this.shadowRoot.appendChild(display_template.content.cloneNode(true));
         let self = this;
         for (const key of this.managed_attributes) {
-            let elem_name = `${key}_input`,
+            let elem_name = `${key}_field`,
                 fnNameOnChange = `onchange_${key}`;
             self[elem_name] = this.shadowRoot.getElementById(key);
             self[fnNameOnChange] = function() {
@@ -168,8 +171,8 @@ class GroupDisplay extends HTMLElement {
     set value(obj) {
         let self = this;
         for (const key of this.managed_attributes) {
-            let elem_name = `${key}_input`;
-            if (obj[key] !== undefined) {
+            let elem_name = `${key}_field`;
+            if (obj.hasOwnProperty(key)) {
                 this.setAttribute(key, obj[key]);
                 self[elem_name].innerHTML = obj[key];
             }
@@ -179,7 +182,7 @@ class GroupDisplay extends HTMLElement {
     setAttribute(key, val) {
         if (this.managed_attributes.indexOf(key) >= 0) {
             let self = this,
-                elem_name =  `${key}_input`;
+                elem_name =  `${key}_field`;
             self[elem_name].innerHTML = val;
             let evt = document.createEvent('HTMLEvents');
             evt.initEvent("change", true, true);
@@ -188,12 +191,36 @@ class GroupDisplay extends HTMLElement {
         super.setAttribute(key, val);
     }
 
+    showElement() {
+        let self = this;
+        for (const key of this.managed_attributes) {
+            let val = this.getAttribute(key),
+                wrapper = this.shadowRoot.querySelector(`.group-${key}`);
+            if ((val === undefined) || (val == null) ||
+                (val.trim() === '') || 
+                ([ 'created', 'updated' ].indexOf(key) > -1 )) {
+                wrapper.classList.add('no-display');
+            } else {
+                wrapper.classList.remove('no-display');
+            }
+        }
+    }
+
+    hideElement() {
+        let self = this;
+        for (const key of this.managed_attributes) {
+            let val = this.getAttribute(key),
+                wrapper = this.shadowRoot.querySelector(`.group-${key}`);
+            wrapper.classList.add('no-display');
+        }
+    }
+
     connectedCallback() {
         this.innerHTML = '';
         let self = this;
         for (const key of this.managed_attributes) {
             let val = this.getAttribute(key),
-                elem_name = `${key}_input`,
+                elem_name = `${key}_field`,
                 fnNameOnChange = `onchange_${key}`,
                 wrapper = this.shadowRoot.querySelector(`.group-${key}`);
             if ((val === undefined) || (val == null) || (val === '')) {
@@ -256,7 +283,7 @@ class GroupInput extends HTMLElement {
         let self = this;
         for (const key of this.managed_attributes) {
             let elem_name = `${key}_input`;
-            if (obj[key] !== undefined) {
+            if (obj.hasOwnProperty(key)) {
                 this.setAttribute(key, obj[key]);
                 self[elem_name].value = obj[key];
             }
@@ -274,6 +301,31 @@ class GroupInput extends HTMLElement {
         }
         super.setAttribute(key, val);
     }
+
+    showElement() {
+        let self = this;
+        for (const key of this.managed_attributes) {
+            let val = this.getAttribute(key),
+                wrapper = this.shadowRoot.querySelector(`.group-${key}`);
+            if ((val === undefined) || (val == null) ||
+                (val.trim() === '') || 
+                ([ 'created', 'updated' ].indexOf(key) > -1 )) {
+                wrapper.classList.add('no-display');
+            } else {
+                wrapper.classList.remove('no-display');
+            }
+        }
+    }
+
+    hideElement() {
+        let self = this;
+        for (const key of this.managed_attributes) {
+            let val = this.getAttribute(key),
+                wrapper = this.shadowRoot.querySelector(`.group-${key}`);
+            wrapper.classList.add('no-display');
+        }
+    }
+
 
     connectedCallback() {
         this.innerHTML = '';

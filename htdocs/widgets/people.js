@@ -111,7 +111,7 @@ class Person {
     set value(obj) {
         let self = this;
         for (const attr_name of [ 'cl_person_id', 'family', 'given', 'honorific', 'lineage', 'orcid', 'ror' ]) {
-            if (obj[attr_name] !== undefined) {
+            if (obj.hasOwnProperty(attr_name)) {
                 self[attr_name] = obj[attr_name];
             }
         }
@@ -172,7 +172,7 @@ class PersonDisplay extends HTMLElement {
         let self = this;
         for (const key of this.managed_attributes) {
             let elem_name = `${key}_input`;
-            if (obj[key] !== undefined) {
+            if (obj.hasOwnProperty(key)) {
                 this.setAttribute(key, obj[key]);
                 self[elem_name].innerHTML = obj[key];
             }
@@ -259,7 +259,7 @@ class PersonInput extends HTMLElement {
         let self = this;
         for (const key of this.managed_attributes) {
             let elem_name = `${key}_input`;
-            if (obj[key] !== undefined) {
+            if (obj.hasOwnProperty(key)) {
                 this.setAttribute(key, obj[key]);
                 self[elem_name].value = obj[key];
             }

@@ -239,7 +239,7 @@ func checkConfig(cfg *cold.Config) {
 func main() {
 	appName := path.Base(os.Args[0])
 	/* Process command line options */
-	flagSet := flag.NewFlagSet(appName, flag.ContinueOnError)
+	flagSet := flag.NewFlagSet(appName, flag.ExitOnError)
 	flagSet.BoolVar(&showHelp, "help", false, "Display this help message")
 	flagSet.BoolVar(&showVersion, "version", false, "Display software version")
 	flagSet.BoolVar(&showLicense, "license", false, "Display software license")
@@ -259,9 +259,6 @@ func main() {
 	if showLicense {
 		cold.DisplayLicense(os.Stdout, appName, license)
 		os.Exit(0)
-	}
-	if flag.ErrHelp != nil {
-		os.Exit(1)
 	}
 
 	/* Looking settings.json */
