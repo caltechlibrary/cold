@@ -44,17 +44,32 @@ type Person struct {
 	Updated             string `json:"updated,omitempty"`
 }
 
+// Group holds our local group controlled vocabulary
+// fields: name,alternative,email,date,description,start,
+//         approx_start,activity,end,approx_end,website,
+//         pi,parent,prefix,grid,isni,ringgold,viaf,ror,
+//         updated
 type Group struct {
-	CLGroupID string `json:"cl_group_id,required"`
-	Name      string `json:"name,omitempty"`
-	ROR       string `json:"ror,omitempty"`
-	DOI       string `json:"doi,omitempty"`
-	// Started maybe an approx date
-	Started string `json:"started,omitempty"`
-	// Ended maybe an approx date
-	Ended   string `json:"ended,omitempty"`
-	Created string `json:"created,omitempty"`
-	Updated string `json:"updated,omitempty"`
+	CLGroupID           string `json:"cl_group_id,required"`
+	Name                string `json:"name,omitempty"`
+	Alternative         string `json:"alternative,omitempty"`
+	EMail               string `json:"email,omitempty"`
+	Date                string `json:"date,omitempty"`
+	Description         string `json:"description,omitempty"`
+	Start               string `json:"start,omitempty"`
+	AproxStart          string `json:"approx_start,omitempty"`
+	Activity            string `json:"activity,omitempty"`
+	End                 string `json:"end,omitempty"`
+	ApproxEnd           string `json:"approx_end,omitempty"`
+	Website             string `json:"website,omitempty"`
+	PrimaryInvestigator string `json:"pi,omitempty"`
+	Prefix              string `json:"prefix,omitempty"`
+	Grid                string `json:"grid,omitempty"`
+	ISNI                string `json:"isni,omitempty"`
+	RIN                 string `json:"ringgold,omitempty"`
+	VIAF                string `json:"viaf,omitempty"`
+	ROR                 string `json:"ror,omitempty"`
+	Updated             string `json:"updated"`
 }
 
 type Funder struct {

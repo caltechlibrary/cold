@@ -129,7 +129,7 @@ func GetPerson(config *Config, clPeopleID string) (*Person, error) {
 }
 
 // CreatePerson will add a "person" to the database. It
-// has a side effect of populating .Created if it was empty.
+// has a side effect of populating. Created if it was empty.
 func CreatePerson(config *Config, person *Person) error {
 	db := config.Connection
 	if person.Created == `` {
@@ -178,8 +178,8 @@ func GetGroup(config *Config, clGroupID string) (*Group, error) {
 // has a side effect of populating .Created if it was empty.
 func CreateGroup(config *Config, group *Group) error {
 	db := config.Connection
-	if group.Created == `` {
-		group.Created = time.Now().Format(timestamp)
+	if group.Updated == `` {
+		group.Updated = time.Now().Format(timestamp)
 	}
 	stmt := `INSERT INTO local_group (cl_group_id, object) VALUES (?,?)`
 	_, err := db.Exec(stmt, group.CLGroupID, group.String())

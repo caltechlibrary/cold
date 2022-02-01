@@ -9,3 +9,52 @@
 .group-display {
     border: 1px solid blue;
 }
+
+
+table {
+    width: auto;
+    border-collapse: collapse;
+    border: 0.24em solid black;
+}
+
+th {
+    margin-left: 0.12em;
+    margin-right: 0.12em;
+    padding-left: 0.24em;
+    padding-right: 0.24em;
+    text-align: left;
+    text-overflow: ellipsis;
+    font-size:smaller;
+    font-weight: lighter;
+    border-bottom: 0.24em solid black;
+    border-right: 0.12em solid black;
+    text-transform: uppercase;
+}
+
+tr {
+    border-bottom: 0.12em solid black;
+}
+
+
+td {
+    align-items: left;
+    justify-content: left;
+    margin: 0.12em;
+    padding: 0.24em;
+    text-align: left;
+    vertical-align: top;
+    height: auto;
+    width: auto;
+    border-left: 0.06em solid black;
+}
+
+.group-row-action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 8em;
+    border: none;
+}
+
+.group-col-description {
+}

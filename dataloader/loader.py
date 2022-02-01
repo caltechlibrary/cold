@@ -200,8 +200,17 @@ def load_groups(f_name):
         for i, group in enumerate(groups):
             cl_group_id = group['key']
             if cl_group_id != "":
+                # Map "key" to cl_group_id
                 group['cl_group_id'] = cl_group_id
-                del group['key']
+                #del group['key']
+                # Map ringold to ringgold (fixing typo)
+                # See: https://en.wikipedia.org/wiki/Ringgold_identifier
+                if "ringold" in group:
+                    rin = group['ringold']
+                else:
+                    rin = ''
+                group['ringgold'] = rin
+                print(f'DEBUG {cl_group_id} -> {group}')
                 key_path = f'/api/groups/{normalize_id(cl_group_id)}'
                 resp, err = rest_head(key_path)
                 if err != None and not err.startswith('HTTP Error 404'):
