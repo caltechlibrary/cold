@@ -81,27 +81,27 @@ table_template.innerHTML = `<style>
 <table id="group-list">
   <thead>
     <tr>
-      <th class="group-col-cl_group_id">Group ID</th>
-      <th class="group-col-name">Name</th>
-      <th class="group-col-alternative">Alternative</th>
-      <th class="group-col-email">EMail</th>
-      <th class="group-col-date">Date</th>
-      <th class="group-col-description">Description</th>
-      <th class="group-col-start">Start</th>
-      <th class="group-col-start_approx">Start Approx.</th>
-      <th class="group-col-activity">Activity</th>
-      <th class="group-col-end">End</th>
-      <th class="group-col-end-approx">End Approx.</th>
-      <th class="group-col-website">Website</th>
-      <th class="group-col-pi">Primary Investigator</th>
-      <th class="group-col-parent">Parent</th>
-      <th class="group-col-prefix">Prefix</th>
-      <th class="group-col-grid">GRID</th>
-      <th class="group-col-isni">ISNI</th>
-      <th class="group-col-ringgold">Ringgold</th>
-      <th class="group-col-viaf">VIAF</th>
-      <th class="group-col-ror">ROR</th>
-      <th class="group-col-updated">Updated</th>
+      <th class="group-col-cl_group_id" title="click column to sort ascending, click again for descending">Group ID</th>
+      <th class="group-col-name" title="click column to sort ascending, click again for descending">Name</th>
+      <th class="group-col-alternative" title="click column to sort ascending, click again for descending">Alternative</th>
+      <th class="group-col-email" title="click column to sort ascending, click again for descending">EMail</th>
+      <th class="group-col-date" title="click column to sort ascending, click again for descending">Date</th>
+      <th class="group-col-description" title="click column to sort ascending, click again for descending">Description</th>
+      <th class="group-col-start" title="click column to sort ascending, click again for descending">Start</th>
+      <th class="group-col-start_approx" title="click column to sort ascending, click again for descending">Start Approx.</th>
+      <th class="group-col-activity" title="click column to sort ascending, click again for descending">Activity</th>
+      <th class="group-col-end" title="click column to sort ascending, click again for descending">End</th>
+      <th class="group-col-end-approx" title="click column to sort ascending, click again for descending">End Approx.</th>
+      <th class="group-col-website" title="click column to sort ascending, click again for descending">Website</th>
+      <th class="group-col-pi" title="click column to sort ascending, click again for descending">Primary Investigator</th>
+      <th class="group-col-parent" title="click column to sort ascending, click again for descending">Parent</th>
+      <th class="group-col-prefix" title="click column to sort ascending, click again for descending">Prefix</th>
+      <th class="group-col-grid" title="click column to sort ascending, click again for descending">GRID</th>
+      <th class="group-col-isni" title="click column to sort ascending, click again for descending">ISNI</th>
+      <th class="group-col-ringgold" title="click column to sort ascending, click again for descending">Ringgold</th>
+      <th class="group-col-viaf" title="click column to sort ascending, click again for descending">VIAF</th>
+      <th class="group-col-ror" title="click column to sort ascending, click again for descending">ROR</th>
+      <th class="group-col-updated" title="click column to sort ascending, click again for descending">Updated</th>
   </thead>
   <tbody>
   </tbody>
@@ -212,7 +212,7 @@ class GroupDisplay extends HTMLElement {
     }
 
     get value() {
-        let obj = {}
+        let obj = {};
         for (const key of this.managed_attributes) {
             // Copy the values from in element's attributes
             obj[key] = this.getAttribute(key);
@@ -380,141 +380,171 @@ class GroupInput extends HTMLElement {
  * GroupTable is a web component for displaying all the group metadata as a table.
  */
  class GroupTable extends HTMLElement {
-        constructor () {
-            super();
-            this.row_attributes = group_field_names;
-            this.managed_objects = [];
-    
-            this.attachShadow({mode: 'open'});
-            this.shadowRoot.appendChild(table_template.content.cloneNode(true));
-            this.tbody = this.shadowRoot.querySelector('tbody');
-        }
-    
-        get value() {
-            return this.managed_objects;
-        }
-    
-        get as_json() {
-            return JSON.stringify(this.managed_objects); 
-        }
-    
-        set value(obj_list) {
-            this.managed_objects = [];
-            for (const obj of obj_list) {
-                this.managed_objects.push(obj);
-            }
-        }
+    constructor () {
+        super();
+        this.row_attributes = group_field_names;
+        this.managed_objects = [];
 
-        indexOf(cl_group_id) {
-            let i = 0,
-                res = -1;
-            for (const obj of this.managed_objects) {
-                if (obj.cl_group_id == cl_group_id) {
-                    res = i;
-                    break;
-                }
-                i++;
-            }
-            return res;
-        }
+        this.attachShadow({mode: 'open'});
+        this.shadowRoot.appendChild(table_template.content.cloneNode(true));
+        this.tbody = this.shadowRoot.querySelector('tbody');
+    }
 
-        get_group(cl_group_id) {
-            let pos = this.indexOf(cl_group_id);
-            if (pos > -1) {
-                return this.managed_objects[pos];
-            }
-            return null
-        }
+    get value() {
+        return this.managed_objects;
+    }
 
-        /**
-         * set_group updates the object matching "cl_group_id" to the value of object. If
-         *  "cl_group_id" is not in the managed object list the default action is to append it to
-         * the managed object list. If "insert_update" parameter is true, then it'll insert it at
-         * start of the list.  
-         */
-        set_group(cl_group_id, obj, insert_update = false) {
-            let pos = this.indexOf(cl_group_id);
-            if (pos < 0) {
-                if (insert_update === true) {
-                    this.managed_objects.shift(obj);
-                    pos = 0;
-                } else {
-                    this.managed_objects.push(obj);
-                    pos = this.managed_objects.length - 1;
-                }
-            } else {
-                this.managed_objects[pos] = obj;
-            }
-            this.refresh_table();
-        }
+    get as_json() {
+        return JSON.stringify(this.managed_objects); 
+    }
 
-        insert(obj) {
-            this.managed_obejcts.shift(obj);
-            this.refresh_table();
-        }
-
-        append(obj) {
+    set value(obj_list) {
+        this.managed_objects = [];
+        for (const obj of obj_list) {
             this.managed_objects.push(obj);
-            this.refresh_table();
-        }
-
-        remove(cl_group_id) {
-            let pos = this.indexOf(cl_group_id);
-            if (pos > -1) {
-                this.managed_objects.splice(pos, 1);
-            }
-            this.refresh_table();
-        }
-    
-        setAttribute(key, val) {
-            if (this.managed_attributes.indexOf(key) >= 0) {
-                let self = this,
-                    elem_name =  `${key}_input`;
-                self[elem_name].value = val;
-                let evt = new Event("change",{"bubbles": true, "cancelable": true});
-                this.shadowRoot.host.dispatchEvent(evt);
-            }
-            super.setAttribute(key, val);
-        }
-
-        refresh_table() {
-            this.tbody.innerHTML = '';
-            if (this.managed_objects.length > 0) {
-                for (const obj of this.managed_objects) {
-                    let rowElem = document.createElement('tr'),
-                        cl_group_id = obj.cl_group_id;
-                    if (cl_group_id === '') {
-                        cl_group_id = 'unknown_group_id';
-                    }
-                    rowElem.setAttribute('id', `group-{cl_group_id}`);
-                    for (const col of this.row_attributes) {
-                        let colElem = document.createElement('td');
-                        colElem.classList.add(`group-col-${col}`);
-                        if (obj.hasOwnProperty(col)) {
-                            if (col == 'cl_group_id') {
-                                colElem.innerHTML = `<a href="group.html?cl_group_id=${cl_group_id}">${obj[col]}</a>`;
-                            } else {
-                                colElem.innerHTML = obj[col];
-                            }
-                        }
-                        rowElem.appendChild(colElem);
-                    }
-                    this.tbody.appendChild(rowElem);
-                }
-            }
-        }
-
-           
-        connectedCallback() {
-            this.refresh_table();
-        }
-    
-        disconnectCallback() {
         }
     }
-        
 
+    indexOf(cl_group_id) {
+        let i = 0,
+            res = -1;
+        for (const obj of this.managed_objects) {
+            if (obj.cl_group_id == cl_group_id) {
+                res = i;
+                break;
+            }
+            i++;
+        }
+        return res;
+    }
 
+    get_group(cl_group_id) {
+        let pos = this.indexOf(cl_group_id);
+        if (pos > -1) {
+            return this.managed_objects[pos];
+        }
+        return null
+    }
+
+    /**
+     * set_group updates the object matching "cl_group_id" to the value of object. If
+     *  "cl_group_id" is not in the managed object list the default action is to append it to
+     * the managed object list. If "insert_update" parameter is true, then it'll insert it at
+     * start of the list.  
+     */
+    set_group(cl_group_id, obj, insert_update = false) {
+        let pos = this.indexOf(cl_group_id);
+        if (pos < 0) {
+            if (insert_update === true) {
+                this.managed_objects.shift(obj);
+                pos = 0;
+            } else {
+                this.managed_objects.push(obj);
+                pos = this.managed_objects.length - 1;
+            }
+        } else {
+            this.managed_objects[pos] = obj;
+        }
+        this.refresh_table();
+    }
+
+    insert(obj) {
+        this.managed_obejcts.shift(obj);
+        this.refresh_table();
+    }
+
+    append(obj) {
+        this.managed_objects.push(obj);
+        this.refresh_table();
+    }
+
+    remove(cl_group_id) {
+        let pos = this.indexOf(cl_group_id);
+        if (pos > -1) {
+            this.managed_objects.splice(pos, 1);
+        }
+        this.refresh_table();
+    }
+
+    setAttribute(key, val) {
+        if (this.managed_attributes.indexOf(key) >= 0) {
+            let self = this,
+                elem_name =  `${key}_input`;
+            self[elem_name].value = val;
+            let evt = new Event("change",{"bubbles": true, "cancelable": true});
+            this.shadowRoot.host.dispatchEvent(evt);
+        }
+        super.setAttribute(key, val);
+    }
+
+    refresh_table() {
+        this.tbody.innerHTML = '';
+        if (this.managed_objects.length > 0) {
+            for (const obj of this.managed_objects) {
+                let rowElem = document.createElement('tr'),
+                    cl_group_id = obj.cl_group_id;
+                if (cl_group_id === '') {
+                    cl_group_id = 'unknown_group_id';
+                }
+                rowElem.setAttribute('id', `group-{cl_group_id}`);
+                for (const col of this.row_attributes) {
+                    let colElem = document.createElement('td');
+                    colElem.classList.add(`group-col-${col}`);
+                    if (obj.hasOwnProperty(col)) {
+                        if (col == 'cl_group_id') {
+                            colElem.innerHTML = `<a href="group.html?cl_group_id=${cl_group_id}">${obj[col]}</a>`;
+                        } else {
+                            colElem.innerHTML = obj[col];
+                        }
+                    }
+                    rowElem.appendChild(colElem);
+                }
+                this.tbody.appendChild(rowElem);
+            }
+        }
+    }
+
+    /* Table sorter is based on MDN example at https://developer.mozilla.org/en-US/docs/Web/HTML/Element/table */
+    tableSorter() {
+        let sort_ascending = true;
+        for (let table of this.shadowRoot.querySelectorAll('table')) {
+            for (let th of table.tHead.rows[0].cells) {
+                th.onclick = function(){
+                    const tBody = table.tBodies[0];
+                    const rows = tBody.rows;
+                    for (let tr of rows) {
+                        Array.prototype.slice.call(rows)
+                        .sort(function(tr1, tr2) {
+                            const cellIndex = th.cellIndex;
+                            if (sort_ascending) {
+                                return tr1.cells[cellIndex].textContent.localeCompare(tr2.cells[cellIndex].textContent);
+                            } else {
+                                return tr2.cells[cellIndex].textContent.localeCompare(tr1.cells[cellIndex].textContent);
+                            }
+                        })
+                        .forEach(function(tr){
+                            this.appendChild(this.removeChild(tr));
+                        }, tBody);
+                    }
+                    /* Sort direction switch on click of heading */
+                    if (sort_ascending) {
+                        sort_ascending = false;
+                    } else {
+                        sort_ascending = true;
+                    }
+                }
+            }
+        }
+    }
+
+    connectedCallback() {
+        this.refresh_table();
+        this.tableSorter()
+    }
+
+    disconnectCallback() {
+    }
+}
 
 
 export { Group, GroupDisplay, GroupInput, GroupTable };

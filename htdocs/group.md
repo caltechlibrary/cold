@@ -12,6 +12,8 @@ Group
 
 <script type="module">
 "use strict";
+import { Group } from "/widgets/groups.js";
+
 let group_viewer = document.getElementById('group-viewer'),
     group_control = document.getElementById('group-controls'),
     group_display = document.createElement('group-display'),
@@ -19,6 +21,7 @@ let group_viewer = document.getElementById('group-viewer'),
     /* Edit controls */
     edit_button = document.createElement('button'),
     remove_button = document.createElement('button'),
+    return_button = document.createElement('button'),
     /* Save controls */
     save_button = document.createElement('button'),
     cancel_button = document.createElement('button'),
@@ -43,6 +46,15 @@ function cancelGroup() {
     console.log("DEBUG cancelGroup()");
 }
 
+function createGroup() {
+    let obj = new Group();
+    group_input.value = obj;
+    group_viewer.innerHTML = '';
+    group_viewer.appendChild(group_input);
+    show_save_buttons();
+    console.log("DEBUG createGroup() ");
+}
+
 function editGroup() {
     let obj = group_display.value;
     group_input.value = obj;
@@ -52,18 +64,24 @@ function editGroup() {
     console.log("DEBUG editGroup() ");
 }
 
+function returnToGroupList() {
+    window.location.href = "groups.html";
+}
+
 function removeGroup() {
     let obj = group_display.value,
         cl_group_id = obj.cl_group_id;
     //FIXME: Need to send delete request to service
-    window.location.href = "groups.html";
     console.log("DEBUG removeGroup() not fully implemented.");
+    returnToGroupList();
 }
+
 
 function show_edit_buttons() {
     group_control.innerHTML = '';
     group_control.appendChild(edit_button);
     group_control.appendChild(remove_button);
+    group_control.appendChild(return_button);
 }
 
 function show_save_buttons() {
@@ -97,5 +115,11 @@ edit_button.innerHTML = 'Edit';
 edit_button.addEventListener('click', editGroup);
 remove_button.innerHTML = 'Remove';
 remove_button.addEventListener('click', removeGroup);
-retrieveGroup(cl_group_id);
+return_button.innerHTML = "Return to list";
+return_button.addEventListener('click', returnToGroupList);
+if (! cl_group_id) {
+    createGroup();
+} else {
+    retrieveGroup(cl_group_id);
+}
 </script>

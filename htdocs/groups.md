@@ -2,10 +2,13 @@
 Groups
 =======
 
-This page provides a widget demonstrating display of a group's table.
+This page provides group management. Click on the group ID to view, editor or remove a group. You can click on the column headings to sort the table. Clicking again switch directions, e.g. from ascending to descending or descending to ascending. Searching the table can be done with your browser's search in page function (e.g. command + f on macOS, control + f on Windows).
 
-Group Table
------------
+
+<div><button id="add-group">Add Group</button></div><p>
+
+Manage Groups
+-------------
 
 <div><group-table id="group-table"></group-table></div>
 
@@ -15,10 +18,13 @@ Group Table
 "use strict";
 
 let group_table = document.getElementById('group-table'),
-    u = window.location;
-console.log("DEBUG group_table ->", group_table);
+    add_group = document.getElementById('add-group');
+
+add_group.addEventListener('click', function () {
+    window.location.href = 'group.html';
+})
+
 function updateRow(key) {
-    console.log(`DEBUG updateRow(${key})`);
     let oReq = new XMLHttpRequest(),
         api_path = `/api/group/${key}`;
     oReq.addEventListener('load', function () {
@@ -32,7 +38,6 @@ function updateRow(key) {
 }
 
 function updateGroupsTable() {
-    console.log("DEBUG updateGroupsTable()");
     /* Iterate through the fetched data, generate a group-display element
        and link to form for editing group data */
     let src = this.responseText,

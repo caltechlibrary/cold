@@ -76,6 +76,8 @@ JSON service defined end points are formed as the following. The following end p
 `/api/funder/{CL_funder_ID}`
 : For a GET returns a funder object, a PUT will create the funder object, POST will replace the funder object and DELETE will remove the funder object
 
+<!-- 
+
 `/api/crosswalk`
 : Returns help on how to crosswalk from one identifier to the internal identifier
 
@@ -98,6 +100,8 @@ JSON service defined end points are formed as the following. The following end p
 : Returns a list of "cl_funder_id" assocated with that identifier
 
 *cold* takes a REST approach to updates for managed objects.  PUT will create a new object, POST will update it, GET will retrieve it and DELETE will remove it.
+
+-->
 
 Vocabularies
 ------------

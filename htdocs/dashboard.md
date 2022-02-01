@@ -2,7 +2,7 @@
 Dashboard
 =========
 
-This is the management interface for [cold](/). It is broken down by objects and vocabulars
+This is the management interface for [cold](/). It is organized around managed objects and static vocabularies.
 
 Managable Objects
 ------------------
@@ -11,10 +11,10 @@ Managable Objects
 - [Groups](/app/groups.html)
 - [Funders](/app/funders.html)
 
-Vocabularies
-------------
+Static Vocabularies
+-------------------
 
-These can not be edited via **cold**, they are generated when the **cold** application is compiled and released.  They change very rarely.
+Vocabularies are static ready only key/value pair lists provided by the **cold** application.  **cold** source code must be updated and compiled to change the key/value pairs in the lists.
 
 - [Subjects](/app/subjects.html)
 - [ISSN/Publishers](/app/issns.html)

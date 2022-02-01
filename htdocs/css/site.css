@@ -364,3 +364,19 @@ form p input {
     padding-left: 1.24em;
     display: inline-block;
 }
+
+/* Page level CSS */
+#people-controls, #group-controls, #funders-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.24em;
+    margin: 0.24em;
+    max-width: 80%;
+}
+
+#people-controls > button, #group-controls > button, #funders-controls > button {
+    padding: 0.24em;
+    margin: 0.24em;
+}
+

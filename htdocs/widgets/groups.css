@@ -2,6 +2,50 @@
  * groups.css this is the default styling for our custom web component.
  * It can be augmented by the stylesheet in `/css/groups.css`.
  */
+
+label {
+    vertical-align: top;
+    text-align: right;
+}
+
+table {
+    width: auto;
+    border-collapse: collapse;
+    border: 0.24em solid black;
+}
+
+th {
+    margin-left: 0.12em;
+    margin-right: 0.12em;
+    padding-left: 0.24em;
+    padding-right: 0.24em;
+    text-align: left;
+    text-overflow: ellipsis;
+    font-size:smaller;
+    font-weight: lighter;
+    border-bottom: 0.24em solid black;
+    border-right: 0.12em solid black;
+    text-transform: uppercase;
+    text-decoration: underline;
+}
+
+tr {
+    border-bottom: 0.12em solid black;
+}
+
+
+td {
+    align-items: left;
+    justify-content: left;
+    margin: 0.12em;
+    padding: 0.24em;
+    text-align: left;
+    vertical-align: top;
+    height: auto;
+    width: auto;
+    border-left: 0.06em solid black;
+}
+
 .no-display {
     display: none;
 }
@@ -38,48 +82,14 @@
     grid-column: 1 / 2;
 }
 
-
-label {
-    vertical-align: top;
-    text-align: right;
-}
-
-table {
-    width: auto;
-    border-collapse: collapse;
-    border: 0.24em solid black;
-}
-
-th {
-    margin-left: 0.12em;
-    margin-right: 0.12em;
-    padding-left: 0.24em;
-    padding-right: 0.24em;
-    text-align: left;
-    text-overflow: ellipsis;
-    font-size:smaller;
-    font-weight: lighter;
-    border-bottom: 0.24em solid black;
-    border-right: 0.12em solid black;
-    text-transform: uppercase;
-}
-
-tr {
-    border-bottom: 0.12em solid black;
-}
-
-
-td {
-    align-items: left;
-    justify-content: left;
-    margin: 0.12em;
+.group-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     padding: 0.24em;
-    text-align: left;
-    vertical-align: top;
-    height: auto;
-    width: auto;
-    border-left: 0.06em solid black;
+    margin: 0.24em;
 }
+
 
 .group-row-action {
     display: flex;
