@@ -49,27 +49,27 @@ input_template.innerHTML = `<style>
 @import "/css/groups.css";
 </style>
 <div class="group-input">
-    <div class="group-cl_group_id"><label for="cl_group_id">Group ID:</label> <input type="text" id="cl_group_id" value="" ></div>
-    <div class="group-name"><label for="name">Name:</label> <input type="text" id="name" value="" ></div>
-    <div class="group-alternative"><label for="name">Alternative:</label> <input type="text" id="alternative" value="" ></div>
-    <div class="group-email"><label for="name">Email:</label> <input type="text" id="email" value="" ></div>
-    <div class="group-date"><label for="date">Date:</label> <input type="text" id="date" value="" ></div>
-    <div class="group-description"><label for="description">Description:</label> <input type="text" id="description" value="" ></div>
-    <div class="group-start"><label for="start">Start:</label> <input type="text" id="start" value="" ></div>
-    <div class="group-approx_start"><label for="approx_start">Approx Start:</label> <input type="text" id="approx_start" value="" ></div>
-    <div class="group-activity"><label for="activity">Activity:</label> <input type="text" id="activity" value="" ></div>
-    <div class="group-end"><label for="end">End:</label> <input type="text" id="end" value="" ></div>
-    <div class="group-approx_end"><label for="approx_end">Approx End:</label> <input type="text" id="approx_end" value="" ></div>
-    <div class="group-website"><label for="website">Website:</label> <input type="url" id="website" value="" ></div>
-    <div class="group-pi"><label for="pi">PI:</label> <input type="text" id="pi" value="" ></div>
-    <div class="group-parent"><label for="parent">Parent:</label> <input type="text" id="parent" value="" ></div>
-    <div class="group-prefix"><label for="prefix">Prefix:</label> <input type="text" id="prefix" value="" ></div>
-    <div class="group-grid"><label for="grid">GRID:</label> <input type="text" id="grid" value="" ></div>
-    <div class="group-isni"><label for="isni">ISNI:</label> <input type="text" id="isni" value="" ></div>
-    <div class="group-ringgold"><label for="isni">Ringgold:</label> <input type="text" id="ringgold" value="" ></div>
-    <div class="group-viaf"><label for="isni">VIAF:</label> <input type="text" id="viaf" value="" ></div>
-    <div class="group-ror"><label for="isni">ROR:</label> <input type="text" id="ror" value="" ></div>
-    <div class="group-updated"><label for="updated">Updated:</label> <input type="date" id="updated" value="" ></div>
+    <div class="group-cl_group_id"><label for="cl_group_id">Group ID:</label> <input type="text" id="cl_group_id" value="" size="80" required="true"></div>
+    <div class="group-name"><label for="name">Name:</label> <input type="text" id="name" value="" size="80"></div>
+    <div class="group-alternative"><label for="name">Alternative:</label> <input type="text" id="alternative" value="" size="80" ></div>
+    <div class="group-email"><label for="name">Email:</label> <input type="email" id="email" value=""></div>
+    <div class="group-date"><label for="date">Date:</label> <input type="date" id="date" value=""></div>
+    <div class="group-description"><label for="description">Description:</label> <textarea type="text" id="description" cols="80" rows="10"></textarea></div>
+    <div class="group-start"><label for="start">Start:</label> <input type="text" pattern="[0-9][0-9][0-9][0-9]|[0-9][0-9][0-9][0-9]-[0-9][0-9]|[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]" id="start" value="" size="12"></div>
+    <div class="group-approx_start"><label for="approx_start">Approx Start:</label> <input type="text" pattern="yes|no" id="approx_start" value="" size="80"></div>
+    <div class="group-activity"><label for="activity">Activity:</label> <input type="text" id="activity" value="" size="80"></div>
+    <div class="group-end"><label for="end">End:</label> <input type="text" pattern="[0-9][0-9][0-9][0-9]|[0-9][0-9][0-9][0-9]-[0-9][0-9]|[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]" id="end" value="" size="12"></div>
+    <div class="group-approx_end"><label for="approx_end">Approx End:</label> <input type="text" pattern="yes|no" id="approx_end" value="" size="80"></div>
+    <div class="group-website"><label for="website">Website:</label> <input type="url" id="website" value=""></div>
+    <div class="group-pi"><label for="pi">PI:</label> <input type="text" id="pi" value="" size="80"></div>
+    <div class="group-parent"><label for="parent">Parent:</label> <input type="text" id="parent" value="" size="80"></div>
+    <div class="group-prefix"><label for="prefix">Prefix:</label> <input type="text" id="prefix" value="" size="80"></div>
+    <div class="group-grid"><label for="grid">GRID:</label> <input type="text" id="grid" value="" size="80"></div>
+    <div class="group-isni"><label for="isni">ISNI:</label> <input type="text" id="isni" value="" size="80"></div>
+    <div class="group-ringgold"><label for="isni">Ringgold:</label> <input type="text" id="ringgold" value="" size="80"></div>
+    <div class="group-viaf"><label for="isni">VIAF:</label> <input type="text" id="viaf" value="" size="80"></div>
+    <div class="group-ror"><label for="isni">ROR:</label> <input type="text" id="ror" value="" size="80"></div>
+    <div class="group-updated"><label for="updated">Updated:</label> <input type="date" id="updated" value="" size="80"></div>
 </div>`;
 
 table_template.innerHTML = `<style>
@@ -322,7 +322,11 @@ class GroupInput extends HTMLElement {
                     obj[key] = '';
                 }
                 this.setAttribute(key, obj[key]);
-                self[elem_name].value = obj[key];
+                if (key === "description") {
+                    self[elem_name].innerText = obj[key];
+                } else {
+                    self[elem_name].value = obj[key];
+                }
             }
         }
     }

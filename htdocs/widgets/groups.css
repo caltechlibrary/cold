@@ -8,8 +8,41 @@
 
 .group-display {
     border: 1px solid blue;
+    max-width: 85%;
 }
 
+.group-display > div {
+    display: grid;
+    grid-template-columns: 10% auto;
+    gap: 0.24em;
+    padding: 0.24em;
+    margin: 0.24em;
+}
+
+.group-display > div > label {
+    grid-column: 1 / 2;
+}
+.group-display > div > span {
+    grid-column: 2 / 2;
+}
+
+.group-input > div {
+    display: grid;
+    grid-template-columns: 10% 70%;
+    gap: 0.24em;
+    padding: 0.24em;
+    margin: 0.24em;
+}
+
+.group-input > div > label {
+    grid-column: 1 / 2;
+}
+
+
+label {
+    vertical-align: top;
+    text-align: right;
+}
 
 table {
     width: auto;

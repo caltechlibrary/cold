@@ -210,6 +210,11 @@ def load_groups(f_name):
                 else:
                     rin = ''
                 group['ringgold'] = rin
+                if ('start' in group) and (group['start'].startswith('"')):
+                    group['start'] = group['start'].strip('"')
+                if ('end' in group) and (group['end'].endswith('"')):
+                    group['end'] = group['end'].strip('"')
+
                 print(f'DEBUG {cl_group_id} -> {group}')
                 key_path = f'/api/groups/{normalize_id(cl_group_id)}'
                 resp, err = rest_head(key_path)
