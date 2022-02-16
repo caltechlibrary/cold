@@ -34,10 +34,11 @@ def normalize_id(key):
 def person_to_name(person):
     given = get_field('given_name', person, '')
     family = get_field('family_name', person, '')
-    display_name = f'{given} {family}'.strip()
     honorific = get_field('honorific', person, '')
     lineage = get_field('lineage', person, '')
-    return { 'given': given, 'family': family, 'honorific': honorific, 'lineage': lineage, 'display_name': display_name }
+    display_name = f'{honorific} {given} {family} {lineage}'.strip()
+    sort_name = f'{family} {given} {lineage} {honorific}'.strip()
+    return { 'given': given, 'family': family, 'honorific': honorific, 'lineage': lineage, 'display_name': display_name, 'sort_name': sort_name }
 
 def rest_head(key_path):
     req = Request(url= f'{rest_api_url}{key_path}',
@@ -301,6 +302,9 @@ def load_people(f_name):
             if 'cl_people_id' in person:
                 cl_people_id = person['cl_people_id']
                 person['name'] = person_to_name(person)
+                # Fix attribute name for VIAF
+                if 'viaf_id' in person:
+                    person['viaf'] = person['viaf_id']
                 key_path = f'/api/people/{normalize_id(cl_people_id)}'
                 resp, err = rest_head(key_path)
                 if err != None and not err.startswith('HTTP Error 404'):

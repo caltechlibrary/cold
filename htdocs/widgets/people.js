@@ -1,11 +1,12 @@
 /**
- * people.js implements a common display and editing widgets for person objects.
+ * people.js implements a common display and editing widgets for people objects.
  */
 "use strict";
 
 const display_template = document.createElement('template'),
       input_template = document.createElement('template'),
-      table_template = document.createElement('template');
+      table_template = document.createElement('template'),
+      pager_template = document.createElement('template');
 
 /*
  * Template definitions
@@ -16,41 +17,41 @@ display_template.innerHTML = `<style>
 /* Site overrides */
 @import "/css/people.css";
 </style>
-<div class="person-display">
-  <div class="person-cl_person_id"><label for="cl_person_id">Person ID:</label> <span id="cl_person_id" /></div>
-  <div class="person-family"><label for="family">Family Name:</label> <span id="family" /></div>
-  <div class="person-given"><label for="given">Given Name:</label> <span id="given" /></div>
-  <div class="person-honorific"><label for="honorific">Honorific:</label> <span id="honorific" /></div>
-  <div class="person-lineage"><label for="lineaged">Lineage:</label> <span id="lineage" /></div>
-  <div class="person-orcid"><label for="orcid">ORCID:</label> <span id="orcid" /></div>
-  <div class="person-thesis_id"><label for="thesis_id">Thesis ID:</label> <span id="thesis_id" /></div>
-  <div class="person-advisor_id"><label for="advisor_id">Advisor ID:</label> <span id="advisor_id" /></div>
-  <div class="person-authors_id"><label for="authors_id">Author ID:</label> <span id="author_id" /></div>
-  <div class="person-archivesspace_id"><label for="archivesspace_id">ArchivesSpace ID:</label> <span id="archivesspace_id" /></div>
-  <div class="person-directory_id"><label for="directory_id">Directory ID:</label> <span id="directory_id" /></div>
-  <div class="person-viaf"><label for="viaf">VIAF:</label> <span id="viaf" /></div>
-  <div class="person-lcnaf"><label for="lcnaf">LCNAF:</label> <span id="lcnaf" /></div>
-  <div class="person-isni"><label for="isni">ISNI:</label> <span id="isni" /></div>
-  <div class="person-wikidata"><label for="wikidata">Wikidata:</label> <span id="wikidata" /></div>
-  <div class="person-snac"><label for="snac">SNAC:</label> <span id="snac" /></div>
-  <div class="person-image"><label for="image">Image:</label> <span id="image" /></div>
-  <div class="person-educated_at"><label for="educated_at">Educated At:</label> <span id="educated_at" /></div>
-  <div class="person-caltech"><label for="caltech">Caltech:</label> <span id="caltech" /></div>
-  <div class="person-jpl"><label for="caltech">JPL:</label> <span id="jpl" /></div>
-  <div class="person-faculty"><label for="faculty">Faculty:</label> <span id="faculty" /></div>
-  <div class="person-alumn"><label for="alumn">Alumn:</label> <span id="alumn" /></div>
-  <div class="person-status"><label for="status">Status:</label> <span id="status" /></div>
-  <div class="person-directory_person_type"><label for="directory_person_type">Directory Person Type:</label> <span id="directory_person_type" /></div>
-  <div class="person-title"><label for="title">Title:</label> <span id="title" /></div>
-  <div class="person-title"><label for="title">Title:</label> <span id="title" /></div>
-  <div class="person-bio"><label for="bio">BIO:</label> <span id="bio" /></div>
-  <div class="person-division"><label for="division">Division:</label> <span id="division" /></div>
-  <div class="person-authors_count"><label for="authors_count">Authors Count:</label> <span id="authors_count" /></div>
-  <div class="person-thesis_count"><label for="thesis_count">Thesis Count:</label> <span id="thesis_count" /></div>
-  <div class="person-data_count"><label for="data_count">Data Count:</label> <span id="data_count" /></div>
-  <div class="person-advisor_count"><label for="advisor_count">Advisor Count:</label> <span id="advisor_count" /></div>
-  <div class="person-editor_count"><label for="editor_count">Editor Count:</label> <span id="editor_count" /></div>
-  <div class="person-updated no-display"><label for="updated"> <span id="updated" /></div>
+<div class="people-display">
+  <div class="people-cl_people_id"><label for="cl_people_id">Person ID:</label> <span id="cl_people_id" /></div>
+  <div class="people-family"><label for="family">Family Name:</label> <span id="family" /></div>
+  <div class="people-given"><label for="given">Given Name:</label> <span id="given" /></div>
+  <div class="people-honorific"><label for="honorific">Honorific:</label> <span id="honorific" /></div>
+  <div class="people-lineage"><label for="lineaged">Lineage:</label> <span id="lineage" /></div>
+  <div class="people-orcid"><label for="orcid">ORCID:</label> <span id="orcid" /></div>
+  <div class="people-thesis_id"><label for="thesis_id">Thesis ID:</label> <span id="thesis_id" /></div>
+  <div class="people-advisor_id"><label for="advisor_id">Advisor ID:</label> <span id="advisor_id" /></div>
+  <div class="people-authors_id"><label for="authors_id">Author ID:</label> <span id="author_id" /></div>
+  <div class="people-archivesspace_id"><label for="archivesspace_id">ArchivesSpace ID:</label> <span id="archivesspace_id" /></div>
+  <div class="people-directory_id"><label for="directory_id">Directory ID:</label> <span id="directory_id" /></div>
+  <div class="people-viaf"><label for="viaf">VIAF:</label> <span id="viaf" /></div>
+  <div class="people-lcnaf"><label for="lcnaf">LCNAF:</label> <span id="lcnaf" /></div>
+  <div class="people-isni"><label for="isni">ISNI:</label> <span id="isni" /></div>
+  <div class="people-wikidata"><label for="wikidata">Wikidata:</label> <span id="wikidata" /></div>
+  <div class="people-snac"><label for="snac">SNAC:</label> <span id="snac" /></div>
+  <div class="people-image"><label for="image">Image:</label> <span id="image" /></div>
+  <div class="people-educated_at"><label for="educated_at">Educated At:</label> <span id="educated_at" /></div>
+  <div class="people-caltech"><label for="caltech">Caltech:</label> <span id="caltech" /></div>
+  <div class="people-jpl"><label for="caltech">JPL:</label> <span id="jpl" /></div>
+  <div class="people-faculty"><label for="faculty">Faculty:</label> <span id="faculty" /></div>
+  <div class="people-alumn"><label for="alumn">Alumn:</label> <span id="alumn" /></div>
+  <div class="people-status"><label for="status">Status:</label> <span id="status" /></div>
+  <div class="people-directory_person_type"><label for="directory_person_type">Directory Person Type:</label> <span id="directory_person_type" /></div>
+  <div class="people-title"><label for="title">Title:</label> <span id="title" /></div>
+  <div class="people-title"><label for="title">Title:</label> <span id="title" /></div>
+  <div class="people-bio"><label for="bio">BIO:</label> <span id="bio" /></div>
+  <div class="people-division"><label for="division">Division:</label> <span id="division" /></div>
+  <div class="people-authors_count"><label for="authors_count">Authors Count:</label> <span id="authors_count" /></div>
+  <div class="people-thesis_count"><label for="thesis_count">Thesis Count:</label> <span id="thesis_count" /></div>
+  <div class="people-data_count"><label for="data_count">Data Count:</label> <span id="data_count" /></div>
+  <div class="people-advisor_count"><label for="advisor_count">Advisor Count:</label> <span id="advisor_count" /></div>
+  <div class="people-editor_count"><label for="editor_count">Editor Count:</label> <span id="editor_count" /></div>
+  <div class="people-updated no-display"><label for="updated"> <span id="updated" /></div>
 </div>
 `;
 
@@ -60,39 +61,39 @@ input_template.innerHTML = `<style>
 /* Site overrides */
 @import "/css/people.css";
 </style>
-<div class="person-input">
-  <div class="person-cl_person_id"><label for="cl_person_id">Person ID:</label> <input id="cl_person_id" name="cl_person_id" type="text" /></div>
-  <div class="person-family"><label for="family">Family Name:</label> <input id="family" name="family" type="text" /></div>
-  <div class="person-given"><label for="given">Given Name:</label> <input id="given" name="given" type="text" /></div>
-  <div class="person-honorific"><label for="honorific">Honorific:</label> <input id="honorific" honorific="honorific" type="text" /></div>
-  <div class="person-lineage"><label for="lineage">Lineage:</label> <input id="lineage" name="lineage" type="text" /></div>
-  <div class="person-orcid"><label for="orcid">ORCID:</label> <input id="orcid" name="orcid" type="text" size="18" /></div>
-  <div class="person-thesis_id"><label for="thesis_id">Thesis ID:</label> <input id="thesis_id" name="ror" type="text" size="18" /></div>
-  <div class="person-advisor_id"><label for="advisor_id">Adivsor ID:</label> <input id="advisor_id" name="ror" type="text" size="18" /></div>
-  <div class="person-authors_id"><label for="authors_id">Authors ID:</label> <input id="authors_id" name="authors_id" type="text" size="18" /></div>
-  <div class="person-archivesspace_id"><label for="archivesspace_id">ArchivesSpace ID:</label> <input id="archivesspace_id" name="authors_id" type="text" size="18" /></div>
-  <div class="person-directory_id"><label for="directory_id">Directory ID:</label> <input id="directory_id" name="directory_id" type="text" size="18" /></div>
-  <div class="person-viaf"><label for="viaf">VIAF:</label> <input id="viaf" name="viaf" type="text" size="18" /></div>
-  <div class="person-lcnaf"><label for="lcnaf">LCNAF:</label> <input id="lcnaf" name="lcnaf" type="text" size="18" /></div>
-  <div class="person-isni"><label for="isni">ISNI:</label> <input id="isni" name="isni" type="text" size="18" /></div>
-  <div class="person-wikidata"><label for="wikidata">Wikidata:</label> <input id="wikidata" name="wikidata" type="text" size="18" /></div>
-  <div class="person-image"><label for="image">Image:</label> <input id="image" name="image" type="text" size="18" /></div>
-  <div class="person-educated_at"><label for="educated_at">Educated At:</label> <input id="educated_at" name="educated_at" type="text" size="18" /></div>
-  <div class="person-caltech"><label for="caltech">Caltech:</label> <input id="caltech" name="caltech" type="text" size="18" /></div>
-  <div class="person-jpl"><label for="jpl">JPL:</label> <input id="jpl" name="jpl" type="text" size="18" /></div>
-  <div class="person-faculty"><label for="faculty">Faculty:</label> <input id="faculty" name="faculty" type="text" size="18" /></div>
-  <div class="person-alumn"><label for="alumn">Alumn:</label> <input id="alumn" name="alumn" type="text" size="18" /></div>
-  <div class="person-status"><label for="status">Status:</label> <input id="status" name="status" type="text" size="18" /></div>
-  <div class="person-directory_person_type"><label for="directory_person_type">Directory Person Type:</label> <input id="directory_person_type" name="directory_person_type" type="text" size="18" /></div>
-  <div class="person-title"><label for="title">Title:</label> <input id="title" name="title" type="text" size="18" /></div>
-  <div class="person-bio"><label for="bio">Bio:</label> <textarea id="bio" name="bio" type="text" cols="18" rows="10"></textarea></div>
-  <div class="person-division"><label for="division">Division:</label> <input id="division" name="division" type="text" size="18" /></div>
-  <div class="person-authors_count"><label for="authors_count">Authors Count:</label> <input id="authors_count" name="authors_count" type="text" size="18" /></div>
-  <div class="person-thesis_count"><label for="thesis_count">Thesis Count:</label> <input id="thesis_count" name="thesis_count" type="text" size="18" /></div>
-  <div class="person-data_count"><label for="data_count">Data Count:</label> <input id="data_count" name="data_count" type="text" size="18" /></div>
-  <div class="person-advisor_count"><label for="advisor_count">Advisor Count:</label> <input id="advisor_count" name="advisor_count" type="text" size="18" /></div>
-  <div class="person-editor_count"><label for="editor_count">Editor Count:</label> <input id="editor_count" name="editor_count" type="text" size="18" /></div>
-  <div class="person-updated"><label for="updated">Updated:</label> <input id="updated" name="updated" type="date" /></div>
+<div class="people-input">
+  <div class="people-cl_people_id"><label for="cl_people_id">Person ID:</label> <input id="cl_people_id" name="cl_people_id" type="text" /></div>
+  <div class="people-family"><label for="family">Family Name:</label> <input id="family" name="family" type="text" /></div>
+  <div class="people-given"><label for="given">Given Name:</label> <input id="given" name="given" type="text" /></div>
+  <div class="people-honorific"><label for="honorific">Honorific:</label> <input id="honorific" honorific="honorific" type="text" /></div>
+  <div class="people-lineage"><label for="lineage">Lineage:</label> <input id="lineage" name="lineage" type="text" /></div>
+  <div class="people-orcid"><label for="orcid">ORCID:</label> <input id="orcid" name="orcid" type="text" size="18" /></div>
+  <div class="people-thesis_id"><label for="thesis_id">Thesis ID:</label> <input id="thesis_id" name="ror" type="text" size="18" /></div>
+  <div class="people-advisor_id"><label for="advisor_id">Adivsor ID:</label> <input id="advisor_id" name="ror" type="text" size="18" /></div>
+  <div class="people-authors_id"><label for="authors_id">Authors ID:</label> <input id="authors_id" name="authors_id" type="text" size="18" /></div>
+  <div class="people-archivesspace_id"><label for="archivesspace_id">ArchivesSpace ID:</label> <input id="archivesspace_id" name="authors_id" type="text" size="18" /></div>
+  <div class="people-directory_id"><label for="directory_id">Directory ID:</label> <input id="directory_id" name="directory_id" type="text" size="18" /></div>
+  <div class="people-viaf"><label for="viaf">VIAF:</label> <input id="viaf" name="viaf" type="text" size="18" /></div>
+  <div class="people-lcnaf"><label for="lcnaf">LCNAF:</label> <input id="lcnaf" name="lcnaf" type="text" size="18" /></div>
+  <div class="people-isni"><label for="isni">ISNI:</label> <input id="isni" name="isni" type="text" size="18" /></div>
+  <div class="people-wikidata"><label for="wikidata">Wikidata:</label> <input id="wikidata" name="wikidata" type="text" size="18" /></div>
+  <div class="people-image"><label for="image">Image:</label> <input id="image" name="image" type="text" size="18" /></div>
+  <div class="people-educated_at"><label for="educated_at">Educated At:</label> <input id="educated_at" name="educated_at" type="text" size="18" /></div>
+  <div class="people-caltech"><label for="caltech">Caltech:</label> <input id="caltech" name="caltech" type="text" size="18" /></div>
+  <div class="people-jpl"><label for="jpl">JPL:</label> <input id="jpl" name="jpl" type="text" size="18" /></div>
+  <div class="people-faculty"><label for="faculty">Faculty:</label> <input id="faculty" name="faculty" type="text" size="18" /></div>
+  <div class="people-alumn"><label for="alumn">Alumn:</label> <input id="alumn" name="alumn" type="text" size="18" /></div>
+  <div class="people-status"><label for="status">Status:</label> <input id="status" name="status" type="text" size="18" /></div>
+  <div class="people-directory_person_type"><label for="directory_person_type">Directory Person Type:</label> <input id="directory_person_type" name="directory_person_type" type="text" size="18" /></div>
+  <div class="people-title"><label for="title">Title:</label> <input id="title" name="title" type="text" size="18" /></div>
+  <div class="people-bio"><label for="bio">Bio:</label> <textarea id="bio" name="bio" type="text" cols="18" rows="10"></textarea></div>
+  <div class="people-division"><label for="division">Division:</label> <input id="division" name="division" type="text" size="18" /></div>
+  <div class="people-authors_count"><label for="authors_count">Authors Count:</label> <input id="authors_count" name="authors_count" type="text" size="18" /></div>
+  <div class="people-thesis_count"><label for="thesis_count">Thesis Count:</label> <input id="thesis_count" name="thesis_count" type="text" size="18" /></div>
+  <div class="people-data_count"><label for="data_count">Data Count:</label> <input id="data_count" name="data_count" type="text" size="18" /></div>
+  <div class="people-advisor_count"><label for="advisor_count">Advisor Count:</label> <input id="advisor_count" name="advisor_count" type="text" size="18" /></div>
+  <div class="people-editor_count"><label for="editor_count">Editor Count:</label> <input id="editor_count" name="editor_count" type="text" size="18" /></div>
+  <div class="people-updated"><label for="updated">Updated:</label> <input id="updated" name="updated" type="date" /></div>
 </div>`;
 
 table_template.innerHTML = `<style>
@@ -105,19 +106,18 @@ table_template.innerHTML = `<style>
   <thead>
     <tr>
       <th class="people-col-cl_people_id" title="click column to sort ascending, click again for descending">People ID</th>
-      <th class="people-col-family-name" title="click column to sort ascending, click again for descending">Family Name</th>
-      <th class="people-col-given-name" title="click column to sort ascending, click again for descending">Given Name</th>
+      <th class="people-col-name" title="click column to sort ascending, click again for descending">Name</th>
+      <th class="people-col-orcid" title="click column to sort ascending, click again for descending">orcid</th>
       <th class="people-col-thesis_id" title="click column to sort ascending, click again for descending">Thesis ID</th>
       <th class="people-col-advisor_id" title="click column to sort ascending, click again for descending">Advisor ID</th>
       <th class="people-col-authors_id" title="click column to sort ascending, click again for descending">Authors ID</th>
       <th class="people-col-archivesspace_id" title="click column to sort ascending, click again for descending">ArchivesSpace ID</th>
       <th class="people-col-directory_id" title="click column to sort ascending, click again for descending">Directory ID</th>
-      <th class="people-col-viaf_id" title="click column to sort ascending, click again for descending">VIAF</th>
-      <th class="people-col-lacnaf" title="click column to sort ascending, click again for descending">LCNAF</th>
+      <th class="people-col-viad" title="click column to sort ascending, click again for descending">VIAF</th>
+      <th class="people-col-lcnaf" title="click column to sort ascending, click again for descending">LCNAF</th>
       <th class="people-col-isni" title="click column to sort ascending, click again for descending">ISNI</th>
       <th class="people-col-wikidata" title="click column to sort ascending, click again for descending">Wikidata</th>
       <th class="people-col-snac" title="click column to sort ascending, click again for descending">SNAC</th>
-      <th class="people-col-orcid" title="click column to sort ascending, click again for descending">orcid</th>
       <th class="people-col-image" title="click column to sort ascending, click again for descending">image</th>
       <th class="people-col-educated_at" title="click column to sort ascending, click again for descending">Educated At</th>
       <th class="people-col-caltech" title="click column to sort ascending, click again for descending">Caltech</th>
@@ -141,6 +141,20 @@ table_template.innerHTML = `<style>
 </table>
 `;
 
+pager_template.innerHTML = `<style>
+/* Default CSS */
+@import "/app/widgets/people.css";
+/* Site overrides */
+@import "/css/people.css";
+</style>
+<div>
+  <a href="" id="people-pager-next" class="people-pager-next">Next</a>
+  <a href="" id="people-pager-previous" class="people-pager-previous">Previous</a> 
+  <span id="people-pager-page" class="people-pager-page"></span> /  <span id="people-pager-total" class="people-pager-total"></span>
+  (page size: <span id="people-pager-size" class="people-pager-size"></span>)
+</div>
+`;
+
 /*
  * Utility functions
  */
@@ -158,18 +172,58 @@ function mmddyyyy(date) {
     return `${month}/${day}/${year}`
 }
 
+function display_name_object(obj) {
+    if ((obj.display_name !== undefined) && (obj.display_name !== "")) {
+        return obj.display_name;
+    }
+    let parts = [];
+    if (obj.honorific !== undefined) {
+        parts.push(obj.honorific);
+    }
+    if (obj.given !== undefined) {
+        parts.push(obj.given);
+    }
+    if (obj.family !== undefined) {
+        parts.push(obj.family);
+    }
+    if (obj.lineage !== undefined) {
+        parts.push(obj.lineage);
+    }
+    return parts.join(', ');
+}
+
+function sort_name_object(obj) {
+    if ((obj.sort_name !== undefined) && (obj.sort_name !== "")) {
+        return obj.sort_name;
+    }
+    let parts = [];
+    if (obj.family !== undefined) {
+        parts.push(obj.family);
+    }
+    if (obj.given !== undefined) {
+        parts.push(obj.given);
+    }
+    if (obj.lineage !== undefined) {
+        parts.push(obj.lineage);
+    }
+    if (obj.honorific !== undefined) {
+        parts.push(obj.honorific);
+    }
+    return parts.join(', ');
+}
 
 /******************************
  * Web worker classes
  ******************************/
 
-let people_field_names = [ 'family_name', 'given_name', 'cl_people_id', 'thesis_id', 'advisor_id', 'authors_id', 'archivesspace_id', 'directory_id', 'viaf_id', 'lcnaf', 'isni', 'wikidata', 'snac', 'orcid', 'image', 'educated_at', 'caltech', 'jpl', 'faculty', 'alumn', 'status', 'directory_person_type', 'title', 'bio', 'division', 'authors_count', 'thesis_count', 'data_count', 'advisor_count', 'editor_count', 'updated' ];
+let people_field_names = [ 'cl_people_id', 'name', 'orcid', 'thesis_id', 'advisor_id', 'authors_id', 'archivesspace_id', 'directory_id', 'viad', 'lcnaf', 'isni', 'wikidata', 'snac', 'image', 'educated_at', 'caltech', 'jpl', 'faculty', 'alumn', 'status', 'directory_person_type', 'title', 'bio', 'division', 'authors_count', 'thesis_count', 'data_count', 'advisor_count', 'editor_count', 'updated' ],
+    pager_field_names = [ 'page', 'size', 'total', 'next', 'previous' ];
 
 /**
- * Person is a minimalist implementation of a Person object
+ * People is a minimalist implementation of a People object
  * without any component elements.
  */
-class Person {
+class People {
     constructor() {
         for (const key of people_field_names) {
             Object.defineProperty(this, key, { 'value': '', 'writable': true });
@@ -194,7 +248,7 @@ class Person {
         let self = this,
             now = new Date();
         if (obj == undefined) {
-            obj = new Person();
+            obj = new People();
         }
         self = Object.assign(self, obj);
         if (obj.updated !== undefined) {
@@ -217,10 +271,10 @@ class Person {
  ************************************/
 
 /**
- * PersonDisplay is a web component for displaying a single person's
+ * PeopleDisplay is a web component for displaying a single person's
  * metadata.
  */
-class PersonDisplay extends HTMLElement {
+class PeopleDisplay extends HTMLElement {
     constructor () {
         super();
         this.managed_attributes = people_field_names;
@@ -290,7 +344,6 @@ class PersonDisplay extends HTMLElement {
             if (val == null) {
                 val = '';
             }
-            console.log("DEBUG people-key -> ", key, "val ->", val);
             self[elem_name].innerHTML = val;
             self[elem_name].addEventListener('change', self[fnNameOnChange]);
         }
@@ -306,7 +359,7 @@ class PersonDisplay extends HTMLElement {
     }
 }
 
-class PersonInput extends HTMLElement {
+class PeopleInput extends HTMLElement {
     constructor () {
         super();
         this.managed_attributes = people_field_names
@@ -453,7 +506,7 @@ class PersonInput extends HTMLElement {
         return res;
     }
 
-    get_person(cl_people_id) {
+    get_people(cl_people_id) {
         let pos = this.indexOf(cl_people_id);
         if (pos > -1) {
             return this.managed_objects[pos];
@@ -462,12 +515,12 @@ class PersonInput extends HTMLElement {
     }
 
     /**
-     * set_person updates the object matching "cl_people_id" to the value of object. If
+     * set_people updates the object matching "cl_people_id" to the value of object. If
      *  "cl_people_id" is not in the managed object list the default action is to append it to
      * the managed object list. If "insert_update" parameter is true, then it'll insert it at
      * start of the list.  
      */
-    set_person(cl_people_id, obj, insert_update = false) {
+    set_people(cl_people_id, obj, insert_update = false) {
         let pos = this.indexOf(cl_people_id);
         if (pos < 0) {
             if (insert_update === true) {
@@ -527,9 +580,17 @@ class PersonInput extends HTMLElement {
                     colElem.classList.add(`people-col-${col}`);
                     if (obj.hasOwnProperty(col)) {
                         if (col == 'cl_people_id') {
-                            colElem.innerHTML = `<a href="people.html?cl_people_id=${cl_people_id}">${obj[col]}</a>`;
+                            colElem.innerHTML = `<a href="person.html?cl_people_id=${cl_people_id}" title="Edit this record">${obj[col]}</a>`;
+                        } else if (col === 'name') {
+                            colElem.textContent = sort_name_object(obj[col]);
+                        } else if (col === 'orcid') {
+                            if ((obj[col] !== undefined) && (obj[col] !== '')) {
+                                colElem.innerHTML = `<a href="https://orcid.org/${obj[col]}" title="Go to ORCID record at orcid.org website" target="_blank">${obj[col]}</a>`;
+                            } else {
+                                colElem.innerHTML = obj[col];
+                            }
                         } else {
-                            colElem.innerHTML = obj[col];
+                            colElem.textContent = obj[col];
                         }
                     }
                     rowElem.appendChild(colElem);
@@ -574,7 +635,7 @@ class PersonInput extends HTMLElement {
 
     connectedCallback() {
         this.refresh_table();
-        this.tableSorter()
+        this.tableSorter();
     }
 
     disconnectCallback() {
@@ -582,8 +643,111 @@ class PersonInput extends HTMLElement {
 }
 
 
+class PeoplePager extends HTMLElement {
+    constructor () {
+        super();
+        this.managed_attributes = pager_field_names;
+        for (const key of pager_field_names) {
+            Object.defineProperty(this, key, { 'value': '', 'writable': true });
+        }
 
-export { Person, PersonDisplay, PersonInput, PeopleTable };
-window.customElements.define('person-display', PersonDisplay);
-window.customElements.define('person-input', PersonInput);
+        this.attachShadow({mode: 'open'});
+        this.shadowRoot.appendChild(pager_template.content.cloneNode(true));
+        let self = this;
+        for (const key of this.managed_attributes) {
+            let elem_name = `people_pager_${key}`,
+                fnNameOnChange = `onchange_people_pager_${key}`;
+            self[elem_name] = this.shadowRoot.getElementById(elem_name);
+            self[fnNameOnChange] = function() {
+                let evt = new Event("change", {"bubbles": true, "cancelable": true});
+                self[key] = self[elem_name].textContent;
+                self.setAttribute(key, self[elem_name].textContent);
+                this.shadowRoot.host.dispatchEvent(evt);
+            };
+            self[fnNameOnChange] = self[fnNameOnChange].bind(this);
+        }
+    }
+
+    get value() {
+        let obj = {};
+        for (const key of this.managed_attributes) {
+            obj[key] = this.getAttribute(key);
+        }
+        return obj;
+    }
+
+    get as_json() {
+        return JSON.stringify(this.value);
+    }
+
+    set value(obj) {
+        let self = this;
+        for (const key of this.managed_attributes) {
+            let elem_name = `people_pager_${key}`;
+            if (obj.hasOwnProperty(key)) {
+                this.setAttribute(key, obj[key]);
+                self[elem_name].textContent = obj[key];
+            }
+        }
+    }
+
+    get_page_no(page_no, default_page_no) {
+        if ((page_no !== undefined) && (page_no !== null)) {
+            return page_no;
+        }
+        return default_page_no;
+    }
+
+    get_page_size(page_size, default_page_size) {
+        if ((page_size !== undefined) && (page_size !== null)) {
+            return page_size;
+        }
+        return default_page_size;
+    }
+
+    in_page(expected_page_number, page_size, ith) {
+        let current_page =  (Math.floor(ith / page_size) + 1);
+        console.log("DEBUG current_page, expected_page_number, page_size, ith:", current_page, expected_page_number, page_size, ith);
+        return (current_page === expected_page_number);
+    }
+
+    setAttribute(key, val) {
+        if (this.managed_attributes.indexOf(key) >= 0) {
+            let self = this,
+                elem_name =  `people_pager_${key}`;
+            self[elem_name].textContent = val;
+            let evt = new Event("change", {"bubbles": true, "cancelable": true});
+            this.shadowRoot.host.dispatchEvent(evt);
+        }
+        super.setAttribute(key, val);
+    }
+
+    connectedCallback() {
+        this.innerHTML = '';
+        let self = this;
+        for (const key of this.managed_attributes) {
+            let elem = this.shadowRoot.getElementById(`people-pager-${key}`),
+                val = this.getAttribute(key);
+            if (val === null) {
+                val = '';
+            }
+            console.log("DEBUG key, elem, val", key, elem, val);
+        }
+    }
+
+    disconnectCallback() {
+        let self = this;
+        for (const key of this.managed_attributes) {
+            let elem = this.shadowRoot.getElementById(`people-pager-${key}`),
+                fnNameOnChange = `onchange_people_pager_${key}`;
+            elem.removeEventListener('change', fnNameOnChange);
+        }
+    }
+}
+
+
+export { People, PeopleDisplay, PeopleInput, PeopleTable, PeoplePager };
+window.customElements.define('people-display', PeopleDisplay);
+window.customElements.define('people-input', PeopleInput);
 window.customElements.define('people-table', PeopleTable);
+window.customElements.define('people-pager', PeoplePager);

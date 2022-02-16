@@ -110,16 +110,16 @@ func sqlQueryObject(config *Config, stmt string, id string, obj interface{}) err
 	return jsonDecode([]byte(value), &obj)
 }
 
-// GetAllPersonID returns a list of cl_people_id in the person table
-func GetAllPersonID(config *Config) ([]string, error) {
+// GetAllPeopleID returns a list of cl_people_id in the person table
+func GetAllPeopleID(config *Config) ([]string, error) {
 	stmt := `SELECT cl_people_id FROM person ORDER BY cl_people_id`
 	return sqlQueryStringIDs(config, stmt)
 }
 
-// GetPerson returns a list of all usernames in a repository
-func GetPerson(config *Config, clPeopleID string) (*Person, error) {
+// GetPeople returns a list of all usernames in a repository
+func GetPeople(config *Config, clPeopleID string) (*People, error) {
 	stmt := `SELECT object FROM person WHERE cl_people_id = ?`
-	obj := new(Person)
+	obj := new(People)
 	obj.Name = new(Name)
 	err := sqlQueryObject(config, stmt, clPeopleID, &obj)
 	if isErrorMsg(err, "not found") {
@@ -128,9 +128,9 @@ func GetPerson(config *Config, clPeopleID string) (*Person, error) {
 	return obj, err
 }
 
-// CreatePerson will add a "person" to the database. It
+// CreatePeople will add a "person" to the database. It
 // has a side effect of populating. Created if it was empty.
-func CreatePerson(config *Config, person *Person) error {
+func CreatePeople(config *Config, person *People) error {
 	db := config.Connection
 	if person.Created == `` {
 		person.Created = time.Now().Format(timestamp)
@@ -140,9 +140,9 @@ func CreatePerson(config *Config, person *Person) error {
 	return err
 }
 
-// UpdatePerson will update a "person" in the database. It
+// UpdatePeople will update a "person" in the database. It
 // has a side effect of populating/updating .Updated attribute.
-func UpdatePerson(config *Config, person *Person) error {
+func UpdatePeople(config *Config, person *People) error {
 	db := config.Connection
 	person.Updated = time.Now().Format(timestamp)
 	stmt := `REPLACE INTO person (cl_people_id, object) VALUES (?,?)`
@@ -150,7 +150,7 @@ func UpdatePerson(config *Config, person *Person) error {
 	return err
 }
 
-func DeletePerson(config *Config, clPeopleID string) error {
+func DeletePeople(config *Config, clPeopleID string) error {
 	db := config.Connection
 	stmt := `DELETE FROM person WHERE cl_people_id = ?`
 	_, err := db.Exec(stmt, clPeopleID)

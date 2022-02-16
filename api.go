@@ -148,19 +148,19 @@ func (api *API) PeopleAPI(w http.ResponseWriter, r *http.Request) {
 	}
 	if r.Method == `GET` || r.Method == `HEAD` {
 		if clPeopleID == `` {
-			clPersonIDs, err := GetAllPersonID(api.Cfg)
+			clPeopleIDs, err := GetAllPeopleID(api.Cfg)
 			if err != nil {
 				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-				api.logResponse(r, http.StatusInternalServerError, fmt.Errorf("GetAllPersonID: %s", err))
+				api.logResponse(r, http.StatusInternalServerError, fmt.Errorf("GetAllPeopleID: %s", err))
 				return
 			}
-			src, err = jsonEncode(clPersonIDs)
+			src, err = jsonEncode(clPeopleIDs)
 			api.packageJSON(w, r, src, err)
 		} else {
-			obj, err := GetPerson(api.Cfg, clPeopleID)
+			obj, err := GetPeople(api.Cfg, clPeopleID)
 			if err != nil {
 				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-				api.logResponse(r, http.StatusInternalServerError, fmt.Errorf("GetPerson(%q): %s", clPeopleID, err))
+				api.logResponse(r, http.StatusInternalServerError, fmt.Errorf("GetPeople(%q): %s", clPeopleID, err))
 				return
 			}
 			if obj == nil {
@@ -182,7 +182,7 @@ func (api *API) PeopleAPI(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			defer r.Body.Close()
-			obj := new(Person)
+			obj := new(People)
 			err = jsonDecode(src, &obj)
 			if err != nil {
 				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -191,14 +191,14 @@ func (api *API) PeopleAPI(w http.ResponseWriter, r *http.Request) {
 			}
 			switch r.Method {
 			case `PUT`:
-				err = CreatePerson(api.Cfg, obj)
+				err = CreatePeople(api.Cfg, obj)
 				if err != nil {
 					http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 					api.logResponse(r, http.StatusInternalServerError, fmt.Errorf("id: %q, create person %s", clPeopleID, err))
 					return
 				}
 			case `POST`:
-				err = UpdatePerson(api.Cfg, obj)
+				err = UpdatePeople(api.Cfg, obj)
 				if err != nil {
 					http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 					api.logResponse(r, http.StatusInternalServerError, fmt.Errorf("id: %q, update person %s", clPeopleID, err))
@@ -211,7 +211,7 @@ func (api *API) PeopleAPI(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if r.Method == `DELETE` {
-			if err := DeletePerson(api.Cfg, clPeopleID); err != nil {
+			if err := DeletePeople(api.Cfg, clPeopleID); err != nil {
 				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 				api.logResponse(r, http.StatusInternalServerError, fmt.Errorf("id: %q, delete person %s", clPeopleID, err))
 				return
@@ -220,8 +220,8 @@ func (api *API) PeopleAPI(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	// Method is not implemented or not supported
-	err = fmt.Errorf("PersonAPI: %s not allowed", r.Method)
-	api.logResponse(r, http.StatusMethodNotAllowed, fmt.Errorf("PersonAPI: %s", err))
+	err = fmt.Errorf("PeopleAPI: %s not allowed", r.Method)
+	api.logResponse(r, http.StatusMethodNotAllowed, fmt.Errorf("PeopleAPI: %s", err))
 	http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 }
 

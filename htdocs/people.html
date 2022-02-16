@@ -28,15 +28,15 @@
 People
 </h1>
 <p>
-This page provides person management. Click on the person ID to view,
-editor or remove a person. You can click on the column headings to sort
-the table. Clicking again switch directions, e.g. from ascending to
-descending or descending to ascending. Searching the table can be done
-with your browser’s search in page function (e.g. command + f on macOS,
-control + f on Windows).
+This page provides people object management. Click on the people ID to
+view, editor or remove a people object. You can click on the column
+headings to sort the table. Clicking again switch directions, e.g. from
+ascending to descending or descending to ascending. Searching the table
+can be done with your browser’s search in page function (e.g. command +
+f on macOS, control + f on Windows).
 </p>
 <div>
-<button id="add-person">
+<button id="add-people">
 Add Person
 </button>
 </div>
@@ -45,6 +45,7 @@ Add Person
 Manage People
 </h2>
 <div>
+<people-pager id="people-pager" size="10" page="0" total="0" next="0" previous="0"></people-pager>
 <people-table id="people-table"></people-table>
 </div>
 <script type="module" src="/widgets/people.js"></script>
@@ -52,9 +53,10 @@ Manage People
 "use strict";
 
 let people_table = document.getElementById('people-table'),
-    add_person = document.getElementById('add-person');
+    add_people = document.getElementById('add-people'),
+    people_pager = document.getElementById('people-pager');
 
-add_person.addEventListener('click', function () {
+add_people.addEventListener('click', function () {
     window.location.href = 'person.html';
 })
 
@@ -64,22 +66,33 @@ function updateRow(key) {
     oReq.addEventListener('load', function () {
         let src = this.responseText,
             obj = JSON.parse(src),
-            cl_person_id = obj.cl_person_id;
-        people_table.set_person(cl_person_id, obj);
+            cl_people_id = obj.cl_people_id;
+        people_table.set_people(cl_people_id, obj);
     });
     oReq.open('GET', api_path);
     oReq.send();
 }
 
 function updatePeopleTable() {
-    /* Iterate through the fetched data, generate a person-display element
-       and link to form for editing person data */
+    /* Iterate through the fetched data, generate a people-display element
+       and link to form for editing people data */
     let src = this.responseText,
-            keys = JSON.parse(src);
+        keys = JSON.parse(src),
+        pager = document.getElementById('people-pager'),
+        params = new URLSearchParams(document.location.search),
+        page_no = pager.get_page_no(params.get('page'), 1),
+        size = pager.get_page_size(params.get('size'), 10);
+
     keys.sort();
+
+    /* FIXME: Need to fetch a list bit filter it through either a pager or a A-Z list filter */
     let i = 0;
     for (const key of keys) {
-        updateRow(key);
+        if (pager.in_page(page_no, size, i)) {
+            updateRow(key);
+        }
+        i++;
+        if (i > size) { break; } /* DEBUG */
     }
 }
 

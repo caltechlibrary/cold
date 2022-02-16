@@ -8,9 +8,10 @@ type Name struct {
 	Family  string `json:"family,omitempty"`
 	Given   string `json:"given,omitempty"`
 	Display string `json:"display_name,omitempty"`
+	Sort    string `json:"sort_name,omitempty"`
 }
 
-type Person struct {
+type People struct {
 	CLPeopleID          string `json:"cl_people_id,required"`
 	Name                *Name  `json:"name,omitempty"`
 	ORCID               string `json:"orcid,omitempty"`
@@ -25,7 +26,7 @@ type Person struct {
 	ThesisCommitteeID   string `json:"thesis_committee_id,omitempty"`
 	ArchivesSpaceID     string `json:"archivesspace_id,omitempty"`
 	DirectoryID         string `json:"directory_id,omitempty"`
-	VIAF                string `json:"viaf_id,omitempty"`
+	VIAF                string `json:"viaf,omitempty"`
 	ISNI                string `json:"lcnaf,omitempty"`
 	WikiData            string `json:"wikidata,omitempty"`
 	SNAC                string `json:"snac,omitempty"`
@@ -95,12 +96,12 @@ func (n *Name) String() string {
 	return string(src)
 }
 
-func (p *Person) String() string {
+func (p *People) String() string {
 	src, _ := jsonEncode(p)
 	return string(src)
 }
 
-func (p *Person) ToMap() (map[string]interface{}, error) {
+func (p *People) ToMap() (map[string]interface{}, error) {
 	m := map[string]interface{}{}
 	src, err := jsonEncode(p)
 	if err != nil {

@@ -1,23 +1,23 @@
 
-Person
+People
 ======
 
 <div>back to <a href="people.html">People List</a></div><p>
 
-<div id="person-viewer"></div>
+<div id="people-viewer"></div>
 
-<div id="person-controls"></div>
+<div id="people-controls"></div>
 
 <script type="module" src="/widgets/people.js"></script>
 
 <script type="module">
 "use strict";
-import { Person } from "/widgets/people.js";
+import { People } from "/widgets/people.js";
 
-let person_viewer = document.getElementById('person-viewer'),
-    person_control = document.getElementById('person-controls'),
-    person_display = document.createElement('person-display'),
-    person_input = document.createElement('person-input'),
+let people_viewer = document.getElementById('people-viewer'),
+    people_control = document.getElementById('people-controls'),
+    people_display = document.createElement('people-display'),
+    people_input = document.createElement('people-input'),
     /* Edit controls */
     edit_button = document.createElement('button'),
     remove_button = document.createElement('button'),
@@ -29,97 +29,97 @@ let person_viewer = document.getElementById('person-viewer'),
     cl_people_id = params.get('cl_people_id');
 
 
-function savePerson() {
-    let obj = person_input.value;
-    person_display.value = obj;
+function savePeople() {
+    let obj = people_input.value;
+    people_display.value = obj;
     //FIXME: Need to seen this back to service.
-    person_viewer.innerHTML = '';
-    person_viewer.appendChild(person_display);
+    people_viewer.innerHTML = '';
+    people_viewer.appendChild(people_display);
     show_edit_buttons();
-    console.log("DEBUG savePerson() not fully implemented.");
+    console.log("DEBUG savePeople() not fully implemented.");
 }
 
-function cancelPerson() {
-    person_viewer.innerHTML = '';
-    person_viewer.appendChild(person_display);
+function cancelPeople() {
+    people_viewer.innerHTML = '';
+    people_viewer.appendChild(people_display);
     show_edit_buttons();
-    console.log("DEBUG cancelPerson()");
+    console.log("DEBUG cancelPeople()");
 }
 
-function createPerson() {
-    let obj = new Person();
-    person_input.value = obj;
-    person_viewer.innerHTML = '';
-    person_viewer.appendChild(person_input);
+function createPeople() {
+    let obj = new People();
+    people_input.value = obj;
+    people_viewer.innerHTML = '';
+    people_viewer.appendChild(people_input);
     show_save_buttons();
-    console.log("DEBUG createPerson() ");
+    console.log("DEBUG createPeople() ");
 }
 
-function editPerson() {
-    let obj = person_display.value;
-    person_input.value = obj;
-    person_viewer.innerHTML = '';
-    person_viewer.appendChild(person_input);
+function editPeople() {
+    let obj = people_display.value;
+    people_input.value = obj;
+    people_viewer.innerHTML = '';
+    people_viewer.appendChild(people_input);
     show_save_buttons();
-    console.log("DEBUG editPerson() ");
+    console.log("DEBUG editPeople() ");
 }
 
-function returnToPersonList() {
+function returnToPeopleList() {
     window.location.href = "people.html";
 }
 
-function removePerson() {
-    let obj = person_display.value,
+function removePeople() {
+    let obj = people_display.value,
         cl_people_id = obj.cl_people_id;
     //FIXME: Need to send delete request to service
-    console.log("DEBUG removePerson() not fully implemented.");
-    returnToPersonList();
+    console.log("DEBUG removePeople() not fully implemented.");
+    returnToPeopleList();
 }
 
 
 function show_edit_buttons() {
-    person_control.innerHTML = '';
-    person_control.appendChild(edit_button);
-    person_control.appendChild(remove_button);
-    person_control.appendChild(return_button);
+    people_control.innerHTML = '';
+    people_control.appendChild(edit_button);
+    people_control.appendChild(remove_button);
+    people_control.appendChild(return_button);
 }
 
 function show_save_buttons() {
-    person_control.innerHTML = '';
-    person_control.appendChild(save_button);
-    person_control.appendChild(cancel_button);
+    people_control.innerHTML = '';
+    people_control.appendChild(save_button);
+    people_control.appendChild(cancel_button);
 }
 
-function updateDisplayPerson() {
+function updateDisplayPeople() {
     let src = this.responseText,
         obj = JSON.parse(src);
-    person_display.value = obj;
-    person_viewer.innerHTML = '';
-    person_viewer.appendChild(person_display);
+    people_display.value = obj;
+    people_viewer.innerHTML = '';
+    people_viewer.appendChild(people_display);
     show_edit_buttons();
-    console.log("DEBUG updatePerson() not fully implemented.");
+    console.log("DEBUG updatePeople() not fully implemented.");
 }
 
-function retrievePerson(cl_people_id) {
+function retrievePeople(cl_people_id) {
     let oReq = new XMLHttpRequest();
-    oReq.addEventListener('load', updateDisplayPerson);
+    oReq.addEventListener('load', updateDisplayPeople);
     oReq.open('GET', `/api/people/${cl_people_id}`);
     oReq.send();
 }
 
 save_button.innerHTML = 'Save';
-save_button.addEventListener('click', savePerson);
+save_button.addEventListener('click', savePeople);
 cancel_button.innerHTML = 'Cancel';
-cancel_button.addEventListener('click', cancelPerson);
+cancel_button.addEventListener('click', cancelPeople);
 edit_button.innerHTML = 'Edit';
-edit_button.addEventListener('click', editPerson);
+edit_button.addEventListener('click', editPeople);
 remove_button.innerHTML = 'Remove';
-remove_button.addEventListener('click', removePerson);
+remove_button.addEventListener('click', removePeople);
 return_button.innerHTML = "Return to list";
-return_button.addEventListener('click', returnToPersonList);
+return_button.addEventListener('click', returnToPeopleList);
 if (! cl_people_id) {
-    createPerson();
+    createPeople();
 } else {
-    retrievePerson(cl_people_id);
+    retrievePeople(cl_people_id);
 }
 </script>
