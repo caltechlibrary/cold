@@ -24,7 +24,7 @@
 </nav>
 
 <section>
-<h1>
+<h1 id="cold---controlled-object-list-daemon">
 cold - (C)ontrolled (o)bject (l)ist (d)aemon
 </h1>
 <p>
@@ -32,7 +32,7 @@ This repository implements a service to maintain a controlled list of
 objects such as Caltech Library uses for crosswalking data using pid
 associated with a person, group or funding source.
 </p>
-<h1>
+<h1 id="requirements">
 Requirements
 </h1>
 <ul>
@@ -58,7 +58,7 @@ Golang (for compiling the service)
 </ul>
 </li>
 </ul>
-<h2>
+<h2 id="overview">
 Overview
 </h2>
 <p>
@@ -69,8 +69,9 @@ sense to provide a more robust implementation allowing for easier
 curation of the list. The objects are relatively flat with the exception
 of the name attribute. Here’s an example JSON object representing R. S.
 Doiel showing the internal identifier named “cl_people_id”, name object,
-email, orcid and ‘<span class="citation"
-data-cites="affiliation">@affiliation</span>’ which contains a ROR.
+email, orcid and ‘<span class="citation" data-cites="affiliation"><span
+class="citation" data-cites="affiliation">@affiliation</span></span>’
+which contains a ROR.
 </p>
 <pre><code>{
     &quot;cl_people_id&quot;: &quot;Doiel-R-S&quot;,
@@ -97,13 +98,13 @@ but not a ORCID).
 <pre><code>CREATE TABLE people (cl_people_id VARCHAR(255) PRIMARY KEY, object JSON);
 CREATE TABLE local_group (cl_group_id VARCHAR(255) PRIMARY KEY, object JSON);
 CREATE TABLE funder (cl_funder_id VARCHAR(255) PRIMARY KEY, object JSON);</code></pre>
-<h2>
+<h2 id="approach">
 Approach
 </h2>
 <p>
-This service is intended to run on localhost on a known port (e.g.
-localhost:8486). It is a mininal service relying on access control from
-the operating system or front-end web service (e.g. a Bottle
+This service is intended to run on localhost on a known port
+(e.g. localhost:8486). It is a mininal service relying on access control
+from the operating system or front-end web service (e.g. a Bottle
 application, Apache 2 with Shibboleth). The goal of the service is to
 provide a light weight layer between the database storing the objects
 and the applications that need to work with them. Also like ep3apid and
@@ -119,46 +120,69 @@ manage and display the vocabularies and controlled object lists. The
 static website is build from HTML, CSS, JavaScript leveraging Web
 Components for providing a sufficient interface.
 </p>
-<h2>
+<h2 id="end-points">
 End Points
 </h2>
 <p>
 JSON service defined end points are formed as the following. The
 following end point descriptions support the GET method.
 </p>
-<p>
-<code>/</code> : A description of the service
-</p>
-<p>
-<code>/api/version</code> : Returns the version number of the service
-</p>
-<p>
-<code>/api/people</code> : Returns a list of “cl_people_id” managed by
-<em>cold</em>
-</p>
-<p>
-<code>/api/people/{CL_PEOPLE_ID}</code> : For a GET returns a people
-object, a PUT will create the people object, POST will replace the
-people object and DELETE will remove the people object
-</p>
-<p>
-<code>/api/group</code> : Returns a list of “cl_group_id” managed by
-<em>cold</em>
-</p>
-<p>
-<code>/api/group/{CL_GROUP_ID}</code> : For a GET returns a group
-object, a PUT will create the group object, POST will replace the group
-object and DELETE will remove the group object
-</p>
-<p>
-<code>/api/funder</code> : Returns a list of “cl_funder” managed by
-<em>cold</em>
-</p>
-<p>
-<code>/api/funder/{CL_funder_ID}</code> : For a GET returns a funder
-object, a PUT will create the funder object, POST will replace the
-funder object and DELETE will remove the funder object
-</p>
+<dl>
+<dt>
+<code>/</code>
+</dt>
+<dd>
+A description of the service
+</dd>
+<dt>
+<code>/api/version</code>
+</dt>
+<dd>
+Returns the version number of the service
+</dd>
+<dt>
+<code>/api/people</code>
+</dt>
+<dd>
+Returns a list of “cl_people_id” managed by <em>cold</em>
+</dd>
+<dt>
+<code>/api/people/{CL_PEOPLE_ID}</code>
+</dt>
+<dd>
+For a GET returns a people object, a PUT will create the people object,
+POST will replace the people object and DELETE will remove the people
+object
+</dd>
+<dt>
+<code>/api/group</code>
+</dt>
+<dd>
+Returns a list of “cl_group_id” managed by <em>cold</em>
+</dd>
+<dt>
+<code>/api/group/{CL_GROUP_ID}</code>
+</dt>
+<dd>
+For a GET returns a group object, a PUT will create the group object,
+POST will replace the group object and DELETE will remove the group
+object
+</dd>
+<dt>
+<code>/api/funder</code>
+</dt>
+<dd>
+Returns a list of “cl_funder” managed by <em>cold</em>
+</dd>
+<dt>
+<code>/api/funder/{CL_funder_ID}</code>
+</dt>
+<dd>
+For a GET returns a funder object, a PUT will create the funder object,
+POST will replace the funder object and DELETE will remove the funder
+object
+</dd>
+</dl>
 <!-- 
 
 `/api/crosswalk`
@@ -185,7 +209,7 @@ funder object and DELETE will remove the funder object
 *cold* takes a REST approach to updates for managed objects.  PUT will create a new object, POST will update it, GET will retrieve it and DELETE will remove it.
 
 -->
-<h2>
+<h2 id="vocabularies">
 Vocabularies
 </h2>
 <p>
@@ -193,31 +217,45 @@ Vocabularies
 an indentifier to a normalized name. These are set at compile time
 because they are so slow changing.
 </p>
-<p>
-<code>/api/subject</code> : Returns a list of all the subject ids
-(codes)
-</p>
-<p>
-<code>/api/subject/{SUBJECT_ID}</code> : Returns the normalized text
-string for that subject id
-</p>
-<p>
-<code>/api/issn</code> : Returns a list of issn that are mapped to a
-publisher name
-</p>
-<p>
-<code>/api/issn/{ISSN}</code> : Returns the normalized publisher name
-for that ISSN
-</p>
-<p>
-<code>/api/doi-prefix</code> : Returns a list of DOI prefixes that map
-to a normalize name
-</p>
-<p>
-<code>/api/doi-prefix/{DOI_PREFIX}</code> : Returns the normalized
-publisher name for that DOI prefix
-</p>
-<h1>
+<dl>
+<dt>
+<code>/api/subject</code>
+</dt>
+<dd>
+Returns a list of all the subject ids (codes)
+</dd>
+<dt>
+<code>/api/subject/{SUBJECT_ID}</code>
+</dt>
+<dd>
+Returns the normalized text string for that subject id
+</dd>
+<dt>
+<code>/api/issn</code>
+</dt>
+<dd>
+Returns a list of issn that are mapped to a publisher name
+</dd>
+<dt>
+<code>/api/issn/{ISSN}</code>
+</dt>
+<dd>
+Returns the normalized publisher name for that ISSN
+</dd>
+<dt>
+<code>/api/doi-prefix</code>
+</dt>
+<dd>
+Returns a list of DOI prefixes that map to a normalize name
+</dd>
+<dt>
+<code>/api/doi-prefix/{DOI_PREFIX}</code>
+</dt>
+<dd>
+Returns the normalized publisher name for that DOI prefix
+</dd>
+</dl>
+<h1 id="manage-interface">
 Manage interface
 </h1>
 <p>
@@ -226,7 +264,7 @@ path. This provides a dashboard which then interacts with the JSON side
 of the service to update content. The manage interface is built from Web
 Components and requires JavaScript to be enabled in the browser.
 </p>
-<h2>
+<h2 id="widgets">
 Widgets
 </h2>
 <p>
@@ -239,35 +277,46 @@ the static content does not contain anything that is priviliged. The
 Widgets can be loaded indepentently in the page using the following end
 points.
 </p>
-<p>
-<code>/widgets/person.js</code> : This JavaScript file provides a
-display and input set of web components for our Person Object. Markup
-example <code>&lt;person-display honorific=“Mr.” given=“R. S.”
-family=“Doiel” lineage=“”
+<dl>
+<dt>
+<code>/widgets/person.js</code>
+</dt>
+<dd>
+This JavaScript file provides a display and input set of web components
+for our Person Object. Markup example <code>&lt;person-display
+honorific=“Mr.” given=“R. S.” family=“Doiel” lineage=“”
 orcid=“0000-0003-0900-6903”&gt;&lt;/person-display&gt;</code> and
 <code>&lt;person-input honorific=“Mr.” given=“R. S.” family=“Doiel”
 lineage=“” orcid=“0000-0003-0900-6903”&gt;&lt;/person-input&gt;</code>
-</p>
-<p>
-<code>/widgets/group.js</code> : This JavaScript file provides a display
-and input set of web components for our Markup example
-<code>&lt;group-display name=“GALCIT”
+</dd>
+<dt>
+<code>/widgets/group.js</code>
+</dt>
+<dd>
+This JavaScript file provides a display and input set of web components
+for our Markup example <code>&lt;group-display name=“GALCIT”
 ror=““&gt;&lt;/group-display&gt;</code> and <code>&lt;group-input
 name=”GALCIT” ror=“” label=““&gt;&lt;/group-input&gt;</code>
-</p>
-<p>
-<code>/widgets/funder.js</code> : This JavaScript file provides a
-display and input set of web components for our Markup example
-<code>&lt;funder-display name=“NSF” grant_number=“1.203221” ror=“”
-doi=““&gt;&lt;/funder-display&gt;</code> and <code>&lt;funder-input
-name=”NSF” grant_number=“1.203221” doi=“” ror=“” label=“Grant
-details”&gt;&lt;/funder-input&gt;</code>
-</p>
-<p>
-<code>/widgets/vocabulary.js</code> : This JavaScript file provides a
-identifier/name web component suitable for displaying subjects,
-issn/publisher info and doi-prefix/publisher info.
-</p>
+</dd>
+<dt>
+<code>/widgets/funder.js</code>
+</dt>
+<dd>
+This JavaScript file provides a display and input set of web components
+for our Markup example <code>&lt;funder-display name=“NSF”
+grant_number=“1.203221” ror=“” doi=““&gt;&lt;/funder-display&gt;</code>
+and <code>&lt;funder-input name=”NSF” grant_number=“1.203221” doi=“”
+ror=“” label=“Grant details”&gt;&lt;/funder-input&gt;</code>
+</dd>
+<dt>
+<code>/widgets/vocabulary.js</code>
+</dt>
+<dd>
+This JavaScript file provides a identifier/name web component suitable
+for displaying subjects, issn/publisher info and doi-prefix/publisher
+info.
+</dd>
+</dl>
 </section>
 
 <footer>

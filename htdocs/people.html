@@ -24,7 +24,7 @@
 </nav>
 
 <section>
-<h1>
+<h1 id="people">
 People
 </h1>
 <p>
@@ -41,12 +41,12 @@ Add Person
 </button>
 </div>
 <p>
-<h2>
+<h2 id="manage-people">
 Manage People
 </h2>
 <div>
-<people-pager id="people-pager" size="10" page="0" total="0" next="0" previous="0"></people-pager>
-<people-table id="people-table"></people-table>
+<p><people-pager id="people-pager" size="10" page="0" total="0" next="0" previous="0"></people-pager>
+<people-table id="people-table"></people-table></p>
 </div>
 <script type="module" src="/widgets/people.js"></script>
 <script type="module">
@@ -79,20 +79,20 @@ function updatePeopleTable() {
     let src = this.responseText,
         keys = JSON.parse(src),
         pager = document.getElementById('people-pager'),
-        params = new URLSearchParams(document.location.search),
-        page_no = pager.get_page_no(params.get('page'), 1),
-        size = pager.get_page_size(params.get('size'), 10);
+        params = new URLSearchParams(document.location.search);
 
+    pager.value = params;
+    pager.setAttribute('total', len(keys));
     keys.sort();
 
     /* FIXME: Need to fetch a list bit filter it through either a pager or a A-Z list filter */
     let i = 0;
+        page_no = pager.page;
     for (const key of keys) {
         if (pager.in_page(page_no, size, i)) {
             updateRow(key);
         }
         i++;
-        if (i > size) { break; } /* DEBUG */
     }
 }
 
