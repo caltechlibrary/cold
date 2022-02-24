@@ -16,6 +16,10 @@ type Config struct {
 	// Hostname (and port) for running service, e.g. localhost:8486
 	Hostname string `json:"hostname"`
 
+	// BaseURL is the URL used to resolve relative paths browser side
+	// E.g. the base URL generated in `/widgets/config.js`.
+	BaseURL string `json:"base_url"`
+
 	// Htdocs holds static pages, help and Widgets
 	Htdocs string `json:"htdocs"`
 
@@ -58,6 +62,9 @@ func LoadConfig(fname string) (*Config, error) {
 		}
 		if config.Htdocs == "" {
 			config.Htdocs = "htdocs"
+		}
+		if config.BaseURL == "" {
+			config.BaseURL = fmt.Sprintf(`http://%s/`, config.Hostname)
 		}
 	}
 	return config, nil

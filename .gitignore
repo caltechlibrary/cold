@@ -56,3 +56,4 @@ gsheet_test.json
 __pycache__
 settings.*
 pandoc.*.json
+config.js

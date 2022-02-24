@@ -19,6 +19,7 @@ HTML_PAGES = $(addsuffix .html, $(PAGES))
 
 PACKAGE = $(shell ls -1 *.go)
 
+
 #PREFIX = /usr/local/bin
 PREFIX = $(HOME)
 
@@ -33,7 +34,7 @@ ifeq ($(OS), Windows)
 	EXT = .exe
 endif
 
-build: $(PKGASSETS) version.go $(PROGRAMS) $(HTML_PAGES) htdocs/index.html
+build: $(PKGASSETS) version.go $(PROGRAMS) $(HTML_PAGES) htdocs/index.html htdocs/widgets/config.js
 
 
 version.go: .FORCE
@@ -50,12 +51,18 @@ $(PROGRAMS): cmd/*/*.go $(PACKAGE)
 	@mkdir -p bin
 	go build -o bin/$@$(EXT) cmd/$@/*.go
 
+nav.md: nav.tmpl
+	mkpage settings=settings.json nav.tmpl >nav.md
+
 htdocs/index.html: README.md nav.md
 	mkpage body=README.md nav=nav.md page.tmpl > htdocs/index.html
 
-$(HTML_PAGES): $(MD_PAGES)
+$(HTML_PAGES): $(MD_PAGES) nav.md
 	@echo "PAGE html: "$@" PAGE md: "$(basename $@).md
 	mkpage body=$(basename $@).md nav=nav.md page.tmpl >$@
+
+htdocs/widgets/config.js: .FORCE
+	mkpage settings=settings.json templates/config-js.tmpl >htdocs/widgets/config.js	
 
 harvest: .FORCE
 	./harvest_testdata.bash
@@ -83,10 +90,12 @@ cleanweb:
 	@if [ -f index.html ]; then rm *.html; fi
 
 clean: 
+	@if [ -d nav.md ]; then rm nav.md; fi
 	@if [ -d htdocs ]; then rm htdocs/*.html; fi
 	@if [ -d bin ]; then rm -fR bin; fi
 	@if [ -d dist ]; then rm -fR dist; fi
 	@if [ -d testout ]; then rm -fR testout; fi
+	@if [ -d htdocs/widgets/config.js ]; then rm -fR htdocs/widgets/config.js; fi
 
 dist/linux-amd64:
 	@mkdir -p dist/bin

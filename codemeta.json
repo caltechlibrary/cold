@@ -6,7 +6,7 @@
     "codeRepository": "https://github.com/caltechlibrary/cold",
     "issueTracker": "https://github.com/caltechlibrary/cold/issues",
     "license": "https://caltechlibrary.github.io/cold/license.html",
-    "version": "0.0.0",
+    "version": "0.0.0-next",
     "author": [
         {
             "@type": "Person",

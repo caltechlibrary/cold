@@ -1,3 +1,5 @@
-- [Home](/app/)
-- [Dashboard](/app/dashboard.html)
-- [Version](/api/version)
+- [Home](http://localhost:8486/app/)
+- [Dashboard](http://localhost:8486/app/dashboard.html)
+- [API Help](http://localhost:8486/app/api-help.html)
+- [About](http://localhost:8486/app/about.html)
+- [Logout](/Shibboleth.sso/Logout)

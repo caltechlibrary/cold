@@ -469,7 +469,11 @@ func (api *API) RouteHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/app/api-help.md", http.StatusMovedPermanently)
 		api.logResponse(r, 301, fmt.Errorf(`redirected to "/app/index.html"`))
 	case strings.HasPrefix(r.URL.Path, "/api/version"):
-		fmt.Fprintf(w, "%s %s\n", api.AppName, Version)
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprintf(w, `{
+	"application_name": %q, 
+	"version": %q
+}`, api.AppName, Version)
 		api.logResponse(r, http.StatusOK, nil)
 	case strings.HasPrefix(r.URL.Path, "/api/people"):
 		api.PeopleAPI(w, r)
@@ -598,7 +602,7 @@ Using configuration %s
 
 Process id: %d
 
-EPrints 3.3.x Extended API
+Cold (Controlled Object Lists Daemon)
 
 Listening on http://%s
 Log status: %s
