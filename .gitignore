@@ -29,7 +29,7 @@ _testmain.go
 *.tar.gz
 *.tgz
 *-demoset
-#etc/*
+etc/*
 dist/*
 dataset/*
 testdata/*.json
