@@ -1,0 +1,9 @@
+[Unit]
+Description=An extended cold 0.0.0 web service
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/cold /usr/local/etc/cold/settings.json
+
+[Install]
+WantedBy=multi-user.target
