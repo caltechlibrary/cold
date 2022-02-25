@@ -91,7 +91,7 @@ cleanweb:
 
 clean: 
 	@if [ -d nav.md ]; then rm nav.md; fi
-	@if [ -d htdocs ]; then rm htdocs/*.html; fi
+	@if [ -d htdocs/index.html ]; then rm htdocs/*.html; fi
 	@if [ -d bin ]; then rm -fR bin; fi
 	@if [ -d dist ]; then rm -fR dist; fi
 	@if [ -d testout ]; then rm -fR testout; fi
