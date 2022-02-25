@@ -1,0 +1,5 @@
+{
+    "dsn": "DB_USER_HERE:DB_PASSWORD_HERE@/cold",
+    "hostname": "localhost:8486",
+    "base_url": "http://localhost:8486"
+}
