@@ -2,7 +2,6 @@
 Group
 =====
 
-<div>back to <a href="groups.html">Group List</a></div><p>
 
 <div id="group-viewer"></div>
 

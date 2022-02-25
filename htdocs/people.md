@@ -10,7 +10,7 @@ This page provides people object management. Click on the people ID to view, edi
 Manage People
 -------------
 
-<div><people-pager id="people-pager" size="10" page="0" total="0" next="0" previous="0"></people-pager> <people-table id="people-table"></people-table></div>
+<div><people-pager id="people-pager" pos="0" size="25"></people-pager> <people-table id="people-table"></people-table></div>
 
 <script type="module" src="/widgets/people.js"></script>
 
@@ -44,20 +44,32 @@ function updatePeopleTable() {
     let src = this.responseText,
         keys = JSON.parse(src),
         pager = document.getElementById('people-pager'),
-        params = new URLSearchParams(document.location.search);
+        params = (new URL(document.location)).searchParams, /* new URLSearchParams(document.location.search), */
+        pos = new Number(params.get('pos')),
+        size = new Number(params.get('size'));
 
-    pager.value = params;
-    pager.setAttribute('total', len(keys));
+    console.log("DEBUG document.location", document.location);
+    console.log("DEBUG pos, size", pos, size);
+    /* We need to know size first before we can set position */
+    pager.setAttribute('total', keys.length);
+    if (size > 0) {
+        pager.setAttribute('size', size);
+    } else {
+        size = pager.get_size();
+    }
+    if (pos >= 0) {
+        pager.set_position(pos, size);
+    }
     keys.sort();
+    console.log("DEBUG pos/size", pos, size);
 
-    /* FIXME: Need to fetch a list bit filter it through either a pager or a A-Z list filter */
-    let i = 0;
-        page_no = pager.page;
-    for (const key of keys) {
-        if (pager.in_page(page_no, size, i)) {
-            updateRow(key);
-        }
-        i++;
+    let start = 0 + pos,
+        end = start + size;
+    console.log("DEBUG start/end", start, end);
+    /* FIXME: debugging, manually setting start end *
+    start = 3; end = 5; */
+    for (const key of keys.slice(start, end)) {
+        updateRow(key);
     }
 }
 

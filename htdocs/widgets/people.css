@@ -99,5 +99,16 @@ td {
     border: none;
 }
 
-.people-col-description {
+.people-pager-status {
+    display: none;
 }
+
+.people-pager-pos {
+}
+
+.people-pager-size {
+}
+
+.people-pager-total {
+}
+

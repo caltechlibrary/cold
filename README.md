@@ -11,7 +11,7 @@ Requirements
     - GNU Make
     - [MkPage](https://github.com/caltechlibrary/mkpage) (to build UI)
     - [Pandoc](https://pandoc.org) (to build UI)
-    - Golang (for compiling the service)
+    - Golang (for compiling the service, needed when updating static vocabularies)
 
 Overview
 --------

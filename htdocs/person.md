@@ -2,8 +2,6 @@
 People
 ======
 
-<div>back to <a href="people.html">People List</a></div><p>
-
 <div id="people-viewer"></div>
 
 <div id="people-controls"></div>

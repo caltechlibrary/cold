@@ -150,14 +150,22 @@ pager_template.innerHTML = `<style>
 <div>
   <a href="" id="people-pager-next" class="people-pager-next">Next</a>
   <a href="" id="people-pager-previous" class="people-pager-previous">Previous</a> 
-  <span id="people-pager-page" class="people-pager-page"></span> /  <span id="people-pager-total" class="people-pager-total"></span>
-  (page size: <span id="people-pager-size" class="people-pager-size"></span>)
+  <span id="people-pager-status" class="people-pager-status">
+     (<span id="people-pager-pos" class="people-pager-pos"></span>/<span id="people-pager-total" class="people-pager-total"></span>, <span id="people-pager-size" class="people-pager-size"></span>)
+  </span>
 </div>
 `;
 
 /*
  * Utility functions
  */
+function as_number(val) {
+    if (val === null) {
+        return 0;
+    }
+    return new Number(val);
+}
+
 function yyyymmdd(date) {
     let day = `${date.getDate()}`.padStart(2, '0'),
         month = `${date.getMonth() + 1}`.padStart(2, '0'),
@@ -216,8 +224,7 @@ function sort_name_object(obj) {
  * Web worker classes
  ******************************/
 
-let people_field_names = [ 'cl_people_id', 'name', 'orcid', 'thesis_id', 'advisor_id', 'authors_id', 'archivesspace_id', 'directory_id', 'viad', 'lcnaf', 'isni', 'wikidata', 'snac', 'image', 'educated_at', 'caltech', 'jpl', 'faculty', 'alumn', 'status', 'directory_person_type', 'title', 'bio', 'division', 'authors_count', 'thesis_count', 'data_count', 'advisor_count', 'editor_count', 'updated' ],
-    pager_field_names = [ 'page', 'size', 'total', 'next', 'previous' ];
+let people_field_names = [ 'cl_people_id', 'name', 'orcid', 'thesis_id', 'advisor_id', 'authors_id', 'archivesspace_id', 'directory_id', 'viad', 'lcnaf', 'isni', 'wikidata', 'snac', 'image', 'educated_at', 'caltech', 'jpl', 'faculty', 'alumn', 'status', 'directory_person_type', 'title', 'bio', 'division', 'authors_count', 'thesis_count', 'data_count', 'advisor_count', 'editor_count', 'updated' ];
 
 /**
  * People is a minimalist implementation of a People object
@@ -314,19 +321,21 @@ class PeopleDisplay extends HTMLElement {
     set value(obj) {
         let self = this;
         for (const key of this.managed_attributes) {
-            let elem_name = `${key}_input`;
+            let elem = this.shadowRoot.getElementById(key);
             if (obj.hasOwnProperty(key)) {
+                console.log("DEBUG set value", key, obj);
                 this.setAttribute(key, obj[key]);
-                self[elem_name].innerHTML = obj[key];
+                elem.innerHTML = obj[key];
             }
         }
     }
 
     setAttribute(key, val) {
         if (this.managed_attributes.indexOf(key) >= 0) {
+            console.log("DEBUG setAttribute()", key, val);
             let self = this,
-                elem_name =  `${key}_input`;
-            self[elem_name].innerHTML = val;
+                elem = this.shadowRoot.getElementById(key);
+            elem.innerHTML = val;
             let evt = new Event("change", {"bubbles": true, "cancelable": true});
             this.shadowRoot.host.dispatchEvent(evt);
         }
@@ -580,7 +589,7 @@ class PeopleInput extends HTMLElement {
                     colElem.classList.add(`people-col-${col}`);
                     if (obj.hasOwnProperty(col)) {
                         if (col == 'cl_people_id') {
-                            colElem.innerHTML = `<a href="person.html?cl_people_id=${cl_people_id}" title="Edit this record">${obj[col]}</a>`;
+                            colElem.innerHTML = `<a href="person.html?cl_people_id=${cl_people_id}" title="Edit this record" target="_blank">${obj[col]}</a>`;
                         } else if (col === 'name') {
                             colElem.textContent = sort_name_object(obj[col]);
                         } else if (col === 'orcid') {
@@ -646,26 +655,21 @@ class PeopleInput extends HTMLElement {
 class PeoplePager extends HTMLElement {
     constructor () {
         super();
-        this.managed_attributes = pager_field_names;
-        for (const key of pager_field_names) {
-            Object.defineProperty(this, key, { 'value': '', 'writable': true });
-        }
+        this.defaults = new Map()
+        this.defaults.set('size', 250);
+        this.defaults.set('pos', 0);
+        this.defaults.set('next', 0);
+        this.defaults.set('previous', 0);
+        this.defaults.set('total', -1);
+        this.size = this.defaults.get('size');
+        this.pos = this.defaults.get('pos');
+        this.next = this.defaults.get('next');
+        this.previous = this.defaults.get('previous');
+        this.total = this.defaults.get('total');
+        this.managed_attributes = [ 'size', 'pos', 'next', 'previous', 'total' ];
 
         this.attachShadow({mode: 'open'});
         this.shadowRoot.appendChild(pager_template.content.cloneNode(true));
-        let self = this;
-        for (const key of this.managed_attributes) {
-            let elem_name = `people_pager_${key}`,
-                fnNameOnChange = `onchange_people_pager_${key}`;
-            self[elem_name] = this.shadowRoot.getElementById(elem_name);
-            self[fnNameOnChange] = function() {
-                let evt = new Event("change", {"bubbles": true, "cancelable": true});
-                self[key] = self[elem_name].textContent;
-                self.setAttribute(key, self[elem_name].textContent);
-                this.shadowRoot.host.dispatchEvent(evt);
-            };
-            self[fnNameOnChange] = self[fnNameOnChange].bind(this);
-        }
     }
 
     get value() {
@@ -681,57 +685,96 @@ class PeoplePager extends HTMLElement {
     }
 
     set value(obj) {
-        let self = this;
         for (const key of this.managed_attributes) {
-            let elem_name = `people_pager_${key}`;
+            let elem_name = `people-pager-${key}`,
+                elem = this.shadowRoot.getElementById(elem_name);
             if (obj.hasOwnProperty(key)) {
                 this.setAttribute(key, obj[key]);
-                self[elem_name].textContent = obj[key];
+                elem.textContent = obj[key];
             }
         }
     }
 
-    get_page_no(page_no, default_page_no) {
-        if ((page_no !== undefined) && (page_no !== null)) {
-            return page_no;
-        }
-        return default_page_no;
+    get_position() {
+        let pos = this.getAttribute('pos');
+        console.log("DEBUG get_position()", pos);
+        return new Numner(pos);
     }
 
-    get_page_size(page_size, default_page_size) {
-        if ((page_size !== undefined) && (page_size !== null)) {
-            return page_size;
+    set_position(pos, size) {
+        let next = pos + size,
+            prev = pos - size,
+            total = this.getAttribute('total');
+        if (prev < 0) {
+            prev = 0;
         }
-        return default_page_size;
+        if ((total > -1) && (next >= total)) {
+            next = total - size;
+        }
+        this.setAttribute('pos', pos);
+        this.setAttribute('size', size);
+        let elem = this.shadowRoot.getElementById('people-pager-next');
+        elem.setAttribute('href', `?size=${size}&pos=${next}`)
+        elem = this.shadowRoot.getElementById('people-pager-previous');
+        elem.setAttribute('href', `?size=${size}&pos=${prev}`)
     }
 
-    in_page(expected_page_number, page_size, ith) {
-        let current_page =  (Math.floor(ith / page_size) + 1);
-        console.log("DEBUG current_page, expected_page_number, page_size, ith:", current_page, expected_page_number, page_size, ith);
-        return (current_page === expected_page_number);
+    get_size() {
+        let size = this.getAttribute('size');
+        return new Number(size);
     }
 
     setAttribute(key, val) {
-        if (this.managed_attributes.indexOf(key) >= 0) {
-            let self = this,
-                elem_name =  `people_pager_${key}`;
-            self[elem_name].textContent = val;
-            let evt = new Event("change", {"bubbles": true, "cancelable": true});
-            this.shadowRoot.host.dispatchEvent(evt);
-        }
         super.setAttribute(key, val);
+        if (this.managed_attributes.indexOf(key) >= 0) {
+            let elem_name =  `people-pager-${key}`,
+                elem = this.shadowRoot.getElementById(elem_name);
+            if (elem !== null) {
+                if (val === null) {
+                    val = '';
+                }
+                elem.textContent = val;
+                let evt = new Event("change", {"bubbles": true, "cancelable": true});
+                this.shadowRoot.host.dispatchEvent(evt);    
+            }
+        }
     }
 
     connectedCallback() {
+        let pos = as_number(this.getAttribute('pos')),
+            size = as_number(this.getAttribute('size')),
+            total = as_number(this.getAttribute('total'));
         this.innerHTML = '';
-        let self = this;
         for (const key of this.managed_attributes) {
-            let elem = this.shadowRoot.getElementById(`people-pager-${key}`),
-                val = this.getAttribute(key);
-            if (val === null) {
-                val = '';
+            let elem = this.shadowRoot.getElementById(`people-pager-${key}`);
+            if ([ 'previous', 'next'].indexOf(key) >= 0) {
+                let href = elem.getAttribute('href'),
+                    val = this.getAttribute(key);
+                if (key == 'previous') {
+                    let previous = 0;
+                     if (pos > size) {
+                        previous = pos - size;
+                    }
+                    elem.setAttribute('href', `?size=${size}&pos=${previous}`);
+                }
+                if (key == 'next') {
+                    let next = pos + size;
+                    if ((total > 0) && (next >= total)) {
+                        next = total - 1;
+                    }
+                    elem.setAttribute('href', `?size=${size}&pos=${next}`);
+                }
+            } else if (elem !== null) {
+                let val = this.getAttribute(key);
+                if (val === null) {
+                    if( this.defaults.has(key)) {
+                        val = this.defaults.get(key);
+                    } else {
+                        val = '';
+                    }
+                }
+                elem.textContent = val;
             }
-            console.log("DEBUG key, elem, val", key, elem, val);
         }
     }
 
