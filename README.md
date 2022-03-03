@@ -1,7 +1,7 @@
 cold - (C)ontrolled (o)bject (l)ist (d)aemon
 ============================================
 
-This repository implements a service to maintain a controlled list of objects such as Caltech Library uses for crosswalking data using pid associated with a person, group or funding source.
+This repository implements a service to maintain a controlled list of objects such as Caltech Library uses for crosswalking data using pid associated with a person or group.
 
 Requirements
 ============
@@ -32,12 +32,12 @@ Caltech Library maintains a list of people, groups and funders and their related
 } 
 ~~~
 
-Some objects may have more attributes others less. A simple table schema containing a row id, an internal identifier (e.g. cl_people_id, cl_group_id, cl_funder_id), a "field" and a "value" can be used to represent all the types of fields associated with a given object.  A separate table can be used for person, group and finder with the individual objects stored as a JSON type. This is well suited to a data collection that has sparse consistency (e.g. one person might have an ORCID but not a research id, the next might have a viaf or wikidata id but not a ORCID).
+Some objects may have more attributes others less. A simple table schema containing a row id, an internal identifier (e.g. cl_people_id, cl_group_id), a "field" and a "value" can be used to represent all the types of fields associated with a given object.  A separate table can be used for person, group and finder with the individual objects stored as a JSON type. This is well suited to a data collection that has sparse consistency (e.g. one person might have an ORCID but not a research id, the next might have a viaf or wikidata id but not a ORCID).
 
 ~~~
 CREATE TABLE people (cl_people_id VARCHAR(255) PRIMARY KEY, object JSON);
 CREATE TABLE local_group (cl_group_id VARCHAR(255) PRIMARY KEY, object JSON);
-CREATE TABLE funder (cl_funder_id VARCHAR(255) PRIMARY KEY, object JSON);
+<!-- CREATE TABLE funder (cl_funder_id VARCHAR(255) PRIMARY KEY, object JSON); -->
 ~~~
 
 Approach
@@ -70,11 +70,13 @@ JSON service defined end points are formed as the following. The following end p
 `/api/group/{CL_GROUP_ID}`
 : For a GET returns a group object, a PUT will create the group object, POST will replace the group object and DELETE will remove the group object
 
+<!--
 `/api/funder`
 : Returns a list of "cl_funder" managed by *cold*
 
 `/api/funder/{CL_funder_ID}`
 : For a GET returns a funder object, a PUT will create the funder object, POST will replace the funder object and DELETE will remove the funder object
+-->
 
 <!-- 
 
@@ -143,8 +145,12 @@ Widgets provide the user interface for humans to manage and view the objects. Wh
 `/widgets/group.js`
 : This JavaScript file provides a display and input set of web components for our Markup example `<group-display name="GALCIT" ror=""></group-display>` and `<group-input  name="GALCIT" ror="" label=""></group-input>`
 
+<!--
+
 `/widgets/funder.js`
 : This JavaScript file provides a display and input set of web components for our Markup example `<funder-display name="NSF" grant_number="1.203221" ror="" doi=""></funder-display>` and `<funder-input  name="NSF" grant_number="1.203221" doi="" ror="" label="Grant details"></funder-input>`
+
+-->
 
 `/widgets/vocabulary.js`
 : This JavaScript file provides a identifier/name web component suitable for displaying subjects, issn/publisher info and doi-prefix/publisher info.

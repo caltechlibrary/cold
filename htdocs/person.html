@@ -78,8 +78,7 @@ function cancelPeople() {
 function createPeople() {
     console.log("DEBUG createPeople() ");
     let obj = new People(),
-        /* Display or Editor for people */
-        people_display = document.createElement('people-display'),
+        /* Editor for people */
         people_input = document.createElement('people-input');
     people_input.value = obj;
     people_viewer.innerHTML = '';
@@ -90,8 +89,7 @@ function createPeople() {
 function editPeople() {
     console.log("DEBUG editPeople() ");
     let obj = people_display.value,
-        /* Display or Editor for people */
-        people_display = document.createElement('people-display'),
+        /* Editor for people */
         people_input = document.createElement('people-input');
     people_input.value = obj;
     people_viewer.innerHTML = '';
@@ -116,12 +114,14 @@ function show_edit_buttons() {
     people_controls.appendChild(edit_button);
     people_controls.appendChild(remove_button);
     people_controls.appendChild(return_button);
+    /* FIXME: Need to wire up actions of each button */
 }
 
 function show_save_buttons() {
     people_controls.innerHTML = '';
     people_controls.appendChild(save_button);
     people_controls.appendChild(cancel_button);
+    /* FIXME: Need to wire up actions of each button */
 }
 
 function displayPeople() {
