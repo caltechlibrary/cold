@@ -13,9 +13,7 @@ People
 import { People } from "/widgets/people.js";
 
 let people_viewer = document.getElementById('people-viewer'),
-    people_control = document.getElementById('people-controls'),
-    people_display = document.createElement('people-display'),
-    people_input = document.createElement('people-input'),
+    people_controls = document.getElementById('people-controls'),
     /* Edit controls */
     edit_button = document.createElement('button'),
     remove_button = document.createElement('button'),
@@ -45,21 +43,25 @@ function cancelPeople() {
 }
 
 function createPeople() {
-    let obj = new People();
+    console.log("DEBUG createPeople() ");
+    let obj = new People(),
+        /* Editor for people */
+        people_input = document.createElement('people-input');
     people_input.value = obj;
     people_viewer.innerHTML = '';
     people_viewer.appendChild(people_input);
     show_save_buttons();
-    console.log("DEBUG createPeople() ");
 }
 
 function editPeople() {
-    let obj = people_display.value;
+    console.log("DEBUG editPeople() ");
+    let obj = people_display.value,
+        /* Editor for people */
+        people_input = document.createElement('people-input');
     people_input.value = obj;
     people_viewer.innerHTML = '';
     people_viewer.appendChild(people_input);
     show_save_buttons();
-    console.log("DEBUG editPeople() ");
 }
 
 function returnToPeopleList() {
@@ -70,37 +72,40 @@ function removePeople() {
     let obj = people_display.value,
         cl_people_id = obj.cl_people_id;
     //FIXME: Need to send delete request to service
-    console.log("DEBUG removePeople() not fully implemented.");
     returnToPeopleList();
 }
 
 
 function show_edit_buttons() {
-    people_control.innerHTML = '';
-    people_control.appendChild(edit_button);
-    people_control.appendChild(remove_button);
-    people_control.appendChild(return_button);
+    people_controls.innerHTML = '';
+    people_controls.appendChild(edit_button);
+    people_controls.appendChild(remove_button);
+    people_controls.appendChild(return_button);
+    /* FIXME: Need to wire up actions of each button */
 }
 
 function show_save_buttons() {
-    people_control.innerHTML = '';
-    people_control.appendChild(save_button);
-    people_control.appendChild(cancel_button);
+    people_controls.innerHTML = '';
+    people_controls.appendChild(save_button);
+    people_controls.appendChild(cancel_button);
+    /* FIXME: Need to wire up actions of each button */
 }
 
-function updateDisplayPeople() {
+function displayPeople() {
+    console.log("DEBUG updatePeople() not fully implemented.");
     let src = this.responseText,
-        obj = JSON.parse(src);
+        obj = JSON.parse(src),
+        /* Display or Editor for people */
+        people_display = document.createElement('people-display');
     people_display.value = obj;
     people_viewer.innerHTML = '';
     people_viewer.appendChild(people_display);
     show_edit_buttons();
-    console.log("DEBUG updatePeople() not fully implemented.");
 }
 
 function retrievePeople(cl_people_id) {
     let oReq = new XMLHttpRequest();
-    oReq.addEventListener('load', updateDisplayPeople);
+    oReq.addEventListener('load', displayPeople);
     oReq.open('GET', `/api/people/${cl_people_id}`);
     oReq.send();
 }

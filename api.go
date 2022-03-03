@@ -608,9 +608,11 @@ Listening on %s
 
 Base URL: %s
 
+Htdocs: %s
+
 Log status: %s
 Press ctl-c to terminate.
-`, api.AppName, Version, api.Settings, os.Getpid(), api.Cfg.Hostname, api.Cfg.BaseURL, logStatus)
+`, api.AppName, Version, api.Settings, os.Getpid(), api.Cfg.Hostname, api.Cfg.BaseURL, api.Cfg.Htdocs, logStatus)
 
 	/* Listen for Ctr-C or signals */
 	processControl := make(chan os.Signal, 1)

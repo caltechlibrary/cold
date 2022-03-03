@@ -148,8 +148,8 @@ pager_template.innerHTML = `<style>
 @import "/css/people.css";
 </style>
 <div>
-  <a href="" id="people-pager-next" class="people-pager-next">Next</a>
   <a href="" id="people-pager-previous" class="people-pager-previous">Previous</a> 
+  <a href="" id="people-pager-next" class="people-pager-next">Next</a>
   <span id="people-pager-status" class="people-pager-status">
      (<span id="people-pager-pos" class="people-pager-pos"></span>/<span id="people-pager-total" class="people-pager-total"></span>, <span id="people-pager-size" class="people-pager-size"></span>)
   </span>
@@ -322,7 +322,7 @@ class PeopleDisplay extends HTMLElement {
         let self = this;
         for (const key of this.managed_attributes) {
             let elem = this.shadowRoot.getElementById(key);
-            if (obj.hasOwnProperty(key)) {
+            if (obj.hasOwnProperty(key) && (elem !== null)) {
                 console.log("DEBUG set value", key, obj);
                 this.setAttribute(key, obj[key]);
                 elem.innerHTML = obj[key];
@@ -353,8 +353,10 @@ class PeopleDisplay extends HTMLElement {
             if (val == null) {
                 val = '';
             }
-            self[elem_name].innerHTML = val;
-            self[elem_name].addEventListener('change', self[fnNameOnChange]);
+            if (self.hasOwnProperty(elem_name)) {
+                self[elem_name].innerHTML = val;
+                self[elem_name].addEventListener('change', self[fnNameOnChange]);    
+            }
         }
     }
 
