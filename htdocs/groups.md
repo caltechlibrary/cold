@@ -12,6 +12,8 @@ Manage Groups
 
 <div><group-table id="group-table"></group-table></div>
 
+<script type="module" src="./widgets/config.js"></script>
+
 <script type="module" src="/widgets/groups.js"></script>
 
 <script type="module">

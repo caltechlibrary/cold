@@ -6,6 +6,8 @@ People
 
 <div id="people-controls"></div>
 
+<script type="module" src="./widgets/config.js"></script>
+
 <script type="module" src="/widgets/people.js"></script>
 
 <script type="module">

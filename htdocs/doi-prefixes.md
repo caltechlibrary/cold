@@ -4,6 +4,8 @@ DOI Prefix
 
 <div id="doi-prefix-list">Fetching doi-prefix list</div>
 
+<script type="module" src="./widgets/config.js"></script>
+
 <script type="module" src="/widgets/vocabulary.js"></script>
 
 <script type="module">

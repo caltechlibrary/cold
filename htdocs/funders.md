@@ -13,6 +13,8 @@ Input
 
 <div id="funder-manage">Funder management UI is displayed here.</div>
 
+<script type="module" src="./widgets/config.js"></script>
+
 <script type="module" src="/widgets/funder.js"></script>
 
 <script>

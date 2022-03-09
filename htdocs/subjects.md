@@ -6,6 +6,8 @@ This page lists the subjects by subject id and the text description (i.e. name).
 
 <div id="subject-list">Fetching subject list</div>
 
+<script type="module" src="./widgets/config.js"></script>
+
 <script type="module" src="/widgets/vocabulary.js"></script>
 
 <script type="module">

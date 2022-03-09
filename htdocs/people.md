@@ -12,6 +12,8 @@ Manage People
 
 <div><people-pager id="people-pager" pos="0" size="25"></people-pager> <people-table id="people-table"></people-table></div>
 
+<script type="module" src="./widgets/config.js"></script>
+
 <script type="module" src="/widgets/people.js"></script>
 
 <script type="module">
