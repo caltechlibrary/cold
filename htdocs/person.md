@@ -29,15 +29,23 @@ let people_viewer = document.getElementById('people-viewer'),
 
 function savePeople() {
     console.log("DEBUG savePeople() not implemented.");
+    /* FIXME: Validate form */
+    /* FIXME: turn form into people object, send to API */
+    /* FIXME: if successful return to list otherwise show error and remain on form */
     setTimeout(function () {
         /* Reload the current page in display mode after a save */
-        window.history.go(0);
-    }, 1000)
+        window.history.go();
+    }, 3000);
 }
 
 function cancelPeople() {
+    console.log("DEBUG cl_people_id", cl_people_id);
+    if (cl_people_id == null) {
+        returnToPeopleList();
+        return;
+    }
     /* Reload the current page in display mode */
-    window.history.go(0);
+    window.history.go();
 }
 
 function createPeople() {
