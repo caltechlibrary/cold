@@ -43,15 +43,14 @@ display_template.innerHTML = `<style>
   <div class="people-status"><label for="status">Status:</label> <span id="status" /></div>
   <div class="people-directory_person_type"><label for="directory_person_type">Directory Person Type:</label> <span id="directory_person_type" /></div>
   <div class="people-title"><label for="title">Title:</label> <span id="title" /></div>
-  <div class="people-title"><label for="title">Title:</label> <span id="title" /></div>
   <div class="people-bio"><label for="bio">BIO:</label> <span id="bio" /></div>
   <div class="people-division"><label for="division">Division:</label> <span id="division" /></div>
   <div class="people-authors_count"><label for="authors_count">Authors Count:</label> <span id="authors_count" /></div>
   <div class="people-thesis_count"><label for="thesis_count">Thesis Count:</label> <span id="thesis_count" /></div>
   <div class="people-data_count"><label for="data_count">Data Count:</label> <span id="data_count" /></div>
-  <div class="people-advisor_count"><label for="advisor_count">Advisor Count:</label> <span id="advisor_count" /></div>
-  <div class="people-editor_count"><label for="editor_count">Editor Count:</label> <span id="editor_count" /></div>
-  <div class="people-updated no-display"><label for="updated"> <span id="updated" /></div>
+  <div class="people-advisor_count"><label for="advisor_count" readonly>Advisor Count:</label> <span id="advisor_count" /></div>
+  <div class="people-editor_count"><label for="editor_count" readonly>Editor Count:</label> <span id="editor_count" /></div>
+  <div class="people-updated"><label for="updated">Updated:</label> <span id="updated" /></div>
 </div>
 `;
 
@@ -62,7 +61,7 @@ input_template.innerHTML = `<style>
 @import "/css/people.css";
 </style>
 <div class="people-input">
-  <div class="people-cl_people_id"><label for="cl_people_id">Person ID:</label> <input id="cl_people_id" name="cl_people_id" type="text" /></div>
+  <div class="people-cl_people_id"><label for="cl_people_id">Person ID:</label> <input required id="cl_people_id" name="cl_people_id" type="text" /></div>
   <div class="people-family_name"><label for="family_name">Family Name:</label> <input id="family_name" name="family_name" type="text" /></div>
   <div class="people-given_name"><label for="given_name">Given Name:</label> <input id="given_name" name="given_name" type="text" /></div>
   <div class="people-honorific"><label for="honorific">Honorific:</label> <input id="honorific" honorific="honorific" type="text" /></div>
@@ -80,7 +79,7 @@ input_template.innerHTML = `<style>
   <div class="people-snac"><label for="scac">SNAC:</label> <input id="snac" name="snac" type="text" size="18" /></div>
   <div class="people-image"><label for="image">Image:</label> <input id="image" name="image" type="text" size="18" /></div>
   <div class="people-educated_at"><label for="educated_at">Educated At:</label> <input id="educated_at" name="educated_at" type="text" size="18" /></div>
-  <div class="people-caltech"><label for="caltech">Caltech:</label> <input id="caltech" name="caltech" type="text" size="18" /></div>
+  <div class="people-caltech"><label for="caltech">Caltech:</label> <input id="caltech" pattern="true|false" name="caltech" type="text" size="18" /></div>
   <div class="people-jpl"><label for="jpl">JPL:</label> <input id="jpl" name="jpl" type="text" size="18" /></div>
   <div class="people-faculty"><label for="faculty">Faculty:</label> <input id="faculty" name="faculty" type="text" size="18" /></div>
   <div class="people-alumn"><label for="alumn">Alumn:</label> <input id="alumn" name="alumn" type="text" size="18" /></div>
@@ -89,12 +88,12 @@ input_template.innerHTML = `<style>
   <div class="people-title"><label for="title">Title:</label> <input id="title" name="title" type="text" size="18" /></div>
   <div class="people-bio"><label for="bio">Bio:</label> <textarea id="bio" name="bio" type="text" cols="18" rows="10"></textarea></div>
   <div class="people-division"><label for="division">Division:</label> <input id="division" name="division" type="text" size="18" /></div>
-  <div class="people-authors_count"><label for="authors_count">Authors Count:</label> <input id="authors_count" name="authors_count" type="text" size="18" /></div>
-  <div class="people-thesis_count"><label for="thesis_count">Thesis Count:</label> <input id="thesis_count" name="thesis_count" type="text" size="18" /></div>
-  <div class="people-data_count"><label for="data_count">Data Count:</label> <input id="data_count" name="data_count" type="text" size="18" /></div>
-  <div class="people-advisor_count"><label for="advisor_count">Advisor Count:</label> <input id="advisor_count" name="advisor_count" type="text" size="18" /></div>
-  <div class="people-editor_count"><label for="editor_count">Editor Count:</label> <input id="editor_count" name="editor_count" type="text" size="18" /></div>
-  <div class="people-updated"><label for="updated">Updated:</label> <input id="updated" name="updated" type="date" /></div>
+  <div class="people-authors_count"><label for="authors_count">Authors Count:</label> <input id="authors_count" name="authors_count" type="text" size="18" readonly /></div>
+  <div class="people-thesis_count"><label for="thesis_count">Thesis Count:</label> <input id="thesis_count" name="thesis_count" type="text" size="18" readonly /></div>
+  <div class="people-data_count"><label for="data_count">Data Count:</label> <input id="data_count" name="data_count" type="text" size="18" readonly /></div>
+  <div class="people-advisor_count"><label for="advisor_count">Advisor Count:</label> <input id="advisor_count" name="advisor_count" type="text" size="18" readonly /></div>
+  <div class="people-editor_count"><label for="editor_count">Editor Count:</label> <input id="editor_count" name="editor_count" type="text" size="18" readonly /></div>
+  <div class="people-updated"><label for="updated">Updated:</label> <input id="updated" name="updated" type="date" readonly /></div>
 </div>`;
 
 table_template.innerHTML = `<style>
@@ -320,6 +319,9 @@ class PeopleDisplay extends HTMLElement {
                 wrapper = this.shadowRoot.querySelector(`.people-${key}`);
             if ((val == undefined) || (val == null)) {
                 val = '';
+                if (key === 'updated') {
+                    val == yyyymmdd(today);
+                }
             }
             if (self.hasOwnProperty(elem_name)) {
                 self[elem_name].textContent = val;
@@ -414,18 +416,16 @@ class PeopleInput extends HTMLElement {
     }
 
     connectedCallback() {
+        let self = this;
         this.innerHTML = '';
-        let self = this,
-            today = new Date();
-
         for (const key of this.managed_attributes) {
             let val = this.getAttribute(key),
                 elem_name = `${key}_input`,
                 fnNameOnChange = `onchange_${key}`;
-            if ((val === undefined) || (val === null)) {
+            if ((val == undefined) || (val == null)) {
                 val = '';
-                if ((key === 'created') || (key === 'updated')) {
-                    val = yyyymmdd(today);
+                if  (key === 'updated') {
+                    val == yyyymmdd(today);
                 }
             }
             self[elem_name].value = val;

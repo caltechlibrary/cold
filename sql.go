@@ -129,12 +129,10 @@ func GetPeople(config *Config, clPeopleID string) (*People, error) {
 }
 
 // CreatePeople will add a "person" to the database. It
-// has a side effect of populating. Created if it was empty.
+// has a side effect of populating/updating .Updated attribute.
 func CreatePeople(config *Config, person *People) error {
 	db := config.Connection
-	if person.Created == `` {
-		person.Created = time.Now().Format(timestamp)
-	}
+	person.Updated = time.Now().Format(datestamp)
 	stmt := `INSERT INTO person (cl_people_id, object) VALUES (?,?)`
 	_, err := db.Exec(stmt, person.CLPeopleID, person.String())
 	return err
@@ -144,7 +142,7 @@ func CreatePeople(config *Config, person *People) error {
 // has a side effect of populating/updating .Updated attribute.
 func UpdatePeople(config *Config, person *People) error {
 	db := config.Connection
-	person.Updated = time.Now().Format(timestamp)
+	person.Updated = time.Now().Format(datestamp)
 	stmt := `REPLACE INTO person (cl_people_id, object) VALUES (?,?)`
 	_, err := db.Exec(stmt, person.CLPeopleID, person.String())
 	return err
@@ -175,11 +173,11 @@ func GetGroup(config *Config, clGroupID string) (*Group, error) {
 }
 
 // CreateGroup will add a "group" to the database. It
-// has a side effect of populating .Created if it was empty.
+// has a side effect of populating .Updated if it was empty.
 func CreateGroup(config *Config, group *Group) error {
 	db := config.Connection
 	if group.Updated == `` {
-		group.Updated = time.Now().Format(timestamp)
+		group.Updated = time.Now().Format(datestamp)
 	}
 	stmt := `INSERT INTO local_group (cl_group_id, object) VALUES (?,?)`
 	_, err := db.Exec(stmt, group.CLGroupID, group.String())
@@ -190,7 +188,7 @@ func CreateGroup(config *Config, group *Group) error {
 // has a side effect of populating/updating .Updated attribute.
 func UpdateGroup(config *Config, group *Group) error {
 	db := config.Connection
-	group.Updated = time.Now().Format(timestamp)
+	group.Updated = time.Now().Format(datestamp)
 	stmt := `REPLACE INTO local_group (cl_group_id, object) VALUES (?,?)`
 	_, err := db.Exec(stmt, group.CLGroupID, group.String())
 	return err
@@ -220,13 +218,9 @@ func GetFunder(config *Config, clFunderID string) (*Funder, error) {
 	return obj, err
 }
 
-// CreateFunder will add a "funder" to the database. It
-// has a side effect of populating .Created if it was empty.
+// CreateFunder will add a "funder" to the database.
 func CreateFunder(config *Config, funder *Funder) error {
 	db := config.Connection
-	if funder.Created == `` {
-		funder.Created = time.Now().Format(timestamp)
-	}
 	stmt := `INSERT INTO funder (cl_funder_id, object) VALUES (?,?)`
 	_, err := db.Exec(stmt, funder.CLFunderID, funder.String())
 	return err
@@ -236,7 +230,7 @@ func CreateFunder(config *Config, funder *Funder) error {
 // has a side effect of populating/updating .Updated attribute.
 func UpdateFunder(config *Config, funder *Funder) error {
 	db := config.Connection
-	funder.Updated = time.Now().Format(timestamp)
+	funder.Updated = time.Now().Format(datestamp)
 	stmt := `REPLACE INTO funder (cl_funder_id, object) VALUES (?,?)`
 	_, err := db.Exec(stmt, funder.CLFunderID, funder.String())
 	return err

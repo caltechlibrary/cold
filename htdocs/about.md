@@ -6,7 +6,7 @@ About Cold
 ==========
 
 cold is a micro service for managing controlled object lists, i.e.
-people, groups and funders using by Caltech Library's repositories
+people and groups used by Caltech Library's repositories
 and archival systems.
 
 Developers

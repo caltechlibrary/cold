@@ -39,7 +39,6 @@ function savePeople() {
 }
 
 function cancelPeople() {
-    console.log("DEBUG cl_people_id", cl_people_id);
     if (cl_people_id == null) {
         returnToPeopleList();
         return;

@@ -45,7 +45,7 @@ type People struct {
 	Title               string `json:"title,omitempty"`
 	Bio                 string `json:"bio,omitempty"`
 	Division            string `json:"division,omitempty"`
-	Created             string `json:"created,omitempty"`
+	//Created             string `json:"created,omitempty"`
 	Updated             string `json:"updated,omitempty"`
 }
 
@@ -84,7 +84,7 @@ type Funder struct {
 	ROR              string   `json:"ror,omitempty"`
 	DOI              string   `json:"doi,omitempty"`
 	GrantNumber      []string `json:"grant_number,omitempty"`
-	Created          string   `json:"created,omitempty"`
+	//Created          string   `json:"created,omitempty"`
 	Updated          string   `json:"updated,omitempty"`
 }
 
