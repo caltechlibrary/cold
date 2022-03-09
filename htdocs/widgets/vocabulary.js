@@ -5,9 +5,15 @@
 
 const pair_template = document.createElement('template');
 
-pair_template.innerHTML = `<style>@import "/css/vocabulary.css";</style>
+pair_template.innerHTML = `<style>
+@import "/app/widgets/vocabulary.css";
+@import "/css/vocabulary.css";
+</style>
 <span id="identifier" class="vocabulary-identifier"></span>
-<style>@import "/css/vocabulary.css";</style>
+<style>
+@import "/app/widgets/vocabulary.css";
+@import "/css/vocabulary.css";
+</style>
 <span id="name" class="vocabulary-name"></span>
 `;
 

@@ -9,7 +9,7 @@ const version_info_template = document.createElement('template');
 
 version_info_template.innerHTML = `<style>
 /* Default CSS */
-@import "/widgets/version-info.css";
+@import "/app/widgets/version-info.css";
 /* Site overrides */
 @import "/css/site.css";
 </style>

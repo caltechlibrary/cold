@@ -11,7 +11,7 @@ const display_template = document.createElement('template'),
  */
 display_template.innerHTML = `<style>
 /* Default CSS */
-@import "funders.css";
+@import "/app/widget/funders.css";
 /* Site overrides */
 @import "/css/funders.css";
 </style>
@@ -29,7 +29,7 @@ display_template.innerHTML = `<style>
 
 input_template.innerHTML = `<style>
 /* Default CSS */
-@import "funders.css";
+@import "/app/widget/funders.css";
 /* Site overrides */
 @import "/css/funders.css";
 </style>

@@ -120,7 +120,7 @@ func GetAllPeopleID(config *Config) ([]string, error) {
 func GetPeople(config *Config, clPeopleID string) (*People, error) {
 	stmt := `SELECT object FROM person WHERE cl_people_id = ?`
 	obj := new(People)
-	obj.Name = new(Name)
+	//	obj.Name = new(Name)
 	err := sqlQueryObject(config, stmt, clPeopleID, &obj)
 	if isErrorMsg(err, "not found") {
 		return nil, nil

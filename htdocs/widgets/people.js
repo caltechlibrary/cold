@@ -13,20 +13,20 @@ const display_template = document.createElement('template'),
  */
 display_template.innerHTML = `<style>
 /* Default CSS */
-@import "people.css";
+@import "/app/widgets/people.css";
 /* Site overrides */
 @import "/css/people.css";
 </style>
 <div class="people-display">
   <div class="people-cl_people_id"><label for="cl_people_id">Person ID:</label> <span id="cl_people_id" /></div>
-  <div class="people-family"><label for="family">Family Name:</label> <span id="family" /></div>
-  <div class="people-given"><label for="given">Given Name:</label> <span id="given" /></div>
+  <div class="people-family_name"><label for="family_name">Family:</label> <span id="family_name" /></div>
+  <div class="people-given_name"><label for="given_name">Given:</label> <span id="given_name" /></div>
   <div class="people-honorific"><label for="honorific">Honorific:</label> <span id="honorific" /></div>
-  <div class="people-lineage"><label for="lineaged">Lineage:</label> <span id="lineage" /></div>
+  <dic class="people-lineage"><label for="lineage">Lineage:</labe> <span id="lineage" /></div>
   <div class="people-orcid"><label for="orcid">ORCID:</label> <span id="orcid" /></div>
   <div class="people-thesis_id"><label for="thesis_id">Thesis ID:</label> <span id="thesis_id" /></div>
   <div class="people-advisor_id"><label for="advisor_id">Advisor ID:</label> <span id="advisor_id" /></div>
-  <div class="people-authors_id"><label for="authors_id">Author ID:</label> <span id="author_id" /></div>
+  <div class="people-authors_id"><label for="authors_id">Author ID:</label> <span id="authors_id" /></div>
   <div class="people-archivesspace_id"><label for="archivesspace_id">ArchivesSpace ID:</label> <span id="archivesspace_id" /></div>
   <div class="people-directory_id"><label for="directory_id">Directory ID:</label> <span id="directory_id" /></div>
   <div class="people-viaf"><label for="viaf">VIAF:</label> <span id="viaf" /></div>
@@ -57,14 +57,14 @@ display_template.innerHTML = `<style>
 
 input_template.innerHTML = `<style>
 /* Default CSS */
-@import "people.css";
+@import "/app/widgets/people.css";
 /* Site overrides */
 @import "/css/people.css";
 </style>
 <div class="people-input">
   <div class="people-cl_people_id"><label for="cl_people_id">Person ID:</label> <input id="cl_people_id" name="cl_people_id" type="text" /></div>
-  <div class="people-family"><label for="family">Family Name:</label> <input id="family" name="family" type="text" /></div>
-  <div class="people-given"><label for="given">Given Name:</label> <input id="given" name="given" type="text" /></div>
+  <div class="people-family_name"><label for="family_name">Family Name:</label> <input id="family_name" name="family_name" type="text" /></div>
+  <div class="people-given_name"><label for="given_name">Given Name:</label> <input id="given_name" name="given_name" type="text" /></div>
   <div class="people-honorific"><label for="honorific">Honorific:</label> <input id="honorific" honorific="honorific" type="text" /></div>
   <div class="people-lineage"><label for="lineage">Lineage:</label> <input id="lineage" name="lineage" type="text" /></div>
   <div class="people-orcid"><label for="orcid">ORCID:</label> <input id="orcid" name="orcid" type="text" size="18" /></div>
@@ -77,6 +77,7 @@ input_template.innerHTML = `<style>
   <div class="people-lcnaf"><label for="lcnaf">LCNAF:</label> <input id="lcnaf" name="lcnaf" type="text" size="18" /></div>
   <div class="people-isni"><label for="isni">ISNI:</label> <input id="isni" name="isni" type="text" size="18" /></div>
   <div class="people-wikidata"><label for="wikidata">Wikidata:</label> <input id="wikidata" name="wikidata" type="text" size="18" /></div>
+  <div class="people-snac"><label for="scac">SNAC:</label> <input id="snac" name="snac" type="text" size="18" /></div>
   <div class="people-image"><label for="image">Image:</label> <input id="image" name="image" type="text" size="18" /></div>
   <div class="people-educated_at"><label for="educated_at">Educated At:</label> <input id="educated_at" name="educated_at" type="text" size="18" /></div>
   <div class="people-caltech"><label for="caltech">Caltech:</label> <input id="caltech" name="caltech" type="text" size="18" /></div>
@@ -106,14 +107,17 @@ table_template.innerHTML = `<style>
   <thead>
     <tr>
       <th class="people-col-cl_people_id" title="click column to sort ascending, click again for descending">People ID</th>
-      <th class="people-col-name" title="click column to sort ascending, click again for descending">Name</th>
+      <th class="people-col-family_name" title="click column to sort ascending, click again for descending">Family Name</th>
+      <th class="people-col-given_name" title="click column to sort ascending, click again for descending">Given Name</th>
+      <th class="people-col-honorific" title="click column to sort ascending, click again for descending">Honorific</th>
+      <th class="people-col-lineage" title="click column to sort ascending, click again for descending">Lineage</th>
       <th class="people-col-orcid" title="click column to sort ascending, click again for descending">orcid</th>
       <th class="people-col-thesis_id" title="click column to sort ascending, click again for descending">Thesis ID</th>
       <th class="people-col-advisor_id" title="click column to sort ascending, click again for descending">Advisor ID</th>
       <th class="people-col-authors_id" title="click column to sort ascending, click again for descending">Authors ID</th>
       <th class="people-col-archivesspace_id" title="click column to sort ascending, click again for descending">ArchivesSpace ID</th>
       <th class="people-col-directory_id" title="click column to sort ascending, click again for descending">Directory ID</th>
-      <th class="people-col-viad" title="click column to sort ascending, click again for descending">VIAF</th>
+      <th class="people-col-viaf" title="click column to sort ascending, click again for descending">VIAF</th>
       <th class="people-col-lcnaf" title="click column to sort ascending, click again for descending">LCNAF</th>
       <th class="people-col-isni" title="click column to sort ascending, click again for descending">ISNI</th>
       <th class="people-col-wikidata" title="click column to sort ascending, click again for descending">Wikidata</th>
@@ -180,51 +184,17 @@ function mmddyyyy(date) {
     return `${month}/${day}/${year}`
 }
 
-function display_name_object(obj) {
-    if ((obj.display_name !== undefined) && (obj.display_name !== "")) {
-        return obj.display_name;
-    }
-    let parts = [];
-    if (obj.honorific !== undefined) {
-        parts.push(obj.honorific);
-    }
-    if (obj.given !== undefined) {
-        parts.push(obj.given);
-    }
-    if (obj.family !== undefined) {
-        parts.push(obj.family);
-    }
-    if (obj.lineage !== undefined) {
-        parts.push(obj.lineage);
-    }
-    return parts.join(', ');
-}
-
-function sort_name_object(obj) {
-    if ((obj.sort_name !== undefined) && (obj.sort_name !== "")) {
-        return obj.sort_name;
-    }
-    let parts = [];
-    if (obj.family !== undefined) {
-        parts.push(obj.family);
-    }
-    if (obj.given !== undefined) {
-        parts.push(obj.given);
-    }
-    if (obj.lineage !== undefined) {
-        parts.push(obj.lineage);
-    }
-    if (obj.honorific !== undefined) {
-        parts.push(obj.honorific);
-    }
-    return parts.join(', ');
-}
 
 /******************************
  * Web worker classes
  ******************************/
 
-let people_field_names = [ 'cl_people_id', 'name', 'orcid', 'thesis_id', 'advisor_id', 'authors_id', 'archivesspace_id', 'directory_id', 'viad', 'lcnaf', 'isni', 'wikidata', 'snac', 'image', 'educated_at', 'caltech', 'jpl', 'faculty', 'alumn', 'status', 'directory_person_type', 'title', 'bio', 'division', 'authors_count', 'thesis_count', 'data_count', 'advisor_count', 'editor_count', 'updated' ];
+let people_field_names = [ 'cl_people_id', 'family_name', 'given_name', 'honorific', 'lineage', 
+                           'orcid', 'thesis_id', 'advisor_id', 'authors_id', 'archivesspace_id',
+                           'directory_id', 'viaf', 'lcnaf', 'isni', 'wikidata', 'snac', 'image',
+                           'educated_at', 'caltech', 'jpl', 'faculty', 'alumn', 'status',
+                           'directory_person_type', 'title', 'bio', 'division', 'authors_count',
+                           'thesis_count', 'data_count', 'advisor_count', 'editor_count', 'updated' ];
 
 /**
  * People is a minimalist implementation of a People object
@@ -323,7 +293,6 @@ class PeopleDisplay extends HTMLElement {
         for (const key of this.managed_attributes) {
             let elem = this.shadowRoot.getElementById(key);
             if (obj.hasOwnProperty(key) && (elem !== null)) {
-                console.log("DEBUG set value", key, obj);
                 this.setAttribute(key, obj[key]);
                 elem.innerHTML = obj[key];
             }
@@ -332,7 +301,6 @@ class PeopleDisplay extends HTMLElement {
 
     setAttribute(key, val) {
         if (this.managed_attributes.indexOf(key) >= 0) {
-            console.log("DEBUG setAttribute()", key, val);
             let self = this,
                 elem = this.shadowRoot.getElementById(key);
             elem.innerHTML = val;
@@ -350,11 +318,11 @@ class PeopleDisplay extends HTMLElement {
                 elem_name = `${key}_field`,
                 fnNameOnChange = `onchange_${key}`,
                 wrapper = this.shadowRoot.querySelector(`.people-${key}`);
-            if (val == null) {
+            if ((val == undefined) || (val == null)) {
                 val = '';
             }
             if (self.hasOwnProperty(elem_name)) {
-                self[elem_name].innerHTML = val;
+                self[elem_name].textContent = val;
                 self[elem_name].addEventListener('change', self[fnNameOnChange]);    
             }
         }
@@ -591,12 +559,10 @@ class PeopleInput extends HTMLElement {
                     colElem.classList.add(`people-col-${col}`);
                     if (obj.hasOwnProperty(col)) {
                         if (col == 'cl_people_id') {
-                            colElem.innerHTML = `<a href="person.html?cl_people_id=${cl_people_id}" title="Edit this record" target="_blank">${obj[col]}</a>`;
-                        } else if (col === 'name') {
-                            colElem.textContent = sort_name_object(obj[col]);
+                            colElem.innerHTML = `<a href="person.html?cl_people_id=${cl_people_id}" title="Edit this record">${obj[col]}</a>`;
                         } else if (col === 'orcid') {
                             if ((obj[col] !== undefined) && (obj[col] !== '')) {
-                                colElem.innerHTML = `<a href="https://orcid.org/${obj[col]}" title="Go to ORCID record at orcid.org website" target="_blank">${obj[col]}</a>`;
+                                colElem.innerHTML = `<a href="https://orcid.org/${obj[col]}" title="Go to ORCID record at orcid.org website">${obj[col]}</a>`;
                             } else {
                                 colElem.innerHTML = obj[col];
                             }
@@ -699,7 +665,6 @@ class PeoplePager extends HTMLElement {
 
     get_position() {
         let pos = this.getAttribute('pos');
-        console.log("DEBUG get_position()", pos);
         return new Numner(pos);
     }
 

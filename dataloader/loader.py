@@ -216,7 +216,6 @@ def load_groups(f_name):
                 if ('end' in group) and (group['end'].endswith('"')):
                     group['end'] = group['end'].strip('"')
 
-                print(f'DEBUG {cl_group_id} -> {group}')
                 key_path = f'/api/groups/{normalize_id(cl_group_id)}'
                 resp, err = rest_head(key_path)
                 if err != None and not err.startswith('HTTP Error 404'):
@@ -301,7 +300,7 @@ def load_people(f_name):
         for i, person in enumerate(people):
             if 'cl_people_id' in person:
                 cl_people_id = person['cl_people_id']
-                person['name'] = person_to_name(person)
+                #person['name'] = person_to_name(person)
                 # Fix attribute name for VIAF
                 if 'viaf_id' in person:
                     person['viaf'] = person['viaf_id']

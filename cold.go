@@ -12,8 +12,12 @@ type Name struct {
 }
 
 type People struct {
-	CLPeopleID          string `json:"cl_people_id,required"`
-	Name                *Name  `json:"name,omitempty"`
+	CLPeopleID string `json:"cl_people_id"`
+	//Name                *Name  `json:"name,omitempty"`
+	Family              string `json:"family_name,omitempty"`
+	Given               string `json:"given_name,omitempty"`
+	Honorific           string `json:"honorific,omitempty"`
+	Lineage             string `json:"lineage,omitempty"`
 	ORCID               string `json:"orcid,omitempty"`
 	ROR                 string `json:"ror,omitempty"`
 	DOI                 string `json:"doi,omitempty"`
@@ -51,7 +55,7 @@ type People struct {
 //         pi,parent,prefix,grid,isni,ringgold,viaf,ror,
 //         updated
 type Group struct {
-	CLGroupID           string `json:"cl_group_id,required"`
+	CLGroupID           string `json:"cl_group_id"`
 	Name                string `json:"name,omitempty"`
 	Alternative         string `json:"alternative,omitempty"`
 	EMail               string `json:"email,omitempty"`
@@ -74,7 +78,7 @@ type Group struct {
 }
 
 type Funder struct {
-	CLFunderID       string   `json:"cl_funder_id,required"`
+	CLFunderID       string   `json:"cl_funder_id"`
 	Agency           string   `json:"agency,omitempty"`
 	CrossRefFunderID string   `json:"crossref_funder_id,omitempty"`
 	ROR              string   `json:"ror,omitempty"`
@@ -149,7 +153,7 @@ func (pub *Publisher) String() string {
 func (pub *Publisher) ToMap() (map[string]interface{}, error) {
 	m := map[string]interface{}{}
 	if pub.Name != `` {
-		return m, fmt.Errorf(`No publisher name`)
+		return m, fmt.Errorf(`no publisher name`)
 	}
 	if pub.DOIPrefix != `` {
 		m[pub.DOIPrefix] = pub.Name
@@ -159,7 +163,7 @@ func (pub *Publisher) ToMap() (map[string]interface{}, error) {
 	}
 	var err error
 	if len(m) == 0 {
-		err = fmt.Errorf(`No DOI prefix or ISSN`)
+		err = fmt.Errorf(`no DOI prefix or ISSN`)
 	}
 	return m, err
 }
