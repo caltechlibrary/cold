@@ -1,0 +1,27 @@
+/**
+ * cl-pager.css this is the default styling for our custom web component.
+ * It can be augmented by the stylesheet in `/css/pager.css`.
+ */
+
+label {
+    vertical-align: top;
+    text-align: right;
+}
+
+.no-display {
+    display: none;
+}
+
+.pager-status {
+    display: none;
+}
+
+.pager-pos {
+}
+
+.pager-size {
+}
+
+.pager-total {
+}
+
