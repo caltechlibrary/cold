@@ -17,7 +17,7 @@ pager_template.innerHTML = `<style>
   <a href="" id="cl-pager-next" class="cl-pager-next">Next</a>
   <input type="range" id="cl-pager-slider" />
   <span id="cl-pager-status" class="cl-pager-status">
-     (<span id="cl-pager-value" class="cl-pager-value"></span>/<span id="cl-pager-max" class="cl-pager-max"></span>, <span id="cl-pager-step" class="cl-pager-step"></span>)
+     (<span id="cl-pager-pos" class="cl-pager-pos"></span>/<span id="cl-pager-max" class="cl-pager-max"></span>, <span id="cl-pager-step" class="cl-pager-step"></span>)
   </span>
 </div>
 `;

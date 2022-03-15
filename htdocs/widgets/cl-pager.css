@@ -3,25 +3,20 @@
  * It can be augmented by the stylesheet in `/css/pager.css`.
  */
 
-label {
-    vertical-align: top;
-    text-align: right;
-}
-
 .no-display {
     display: none;
 }
 
-.pager-status {
+.cl-pager-status {
     display: none;
 }
 
-.pager-pos {
+.cl-pager-pos {
 }
 
-.pager-size {
+.cl-pager-size {
 }
 
-.pager-total {
+.cl-pager-total {
 }
 

@@ -152,21 +152,19 @@ pager_template.innerHTML = `<style>
 </style>
 <div>
   <a href="" id="people-pager-previous" class="people-pager-previous">Previous</a> 
+  <input id="people-pager-pos" type="range" min="0" max="-1" step="1" value="0" />
   <a href="" id="people-pager-next" class="people-pager-next">Next</a>
-  <span id="people-pager-status" class="people-pager-status">
-     (<span id="people-pager-pos" class="people-pager-pos"></span>/<span id="people-pager-total" class="people-pager-total"></span>, <span id="people-pager-size" class="people-pager-size"></span>)
-  </span>
 </div>
 `;
 
 /*
  * Utility functions
  */
-function as_number(val) {
-    if (val === null) {
+function as_integer(val) {
+    if ((val === null) || (val === undefined) || (val == 'null')) {
         return 0;
     }
-    return new Number(val);
+    return parseInt(val, 10);
 }
 
 function yyyymmdd(date) {
@@ -544,6 +542,11 @@ class PeopleInput extends HTMLElement {
         super.setAttribute(key, val);
     }
 
+    reset_table() {
+        this.managed_objects = [];
+        this.tbody.innerHTML = '';
+    }
+
     refresh_table() {
         this.tbody.innerHTML = '';
         if (this.managed_objects.length > 0) {
@@ -624,17 +627,17 @@ class PeoplePager extends HTMLElement {
     constructor () {
         super();
         this.defaults = new Map()
-        this.defaults.set('size', 250);
+        this.defaults.set('step', 250);
         this.defaults.set('pos', 0);
         this.defaults.set('next', 0);
         this.defaults.set('previous', 0);
         this.defaults.set('total', -1);
-        this.size = this.defaults.get('size');
+        this.step = this.defaults.get('step');
         this.pos = this.defaults.get('pos');
         this.next = this.defaults.get('next');
         this.previous = this.defaults.get('previous');
         this.total = this.defaults.get('total');
-        this.managed_attributes = [ 'size', 'pos', 'next', 'previous', 'total' ];
+        this.managed_attributes = [ 'step', 'pos', 'next', 'previous', 'total' ];
 
         this.attachShadow({mode: 'open'});
         this.shadowRoot.appendChild(pager_template.content.cloneNode(true));
@@ -668,27 +671,30 @@ class PeoplePager extends HTMLElement {
         return new Numner(pos);
     }
 
-    set_position(pos, size) {
-        let next = pos + size,
-            prev = pos - size,
+    set_position(pos, step) {
+        let next = pos + step,
+            prev = pos - step,
             total = this.getAttribute('total');
         if (prev < 0) {
             prev = 0;
         }
         if ((total > -1) && (next >= total)) {
-            next = total - size;
+            next = total - step;
         }
         this.setAttribute('pos', pos);
-        this.setAttribute('size', size);
+        this.setAttribute('step', step);
         let elem = this.shadowRoot.getElementById('people-pager-next');
-        elem.setAttribute('href', `?size=${size}&pos=${next}`)
+        elem.setAttribute('href', `?step=${step}&pos=${next}`);
         elem = this.shadowRoot.getElementById('people-pager-previous');
-        elem.setAttribute('href', `?size=${size}&pos=${prev}`)
+        elem.setAttribute('href', `?step=${step}&pos=${prev}`);
+        elem = this.shadowRoot.getElementById('people-pager-pos');
+        elem.setAttribute('max', `${total}`);
+        elem.value = pos;
     }
 
-    get_size() {
-        let size = this.getAttribute('size');
-        return new Number(size);
+    get_step() {
+        let step = this.getAttribute('step');
+        return new Number(step);
     }
 
     setAttribute(key, val) {
@@ -708,28 +714,38 @@ class PeoplePager extends HTMLElement {
     }
 
     connectedCallback() {
-        let pos = as_number(this.getAttribute('pos')),
-            size = as_number(this.getAttribute('size')),
-            total = as_number(this.getAttribute('total'));
+        let self = this,
+            pos = as_integer(this.getAttribute('pos')),
+            step = as_integer(this.getAttribute('step')),
+            total = as_integer(this.getAttribute('total')),
+            elem = this.shadowRoot.getElementById('people-pager-pos');
+
         this.innerHTML = '';
+        elem.setAttribute('name', 'go to record');
+        elem.setAttribute('title', `Go to record`);
+        elem.value = pos;
+        elem.setAttribute('step', step);
+        elem.setAttribute('min', 0);
+        elem.setAttribute('max', total);
+
         for (const key of this.managed_attributes) {
-            let elem = this.shadowRoot.getElementById(`people-pager-${key}`);
+            elem = this.shadowRoot.getElementById(`people-pager-${key}`);
             if ([ 'previous', 'next'].indexOf(key) >= 0) {
                 let href = elem.getAttribute('href'),
                     val = this.getAttribute(key);
                 if (key == 'previous') {
                     let previous = 0;
-                     if (pos > size) {
-                        previous = pos - size;
+                     if (pos > step) {
+                        previous = pos - step;
                     }
-                    elem.setAttribute('href', `?size=${size}&pos=${previous}`);
+                    elem.setAttribute('href', `?step=${step}&pos=${previous}`);
                 }
                 if (key == 'next') {
-                    let next = pos + size;
+                    let next = pos + step;
                     if ((total > 0) && (next >= total)) {
                         next = total - 1;
                     }
-                    elem.setAttribute('href', `?size=${size}&pos=${next}`);
+                    elem.setAttribute('href', `?step=${step}&pos=${next}`);
                 }
             } else if (elem !== null) {
                 let val = this.getAttribute(key);
@@ -743,6 +759,25 @@ class PeoplePager extends HTMLElement {
                 elem.textContent = val;
             }
         }
+        elem = this.shadowRoot.getElementById('people-pager-pos');
+        elem.addEventListener('change', function (evt) {
+            let slider = evt.target,
+                params = (new URL(document.location)).searchParams,
+                pos = as_integer(elem.value),
+                step = as_integer(params.get('step'));
+
+            if (step === 0) {
+                step = 5;
+            }
+            slider.setAttribute('title', `Go to record ${pos}`);
+            self.set_position(pos, step);
+        
+            /* I want to maintain changes in the history and update the URL ... */
+            const url = new URL(window.location);
+            url.searchParams.set('pos', pos);
+            url.searchParams.set('step', step);
+            window.history.pushState({}, '', url);
+        }, true);        
     }
 
     disconnectCallback() {

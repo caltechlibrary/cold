@@ -10,7 +10,7 @@ This page provides people object management. Click on the people ID to view, edi
 Manage People
 -------------
 
-<div><people-pager id="people-pager" pos="0" size="25"></people-pager> <people-table id="people-table"></people-table></div>
+<div><people-pager id="people-pager" pos="0" step="5"></people-pager> <people-table id="people-table"></people-table></div>
 
 <script type="module" src="./widgets/config.js"></script>
 
@@ -21,11 +21,35 @@ Manage People
 
 let people_table = document.getElementById('people-table'),
     add_people = document.getElementById('add-people'),
-    people_pager = document.getElementById('people-pager');
+    people_pager = document.getElementById('people-pager'),
+    keys = [];
+
+function as_integer(val) {
+    if (val === null) {
+        return 0;
+    }
+    return parseInt(val, 10);
+}
+
 
 add_people.addEventListener('click', function () {
     window.location.href = 'person.html';
-})
+});
+
+people_pager.addEventListener('change', function (evt) {
+    let elem = evt.target,
+        pos = as_integer(elem.getAttribute('pos')),
+        step = as_integer(elem.getAttribute('step'));
+    console.log(`DEBUG people_pager as elem ->`, elem);
+    people_table.reset_table();
+    let start = 0 + pos,
+        end = start + step;
+    console.log(`DEBUG start -> ${start} ${typeof(start)} end -> ${end} ${typeof(end)} step -> ${step} ${typeof(step)}`);
+    console.log("DEBUG keys.slice -> ", keys.slice(start, end));
+    for (const key of keys.slice(start, end)) {
+        updateRow(key);
+    }
+}, false);
 
 function updateRow(key) {
     let oReq = new XMLHttpRequest(),
@@ -44,32 +68,27 @@ function updatePeopleTable() {
     /* Iterate through the fetched data, generate a people-display element
        and link to form for editing people data */
     let src = this.responseText,
-        keys = JSON.parse(src),
         pager = document.getElementById('people-pager'),
-        params = (new URL(document.location)).searchParams, /* new URLSearchParams(document.location.search), */
+        params = (new URL(document.location)).searchParams,
         pos = new Number(params.get('pos')),
-        size = new Number(params.get('size'));
+        step = new Number(params.get('step'));
+    /* Update the list of keys from what we retrieved. */
+    keys = JSON.parse(src);
 
-    console.log("DEBUG document.location", document.location);
-    console.log("DEBUG pos, size", pos, size);
-    /* We need to know size first before we can set position */
+    /* We need to know step first before we can set position */
     pager.setAttribute('total', keys.length);
-    if (size > 0) {
-        pager.setAttribute('size', size);
+    if (step > 0) {
+        pager.setAttribute('step', step);
     } else {
-        size = pager.get_size();
+        step = pager.get_step();
     }
     if (pos >= 0) {
-        pager.set_position(pos, size);
+        pager.set_position(pos, step);
     }
     keys.sort();
-    console.log("DEBUG pos/size", pos, size);
 
     let start = 0 + pos,
-        end = start + size;
-    console.log("DEBUG start/end", start, end);
-    /* FIXME: debugging, manually setting start end *
-    start = 3; end = 5; */
+        end = start + step;
     for (const key of keys.slice(start, end)) {
         updateRow(key);
     }

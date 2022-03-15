@@ -25,11 +25,16 @@
 			max = pager.getAttribute("max"),
 			elem_name = pager.getAttribute("for"),
 			elem = document.getElementById("test-list");
-		
+		console.log("DEBUG pos", pos);
+		console.log("DEBUG step", step);
+		console.log("DEBUG min", min);
+		console.log("DEBUG max", max);
+
 		elem.innerHTML = '';
 		for (let i = pos; (i <= max) && (i < (pos + step)); i++) {
 			let li = document.createElement('li');
-			li.innerHTML = `no. ${i}`;
+			li.textContent = `no. ${i}`;
+			console.log("DEBUG adding li", li);
 			elem.appendChild(li)
 		}
 		</script>
