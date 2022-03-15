@@ -29,6 +29,7 @@ let people_viewer = document.getElementById('people-viewer'),
     base_url = Cfg.base_url;
 
 
+
 function savePeople() {
     console.log("DEBUG savePeople() not implemented.");
     /* FIXME: Validate form */
@@ -133,15 +134,15 @@ function retrievePeople(cl_people_id) {
 }
 
 save_button.innerHTML = 'Save';
-save_button.addEventListener('click', savePeople);
+save_button.addEventListener('click', savePeople, false);
 cancel_button.innerHTML = 'Cancel';
-cancel_button.addEventListener('click', cancelPeople);
+cancel_button.addEventListener('click', cancelPeople, false);
 edit_button.innerHTML = 'Edit';
-edit_button.addEventListener('click', updatePeople);
+edit_button.addEventListener('click', updatePeople, false);
 remove_button.innerHTML = 'Remove';
-remove_button.addEventListener('click', removePeople);
+remove_button.addEventListener('click', removePeople, false);
 return_button.innerHTML = "Return to list";
-return_button.addEventListener('click', returnToPeopleList);
+return_button.addEventListener('click', returnToPeopleList, false);
 if (! cl_people_id) {
     createPeople();
 } else {
