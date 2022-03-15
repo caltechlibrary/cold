@@ -10,7 +10,7 @@ This page provides people object management. Click on the people ID to view, edi
 Manage People
 -------------
 
-<div><people-pager id="people-pager" pos="0" step="5"></people-pager> <people-table id="people-table"></people-table></div>
+<div><people-pager id="people-pager" pos="0" step="25"></people-pager> <people-table id="people-table"></people-table></div>
 
 <script type="module" src="./widgets/config.js"></script>
 
@@ -31,7 +31,6 @@ function as_integer(val) {
     return parseInt(val, 10);
 }
 
-
 add_people.addEventListener('click', function () {
     window.location.href = 'person.html';
 });
@@ -40,13 +39,12 @@ people_pager.addEventListener('change', function (evt) {
     let elem = evt.target,
         pos = as_integer(elem.getAttribute('pos')),
         step = as_integer(elem.getAttribute('step'));
-    console.log(`DEBUG people_pager as elem ->`, elem);
     people_table.reset_table();
-    let start = 0 + pos,
-        end = start + step;
-    console.log(`DEBUG start -> ${start} ${typeof(start)} end -> ${end} ${typeof(end)} step -> ${step} ${typeof(step)}`);
-    console.log("DEBUG keys.slice -> ", keys.slice(start, end));
+    let start = pos,
+        end = (pos + step);
+    /** NOTE: I render the rows here because I've tied them to the set_position call of the pager */
     for (const key of keys.slice(start, end)) {
+        console.log(`DEBUG key -> ${key}`);
         updateRow(key);
     }
 }, false);
@@ -86,12 +84,6 @@ function updatePeopleTable() {
         pager.set_position(pos, step);
     }
     keys.sort();
-
-    let start = 0 + pos,
-        end = start + step;
-    for (const key of keys.slice(start, end)) {
-        updateRow(key);
-    }
 }
 
 function refreshPeople() {

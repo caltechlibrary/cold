@@ -627,7 +627,7 @@ class PeoplePager extends HTMLElement {
     constructor () {
         super();
         this.defaults = new Map()
-        this.defaults.set('step', 250);
+        this.defaults.set('step', 25);
         this.defaults.set('pos', 0);
         this.defaults.set('next', 0);
         this.defaults.set('previous', 0);
@@ -767,7 +767,7 @@ class PeoplePager extends HTMLElement {
                 step = as_integer(params.get('step'));
 
             if (step === 0) {
-                step = 5;
+                step = self.defaults.get('step');
             }
             slider.setAttribute('title', `Go to record ${pos}`);
             self.set_position(pos, step);
