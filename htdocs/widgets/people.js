@@ -632,11 +632,13 @@ class PeoplePager extends HTMLElement {
         this.defaults.set('next', 0);
         this.defaults.set('previous', 0);
         this.defaults.set('total', -1);
+        /*
         this.step = this.defaults.get('step');
         this.pos = this.defaults.get('pos');
         this.next = this.defaults.get('next');
         this.previous = this.defaults.get('previous');
         this.total = this.defaults.get('total');
+        */
         this.managed_attributes = [ 'step', 'pos', 'next', 'previous', 'total' ];
 
         this.attachShadow({mode: 'open'});
@@ -719,6 +721,12 @@ class PeoplePager extends HTMLElement {
             step = as_integer(this.getAttribute('step')),
             total = as_integer(this.getAttribute('total')),
             elem = this.shadowRoot.getElementById('people-pager-pos');
+        /* Allow override from URL search params */
+        let params = new URL(document.location).searchParams;
+
+        if (params.get('step')) {
+            step = as_integer(params.get('step'));
+        }    
 
         this.innerHTML = '';
         elem.setAttribute('name', 'go to record');
@@ -767,7 +775,7 @@ class PeoplePager extends HTMLElement {
                 step = as_integer(params.get('step'));
 
             if (step === 0) {
-                step = self.defaults.get('step');
+                step = self.getAttribute('step');
             }
             slider.setAttribute('title', `Go to record ${pos}`);
             self.set_position(pos, step);

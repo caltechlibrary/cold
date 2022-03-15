@@ -28,17 +28,58 @@ let people_viewer = document.getElementById('people-viewer'),
     cl_people_id = params.get('cl_people_id'),
     base_url = Cfg.base_url;
 
+function as_bool(s) {
+    if (s.startsWith('t') || s.startsWith('T') || s.startsWith('1')) {
+        return true;
+    }
+    return false;
+}
+
+function normalize_person(data) {
+    let m = new Map();
+    for (const key of Object.keys(data)) {
+        switch(key) {
+            case "caltech":
+                m[key] = as_bool(data[key]);
+                break;
+            case "faculty":
+                m[key] = as_bool(data[key]);
+                break;
+            case "jpl":
+                m[key] = as_bool(data[key]);
+                break;
+            case "alumn":
+                m[key] = as_bool(data[key]);
+                break;
+            default:
+                m[key] = data[key];
+        }
+    }
+    return m
+}
 
 
 function savePeople() {
-    console.log("DEBUG savePeople() not implemented.");
-    /* FIXME: Validate form */
-    /* FIXME: turn form into people object, send to API */
-    /* FIXME: if successful return to list otherwise show error and remain on form */
-    setTimeout(function () {
-        /* Reload the current page in display mode after a save */
-        window.history.go();
-    }, 3000);
+    let elem = document.querySelector('#people-viewer > people-input');
+    console.log("DEBUG savePeople() partially implemented.", elem, elem.value);
+    if (elem !== null) {
+        let data = elem.value,
+            src = JSON.stringify(normalize_person(data));
+        /* FIXME: Validate form */
+        /* FIXME: turn form into people object, send to API */
+        /* FIXME: if successful return to list otherwise show error and remain on form */
+        let oReq = new XMLHttpRequest(),
+            api_path = `${base_url}/api/people/${cl_people_id}`;
+        console.log("DEBUG data", typeof(data), data);
+        console.log("DEBUG src", typeof(src), src);
+        console.log(`DEBUG api_path ${api_path}`);
+        oReq.addEventListener('load', function () {
+            console.log(`DEBUG load recieved`);
+        });
+        oReq.open('POST', api_path);
+        oReq.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+        oReq.send(src);
+    }
 }
 
 function cancelPeople() {
@@ -71,9 +112,13 @@ function returnToPeopleList() {
 }
 
 function removePeople() {
-    console.log("DEBUG removePeople is not implemented");
-    //FIXME: Need to send delete request to service
-    returnToPeopleList();
+    let oReq = new XMLHttpRequest(),
+        api_path = `${base_url}/api/people/${cl_people_id}`;
+    oReq.addEventListener('load', function () {
+        returnToPeopleList();
+    });
+    oReq.open('DELETE', api_path);
+    oReq.send();
 }
 
 

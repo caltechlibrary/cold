@@ -10,7 +10,7 @@ This page provides people object management. Click on the people ID to view, edi
 Manage People
 -------------
 
-<div><people-pager id="people-pager" pos="0" step="25"></people-pager> <people-table id="people-table"></people-table></div>
+<div><people-pager id="people-pager" pos="0" step="75"></people-pager> <people-table id="people-table"></people-table></div>
 
 <script type="module" src="./widgets/config.js"></script>
 
@@ -18,8 +18,9 @@ Manage People
 
 <script type="module">
 "use strict";
-
-let people_table = document.getElementById('people-table'),
+import { Cfg } from './widgets/config.js';
+let base_url = Cfg.base_url,
+    people_table = document.getElementById('people-table'),
     add_people = document.getElementById('add-people'),
     people_pager = document.getElementById('people-pager'),
     keys = [];
@@ -44,14 +45,13 @@ people_pager.addEventListener('change', function (evt) {
         end = (pos + step);
     /** NOTE: I render the rows here because I've tied them to the set_position call of the pager */
     for (const key of keys.slice(start, end)) {
-        console.log(`DEBUG key -> ${key}`);
         updateRow(key);
     }
 }, false);
 
 function updateRow(key) {
     let oReq = new XMLHttpRequest(),
-        api_path = `/api/people/${key}`;
+        api_path = `${base_url}/api/people/${key}`;
     oReq.addEventListener('load', function () {
         let src = this.responseText,
             obj = JSON.parse(src),
@@ -91,6 +91,7 @@ function refreshPeople() {
     oReq.addEventListener('load', updatePeopleTable);
     oReq.open('GET', '/api/people');
     oReq.send();
+    console.log("DEBUG refreshPeople() called");
 }
 
 refreshPeople();
