@@ -1,5 +1,5 @@
-- [Home](http://localhost:8486/app/)
-- [Dashboard](http://localhost:8486/app/dashboard.html)
-- [API Help](http://localhost:8486/app/api-help.html)
+- [Home](http://localhost:8486)
+- [Dashboard](http://localhost:8486/app/)
+- [Help](http://localhost:8486/app/help.html)
 - [About](http://localhost:8486/app/about.html)
 - [Logout](/Shibboleth.sso/Logout)

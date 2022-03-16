@@ -10,12 +10,13 @@ Required software
 
 Adjusting the web content to your host system requires the following
 
-1. Pandoc
-2. MkPage
-3. Python 3
-4. GNU Make
+1. Golang version 1.18 or better
+2. Pandoc
+3. MkPage
+4. Python 3
+5. GNU Make
 
-Compiling **cold** requires Golang 1.71.7 or better (you need to recompile the daemon if you change the static vocabularies provided).
+Compiling **cold** requires Golang 1.18 or better (you need to recompile the daemon if you change the static vocabularies provided).
 
 This is experimental software the installation suggested should be adjusted based on your own system needs.
 

@@ -1,7 +1,7 @@
 cold - (C)ontrolled (o)bject (l)ist (d)aemon
 ============================================
 
-This repository implements a service to maintain a controlled list of objects such as Caltech Library uses for crosswalking data using pid associated with a person or group.
+This repository implements a service to maintain a controlled list of objects at Caltech Library for people and groups.
 
 Requirements
 ============
@@ -16,20 +16,34 @@ Requirements
 Overview
 --------
 
-Caltech Library maintains a list of people, groups and funders and their related pids. This started being managed in Google Sheets, then in CSV files but the number of objects in envoled has increased and it make sense to provide a more robust implementation allowing for easier curation of the list. The objects are relatively flat with the exception of the name attribute.  Here's an example JSON object representing R. S. Doiel showing the internal identifier named "cl_people_id", name object, email, orcid and '@affiliation' which contains a ROR.
+Caltech Library maintains a list of people, groups and funders and their related pids. This started being managed in Google Sheets, then in CSV files but the number of objects in envoled has increased and it make sense to provide a more robust implementation allowing for easier curation of the list. The objects are relatively flat.  Here's an example JSON object representing R. S. Doiel showing the internal identifier named "cl_people_id", name object, email, orcid and Caltech affiliation is shown both via a boolean field and a ROR.
 
 ~~~
 {
     "cl_people_id": "Doiel-R-S",
-    "name": {
-        "family": "Doiel",
-        "given": "Robert",
-        "display_name": "R. S. Doiel"
-    },
-    "email": "rsdoiel@caltech.edu",
-    "orcid: "0000-0003-0900-6903",
+    "family_name": "Doiel",
+    "given_name": "Robert",
+    "orcid": "0000-0003-0900-6903",
+    "authors_id": "Doiel-R-S",
+    "directory_id": "rsdoiel",
+    "caltech": true,
+    "status": "Active",
+    "directory_person_type": "Staff",
+    "division": "Libraries Group",
+    "updated": "2022-03-09"
     "ror": "https://ror.org/05dxps055"
 } 
+~~~
+
+A group object for Caltech Library is also flat.
+
+~~~
+{
+    "cl_group_id": "Caltech-Library",
+    "name": "Caltech Library",
+    "alternative": "Caltech Library System; Library System Papers and Publications",
+    "updated": "2020-03-26 00:00:00"
+}
 ~~~
 
 Some objects may have more attributes others less. A simple table schema containing a row id, an internal identifier (e.g. cl_people_id, cl_group_id), a "field" and a "value" can be used to represent all the types of fields associated with a given object.  A separate table can be used for person, group and finder with the individual objects stored as a JSON type. This is well suited to a data collection that has sparse consistency (e.g. one person might have an ORCID but not a research id, the next might have a viaf or wikidata id but not a ORCID).
@@ -43,9 +57,9 @@ CREATE TABLE local_group (cl_group_id VARCHAR(255) PRIMARY KEY, object JSON);
 Approach
 --------
 
-This service is intended to run on localhost on a known port (e.g. localhost:8486). It is a mininal service relying on access control from the operating system or front-end web service (e.g. a Bottle application, Apache 2 with Shibboleth).  The goal of the service is to provide a light weight layer between the database storing the objects and the applications that need to work with them.  Also like ep3apid and datasetd *cold* is configured using a simple JSON "settings.json" file. Typically this would be stored in a sub-folder of "etc" on the system (e.g. /usr/local/etc/cold/settings.json).
+This service is intended to run on localhost on a known port (e.g. localhost:8486). It is a mininal service relying on access control from the operating system or front-end web service (e.g. Apache 2 with Shibboleth).  The goal of the service is to provide a light weight layer between the database storing the objects and the applications that need to work with them.  Like ep3apid and datasetd *cold* is configured using a simple JSON "settings.json" file. Typically this would be stored in a sub-folder of "etc" on the system (e.g. /usr/local/etc/cold/settings.json).
 
-The service is made up of two parts, a set of "End Points" for managing and retrieving controlled object lists and vocabularies as JSON expressions and a set of static files providing the user interface to manage and display the vocabularies and controlled object lists.  The static website is build from HTML, CSS, JavaScript leveraging Web Components for providing a sufficient interface.
+The service is made up of two parts, a set of "End Points" for managing and retrieving controlled object lists and vocabularies as JSON expressions and a set of static files providing the user interface to manage and display the vocabularies and controlled object lists.  The static website is build from HTML, CSS, JavaScript relying on Web Components for providing a human friendly interface.
 
 End Points
 ----------
@@ -154,6 +168,3 @@ Widgets provide the user interface for humans to manage and view the objects. Wh
 
 `/widgets/vocabulary.js`
 : This JavaScript file provides a identifier/name web component suitable for displaying subjects, issn/publisher info and doi-prefix/publisher info.
-
-
-

@@ -83,7 +83,9 @@ function updatePeopleTable() {
     if (pos >= 0) {
         pager.set_position(pos, step);
     }
-    keys.sort();
+    keys.sort(function (a, b) {
+        return a.toLowerCase().localeCompare(b.toLowerCase());
+    });
 }
 
 function refreshPeople() {

@@ -12,14 +12,13 @@
 <nav>
 <ul>
 <li>
-<a href="http://localhost:8486/app/">Home</a>
+<a href="http://localhost:8486">Home</a>
 </li>
 <li>
-<a
-href="http://localhost:8486/app/dashboard.html">Dashboard</a>
+<a href="http://localhost:8486/app/">Dashboard</a>
 </li>
 <li>
-<a href="http://localhost:8486/app/api-help.html">API Help</a>
+<a href="http://localhost:8486/app/help.html">Help</a>
 </li>
 <li>
 <a href="http://localhost:8486/app/about.html">About</a>
@@ -124,7 +123,9 @@ function updatePeopleTable() {
     if (pos >= 0) {
         pager.set_position(pos, step);
     }
-    keys.sort();
+    keys.sort(function (a, b) {
+        return a.toLowerCase().localeCompare(b.toLowerCase());
+    });
 }
 
 function refreshPeople() {

@@ -33,6 +33,108 @@
 <h1 id="cold---controlled-object-list-daemon">
 cold - (C)ontrolled (o)bject (l)ist (d)aemon
 </h1>
+<p>
+This repository implements a service to maintain a controlled list of
+objects at Caltech Library for people and groups.
+</p>
+<h1 id="requirements">
+Requirements
+</h1>
+<ul>
+<li>
+MySQL 8
+</li>
+<li>
+To build the UI and compile the <strong>cold</strong> daemon
+<ul>
+<li>
+GNU Make
+</li>
+<li>
+<a href="https://github.com/caltechlibrary/mkpage">MkPage</a> (to build
+UI)
+</li>
+<li>
+<a href="https://pandoc.org">Pandoc</a> (to build UI)
+</li>
+<li>
+Golang (for compiling the service, needed when updating static
+vocabularies)
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="overview">
+Overview
+</h2>
+<p>
+Caltech Library maintains a list of people, groups and funders and their
+related pids. This started being managed in Google Sheets, then in CSV
+files but the number of objects in envoled has increased and it make
+sense to provide a more robust implementation allowing for easier
+curation of the list. The objects are relatively flat. Here’s an example
+JSON object representing R. S. Doiel showing the internal identifier
+named “cl_people_id”, name object, email, orcid and Caltech affiliation
+is shown both via a boolean field and a ROR.
+</p>
+<pre><code>{
+    &quot;cl_people_id&quot;: &quot;Doiel-R-S&quot;,
+    &quot;family_name&quot;: &quot;Doiel&quot;,
+    &quot;given_name&quot;: &quot;Robert&quot;,
+    &quot;orcid&quot;: &quot;0000-0003-0900-6903&quot;,
+    &quot;authors_id&quot;: &quot;Doiel-R-S&quot;,
+    &quot;directory_id&quot;: &quot;rsdoiel&quot;,
+    &quot;caltech&quot;: true,
+    &quot;status&quot;: &quot;Active&quot;,
+    &quot;directory_person_type&quot;: &quot;Staff&quot;,
+    &quot;division&quot;: &quot;Libraries Group&quot;,
+    &quot;updated&quot;: &quot;2022-03-09&quot;
+    &quot;ror&quot;: &quot;https://ror.org/05dxps055&quot;
+} </code></pre>
+<p>
+A group object for Caltech Library is also flat.
+</p>
+<pre><code>{
+    &quot;cl_group_id&quot;: &quot;Caltech-Library&quot;,
+    &quot;name&quot;: &quot;Caltech Library&quot;,
+    &quot;alternative&quot;: &quot;Caltech Library System; Library System Papers and Publications&quot;,
+    &quot;updated&quot;: &quot;2020-03-26 00:00:00&quot;
+}</code></pre>
+<p>
+Some objects may have more attributes others less. A simple table schema
+containing a row id, an internal identifier (e.g. cl_people_id,
+cl_group_id), a “field” and a “value” can be used to represent all the
+types of fields associated with a given object. A separate table can be
+used for person, group and finder with the individual objects stored as
+a JSON type. This is well suited to a data collection that has sparse
+consistency (e.g. one person might have an ORCID but not a research id,
+the next might have a viaf or wikidata id but not a ORCID).
+</p>
+<pre><code>CREATE TABLE people (cl_people_id VARCHAR(255) PRIMARY KEY, object JSON);
+CREATE TABLE local_group (cl_group_id VARCHAR(255) PRIMARY KEY, object JSON);
+&lt;!-- CREATE TABLE funder (cl_funder_id VARCHAR(255) PRIMARY KEY, object JSON); --&gt;</code></pre>
+<h2 id="approach">
+Approach
+</h2>
+<p>
+This service is intended to run on localhost on a known port
+(e.g. localhost:8486). It is a mininal service relying on access control
+from the operating system or front-end web service (e.g. Apache 2 with
+Shibboleth). The goal of the service is to provide a light weight layer
+between the database storing the objects and the applications that need
+to work with them. Like ep3apid and datasetd <em>cold</em> is configured
+using a simple JSON “settings.json” file. Typically this would be stored
+in a sub-folder of “etc” on the system
+(e.g. /usr/local/etc/cold/settings.json).
+</p>
+<p>
+The service is made up of two parts, a set of “End Points” for managing
+and retrieving controlled object lists and vocabularies as JSON
+expressions and a set of static files providing the user interface to
+manage and display the vocabularies and controlled object lists. The
+static website is build from HTML, CSS, JavaScript relying on Web
+Components for providing a human friendly interface.
+</p>
 <h2 id="end-points">
 End Points
 </h2>
@@ -88,6 +190,8 @@ object
 
 `/api/funder/{CL_funder_ID}`
 : For a GET returns a funder object, a PUT will create the funder object, POST will replace the funder object and DELETE will remove the funder object
+-->
+<!-- 
 
 `/api/crosswalk`
 : Returns help on how to crosswalk from one identifier to the internal identifier
@@ -110,12 +214,9 @@ object
 `/api/crosswalk/funder/{IDENTIFIER_NAME}/{IDENTIFIER}`
 : Returns a list of "cl_funder_id" assocated with that identifier
 
+*cold* takes a REST approach to updates for managed objects.  PUT will create a new object, POST will update it, GET will retrieve it and DELETE will remove it.
+
 -->
-<p>
-<em>cold</em> takes a REST approach to updates for managed objects. PUT
-will create a new object, POST will update it, GET will retrieve it and
-DELETE will remove it.
-</p>
 <h2 id="vocabularies">
 Vocabularies
 </h2>
@@ -186,7 +287,7 @@ points.
 </p>
 <dl>
 <dt>
-<code>/widgets/people.js</code>
+<code>/widgets/person.js</code>
 </dt>
 <dd>
 This JavaScript file provides a display and input set of web components
@@ -197,7 +298,7 @@ orcid=“0000-0003-0900-6903”&gt;&lt;/person-display&gt;</code> and
 lineage=“” orcid=“0000-0003-0900-6903”&gt;&lt;/person-input&gt;</code>
 </dd>
 <dt>
-<code>/widgets/groups.js</code>
+<code>/widgets/group.js</code>
 </dt>
 <dd>
 This JavaScript file provides a display and input set of web components
@@ -207,8 +308,10 @@ name=”GALCIT” ror=“” label=““&gt;&lt;/group-input&gt;</code>
 </dd>
 </dl>
 <!--
-`/widgets/funders.js`
+
+`/widgets/funder.js`
 : This JavaScript file provides a display and input set of web components for our Markup example `<funder-display name="NSF" grant_number="1.203221" ror="" doi=""></funder-display>` and `<funder-input  name="NSF" grant_number="1.203221" doi="" ror="" label="Grant details"></funder-input>`
+
 -->
 <dl>
 <dt>

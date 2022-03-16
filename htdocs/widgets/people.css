@@ -50,12 +50,12 @@ td {
     display: none;
 }
 
-.person-display {
-    border: 1px solid blue;
+.people-display {
+    border: 2px solid blue;
     max-width: 85%;
 }
 
-.person-display > div {
+.people-display > div {
     display: grid;
     grid-template-columns: 10% auto;
     gap: 0.24em;
@@ -63,14 +63,16 @@ td {
     margin: 0.24em;
 }
 
-.person-display > div > label {
+.people-display > div > label {
     grid-column: 1 / 2;
+    text-align: right;
 }
-.person-display > div > span {
+
+.people-display > div > span {
     grid-column: 2 / 2;
 }
 
-.person-input > div {
+.people-input > div {
     display: grid;
     grid-template-columns: 10% 70%;
     gap: 0.24em;
@@ -78,8 +80,14 @@ td {
     margin: 0.24em;
 }
 
-.person-input > div > label {
+.people-input > div > label {
     grid-column: 1 / 2;
+    text-align: right;
+}
+
+.people-input > div > input, .people-input > div > textarea, .people-input > div > select {
+    grid-column: 2 / 2;
+    text-align: left;
 }
 
 .people-controls {

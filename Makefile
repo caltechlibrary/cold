@@ -34,7 +34,7 @@ ifeq ($(OS), Windows)
 	EXT = .exe
 endif
 
-build: $(PKGASSETS) version.go $(PROGRAMS) $(HTML_PAGES) htdocs/index.html htdocs/widgets/config.js
+build: $(PKGASSETS) version.go $(PROGRAMS) $(HTML_PAGES) htdocs/widgets/config.js htdocs/readme.html
 
 
 version.go: .FORCE
@@ -54,15 +54,15 @@ $(PROGRAMS): cmd/*/*.go $(PACKAGE)
 nav.md: nav.tmpl
 	mkpage settings=settings.json nav.tmpl >nav.md
 
-htdocs/index.html: README.md nav.md
-	mkpage body=README.md nav=nav.md page.tmpl > htdocs/index.html
-
 $(HTML_PAGES): $(MD_PAGES) nav.md
 	@echo "PAGE html: "$@" PAGE md: "$(basename $@).md
 	mkpage body=$(basename $@).md nav=nav.md page.tmpl >$@
 
 htdocs/widgets/config.js: .FORCE
 	mkpage settings=settings.json templates/config-js.tmpl >htdocs/widgets/config.js	
+
+htdocs/readme.html: nav.md README.md
+	mkpage body=README.md nav=nav.md page.tmpl >htdocs/readme.html
 
 harvest: .FORCE
 	./harvest_testdata.bash

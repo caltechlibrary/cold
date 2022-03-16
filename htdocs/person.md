@@ -64,10 +64,17 @@ function savePeople() {
     console.log("DEBUG savePeople() partially implemented.", elem, elem.value);
     if (elem !== null) {
         let data = elem.value,
-            src = JSON.stringify(normalize_person(data));
+            src = JSON.stringify(normalize_person(data)),
+            method = 'POST';
         /* FIXME: Validate form */
         /* FIXME: turn form into people object, send to API */
         /* FIXME: if successful return to list otherwise show error and remain on form */
+        console.log(`DEBUG before cl_people_id -> ${cl_people_id}`)
+        if (cl_people_id == null) {
+            cl_people_id = data['cl_people_id'];
+            method = 'PUT';
+        }
+        console.log(`DEBUG cl_people_id -> ${cl_people_id} method -> ${method}`)
         let oReq = new XMLHttpRequest(),
             api_path = `${base_url}/api/people/${cl_people_id}`;
         console.log("DEBUG data", typeof(data), data);
@@ -75,8 +82,9 @@ function savePeople() {
         console.log(`DEBUG api_path ${api_path}`);
         oReq.addEventListener('load', function () {
             console.log(`DEBUG load recieved`);
+            window.history.go(-1);
         });
-        oReq.open('POST', api_path);
+        oReq.open(method, api_path);
         oReq.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
         oReq.send(src);
     }
@@ -92,7 +100,6 @@ function cancelPeople() {
 }
 
 function createPeople() {
-    console.log("DEBUG createPeople() ");
     let people_viewer = document.getElementById('people-viewer'),
         /* Editor for people */
         people_input = document.createElement('people-input');

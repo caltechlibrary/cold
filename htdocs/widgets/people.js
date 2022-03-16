@@ -3,6 +3,8 @@
  */
 "use strict";
 
+import { Cfg} from './config.js';
+
 const display_template = document.createElement('template'),
       input_template = document.createElement('template'),
       table_template = document.createElement('template'),
@@ -13,16 +15,16 @@ const display_template = document.createElement('template'),
  */
 display_template.innerHTML = `<style>
 /* Default CSS */
-@import "/app/widgets/people.css";
+@import "${Cfg.base_url}/app/widgets/people.css";
 /* Site overrides */
-@import "/css/people.css";
+@import "${Cfg.base_url}/css/people.css";
 </style>
 <div class="people-display">
-  <div class="people-cl_people_id"><label for="cl_people_id">Person ID:</label> <span id="cl_people_id" /></div>
+  <div class="people-cl_people_id"><label for="cl_people_id">People ID:</label> <span id="cl_people_id" /></div>
   <div class="people-family_name"><label for="family_name">Family:</label> <span id="family_name" /></div>
   <div class="people-given_name"><label for="given_name">Given:</label> <span id="given_name" /></div>
   <div class="people-honorific"><label for="honorific">Honorific:</label> <span id="honorific" /></div>
-  <dic class="people-lineage"><label for="lineage">Lineage:</labe> <span id="lineage" /></div>
+  <div class="people-lineage"><label for="lineage">Lineage:</labe> <span id="lineage" /></div>
   <div class="people-orcid"><label for="orcid">ORCID:</label> <span id="orcid" /></div>
   <div class="people-thesis_id"><label for="thesis_id">Thesis ID:</label> <span id="thesis_id" /></div>
   <div class="people-advisor_id"><label for="advisor_id">Advisor ID:</label> <span id="advisor_id" /></div>
@@ -56,12 +58,12 @@ display_template.innerHTML = `<style>
 
 input_template.innerHTML = `<style>
 /* Default CSS */
-@import "/app/widgets/people.css";
+@import "${Cfg.base_url}/app/widgets/people.css";
 /* Site overrides */
-@import "/css/people.css";
+@import "${Cfg.base_url}/css/people.css";
 </style>
 <div class="people-input">
-  <div class="people-cl_people_id"><label for="cl_people_id">Person ID:</label> <input required id="cl_people_id" name="cl_people_id" type="text" /></div>
+  <div class="people-cl_people_id"><label for="cl_people_id">People ID:</label> <input required id="cl_people_id" name="cl_people_id" type="text" /></div>
   <div class="people-family_name"><label for="family_name">Family Name:</label> <input id="family_name" name="family_name" type="text" /></div>
   <div class="people-given_name"><label for="given_name">Given Name:</label> <input id="given_name" name="given_name" type="text" /></div>
   <div class="people-honorific"><label for="honorific">Honorific:</label> <input id="honorific" honorific="honorific" type="text" /></div>
@@ -118,11 +120,11 @@ input_template.innerHTML = `<style>
 
 table_template.innerHTML = `<style>
 /* Default CSS */
-@import "/app/widgets/people.css";
+@import "${Cfg.base_url}/app/widgets/people.css";
 /* Site overrides */
-@import "/css/people.css";
+@import "${Cfg.base_url}/css/people.css";
 </style>
-<table id="people-list">
+<table id="people-list" class="people-list">
   <thead>
     <tr>
       <th class="people-col-cl_people_id" title="click column to sort ascending, click again for descending">People ID</th>
@@ -166,11 +168,11 @@ table_template.innerHTML = `<style>
 
 pager_template.innerHTML = `<style>
 /* Default CSS */
-@import "/app/widgets/people.css";
+@import "${Cfg.base_url}/app/widgets/people.css";
 /* Site overrides */
-@import "/css/people.css";
+@import "${Cfg.base_url}/css/people.css";
 </style>
-<div>
+<div class="people-pager">
   <a href="" id="people-pager-previous" class="people-pager-previous">Previous</a> 
   <input id="people-pager-pos" type="range" min="0" max="-1" step="1" value="0" />
   <a href="" id="people-pager-next" class="people-pager-next">Next</a>
@@ -287,7 +289,7 @@ class PeopleDisplay extends HTMLElement {
                 fnNameOnChange = `onchange_${key}`;
             self[elem_name] = this.shadowRoot.getElementById(key);
             self[fnNameOnChange] = function() {
-                let evt = new Event("change", {"bubbles": true, "cancelable": true});
+                let evt = new Event("change", { "bubbles": true, "cancelable": true });
                 self[key] = self[elem_name].value;
                 self.setAttribute(key, self[elem_name].value);
                 this.shadowRoot.host.dispatchEvent(evt);
@@ -324,7 +326,7 @@ class PeopleDisplay extends HTMLElement {
             let self = this,
                 elem = this.shadowRoot.getElementById(key);
             elem.innerHTML = val;
-            let evt = new Event("change", {"bubbles": true, "cancelable": true});
+            let evt = new Event("change", { "bubbles": true, "cancelable": true });
             this.shadowRoot.host.dispatchEvent(evt);
         }
         super.setAttribute(key, val);
@@ -377,7 +379,7 @@ class PeopleInput extends HTMLElement {
                 fnNameOnChange = `onchange_${key}`;
             self[elem_name] = this.shadowRoot.getElementById(key);
             self[fnNameOnChange] = function() {
-                let evt = new Event("change", {"bubbles": true, "cancelable": true});
+                let evt = new Event("change", { "bubbles": true, "cancelable": true });
                 self[key] = self[elem_name].value;
                 self.setAttribute(key, self[elem_name].value);
                 this.shadowRoot.host.dispatchEvent(evt);
@@ -430,7 +432,7 @@ class PeopleInput extends HTMLElement {
             } else {
                 console.log(`ERROR: can't fund ${elem_name} <-- ${val}`);
             }
-            let evt = new Event("change", {"bubbles": true, "cancelable": true});
+            let evt = new Event("change", { "bubbles": true, "cancelable": true });
             this.shadowRoot.host.dispatchEvent(evt);
         }
         super.setAttribute(key, val);
@@ -559,7 +561,7 @@ class PeopleInput extends HTMLElement {
             let self = this,
                 elem_name =  `${key}_input`;
             self[elem_name].value = val;
-            let evt = new Event("change",{"bubbles": true, "cancelable": true});
+            let evt = new Event("change",{ "bubbles": true, "cancelable": true });
             this.shadowRoot.host.dispatchEvent(evt);
         }
         super.setAttribute(key, val);
@@ -649,22 +651,30 @@ class PeopleInput extends HTMLElement {
 class PeoplePager extends HTMLElement {
     constructor () {
         super();
-        this.defaults = new Map()
-        this.defaults.set('step', 25);
-        this.defaults.set('pos', 0);
-        this.defaults.set('next', 0);
-        this.defaults.set('previous', 0);
-        this.defaults.set('total', -1);
-        /*
-        this.step = this.defaults.get('step');
-        this.pos = this.defaults.get('pos');
-        this.next = this.defaults.get('next');
-        this.previous = this.defaults.get('previous');
-        this.total = this.defaults.get('total');
-        */
         this.managed_attributes = [ 'step', 'pos', 'next', 'previous', 'total' ];
+        for (const key of this.managed_attributes) {
+            if (this.getAttribute(key) == null) {
+                switch (key) {
+                    case 'step':
+                        this.step = 25;
+                        break;
+                    case 'pos':
+                        this.pos = 0;
+                        break;
+                    case 'next':
+                        this.next = 0;
+                        break;
+                    case 'previous':
+                        this.previous = 0;
+                        break;
+                    case 'total':
+                        this.total = -1;
+                        break;
+                }
+            }
+        }
 
-        this.attachShadow({mode: 'open'});
+        this.attachShadow({ mode: 'open' });
         this.shadowRoot.appendChild(pager_template.content.cloneNode(true));
     }
 
@@ -732,7 +742,7 @@ class PeoplePager extends HTMLElement {
                     val = '';
                 }
                 elem.textContent = val;
-                let evt = new Event("change", {"bubbles": true, "cancelable": true});
+                let evt = new Event("change", { "bubbles": true, "cancelable": true });
                 this.shadowRoot.host.dispatchEvent(evt);    
             }
         }
