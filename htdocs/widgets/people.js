@@ -79,10 +79,30 @@ input_template.innerHTML = `<style>
   <div class="people-snac"><label for="scac">SNAC:</label> <input id="snac" name="snac" type="text" size="18" /></div>
   <div class="people-image"><label for="image">Image:</label> <input id="image" name="image" type="text" size="18" /></div>
   <div class="people-educated_at"><label for="educated_at">Educated At:</label> <input id="educated_at" name="educated_at" type="text" size="18" /></div>
-  <div class="people-caltech"><label for="caltech">Caltech:</label> <input id="caltech" pattern="true|false" name="caltech" type="text" size="18" /></div>
-  <div class="people-jpl"><label for="jpl">JPL:</label> <input id="jpl" name="jpl" type="text" size="18" /></div>
-  <div class="people-faculty"><label for="faculty">Faculty:</label> <input id="faculty" name="faculty" type="text" size="18" /></div>
-  <div class="people-alumn"><label for="alumn">Alumn:</label> <input id="alumn" name="alumn" type="text" size="18" /></div>
+  <div class="people-caltech"><label for="caltech">Caltech:</label>
+    <select id="caltech" name="caltech">
+        <option value="false" default>False</option>
+        <option value="true">True</option>
+    </select>
+  </div>
+  <div class="people-jpl"><label for="jpl">JPL:</label>
+    <select id="jpl" name="jpl">
+        <option value="false" default>False</option>
+        <option value="true">True</option>
+    </select>
+  </div>
+  <div class="people-faculty"><label for="faculty">Faculty:</label>
+    <select id="faculty" name="faculty">
+        <option value="false" default>False</option>
+        <option value="true">True</option>
+    </select>
+  </div>
+  <div class="people-alumn"><label for="alumn">Alumn:</label>
+   <select id="alumn" name="alumn">
+        <option value="false" default>False</option>
+        <option value="true">True</option>
+   </select>
+  </div>
   <div class="people-status"><label for="status">Status:</label> <input id="status" name="status" type="text" size="18" /></div>
   <div class="people-directory_person_type"><label for="directory_person_type">Directory Person Type:</label> <input id="directory_person_type" name="directory_person_type" type="text" size="18" /></div>
   <div class="people-title"><label for="title">Title:</label> <input id="title" name="title" type="text" size="18" /></div>
@@ -167,6 +187,8 @@ function as_integer(val) {
     return parseInt(val, 10);
 }
 
+let today = new Date();
+
 function yyyymmdd(date) {
     let day = `${date.getDate()}`.padStart(2, '0'),
         month = `${date.getMonth() + 1}`.padStart(2, '0'),
@@ -192,6 +214,7 @@ let people_field_names = [ 'cl_people_id', 'family_name', 'given_name', 'honorif
                            'educated_at', 'caltech', 'jpl', 'faculty', 'alumn', 'status',
                            'directory_person_type', 'title', 'bio', 'division', 'authors_count',
                            'thesis_count', 'data_count', 'advisor_count', 'editor_count', 'updated' ];
+
 
 /**
  * People is a minimalist implementation of a People object
