@@ -57,3 +57,4 @@ __pycache__
 settings.*
 pandoc.*.json
 config.js
+htdocs/lunr

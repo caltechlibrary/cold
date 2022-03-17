@@ -6,16 +6,14 @@
 
 import sys
 import os
-import json
 
-from dataloader.index import index_people, index_groups, index_funders
+from dataloader.index import index_people, index_groups
 
 settings = 'settings.json'
 
 options = { 
     "groups" : index_groups,
-    "people": index_people,
-    "funders": index_funders 
+    "people": index_people 
 }
 
 if __name__ == '__main__':
