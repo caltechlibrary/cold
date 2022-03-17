@@ -14,7 +14,9 @@ Developers
 
 (alphabetically)
 
-+ R. S. Doiel
+- [R. S. Doiel](https://orcid.org/0000-0003-0900-6903 "link to ORCID record")
+- [Thomas E. Morrell](https://orcid.org/0000-0001-9266-5146 "link to ORCID record")
+
 
 <version-info id="version-info"></version-info>
 

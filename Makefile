@@ -59,7 +59,7 @@ $(HTML_PAGES): $(MD_PAGES) nav.md
 	mkpage settings=settings.json body=$(basename $@).md nav=nav.md page.tmpl >$@
 
 htdocs/widgets/config.js: .FORCE
-	mkpage settings=settings.json templates/config-js.tmpl >htdocs/widgets/config.js	
+	mkpage codemeta=codemeta.json settings=settings.json templates/config-js.tmpl >htdocs/widgets/config.js	
 
 htdocs/readme.html: nav.md README.md
 	mkpage settings=settings.json body=README.md nav=nav.md page.tmpl >htdocs/readme.html
