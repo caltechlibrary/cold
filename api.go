@@ -477,6 +477,28 @@ func (api *API) VocabularyAPI(w http.ResponseWriter, r *http.Request) {
 	api.packageJSON(w, r, src, err)
 }
 
+// Crosswalk takes a collection, field path and value and returns a list of ids or error
+func (api *API) Crosswalk(w http.ResponseWriter, r *http.Request) {
+	var (
+		err  error
+		src  []byte
+		args []string
+	)
+	args = strings.Split(r.URL.Path, "/")[3:]
+	if len(args) != 3 {
+		http.Error(w, `Bad Request`, http.StatusBadRequest)
+		api.logResponse(r, http.StatusBadRequest, fmt.Errorf(`bad request, collection name, expected field name and value %+v`, args))
+		return
+	}
+	ids, err := Crosswalk(api.Cfg, args[0], args[1], args[2])
+	if err != nil {
+		api.packageJSON(w, r, src, err)
+		return
+	}
+	src, err = jsonEncode(ids)
+	api.packageJSON(w, r, src, err)
+}
+
 func (api *API) RouteHandler(w http.ResponseWriter, r *http.Request) {
 	api.logRequest(w, r)
 	switch {
@@ -494,6 +516,8 @@ func (api *API) RouteHandler(w http.ResponseWriter, r *http.Request) {
 		api.PeopleAPI(w, r)
 	case strings.HasPrefix(r.URL.Path, "/api/group"):
 		api.GroupAPI(w, r)
+	case strings.HasPrefix(r.URL.Path, "/api/crosswalk"):
+		api.Crosswalk(w, r)
 	case strings.HasPrefix(r.URL.Path, "/api/funder"):
 		api.FunderAPI(w, r)
 	case strings.HasPrefix(r.URL.Path, "/api/subject"):

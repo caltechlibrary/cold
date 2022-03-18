@@ -84,40 +84,19 @@ JSON service defined end points are formed as the following. The following end p
 `/api/group/{CL_GROUP_ID}`
 : For a GET returns a group object, a PUT will create the group object, POST will replace the group object and DELETE will remove the group object
 
-<!--
-`/api/funder`
-: Returns a list of "cl_funder" managed by *cold*
+Crosswalks
+----------
 
-`/api/funder/{CL_funder_ID}`
-: For a GET returns a funder object, a PUT will create the funder object, POST will replace the funder object and DELETE will remove the funder object
--->
+A cross walk lets you put in a collection name (e.g. people, group), a field name and a value and it returns a list of matching
+records.
 
-<!-- 
-
-`/api/crosswalk`
-: Returns help on how to crosswalk from one identifier to the internal identifier
-
-`/api/crosswalk/people`
-: Returns a list of identifiers available for "people" objects
-
-`/api/crosswalk/people/{IDENTIFIER_NAME}/{IDENTIFIER}`
+`/api/crosswalk/people/{IDENTIFIER_NAME}/{IDENTIFIER_VALUE}`
 : Returns a list of "cl_people_id" assocated with that identifier
 
-`/api/crosswalk/group`
-: Returns a list of identifiers available for "group" objects
-
-`/api/crosswalk/group/{IDENTIFIER_NAME}/{IDENTIFIER}`
+`/api/crosswalk/group/{IDENTIFIER_NAME}/{IDENTIFIER_VALUE}`
 : Returns a list of "cl_group__id" assocated with that identifier
 
-`/api/crosswalk/funder`
-: Returns a list of identifiers available for "funder" objects
-
-`/api/crosswalk/funder/{IDENTIFIER_NAME}/{IDENTIFIER}`
-: Returns a list of "cl_funder_id" assocated with that identifier
-
 *cold* takes a REST approach to updates for managed objects.  PUT will create a new object, POST will update it, GET will retrieve it and DELETE will remove it.
-
--->
 
 Vocabularies
 ------------

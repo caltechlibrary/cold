@@ -24,30 +24,14 @@ JSON service defined end points are formed as the following. The following end p
 `/api/group/{CL_GROUP_ID}`
 : For a GET returns a group object, a PUT will create the group object, POST will replace the group object and DELETE will remove the group object
 
-<!--
+Crosswalks
+----------
 
-`/api/crosswalk`
-: Returns help on how to crosswalk from one identifier to the internal identifier
-
-`/api/crosswalk/people`
-: Returns a list of identifiers available for "people" objects
-
-`/api/crosswalk/people/{IDENTIFIER_NAME}/{IDENTIFIER}`
+`/api/crosswalk/people/{IDENTIFIER_NAME}/{IDENTIFIER_VALUE}`
 : Returns a list of "cl_people_id" assocated with that identifier
 
-`/api/crosswalk/group`
-: Returns a list of identifiers available for "group" objects
-
-`/api/crosswalk/group/{IDENTIFIER_NAME}/{IDENTIFIER}`
+`/api/crosswalk/group/{IDENTIFIER_NAME}/{IDENTIFIER_VALUE}`
 : Returns a list of "cl_group__id" assocated with that identifier
-
-`/api/crosswalk/funder`
-: Returns a list of identifiers available for "funder" objects
-
-`/api/crosswalk/funder/{IDENTIFIER_NAME}/{IDENTIFIER}`
-: Returns a list of "cl_funder_id" assocated with that identifier
-
--->
 
 *cold* takes a REST approach to updates for managed objects.  PUT will create a new object, POST will update it, GET will retrieve it and DELETE will remove it.
 

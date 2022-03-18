@@ -260,3 +260,26 @@ func DeleteFunder(config *Config, clFunderID string) error {
 	_, err := db.Exec(stmt, clFunderID)
 	return err
 }
+
+// Crosswalk a collection name, object field name/path and value returning a
+// list of objects and error
+func Crosswalk(config *Config, collection string, field string, value string) ([]string, error) {
+	collectionToTable := map[string]string{
+		"people": "person",
+		"group":  "local_group",
+	}
+	unQuoted := map[string]bool{
+		"caltech": true,
+		"jpl":     true,
+		"alumn":   true,
+		"faculty": true,
+	}
+	if tableName, ok := collectionToTable[collection]; ok {
+		stmt := fmt.Sprintf(`SELECT cl_%s_id FROM %s WHERE JSON_EXTRACT(object, "$.%s") LIKE ?`, collection, tableName, field)
+		if _, ok := unQuoted[field]; ok {
+			return sqlQueryStringIDs(config, stmt, value)
+		}
+		return sqlQueryStringIDs(config, stmt, fmt.Sprintf(`%q`, value))
+	}
+	return []string{}, fmt.Errorf("unknown collection %q", collection)
+}

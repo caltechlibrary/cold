@@ -186,39 +186,32 @@ POST will replace the group object and DELETE will remove the group
 object
 </dd>
 </dl>
-<!--
-`/api/funder`
-: Returns a list of "cl_funder" managed by *cold*
-
-`/api/funder/{CL_funder_ID}`
-: For a GET returns a funder object, a PUT will create the funder object, POST will replace the funder object and DELETE will remove the funder object
--->
-<!-- 
-
-`/api/crosswalk`
-: Returns help on how to crosswalk from one identifier to the internal identifier
-
-`/api/crosswalk/people`
-: Returns a list of identifiers available for "people" objects
-
-`/api/crosswalk/people/{IDENTIFIER_NAME}/{IDENTIFIER}`
-: Returns a list of "cl_people_id" assocated with that identifier
-
-`/api/crosswalk/group`
-: Returns a list of identifiers available for "group" objects
-
-`/api/crosswalk/group/{IDENTIFIER_NAME}/{IDENTIFIER}`
-: Returns a list of "cl_group__id" assocated with that identifier
-
-`/api/crosswalk/funder`
-: Returns a list of identifiers available for "funder" objects
-
-`/api/crosswalk/funder/{IDENTIFIER_NAME}/{IDENTIFIER}`
-: Returns a list of "cl_funder_id" assocated with that identifier
-
-*cold* takes a REST approach to updates for managed objects.  PUT will create a new object, POST will update it, GET will retrieve it and DELETE will remove it.
-
--->
+<h2 id="crosswalks">
+Crosswalks
+</h2>
+<p>
+A cross walk lets you put in a collection name (e.g. people, group), a
+field name and a value and it returns a list of matching records.
+</p>
+<dl>
+<dt>
+<code>/api/crosswalk/people/{IDENTIFIER_NAME}/{IDENTIFIER}</code>
+</dt>
+<dd>
+Returns a list of “cl_people_id” assocated with that identifier
+</dd>
+<dt>
+<code>/api/crosswalk/group/{IDENTIFIER_NAME}/{IDENTIFIER}</code>
+</dt>
+<dd>
+Returns a list of “cl_group__id” assocated with that identifier
+</dd>
+</dl>
+<p>
+<em>cold</em> takes a REST approach to updates for managed objects. PUT
+will create a new object, POST will update it, GET will retrieve it and
+DELETE will remove it.
+</p>
 <h2 id="vocabularies">
 Vocabularies
 </h2>

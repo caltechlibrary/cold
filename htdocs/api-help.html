@@ -84,30 +84,23 @@ POST will replace the group object and DELETE will remove the group
 object
 </dd>
 </dl>
-<!--
-
-`/api/crosswalk`
-: Returns help on how to crosswalk from one identifier to the internal identifier
-
-`/api/crosswalk/people`
-: Returns a list of identifiers available for "people" objects
-
-`/api/crosswalk/people/{IDENTIFIER_NAME}/{IDENTIFIER}`
-: Returns a list of "cl_people_id" assocated with that identifier
-
-`/api/crosswalk/group`
-: Returns a list of identifiers available for "group" objects
-
-`/api/crosswalk/group/{IDENTIFIER_NAME}/{IDENTIFIER}`
-: Returns a list of "cl_group__id" assocated with that identifier
-
-`/api/crosswalk/funder`
-: Returns a list of identifiers available for "funder" objects
-
-`/api/crosswalk/funder/{IDENTIFIER_NAME}/{IDENTIFIER}`
-: Returns a list of "cl_funder_id" assocated with that identifier
-
--->
+<h2 id="crosswalks">
+Crosswalks
+</h2>
+<dl>
+<dt>
+<code>/api/crosswalk/people/{IDENTIFIER_NAME}/{IDENTIFIER}</code>
+</dt>
+<dd>
+Returns a list of “cl_people_id” assocated with that identifier
+</dd>
+<dt>
+<code>/api/crosswalk/group/{IDENTIFIER_NAME}/{IDENTIFIER}</code>
+</dt>
+<dd>
+Returns a list of “cl_group__id” assocated with that identifier
+</dd>
+</dl>
 <p>
 <em>cold</em> takes a REST approach to updates for managed objects. PUT
 will create a new object, POST will update it, GET will retrieve it and
