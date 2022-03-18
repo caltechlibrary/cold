@@ -41,6 +41,11 @@ type Config struct {
 	// Htdocs holds static pages, help and Widgets
 	Htdocs string `json:"htdocs"`
 
+	// PrefixPath is the partial URL path used as a "base" href
+	// by web pages. This allows for controlling the expected path
+	// in a reverse proxy deployment.
+	PrefixPath string `json:"prefix_path"`
+
 	// Logfile
 	Logfile string `json:"logfile,omitempty"`
 
@@ -80,6 +85,9 @@ func LoadConfig(fname string) (*Config, error) {
 		}
 		if config.Htdocs == "" {
 			config.Htdocs = "htdocs"
+		}
+		if config.PrefixPath == "" {
+			config.PrefixPath = ""
 		}
 		if config.BaseURL == "" {
 			config.BaseURL = fmt.Sprintf(`http://%s/`, config.Hostname)

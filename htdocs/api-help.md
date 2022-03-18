@@ -25,11 +25,6 @@ JSON service defined end points are formed as the following. The following end p
 : For a GET returns a group object, a PUT will create the group object, POST will replace the group object and DELETE will remove the group object
 
 <!--
-`/api/funder`
-: Returns a list of "cl_funder" managed by *cold*
-
-`/api/funder/{CL_funder_ID}`
-: For a GET returns a funder object, a PUT will create the funder object, POST will replace the funder object and DELETE will remove the funder object
 
 `/api/crosswalk`
 : Returns help on how to crosswalk from one identifier to the internal identifier
@@ -96,13 +91,7 @@ Widgets provide the user interface for humans to manage and view the objects. Wh
 `/widgets/groups.js`
 : This JavaScript file provides a display and input set of web components for our Markup example `<group-display name="GALCIT" ror=""></group-display>` and `<group-input  name="GALCIT" ror="" label=""></group-input>`
 
-<!--
-`/widgets/funders.js`
-: This JavaScript file provides a display and input set of web components for our Markup example `<funder-display name="NSF" grant_number="1.203221" ror="" doi=""></funder-display>` and `<funder-input  name="NSF" grant_number="1.203221" doi="" ror="" label="Grant details"></funder-input>`
--->
-
 `/widgets/vocabulary.js`
 : This JavaScript file provides a identifier/name web component suitable for displaying subjects, issn/publisher info and doi-prefix/publisher info.
-
 
 

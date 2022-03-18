@@ -4,11 +4,14 @@ ISSN
 
 <div id="issns-list">Fetching ISSN to Publisher list</div>
 
-<script type="module" src="./widgets/config.js"></script>
+<script type="module" src="/widgets/config.js"></script>
 
 <script type="module" src="/widgets/vocabulary.js"></script>
 
 <script type="module">
+"use strict";
+import { Cfg } from "/widgets/config.js";
+
 let issns_list = document.getElementById('issns-list'),
     oReq = new XMLHttpRequest(),
     u = window.location;
@@ -33,6 +36,6 @@ function updatePage() {
 }
 
 oReq.addEventListener('load', updatePage);
-oReq.open('GET', '/api/issn');
+oReq.open('GET', `${Cfg.prefix_path}/api/issn`);
 oReq.send();
 </script>

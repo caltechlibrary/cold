@@ -3,26 +3,27 @@
 <head>
     <meta charset="utf-8">
     <title>Caltech Library's Digital Library Development Sandbox</title>
+    
     <link rel="stylesheet" href="/css/site.css">
 </head>
 <body>
 <header>
 <span id="library_logo"><a href="http://library.caltech.edu"><img src="/assets/liblogo.gif" alt="Caltech Library logo"></a></span>
-<span id="project_logo"><img src="http://localhost:8486/assets/iceberg-sketch.png" alt="Iceberg logo for cold"></span>
+<span id="project_logo"><img src="/assets/iceberg-sketch.png" alt="Iceberg logo for cold"></span>
 </header>
 <nav>
 <ul>
 <li>
-<a href="http://localhost:8486">Home</a>
+<a href="/">Home</a>
 </li>
 <li>
-<a href="http://localhost:8486/app/">Dashboard</a>
+<a href="/app/">Dashboard</a>
 </li>
 <li>
-<a href="http://localhost:8486/app/help.html">Help</a>
+<a href="/app/help.html">Help</a>
 </li>
 <li>
-<a href="http://localhost:8486/app/about.html">About</a>
+<a href="/app/about.html">About</a>
 </li>
 <li>
 <a href="/Shibboleth.sso/Logout">Logout</a>
@@ -84,11 +85,6 @@ object
 </dd>
 </dl>
 <!--
-`/api/funder`
-: Returns a list of "cl_funder" managed by *cold*
-
-`/api/funder/{CL_funder_ID}`
-: For a GET returns a funder object, a PUT will create the funder object, POST will replace the funder object and DELETE will remove the funder object
 
 `/api/crosswalk`
 : Returns help on how to crosswalk from one identifier to the internal identifier
@@ -206,12 +202,6 @@ for our Markup example <code>&lt;group-display name=“GALCIT”
 ror=““&gt;&lt;/group-display&gt;</code> and <code>&lt;group-input
 name=”GALCIT” ror=“” label=““&gt;&lt;/group-input&gt;</code>
 </dd>
-</dl>
-<!--
-`/widgets/funders.js`
-: This JavaScript file provides a display and input set of web components for our Markup example `<funder-display name="NSF" grant_number="1.203221" ror="" doi=""></funder-display>` and `<funder-input  name="NSF" grant_number="1.203221" doi="" ror="" label="Grant details"></funder-input>`
--->
-<dl>
 <dt>
 <code>/widgets/vocabulary.js</code>
 </dt>

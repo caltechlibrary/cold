@@ -7,12 +7,13 @@ Group
 
 <div id="group-controls"></div>
 
-<script type="module" src="./widgets/config.js"></script>
+<script type="module" src="/widgets/config.js"></script>
 
 <script type="module" src="/widgets/groups.js"></script>
 
 <script type="module">
 "use strict";
+import { Cfg } from "/widgets/config.js";
 import { Group } from "/widgets/groups.js";
 
 let group_viewer = document.getElementById('group-viewer'),
@@ -104,7 +105,7 @@ function updateDisplayGroup() {
 function retrieveGroup(cl_group_id) {
     let oReq = new XMLHttpRequest();
     oReq.addEventListener('load', updateDisplayGroup);
-    oReq.open('GET', `/api/group/${cl_group_id}`);
+    oReq.open('GET', `${Cfg.prefix_path}/api/group/${cl_group_id}`);
     oReq.send();
 }
 

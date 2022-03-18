@@ -10,10 +10,6 @@ Managable Objects
 - [People](/app/people.html)
 - [Groups](/app/groups.html)
 
-<!--
-- [Funders](/app/funders.html)
--->
-
 Static Vocabularies
 -------------------
 

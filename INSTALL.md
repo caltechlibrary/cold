@@ -32,3 +32,27 @@ This is experimental software the installation suggested should be adjusted base
 8. Load the schema into MySQL 8's cold data base (see `schema/*.sql`)
 9. Start service and test with cURL and your web browser
 
+
+Apache 2 Setup
+--------------
+
+**cold** is intended to run on localhost and relies on a front-end web server like Apache 2 for authentication and authorization via reverse proxy setup (see https://httpd.apache.org/docs/2.4/howto/reverse_proxy.html).
+
+Example configuration block
+
+```
+#
+# Example Setup for reverse proxy in Apache 2.
+#
+Proxy "/cold/" "http://localhost:8486/"
+ReverseProxy "/cold/" "http://localhost:8486/"
+<Location /cold>
+   AuthType Basic
+   AuthName "Cold Development"
+   AuthBasicProvider file
+   AuthUserfile "/usr/localhost/etc/cold/passwords.txt"
+   Require valid-user
+</Location>
+```
+
+

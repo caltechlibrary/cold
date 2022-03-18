@@ -26,7 +26,7 @@ let people_viewer = document.getElementById('people-viewer'),
     cancel_button = document.createElement('button'),
     params = new URLSearchParams(window.location.search),
     cl_people_id = params.get('cl_people_id'),
-    base_url = Cfg.base_url;
+    prefix_path = Cfg.prefix_path;
 
 function as_bool(s) {
     if (s.startsWith('t') || s.startsWith('T') || s.startsWith('1')) {
@@ -76,7 +76,7 @@ function savePeople() {
         }
         console.log(`DEBUG cl_people_id -> ${cl_people_id} method -> ${method}`)
         let oReq = new XMLHttpRequest(),
-            api_path = `${base_url}/api/people/${cl_people_id}`;
+            api_path = `${prefix_path}/api/people/${cl_people_id}`;
         console.log("DEBUG data", typeof(data), data);
         console.log("DEBUG src", typeof(src), src);
         console.log(`DEBUG api_path ${api_path}`);
@@ -114,13 +114,13 @@ function returnToPeopleList() {
     if (numberOfEntries > 1) {
         window.history.back();
     } else {
-        window.location.href = `${base_url}/app/people.html`;
+        window.location.href = `${prefix_path}/app/people.html`;
     }
 }
 
 function removePeople() {
     let oReq = new XMLHttpRequest(),
-        api_path = `${base_url}/api/people/${cl_people_id}`;
+        api_path = `${prefix_path}/api/people/${cl_people_id}`;
     oReq.addEventListener('load', function () {
         returnToPeopleList();
     });
@@ -163,7 +163,7 @@ function updatePeople() {
         oReq = new XMLHttpRequest();
 
     oReq.addEventListener('load', editPeople);
-    oReq.open('GET', `/api/people/${people_id}`);
+    oReq.open('GET', `${prefix_path}/api/people/${people_id}`);
     oReq.send();
 }
 
@@ -181,7 +181,7 @@ function displayPeople() {
 function retrievePeople(cl_people_id) {
     let oReq = new XMLHttpRequest();
     oReq.addEventListener('load', displayPeople);
-    oReq.open('GET', `/api/people/${cl_people_id}`);
+    oReq.open('GET', `${prefix_path}/api/people/${cl_people_id}`);
     oReq.send();
 }
 

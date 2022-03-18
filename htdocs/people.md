@@ -12,14 +12,14 @@ Manage People
 
 <div><people-pager id="people-pager" pos="0" step="75"></people-pager> <people-table id="people-table"></people-table></div>
 
-<script type="module" src="./widgets/config.js"></script>
+<script type="module" src="/widgets/config.js"></script>
 
 <script type="module" src="/widgets/people.js"></script>
 
 <script type="module">
 "use strict";
-import { Cfg } from './widgets/config.js';
-let base_url = Cfg.base_url,
+import { Cfg } from '/widgets/config.js';
+let prefix_path = Cfg.prefix_path,
     people_table = document.getElementById('people-table'),
     add_people = document.getElementById('add-people'),
     people_pager = document.getElementById('people-pager'),
@@ -51,7 +51,7 @@ people_pager.addEventListener('change', function (evt) {
 
 function updateRow(key) {
     let oReq = new XMLHttpRequest(),
-        api_path = `${base_url}/api/people/${key}`;
+        api_path = `${prefix_path}/api/people/${key}`;
     oReq.addEventListener('load', function () {
         let src = this.responseText,
             obj = JSON.parse(src),
@@ -91,7 +91,7 @@ function updatePeopleTable() {
 function refreshPeople() {
     let oReq = new XMLHttpRequest();
     oReq.addEventListener('load', updatePeopleTable);
-    oReq.open('GET', '/api/people');
+    oReq.open('GET', `${prefix_path}/api/people`);
     oReq.send();
     console.log("DEBUG refreshPeople() called");
 }

@@ -3,12 +3,13 @@
 <head>
     <meta charset="utf-8">
     <title>Caltech Library's Digital Library Development Sandbox</title>
+    $if(settings.prefix_path)$<base href="$settings.prefix_path$" >$endif$
     <link rel="stylesheet" href="/css/site.css">
 </head>
 <body>
 <header>
 <span id="library_logo"><a href="http://library.caltech.edu"><img src="/assets/liblogo.gif" alt="Caltech Library logo"></a></span>
-<span id="project_logo"><img src="$settings.base_url$/assets/iceberg-sketch.png" alt="Iceberg logo for cold"></span>
+<span id="project_logo"><img src="/assets/iceberg-sketch.png" alt="Iceberg logo for cold"></span>
 </header>
 <nav>
 $nav$

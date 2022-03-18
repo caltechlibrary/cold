@@ -12,12 +12,14 @@ Manage Groups
 
 <div><group-table id="group-table"></group-table></div>
 
-<script type="module" src="./widgets/config.js"></script>
+<script type="module" src="/widgets/config.js"></script>
 
 <script type="module" src="/widgets/groups.js"></script>
 
 <script type="module">
 "use strict";
+
+import { Cfg } from "/widgets/config.js";
 
 let group_table = document.getElementById('group-table'),
     add_group = document.getElementById('add-group');
@@ -28,7 +30,7 @@ add_group.addEventListener('click', function () {
 
 function updateRow(key) {
     let oReq = new XMLHttpRequest(),
-        api_path = `/api/group/${key}`;
+        api_path = `${Cfg.prefix_path}/api/group/${key}`;
     oReq.addEventListener('load', function () {
         let src = this.responseText,
             obj = JSON.parse(src),
@@ -54,7 +56,7 @@ function updateGroupsTable() {
 function refreshGroups() {
     let oReq = new XMLHttpRequest();
     oReq.addEventListener('load', updateGroupsTable);
-    oReq.open('GET', '/api/group');
+    oReq.open('GET', `${Cfg.prefix_path}/api/group`);
     oReq.send();
 }
 

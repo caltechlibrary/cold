@@ -9,9 +9,6 @@ Managable Objects
 - [People](/app/people.html)
 - [Groups](/app/groups.html)
 
-<!--
-- [Funders](/app/funders.html)
--->
 
 Static Vocabularies
 -------------------
@@ -21,6 +18,5 @@ Vocabularies are static. They are read only key/value pair lists provided by the
 - [Subjects](/app/subjects.html)
 - [ISSN/Publishers](/app/issns.html)
 - [DOI Prefix/Publishers](/app/doi-prefixes.html)
-
 
 

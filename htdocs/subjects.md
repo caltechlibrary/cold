@@ -6,14 +6,18 @@ This page lists the subjects by subject id and the text description (i.e. name).
 
 <div id="subject-list">Fetching subject list</div>
 
-<script type="module" src="./widgets/config.js"></script>
+<script type="module" src="/widgets/config.js"></script>
 
 <script type="module" src="/widgets/vocabulary.js"></script>
 
 <script type="module">
+"use strict";
+import { Cfg } from "/widgets/config.js";
+
 let subject_list = document.getElementById('subject-list'),
     oReq = new XMLHttpRequest(),
-    u = window.location;
+    u = window.location,
+    prefix_path = Cfg.prefix_path;
 
 subject_list.innerHTML = ``;
 
@@ -35,6 +39,6 @@ function updatePage() {
 }
 
 oReq.addEventListener('load', updatePage);
-oReq.open('GET', '/api/subject');
+oReq.open('GET', `${prefix_path}/api/subject`);
 oReq.send();
 </script>

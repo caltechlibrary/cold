@@ -483,9 +483,6 @@ func (api *API) RouteHandler(w http.ResponseWriter, r *http.Request) {
 	case r.URL.Path == "/" || r.URL.Path == "/index.html":
 		http.Redirect(w, r, "/app/", http.StatusMovedPermanently)
 		api.logResponse(r, 301, fmt.Errorf(`redirected to "/app/"`))
-	case strings.HasSuffix(r.URL.Path, "/help"):
-		http.Redirect(w, r, "/app/api-help.md", http.StatusMovedPermanently)
-		api.logResponse(r, 301, fmt.Errorf(`redirected to "/app/index.html"`))
 	case strings.HasPrefix(r.URL.Path, "/api/version"):
 		w.Header().Set("Content-Type", "application/json")
 		fmt.Fprintf(w, `{
@@ -549,14 +546,6 @@ func (api *API) Shutdown(sigName string) int {
 		exitCode = 1
 	}
 	api.log.Printf(`Shutdown completed %s pid: %d exit code: %d\n`, api.AppName, pid, exitCode)
-	/*
-		if api.logOutput != os.Stderr {
-			if err := api.logOutput.Close(); err != nil {
-				fmt.Fprintf(os.Stderr, "%s\n", err)
-				exitCode = 1
-			}
-		}
-	*/
 	return exitCode
 }
 

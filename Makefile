@@ -100,25 +100,25 @@ clean:
 dist/linux-amd64:
 	@mkdir -p dist/bin
 	@for FNAME in $(PROGRAMS); do env  GOOS=linux GOARCH=amd64 go build -o dist/bin/$$FNAME cmd/$$FNAME/*.go; done
-	@cd dist && zip -r $(PROJECT)-$(VERSION)-linux-amd64.zip LICENSE codemeta.json CITATION.cff *.md bin/* docs/* etc/* htdocs/*
+	@cd dist && zip -r $(PROJECT)-$(VERSION)-linux-amd64.zip LICENSE codemeta.json CITATION.cff *.md bin/* docs/* etc/* htdocs/* schema/* *.py dataloader/*.py
 	@rm -fR dist/bin
 
 dist/macos-amd64:
 	@mkdir -p dist/bin
 	@for FNAME in $(PROGRAMS); do env GOOS=darwin GOARCH=amd64 go build -o dist/bin/$$FNAME cmd/$$FNAME/*.go; done
-	@cd dist && zip -r $(PROJECT)-$(VERSION)-macos-amd64.zip LICENSE codemeta.json CITATION.cff *.md bin/* docs/* etc/* htdocs/*
+	@cd dist && zip -r $(PROJECT)-$(VERSION)-macos-amd64.zip LICENSE codemeta.json CITATION.cff *.py *.md bin/* docs/* etc/* htdocs/* schema/* *.py dataloader/*.py
 	@rm -fR dist/bin
 
 dist/macos-arm64:
 	@mkdir -p dist/bin
 	@for FNAME in $(PROGRAMS); do env GOOS=darwin GOARCH=arm64 go build -o dist/bin/$$FNAME cmd/$$FNAME/*.go; done
-	@cd dist && zip -r $(PROJECT)-$(VERSION)-macos-arm64.zip LICENSE codemeta.json CITATION.cff *.md bin/* docs/* etc/* htdocs/*
+	@cd dist && zip -r $(PROJECT)-$(VERSION)-macos-arm64.zip LICENSE codemeta.json CITATION.cff *.md bin/* docs/* etc/* htdocs/* schema/* *.py dataloader/*.py
 	@rm -fR dist/bin
 
 dist/windows-amd64:
 	@mkdir -p dist/bin
 	@for FNAME in $(PROGRAMS); do env GOOS=windows GOARCH=amd64 go build -o dist/bin/$$FNAME.exe cmd/$$FNAME/*.go; done
-	@cd dist && zip -r $(PROJECT)-$(VERSION)-windows-amd64.zip LICENSE codemeta.json CITATION.cff *.md bin/* docs/* etc/* htdocs/*
+	@cd dist && zip -r $(PROJECT)-$(VERSION)-windows-amd64.zip LICENSE codemeta.json CITATION.cff *.md bin/* docs/* etc/* htdocs/* schema/* *.py dataloader/*.py
 	@rm -fR dist/bin
 
 dist/raspbian-arm7:
@@ -138,8 +138,17 @@ distribute_docs: build
 	cp -vR docs dist/
 	cp -vR etc dist/
 	cp -vR htdocs dist/
+	rm -fR dist/htdocs/lunr
 	cp -vR schema dist/
 
+distribute_tools:
+	@mkdir -p dist
+	cp -vR dataloader dist/
+	cp -vp build_lunr_index.py dist/
+	cp -vp csv_to_object_lists.py dist/
+	cp -vp load_testdata.py dist/
+	cp -vp unload_testdata.py dist/
+	
 update_version:
 	$(EDITOR) codemeta.json
 	codemeta2cff
@@ -147,7 +156,7 @@ update_version:
 ui: .FORCE clean htdocs/index.html $(HTML_PAGES) htdocs/widgets/config.js
 
 
-release: clean version.go $(HTML_PAGES) htdocs/index.html htdocs/widgets/config.js distribute_docs dist/linux-amd64 dist/windows-amd64 dist/macos-amd64 dist/macos-arm64 dist/raspbian-arm7
+release: clean version.go $(HTML_PAGES) htdocs/index.html htdocs/widgets/config.js distribute_docs distribute_tools dist/linux-amd64 dist/windows-amd64 dist/macos-amd64 dist/macos-arm64 dist/raspbian-arm7
 
 status:
 	git status
