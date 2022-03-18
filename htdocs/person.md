@@ -61,7 +61,6 @@ function normalize_person(data) {
 
 function savePeople() {
     let elem = document.querySelector('#people-viewer > people-input');
-    console.log("DEBUG savePeople() partially implemented.", elem, elem.value);
     if (elem !== null) {
         let data = elem.value,
             src = JSON.stringify(normalize_person(data)),
@@ -69,19 +68,13 @@ function savePeople() {
         /* FIXME: Validate form */
         /* FIXME: turn form into people object, send to API */
         /* FIXME: if successful return to list otherwise show error and remain on form */
-        console.log(`DEBUG before cl_people_id -> ${cl_people_id}`)
         if (cl_people_id == null) {
             cl_people_id = data['cl_people_id'];
             method = 'PUT';
         }
-        console.log(`DEBUG cl_people_id -> ${cl_people_id} method -> ${method}`)
         let oReq = new XMLHttpRequest(),
             api_path = `${prefix_path}/api/people/${cl_people_id}`;
-        console.log("DEBUG data", typeof(data), data);
-        console.log("DEBUG src", typeof(src), src);
-        console.log(`DEBUG api_path ${api_path}`);
         oReq.addEventListener('load', function () {
-            console.log(`DEBUG load recieved`);
             window.history.go(-1);
         });
         oReq.open(method, api_path);

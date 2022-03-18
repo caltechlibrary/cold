@@ -26,7 +26,6 @@ th {
     border-bottom: 0.24em solid black;
     border-right: 0.12em solid black;
     text-transform: uppercase;
-    text-decoration: underline;
 }
 
 tr {
@@ -44,6 +43,18 @@ td {
     height: auto;
     width: auto;
     border-left: 0.06em solid black;
+}
+
+.people-col-updated {
+    min-width: 5.0em;
+}
+
+.people-col-orcid {
+    min-width: 10.0em;
+}
+
+.is-clickable {
+    text-decoration-skip: underline;
 }
 
 .no-display {

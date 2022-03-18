@@ -63,11 +63,6 @@ display_template.innerHTML = `<style>
   <div class="people-title"><label for="title">Title:</label> <span id="title" /></div>
   <div class="people-bio"><label for="bio">BIO:</label> <span id="bio" /></div>
   <div class="people-division"><label for="division">Division:</label> <span id="division" /></div>
-  <div class="people-authors_count"><label for="authors_count">Authors Count:</label> <span id="authors_count" /></div>
-  <div class="people-thesis_count"><label for="thesis_count">Thesis Count:</label> <span id="thesis_count" /></div>
-  <div class="people-data_count"><label for="data_count">Data Count:</label> <span id="data_count" /></div>
-  <div class="people-advisor_count"><label for="advisor_count" readonly>Advisor Count:</label> <span id="advisor_count" /></div>
-  <div class="people-editor_count"><label for="editor_count" readonly>Editor Count:</label> <span id="editor_count" /></div>
   <div class="people-updated"><label for="updated">Updated:</label> <span id="updated" /></div>
 </div>
 `;
@@ -99,25 +94,25 @@ input_template.innerHTML = `<style>
   <div class="people-educated_at"><label for="educated_at">Educated At:</label> <input id="educated_at" name="educated_at" type="text" size="18" /></div>
   <div class="people-caltech"><label for="caltech">Caltech:</label>
     <select id="caltech" name="caltech">
-        <option value="false" default>False</option>
+        <option value="false">False</option>
         <option value="true">True</option>
     </select>
   </div>
   <div class="people-jpl"><label for="jpl">JPL:</label>
     <select id="jpl" name="jpl">
-        <option value="false" default>False</option>
+        <option value="false">False</option>
         <option value="true">True</option>
     </select>
   </div>
   <div class="people-faculty"><label for="faculty">Faculty:</label>
     <select id="faculty" name="faculty">
-        <option value="false" default>False</option>
+        <option value="false">False</option>
         <option value="true">True</option>
     </select>
   </div>
   <div class="people-alumn"><label for="alumn">Alumn:</label>
    <select id="alumn" name="alumn">
-        <option value="false" default>False</option>
+        <option value="false">False</option>
         <option value="true">True</option>
    </select>
   </div>
@@ -126,11 +121,6 @@ input_template.innerHTML = `<style>
   <div class="people-title"><label for="title">Title:</label> <input id="title" name="title" type="text" size="18" /></div>
   <div class="people-bio"><label for="bio">Bio:</label> <textarea id="bio" name="bio" type="text" cols="18" rows="10"></textarea></div>
   <div class="people-division"><label for="division">Division:</label> <input id="division" name="division" type="text" size="18" /></div>
-  <div class="people-authors_count"><label for="authors_count">Authors Count:</label> <input id="authors_count" name="authors_count" type="text" size="18" readonly /></div>
-  <div class="people-thesis_count"><label for="thesis_count">Thesis Count:</label> <input id="thesis_count" name="thesis_count" type="text" size="18" readonly /></div>
-  <div class="people-data_count"><label for="data_count">Data Count:</label> <input id="data_count" name="data_count" type="text" size="18" readonly /></div>
-  <div class="people-advisor_count"><label for="advisor_count">Advisor Count:</label> <input id="advisor_count" name="advisor_count" type="text" size="18" readonly /></div>
-  <div class="people-editor_count"><label for="editor_count">Editor Count:</label> <input id="editor_count" name="editor_count" type="text" size="18" readonly /></div>
   <div class="people-updated"><label for="updated">Updated:</label> <input id="updated" name="updated" type="date" readonly /></div>
 </div>`;
 
@@ -149,32 +139,27 @@ table_template.innerHTML = `<style>
       <th class="people-col-honorific" title="click column to sort ascending, click again for descending">Honorific</th>
       <th class="people-col-lineage" title="click column to sort ascending, click again for descending">Lineage</th>
       <th class="people-col-orcid" title="click column to sort ascending, click again for descending">orcid</th>
-      <th class="people-col-thesis_id" title="click column to sort ascending, click again for descending">Thesis ID</th>
-      <th class="people-col-advisor_id" title="click column to sort ascending, click again for descending">Advisor ID</th>
+      <th class="people-col-thesis_id no-display" title="click column to sort ascending, click again for descending">Thesis ID</th>
+      <th class="people-col-advisor_id no-display" title="click column to sort ascending, click again for descending">Advisor ID</th>
       <th class="people-col-authors_id" title="click column to sort ascending, click again for descending">Authors ID</th>
-      <th class="people-col-archivesspace_id" title="click column to sort ascending, click again for descending">ArchivesSpace ID</th>
-      <th class="people-col-directory_id" title="click column to sort ascending, click again for descending">Directory ID</th>
-      <th class="people-col-viaf" title="click column to sort ascending, click again for descending">VIAF</th>
-      <th class="people-col-lcnaf" title="click column to sort ascending, click again for descending">LCNAF</th>
-      <th class="people-col-isni" title="click column to sort ascending, click again for descending">ISNI</th>
-      <th class="people-col-wikidata" title="click column to sort ascending, click again for descending">Wikidata</th>
-      <th class="people-col-snac" title="click column to sort ascending, click again for descending">SNAC</th>
-      <th class="people-col-image" title="click column to sort ascending, click again for descending">image</th>
-      <th class="people-col-educated_at" title="click column to sort ascending, click again for descending">Educated At</th>
-      <th class="people-col-caltech" title="click column to sort ascending, click again for descending">Caltech</th>
-      <th class="people-col-jpl" title="click column to sort ascending, click again for descending">JPL</th>
+      <th class="people-col-archivesspace_id no-display" title="click column to sort ascending, click again for descending">ArchivesSpace ID</th>
+      <th class="people-col-directory_id no-display" title="click column to sort ascending, click again for descending">Directory ID</th>
+      <th class="people-col-viaf no-display" title="click column to sort ascending, click again for descending">VIAF</th>
+      <th class="people-col-lcnaf no-display" title="click column to sort ascending, click again for descending">LCNAF</th>
+      <th class="people-col-isni no-display" title="click column to sort ascending, click again for descending">ISNI</th>
+      <th class="people-col-wikidata no-display" title="click column to sort ascending, click again for descending">Wikidata</th>
+      <th class="people-col-snac no-display" title="click column to sort ascending, click again for descending">SNAC</th>
+      <th class="people-col-image no-display" title="click column to sort ascending, click again for descending">image</th>
+      <th class="people-col-educated_at no-display" title="click column to sort ascending, click again for descending">Educated At</th>
+      <th class="people-col-caltech no-display" title="click column to sort ascending, click again for descending">Caltech</th>
+      <th class="people-col-jpl no-display" title="click column to sort ascending, click again for descending">JPL</th>
       <th class="people-col-faculty" title="click column to sort ascending, click again for descending">faculty</th>
       <th class="people-col-alumn" title="click column to sort ascending, click again for descending">alumn</th>
-      <th class="people-col-status" title="click column to sort ascending, click again for descending">status</th>
-      <th class="people-col-directory_person_type" title="click column to sort ascending, click again for descending">Directory Person Type</th>
-      <th class="people-col-title" title="click column to sort ascending, click again for descending">Title</th>
-      <th class="people-col-bio" title="click column to sort ascending, click again for descending">Bio</th>
+      <th class="people-col-status no-display" title="click column to sort ascending, click again for descending">status</th>
+      <th class="people-col-directory_person_type no-display" title="click column to sort ascending, click again for descending">Directory Person Type</th>
+      <th class="people-col-title no-display" title="click column to sort ascending, click again for descending">Title</th>
+      <th class="people-col-bio no-display" title="click column to sort ascending, click again for descending">Bio</th>
       <th class="people-col-division" title="click column to sort ascending, click again for descending">Division</th>
-      <th class="people-col-authors_count" title="click column to sort ascending, click again for descending">Authors Count</th>
-      <th class="people-col-thesis_count" title="click column to sort ascending, click again for descending">Thesis Count</th>
-      <th class="people-col-data_count" title="click column to sort ascending, click again for descending">Data Count</th>
-      <th class="people-col-advisor_count" title="click column to sort ascending, click again for descending">Advisor Count</th>
-      <th class="people-col-editor_count" title="click column to sort ascending, click again for descending">Editor Count</th>
       <th class="people-col-updated" title="click column to sort ascending, click again for descending">Updated</th>
   </thead>
   <tbody>
@@ -226,12 +211,15 @@ function mmddyyyy(date) {
  * Web worker classes
  ******************************/
 
-let people_field_names = [ 'cl_people_id', 'family_name', 'given_name', 'honorific', 'lineage', 
-                           'orcid', 'thesis_id', 'advisor_id', 'authors_id', 'archivesspace_id',
+let people_field_names =  [ 'cl_people_id', 'family_name', 'given_name', 'honorific', 'lineage', 
+                            'orcid', 'thesis_id', 'advisor_id', 'authors_id', 'archivesspace_id',
+                            'directory_id', 'viaf', 'lcnaf', 'isni', 'wikidata', 'snac', 'image',
+                            'educated_at', 'caltech', 'jpl', 'faculty', 'alumn', 'status',
+                            'directory_person_type', 'title', 'bio', 'division', 'updated' ];
+
+let suppressed_columns = [ 'thesis_id', 'advisor_id', 'archivesspace_id',
                            'directory_id', 'viaf', 'lcnaf', 'isni', 'wikidata', 'snac', 'image',
-                           'educated_at', 'caltech', 'jpl', 'faculty', 'alumn', 'status',
-                           'directory_person_type', 'title', 'bio', 'division', 'authors_count',
-                           'thesis_count', 'data_count', 'advisor_count', 'editor_count', 'updated' ];
+                           'educated_at', 'caltech', 'jpl', 'status', 'directory_person_type', 'title', 'bio' ];
 
 
 /**
@@ -488,7 +476,8 @@ class PeopleInput extends HTMLElement {
  class PeopleTable extends HTMLElement {
     constructor () {
         super();
-        this.row_attributes = people_field_names;
+        this.is_sortable = false;
+        this.managed_attributes = people_field_names;
         this.managed_objects = [];
 
         this.attachShadow({mode: 'open'});
@@ -533,35 +522,23 @@ class PeopleInput extends HTMLElement {
     }
 
     /**
-     * set_people updates the object matching "cl_people_id" to the value of object. If
-     *  "cl_people_id" is not in the managed object list the default action is to append it to
-     * the managed object list. If "insert_update" parameter is true, then it'll insert it at
-     * start of the list.  
+     * set_people updates the managed object list or appends it to list.
      */
-    set_people(cl_people_id, obj, insert_update = false) {
+    set_people(cl_people_id, obj) {
+        /* Check to see id we have an existing managed object */
         let pos = this.indexOf(cl_people_id);
-        if (pos < 0) {
-            if (insert_update === true) {
-                this.managed_objects.shift(obj);
-                pos = 0;
-            } else {
-                this.managed_objects.push(obj);
-                pos = this.managed_objects.length - 1;
-            }
-        } else {
-            this.managed_objects[pos] = obj;
+        if (pos > -1) {
+            return this.managed_objects[pos];
         }
-        this.refresh_table();
+        this.managed_objects.push(obj);
     }
 
     insert(obj) {
-        this.managed_obejcts.shift(obj);
-        this.refresh_table();
+        this.managed_objects.shift(obj);
     }
 
     append(obj) {
         this.managed_objects.push(obj);
-        this.refresh_table();
     }
 
     remove(cl_people_id) {
@@ -569,7 +546,6 @@ class PeopleInput extends HTMLElement {
         if (pos > -1) {
             this.managed_objects.splice(pos, 1);
         }
-        this.refresh_table();
     }
 
     setAttribute(key, val) {
@@ -591,6 +567,12 @@ class PeopleInput extends HTMLElement {
     refresh_table() {
         this.tbody.innerHTML = '';
         if (this.managed_objects.length > 0) {
+            /* Resort managed object list so it remains in order of cl_people_id */
+            this.managed_objects.sort(function (a, b) {
+                let id_1 = a.cl_people_id, id_2 = b.cl_people_id;
+                return id_1.toLowerCase().localeCompare(id_2.toLowerCase());
+                return 
+            });
             for (const obj of this.managed_objects) {
                 let rowElem = document.createElement('tr'),
                     cl_people_id = obj.cl_people_id;
@@ -598,7 +580,7 @@ class PeopleInput extends HTMLElement {
                     cl_people_id = 'unknown_people_id';
                 }
                 rowElem.setAttribute('id', `people-{cl_people_id}`);
-                for (const col of this.row_attributes) {
+                for (const col of this.managed_attributes) {
                     let colElem = document.createElement('td');
                     colElem.classList.add(`people-col-${col}`);
                     if (obj.hasOwnProperty(col)) {
@@ -614,6 +596,11 @@ class PeopleInput extends HTMLElement {
                             colElem.textContent = obj[col];
                         }
                     }
+                    if (suppressed_columns.indexOf(col) > -1) {
+                        colElem.classList.add("no-display");
+                    } else {
+                        colElem.classList.remove('no-display');
+                    }
                     rowElem.appendChild(colElem);
                 }
                 this.tbody.appendChild(rowElem);
@@ -626,6 +613,7 @@ class PeopleInput extends HTMLElement {
         let sort_ascending = true;
         for (let table of this.shadowRoot.querySelectorAll('table')) {
             for (let th of table.tHead.rows[0].cells) {
+                th.classList.add('is-clickable');
                 th.onclick = function(){
                     const tBody = table.tBodies[0];
                     const rows = tBody.rows;
@@ -656,7 +644,9 @@ class PeopleInput extends HTMLElement {
 
     connectedCallback() {
         this.refresh_table();
-        this.tableSorter();
+        if (this.is_sortable) {
+            this.tableSorter();
+        } 
     }
 
     disconnectCallback() {

@@ -6,7 +6,9 @@ This is the management interface for [cold](readme.html). It is organized around
 Managable Objects
 -----------------
 
-- [People](/app/people.html)
+- People
+    - [List](/app/people.html)
+    - [Lookup](/app/lookup-people.html)
 - [Groups](/app/groups.html)
 
 

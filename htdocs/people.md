@@ -2,10 +2,9 @@
 People
 =======
 
-This page provides people object management. Click on the people ID to view, editor or remove a people object. You can click on the column headings to sort the table. Clicking again switch directions, e.g. from ascending to descending or descending to ascending. Searching the table can be done with your browser's search in page function (e.g. command + f on macOS, control + f on Windows).
+This page provides a list of people objects. Click on the people ID to view, editor or remove a people object. You can click on "previous" and "next" to page through the list or adjust the slider bar left or right to move through the list of people objects.
 
-
-<div><button id="add-people">Add Person</button></div><p>
+<div><button id="lookup-people">Lookup Person</button> <button id="add-people">Add Person</button></div> <p>
 
 Manage People
 -------------
@@ -22,6 +21,7 @@ import { Cfg } from '/widgets/config.js';
 let prefix_path = Cfg.prefix_path,
     people_table = document.getElementById('people-table'),
     add_people = document.getElementById('add-people'),
+    lookup_people = document.getElementById('lookup-people'),
     people_pager = document.getElementById('people-pager'),
     keys = [];
 
@@ -36,13 +36,20 @@ add_people.addEventListener('click', function () {
     window.location.href = 'person.html';
 });
 
+lookup_people.addEventListener('click', function () {
+    window.location.href = 'lookup-people.html';
+});
+
 people_pager.addEventListener('change', function (evt) {
     let elem = evt.target,
         pos = as_integer(elem.getAttribute('pos')),
         step = as_integer(elem.getAttribute('step'));
-    people_table.reset_table();
     let start = pos,
         end = (pos + step);
+    if (start >= keys.length) {
+        start = keys.length - step;
+    }
+    people_table.reset_table();
     /** NOTE: I render the rows here because I've tied them to the set_position call of the pager */
     for (const key of keys.slice(start, end)) {
         updateRow(key);
@@ -57,6 +64,7 @@ function updateRow(key) {
             obj = JSON.parse(src),
             cl_people_id = obj.cl_people_id;
         people_table.set_people(cl_people_id, obj);
+        people_table.refresh_table();
     });
     oReq.open('GET', api_path);
     oReq.send();
@@ -83,9 +91,6 @@ function updatePeopleTable() {
     if (pos >= 0) {
         pager.set_position(pos, step);
     }
-    keys.sort(function (a, b) {
-        return a.toLowerCase().localeCompare(b.toLowerCase());
-    });
 }
 
 function refreshPeople() {
@@ -93,7 +98,6 @@ function refreshPeople() {
     oReq.addEventListener('load', updatePeopleTable);
     oReq.open('GET', `${prefix_path}/api/people`);
     oReq.send();
-    console.log("DEBUG refreshPeople() called");
 }
 
 refreshPeople();
