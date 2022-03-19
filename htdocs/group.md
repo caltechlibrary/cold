@@ -2,19 +2,18 @@
 Group
 =====
 
-
 <div id="group-viewer"></div>
 
 <div id="group-controls"></div>
 
-<script type="module" src="/widgets/config.js"></script>
+<script type="module" src="./widgets/config.js"></script>
 
-<script type="module" src="/widgets/groups.js"></script>
+<script type="module" src="./widgets/groups.js"></script>
 
 <script type="module">
 "use strict";
-import { Cfg } from "/widgets/config.js";
-import { Group } from "/widgets/groups.js";
+import { Cfg } from "./widgets/config.js";
+import { Group } from "./widgets/groups.js";
 
 let group_viewer = document.getElementById('group-viewer'),
     group_control = document.getElementById('group-controls'),

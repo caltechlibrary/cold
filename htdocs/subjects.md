@@ -6,13 +6,13 @@ This page lists the subjects by subject id and the text description (i.e. name).
 
 <div id="subject-list">Fetching subject list</div>
 
-<script type="module" src="/widgets/config.js"></script>
+<script type="module" src="./widgets/config.js"></script>
 
-<script type="module" src="/widgets/vocabulary.js"></script>
+<script type="module" src="./widgets/vocabulary.js"></script>
 
 <script type="module">
 "use strict";
-import { Cfg } from "/widgets/config.js";
+import { Cfg } from "./widgets/config.js";
 
 let subject_list = document.getElementById('subject-list'),
     oReq = new XMLHttpRequest(),
@@ -28,7 +28,6 @@ function updatePage() {
 
     keys.sort();
     for (let i = 0; i < keys.length; i++) {
-    console.log("DEBUG keys ", i);
         let elem = document.createElement('vocabulary-pair'),
             key = keys[i],
             val = data[key];

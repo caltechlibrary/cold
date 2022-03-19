@@ -4,13 +4,13 @@ DOI Prefix
 
 <div id="doi-prefix-list">Fetching doi-prefix list</div>
 
-<script type="module" src="/widgets/config.js"></script>
+<script type="module" src="./widgets/config.js"></script>
 
-<script type="module" src="/widgets/vocabulary.js"></script>
+<script type="module" src="./widgets/vocabulary.js"></script>
 
 <script type="module">
 "use strict";
-import { Cfg } from "/widgets/config.js";
+import { Cfg } from "./widgets/config.js";
 
 let doi_prefix_list = document.getElementById('doi-prefix-list'),
     oReq = new XMLHttpRequest(),

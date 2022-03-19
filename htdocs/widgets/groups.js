@@ -29,9 +29,7 @@ const display_template = document.createElement('template'),
 
 display_template.innerHTML = `<style>
 /* Default CSS */
-@import "/app/widgets/groups.css";
-/* Site overrides */
-@import "/css/groups.css";
+@import "groups.css";
 </style>
 <div class="group-display">
     <div class="group-cl_group_id"><label for="cl_group_id">Group ID:</label> <span id="cl_group_id" /></div>
@@ -60,9 +58,7 @@ display_template.innerHTML = `<style>
 
 input_template.innerHTML = `<style>
 /* Default CSS */
-@import "/app/widgets/groups.css";
-/* Site overrides */
-@import "/css/groups.css";
+@import "groups.css";
 </style>
 <div class="group-input">
     <div class="group-cl_group_id"><label for="cl_group_id">Group ID:</label> <input type="text" id="cl_group_id" value="" size="80" required="true"></div>
@@ -90,9 +86,7 @@ input_template.innerHTML = `<style>
 
 table_template.innerHTML = `<style>
 /* Default CSS */
-@import "/app/widgets/groups.css";
-/* Site overrides */
-@import "/css/groups.css";
+@import "groups.css";
 </style>
 <table id="group-list">
   <thead>

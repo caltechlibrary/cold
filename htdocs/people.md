@@ -11,13 +11,13 @@ Manage People
 
 <div><people-pager id="people-pager" pos="0" step="75"></people-pager> <people-table id="people-table"></people-table></div>
 
-<script type="module" src="/widgets/config.js"></script>
+<script type="module" src="./widgets/config.js"></script>
 
-<script type="module" src="/widgets/people.js"></script>
+<script type="module" src="./widgets/people.js"></script>
 
 <script type="module">
 "use strict";
-import { Cfg } from '/widgets/config.js';
+import { Cfg } from './widgets/config.js';
 let prefix_path = Cfg.prefix_path,
     people_table = document.getElementById('people-table'),
     add_people = document.getElementById('add-people'),

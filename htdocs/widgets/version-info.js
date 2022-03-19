@@ -25,9 +25,7 @@ const version_info_template = document.createElement('template');
 
 version_info_template.innerHTML = `<style>
 /* Default CSS */
-@import "/app/widgets/version-info.css";
-/* Site overrides */
-@import "/css/site.css";
+@import "./version-info.css";
 </style>
 <div id="version-info" class="version-info">
 </div>

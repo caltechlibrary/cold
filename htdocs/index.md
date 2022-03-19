@@ -7,9 +7,9 @@ Managable Objects
 -----------------
 
 - People
-    - [List](/app/people.html)
-    - [Lookup](/app/lookup-people.html)
-- [Groups](/app/groups.html)
+    - [Lookup](lookup-people.html)
+    - [List](people.html)
+- [Groups](groups.html)
 
 
 Static Vocabularies
@@ -17,8 +17,8 @@ Static Vocabularies
 
 Vocabularies are static. They are read only key/value pair lists provided by the **cold** application.  **cold** source code must be updated and compiled to change the key/value pairs in the lists.
 
-- [Subjects](/app/subjects.html)
-- [ISSN/Publishers](/app/issns.html)
-- [DOI Prefix/Publishers](/app/doi-prefixes.html)
+- [Subjects](subjects.html)
+- [ISSN/Publishers](issns.html)
+- [DOI Prefix/Publishers](doi-prefixes.html)
 
 

@@ -14,13 +14,13 @@ and press go. Press "reset" button to clear the results.
 
 <div id="list-results"></div>
 
-<script type="module" src="/widgets/config.js"></script>
+<script type="module" src="./widgets/config.js"></script>
 
-<script type="module" src="/widgets/people.js"></script>
+<script type="module" src="./widgets/people.js"></script>
 
 <script type="module">
 "use strict";
-import { Cfg } from '/widgets/config.js';
+import { Cfg } from './widgets/config.js';
 let prefix_path = Cfg.prefix_path,
     collection = 'people',
     field_elem = document.getElementById('lookup-field'),

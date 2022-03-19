@@ -12,14 +12,14 @@ Manage Groups
 
 <div><group-table id="group-table"></group-table></div>
 
-<script type="module" src="/widgets/config.js"></script>
+<script type="module" src="widgets/config.js"></script>
 
-<script type="module" src="/widgets/groups.js"></script>
+<script type="module" src="widgets/groups.js"></script>
 
 <script type="module">
 "use strict";
 
-import { Cfg } from "/widgets/config.js";
+import { Cfg } from "widgets/config.js";
 
 let group_table = document.getElementById('group-table'),
     add_group = document.getElementById('add-group');

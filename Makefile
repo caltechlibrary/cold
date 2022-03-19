@@ -20,6 +20,8 @@ HTML_PAGES = $(addsuffix .html, $(PAGES))
 PACKAGE = $(shell ls -1 *.go)
 
 
+APP_PREFIX_PATH = $(shell grep '"prefix_path":' settings.json | cut -d\"  -f 4)
+
 #PREFIX = /usr/local/bin
 PREFIX = $(HOME)
 

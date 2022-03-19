@@ -20,14 +20,14 @@ Developers
 
 <version-info id="version-info"></version-info>
 
-<script type="module" src="/widgets/config.js"></script>
+<script type="module" src="./widgets/config.js"></script>
 
-<script type="module" src="/widgets/version-info.js"></script>
+<script type="module" src="./widgets/version-info.js"></script>
 
 <script type="module">
 "use strict";
 
-import { Cfg } from "/widgets/config.js";
+import { Cfg } from "./widgets/config.js";
 
 let version_info = document.getElementById('version-info');
 

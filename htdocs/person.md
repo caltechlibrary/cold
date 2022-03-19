@@ -8,12 +8,12 @@ People
 
 <script type="module" src="./widgets/config.js"></script>
 
-<script type="module" src="/widgets/people.js"></script>
+<script type="module" src="./widgets/people.js"></script>
 
 <script type="module">
 "use strict";
-import { Cfg } from "/widgets/config.js";
-import { People } from "/widgets/people.js";
+import { Cfg } from "./widgets/config.js";
+import { People } from "./widgets/people.js";
 
 let people_viewer = document.getElementById('people-viewer'),
     people_controls = document.getElementById('people-controls'),

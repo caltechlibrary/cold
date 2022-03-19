@@ -138,12 +138,5 @@ Widgets provide the user interface for humans to manage and view the objects. Wh
 `/widgets/group.js`
 : This JavaScript file provides a display and input set of web components for our Markup example `<group-display name="GALCIT" ror=""></group-display>` and `<group-input  name="GALCIT" ror="" label=""></group-input>`
 
-<!--
-
-`/widgets/funder.js`
-: This JavaScript file provides a display and input set of web components for our Markup example `<funder-display name="NSF" grant_number="1.203221" ror="" doi=""></funder-display>` and `<funder-input  name="NSF" grant_number="1.203221" doi="" ror="" label="Grant details"></funder-input>`
-
--->
-
 `/widgets/vocabulary.js`
 : This JavaScript file provides a identifier/name web component suitable for displaying subjects, issn/publisher info and doi-prefix/publisher info.
