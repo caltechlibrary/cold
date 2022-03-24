@@ -10,19 +10,17 @@ import json
 
 from http import client
 
-from dataloader.loader import unload_groups, unload_people, unload_funders
+from dataloader.loader import unload_groups, unload_people
 
 options = { 
     "groups" : unload_groups,
-    "people": unload_people,
-    "funders": unload_funders 
+    "people": unload_people
 }
 
 if __name__ == '__main__':
     if len(sys.argv) == 1:
         unload_groups('testdata/groups.json')
         unload_people('testdata/people.json')
-        unload_funders('testdata/funders.json')
     else:
         for arg in sys.argv[1:]:
             if arg in options:

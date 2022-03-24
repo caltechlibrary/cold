@@ -10,19 +10,17 @@ import json
 
 from http import client
 
-from dataloader.loader import load_people, load_groups, load_funders
+from dataloader.loader import load_people, load_groups
 
 options = { 
     "groups" : load_groups,
-    "people": load_people,
-    "funders": load_funders 
+    "people": load_people
 }
 
 if __name__ == '__main__':
     if len(sys.argv) == 1:
         load_groups('testdata/groups.json')
         load_people('testdata/people.json')
-        load_funders('testdata/funders.json')
     else:
         for arg in sys.argv[1:]:
             if arg in options:

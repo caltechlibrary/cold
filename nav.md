@@ -1,5 +1,5 @@
 - [Home](/)
-- [Dashboard](/app/)
-- [Help](/app/help.html)
-- [About](/app/about.html)
+- [Dashboard](/cold/app/)
+- [Help](/cold/app/help.html)
+- [About](/cold/app/about.html)
 - [Logout](/Shibboleth.sso/Logout)
