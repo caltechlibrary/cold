@@ -25,6 +25,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"os/signal"
 	"path"
@@ -565,6 +566,35 @@ func (api *API) APIRouteHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (api *API) calcRedirect(newPathPart string) string {
+	u := new(url.URL)
+	u.Host = api.Cfg.Hostname
+	u.Path = path.Join(api.Cfg.PrefixPath, newPathPart)
+	return u.String()
+}
+
+func (api *API) RedirectToApp(w http.ResponseWriter, r *http.Request) {
+	api.logRequest(w, r)
+	// NOTE: We need to strip the prefix path to normalize the expected
+	// API path call.
+	switch {
+	case strings.HasSuffix(r.URL.Path, "/version"):
+		http.Redirect(w, r, api.calcRedirect("/api/version"), http.StatusPermanentRedirect)
+		api.logResponse(r, http.StatusPermanentRedirect, nil)
+	case strings.HasSuffix(r.URL.Path, "/favicon.ico"):
+		http.Redirect(w, r, api.calcRedirect("/app/favicon.ico"), http.StatusPermanentRedirect)
+		api.logResponse(r, http.StatusPermanentRedirect, nil)
+	case strings.HasSuffix(r.URL.Path, "/index.html"):
+		http.Redirect(w, r, api.calcRedirect("/app/"), http.StatusPermanentRedirect)
+		api.logResponse(r, http.StatusPermanentRedirect, nil)
+	case strings.HasSuffix(r.URL.Path, "/"):
+		http.Redirect(w, r, api.calcRedirect("/app/"), http.StatusPermanentRedirect)
+		api.logResponse(r, http.StatusPermanentRedirect, nil)
+	default:
+		http.NotFound(w, r)
+		api.logResponse(r, http.StatusNotFound, fmt.Errorf(`not found`))
+	}
+}
 func DisplayLicense(out io.Writer, appName string, license string) {
 	fmt.Fprintln(out, strings.ReplaceAll(strings.ReplaceAll(license, "{app_name}", appName), "{version}", Version))
 }
@@ -670,7 +700,7 @@ Cold (Controlled Object Lists Daemon)
 
 Listening on %s
 
-Base URL: %s%s
+Base URL: http://%s%s
 
 Htdocs: %s
 
@@ -702,6 +732,18 @@ Press ctl-c to terminate.
 	apiPrefixPath := fmt.Sprintf("%s/api/", api.Cfg.PrefixPath)
 	fs := api.requestLogger(api.staticRouter(http.FileServer(http.Dir(api.Cfg.Htdocs))))
 	http.Handle(appPrefixPath, http.StripPrefix(appPrefixPath, fs))
+	if api.Cfg.DisableRootRedirects == false {
+		if api.Cfg.PrefixPath != "" {
+			http.HandleFunc(fmt.Sprintf("%s/version", api.Cfg.PrefixPath), api.RedirectToApp)
+			http.HandleFunc(fmt.Sprintf("%s/index.html", api.Cfg.PrefixPath), api.RedirectToApp)
+			http.HandleFunc(fmt.Sprintf("%s/favicon.ico", api.Cfg.PrefixPath), api.RedirectToApp)
+			http.HandleFunc(fmt.Sprintf("%s/", api.Cfg.PrefixPath), api.RedirectToApp)
+		}
+		http.HandleFunc("/version", api.RedirectToApp)
+		http.HandleFunc("/index.html", api.RedirectToApp)
+		http.HandleFunc("/favicon.ico", api.RedirectToApp)
+		http.HandleFunc("/", api.RedirectToApp)
+	}
 	http.HandleFunc(apiPrefixPath, api.APIRouteHandler)
 	return http.ListenAndServe(api.Cfg.Hostname, nil)
 }

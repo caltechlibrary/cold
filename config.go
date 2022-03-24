@@ -53,6 +53,12 @@ type Config struct {
 
 	// Connection holds database connection
 	Connection *sql.DB `json:"-"`
+
+	// DisableRootRedirects (default is false) if true turns off
+	// root redirects.  By default cold supports simple redirection
+	// for common root level files, e.g. index.html, favicon.ico. Set
+	// from / common files like index.html, favicon.ico
+	DisableRootRedirects bool `json:"disable_root_redirects,omitempty"`
 }
 
 func CheckConfig(cfg *Config) error {
