@@ -3,16 +3,13 @@
 <head>
     <meta charset="utf-8">
     <title>Caltech Library's Digital Library Development Sandbox</title>
-    $if(settings.prefix_path)$
-    <link rel="stylesheet" href="$settings.prefix_path$/css/site.css">
-    $else$
-    <link rel="stylesheet" href="../css/site.css">
-    $endif$
+    <link rel="stylesheet" href="$settings.prefix_path$/app/css/site.css">
+    <link rel="icon" href="$settings.prefix_path$/app/favicon.ico" type="image/x-icon">
 </head>
 <body>
 <header>
-<span id="library_logo"><a href="http://library.caltech.edu"><img src="/assets/liblogo.gif" alt="Caltech Library logo"></a></span>
-<span id="project_logo"><img src="../assets/iceberg-sketch.png" alt="Iceberg logo for cold"></span>
+<span id="library_logo"><a href="http://library.caltech.edu"><img src="$settings.prefix_path$/app/assets/liblogo.gif" alt="Caltech Library logo"></a></span>
+<span id="project_logo"><img src="$settings.prefix_path$/app/assets/iceberg-sketch.png" alt="Iceberg logo for cold"></span>
 </header>
 <nav>
 $nav$

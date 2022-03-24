@@ -156,11 +156,16 @@ func (api *API) staticRouter(next http.Handler) http.Handler {
 // PeopleAPI handles the people/person requests
 func (api *API) PeopleAPI(w http.ResponseWriter, r *http.Request) {
 	var (
-		src        []byte
-		err        error
-		clPeopleID string
+		src         []byte
+		err         error
+		clPeopleID  string
+		requestPath string
 	)
-	args := strings.Split(r.URL.Path, "/")
+	requestPath = r.URL.Path
+	if api.Cfg.PrefixPath != "" {
+		requestPath = strings.TrimPrefix(r.URL.Path, api.Cfg.PrefixPath)
+	}
+	args := strings.Split(requestPath, "/")
 	if len(args) > 3 {
 		clPeopleID = strings.Join(args[3:], "/")
 	}
@@ -246,11 +251,16 @@ func (api *API) PeopleAPI(w http.ResponseWriter, r *http.Request) {
 // GroupAPI handles the group requests
 func (api *API) GroupAPI(w http.ResponseWriter, r *http.Request) {
 	var (
-		src       []byte
-		err       error
-		clGroupID string
+		src         []byte
+		err         error
+		clGroupID   string
+		requestPath string
 	)
-	args := strings.Split(r.URL.Path, "/")
+	requestPath = r.URL.Path
+	if api.Cfg.PrefixPath != "" {
+		requestPath = strings.TrimPrefix(r.URL.Path, api.Cfg.PrefixPath)
+	}
+	args := strings.Split(requestPath, "/")
 	if len(args) > 3 {
 		clGroupID = strings.Join(args[3:], "/")
 	}
@@ -337,11 +347,16 @@ func (api *API) GroupAPI(w http.ResponseWriter, r *http.Request) {
 // FunderAPI handles the funder requests
 func (api *API) FunderAPI(w http.ResponseWriter, r *http.Request) {
 	var (
-		src        []byte
-		err        error
-		clFunderID string
+		src         []byte
+		err         error
+		clFunderID  string
+		requestPath string
 	)
-	args := strings.Split(r.URL.Path, "/")
+	requestPath = r.URL.Path
+	if api.Cfg.PrefixPath != "" {
+		requestPath = strings.TrimPrefix(r.URL.Path, api.Cfg.PrefixPath)
+	}
+	args := strings.Split(requestPath, "/")
 	if len(args) > 3 {
 		clFunderID = strings.Join(args[3:], "/")
 	}
@@ -426,12 +441,18 @@ func (api *API) FunderAPI(w http.ResponseWriter, r *http.Request) {
 
 func (api *API) VocabularyAPI(w http.ResponseWriter, r *http.Request) {
 	var (
-		err        error
-		src        []byte
-		args       []string
-		voc, vocId string
+		err         error
+		src         []byte
+		args        []string
+		voc, vocId  string
+		requestPath string
 	)
-	args = strings.Split(r.URL.Path, "/")[1:]
+	requestPath = r.URL.Path
+	if api.Cfg.PrefixPath != "" {
+		requestPath = strings.TrimPrefix(r.URL.Path, api.Cfg.PrefixPath)
+	}
+
+	args = strings.Split(requestPath, "/")[1:]
 	if len(args) < 2 {
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		api.logResponse(r, http.StatusBadRequest, fmt.Errorf(`bad request`))
@@ -480,11 +501,17 @@ func (api *API) VocabularyAPI(w http.ResponseWriter, r *http.Request) {
 // Crosswalk takes a collection, field path and value and returns a list of ids or error
 func (api *API) Crosswalk(w http.ResponseWriter, r *http.Request) {
 	var (
-		err  error
-		src  []byte
-		args []string
+		err         error
+		src         []byte
+		args        []string
+		requestPath string
 	)
-	args = strings.Split(r.URL.Path, "/")[3:]
+	requestPath = r.URL.Path
+	if api.Cfg.PrefixPath != "" {
+		requestPath = strings.TrimPrefix(r.URL.Path, api.Cfg.PrefixPath)
+	}
+
+	args = strings.Split(requestPath, "/")[3:]
 	if len(args) != 3 {
 		http.Error(w, `Bad Request`, http.StatusBadRequest)
 		api.logResponse(r, http.StatusBadRequest, fmt.Errorf(`bad request, collection name, expected field name and value %+v`, args))
@@ -499,32 +526,38 @@ func (api *API) Crosswalk(w http.ResponseWriter, r *http.Request) {
 	api.packageJSON(w, r, src, err)
 }
 
-func (api *API) RouteHandler(w http.ResponseWriter, r *http.Request) {
+func (api *API) APIRouteHandler(w http.ResponseWriter, r *http.Request) {
+	var requestPath string
 	api.logRequest(w, r)
+	// NOTE: We need to strip the prefix path to normalize the expected
+	// API path call.
+	requestPath = r.URL.Path
+	if api.Cfg.PrefixPath != "" {
+		requestPath = strings.TrimPrefix(r.URL.Path, api.Cfg.PrefixPath)
+	}
+	fmt.Printf("DEBUG requestPath -> %q\n", requestPath)
+
 	switch {
-	case r.URL.Path == "/" || r.URL.Path == "/index.html":
-		http.Redirect(w, r, "/app/", http.StatusMovedPermanently)
-		api.logResponse(r, 301, fmt.Errorf(`redirected to "/app/"`))
-	case strings.HasPrefix(r.URL.Path, "/api/version"):
+	case strings.HasPrefix(requestPath, "/api/version"):
 		w.Header().Set("Content-Type", "application/json")
 		fmt.Fprintf(w, `{
 	"application_name": %q, 
 	"version": %q
 }`, api.AppName, Version)
 		api.logResponse(r, http.StatusOK, nil)
-	case strings.HasPrefix(r.URL.Path, "/api/people"):
+	case strings.HasPrefix(requestPath, "/api/people"):
 		api.PeopleAPI(w, r)
-	case strings.HasPrefix(r.URL.Path, "/api/group"):
+	case strings.HasPrefix(requestPath, "/api/group"):
 		api.GroupAPI(w, r)
-	case strings.HasPrefix(r.URL.Path, "/api/crosswalk"):
+	case strings.HasPrefix(requestPath, "/api/crosswalk"):
 		api.Crosswalk(w, r)
-	case strings.HasPrefix(r.URL.Path, "/api/funder"):
+	case strings.HasPrefix(requestPath, "/api/funder"):
 		api.FunderAPI(w, r)
-	case strings.HasPrefix(r.URL.Path, "/api/subject"):
+	case strings.HasPrefix(requestPath, "/api/subject"):
 		api.VocabularyAPI(w, r)
-	case strings.HasPrefix(r.URL.Path, "/api/issn"):
+	case strings.HasPrefix(requestPath, "/api/issn"):
 		api.VocabularyAPI(w, r)
-	case strings.HasPrefix(r.URL.Path, "/api/doi-prefix"):
+	case strings.HasPrefix(requestPath, "/api/doi-prefix"):
 		api.VocabularyAPI(w, r)
 	default:
 		http.NotFound(w, r)
@@ -637,13 +670,13 @@ Cold (Controlled Object Lists Daemon)
 
 Listening on %s
 
-Base URL: %s
+Base URL: %s%s
 
 Htdocs: %s
 
 Log status: %s
 Press ctl-c to terminate.
-`, api.AppName, Version, api.Settings, os.Getpid(), api.Cfg.Hostname, api.Cfg.BaseURL, api.Cfg.Htdocs, logStatus)
+`, api.AppName, Version, api.Settings, os.Getpid(), api.Cfg.Hostname, api.Cfg.Hostname, api.Cfg.PrefixPath, api.Cfg.Htdocs, logStatus)
 
 	/* Listen for Ctr-C or signals */
 	processControl := make(chan os.Signal, 1)
@@ -665,13 +698,10 @@ Press ctl-c to terminate.
 		}
 	}()
 
+	appPrefixPath := fmt.Sprintf("%s/app/", api.Cfg.PrefixPath)
+	apiPrefixPath := fmt.Sprintf("%s/api/", api.Cfg.PrefixPath)
 	fs := api.requestLogger(api.staticRouter(http.FileServer(http.Dir(api.Cfg.Htdocs))))
-	http.Handle("/favicon.ico", fs)
-	http.Handle("/app/", http.StripPrefix("/app/", fs))
-	http.Handle("/css/", fs)
-	http.Handle("/assets/", fs)
-	http.Handle("/widgets/", fs)
-	http.Handle("/index.html", fs)
-	http.HandleFunc("/", api.RouteHandler)
+	http.Handle(appPrefixPath, http.StripPrefix(appPrefixPath, fs))
+	http.HandleFunc(apiPrefixPath, api.APIRouteHandler)
 	return http.ListenAndServe(api.Cfg.Hostname, nil)
 }

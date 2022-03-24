@@ -34,17 +34,13 @@ type Config struct {
 	// Hostname (and port) for running service, e.g. localhost:8486
 	Hostname string `json:"hostname"`
 
-	// BaseURL is the URL used to resolve relative paths browser side
-	// E.g. the base URL generated in `/widgets/config.js`.
-	BaseURL string `json:"base_url"`
+	// PrefixPath is a URL path used as a prefix by both the API
+	// and APP halfs of the server.  This allows for controlling the
+	// expected path in a reverse proxy deployment.
+	PrefixPath string `json:"prefix_path"`
 
 	// Htdocs holds static pages, help and Widgets
 	Htdocs string `json:"htdocs"`
-
-	// PrefixPath is the partial URL path used as a "base" href
-	// by web pages. This allows for controlling the expected path
-	// in a reverse proxy deployment.
-	PrefixPath string `json:"prefix_path"`
 
 	// Logfile
 	Logfile string `json:"logfile,omitempty"`
@@ -88,9 +84,6 @@ func LoadConfig(fname string) (*Config, error) {
 		}
 		if config.PrefixPath == "" {
 			config.PrefixPath = ""
-		}
-		if config.BaseURL == "" {
-			config.BaseURL = fmt.Sprintf(`http://%s/`, config.Hostname)
 		}
 	}
 	return config, nil

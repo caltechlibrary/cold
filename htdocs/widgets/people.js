@@ -21,6 +21,8 @@
 
 import { Cfg } from './config.js';
 
+const prefix_path = Cfg.prefix_path;
+
 const display_template = document.createElement('template'),
       input_template = document.createElement('template'),
       table_template = document.createElement('template'),
@@ -31,7 +33,7 @@ const display_template = document.createElement('template'),
  */
 display_template.innerHTML = `<style>
 /* Default CSS */
-@import "./people.css";
+@import "${prefix_path}/app/widgets/people.css";
 </style>
 <div class="people-display">
   <div class="people-cl_people_id"><label for="cl_people_id">People ID:</label> <span id="cl_people_id" /></div>
@@ -67,7 +69,7 @@ display_template.innerHTML = `<style>
 
 input_template.innerHTML = `<style>
 /* Default CSS */
-@import "./people.css";
+@import "${prefix_path}/app/widgets/people.css";
 </style>
 <div class="people-input">
   <div class="people-cl_people_id"><label for="cl_people_id">People ID:</label> <input required id="cl_people_id" name="cl_people_id" type="text" /></div>
@@ -122,7 +124,7 @@ input_template.innerHTML = `<style>
 
 table_template.innerHTML = `<style>
 /* Default CSS */
-@import "people.css";
+@import "${prefix_path}/app/widgets/people.css";
 </style>
 <table id="people-list" class="people-list">
   <thead>
@@ -163,7 +165,7 @@ table_template.innerHTML = `<style>
 
 pager_template.innerHTML = `<style>
 /* Default CSS */
-@import "./people.css";
+@import "${prefix_path}/app/widgets/people.css";
 </style>
 <div class="people-pager">
   <a href="" id="people-pager-previous" class="people-pager-previous">Previous</a> 

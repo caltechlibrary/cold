@@ -53,18 +53,18 @@ $(PROGRAMS): cmd/*/*.go $(PACKAGE)
 	@mkdir -p bin
 	go build -o bin/$@$(EXT) cmd/$@/*.go
 
-nav.md: nav.tmpl
-	mkpage settings=settings.json nav.tmpl >nav.md
+nav.md: templates/nav.tmpl
+	mkpage settings=settings.json templates/nav.tmpl >nav.md
 
 $(HTML_PAGES): $(MD_PAGES) nav.md
 	@echo "PAGE html: "$@" PAGE md: "$(basename $@).md
-	mkpage settings=settings.json body=$(basename $@).md nav=nav.md page.tmpl >$@
+	mkpage settings=settings.json body=$(basename $@).md nav=nav.md templates/page.tmpl >$@
 
 htdocs/widgets/config.js: .FORCE
 	mkpage codemeta=codemeta.json settings=settings.json templates/config-js.tmpl >htdocs/widgets/config.js	
 
 htdocs/readme.html: nav.md README.md
-	mkpage settings=settings.json body=README.md nav=nav.md page.tmpl >htdocs/readme.html
+	mkpage settings=settings.json body=README.md nav=nav.md templates/page.tmpl >htdocs/readme.html
 
 harvest: .FORCE
 	./harvest_testdata.bash
@@ -80,9 +80,6 @@ uninstall: .FORCE
 	@echo "Removing programs in $(PREFIX)/bin"
 	@for FNAME in $(PROGRAMS); do if [ -f $(PREFIX)/bin/$$FNAME ]; then rm -v $(PREFIX)/bin/$$FNAME; fi; done
 
-website: page.tmpl README.md nav.md INSTALL.md LICENSE css/site.css
-	bash mk-website.bash
-
 test: clean build
 	python3 csv_to_object_lists.py	
 	go test
@@ -92,7 +89,7 @@ cleanweb:
 	@if [ -f index.html ]; then rm *.html; fi
 
 clean: 
-	@if [ -d nav.md ]; then rm nav.md; fi
+	@if [ -f nav.md ]; then rm nav.md; fi
 	@if [ -f htdocs/index.html ]; then rm htdocs/*.html; fi
 	@if [ -d bin ]; then rm -fR bin; fi
 	@if [ -d dist ]; then rm -fR dist; fi

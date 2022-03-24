@@ -19,6 +19,10 @@
  */
 "use strict";
 
+import { Cfg } from "./config.js";
+
+const prefix_path = Cfg.prefix_path;
+
 const display_template = document.createElement('template'),
       input_template = document.createElement('template'),
       table_template = document.createElement('template');
@@ -29,7 +33,7 @@ const display_template = document.createElement('template'),
 
 display_template.innerHTML = `<style>
 /* Default CSS */
-@import "groups.css";
+@import "${prefix_path}/app/widgets/groups.css";
 </style>
 <div class="group-display">
     <div class="group-cl_group_id"><label for="cl_group_id">Group ID:</label> <span id="cl_group_id" /></div>
@@ -58,7 +62,7 @@ display_template.innerHTML = `<style>
 
 input_template.innerHTML = `<style>
 /* Default CSS */
-@import "groups.css";
+@import "${prefix_path}/app/widgets/groups.css";
 </style>
 <div class="group-input">
     <div class="group-cl_group_id"><label for="cl_group_id">Group ID:</label> <input type="text" id="cl_group_id" value="" size="80" required="true"></div>
@@ -86,7 +90,7 @@ input_template.innerHTML = `<style>
 
 table_template.innerHTML = `<style>
 /* Default CSS */
-@import "groups.css";
+@import "${prefix_path}/app/widgets/groups.css";
 </style>
 <table id="group-list">
   <thead>
@@ -212,7 +216,7 @@ class GroupDisplay extends HTMLElement {
                 fnNameOnChange = `onchange_${key}`;
             self[elem_name] = this.shadowRoot.getElementById(key);
             self[fnNameOnChange] = function() {
-                let evt = new Event("change", {"bubbles": true, "cancelable": true});
+                let evt = new Event('change', { 'bubbles': true, 'cancelable': true });
                 self[key] = self[elem_name].value;
                 self.setAttribute(key, self[elem_name].value);
                 this.shadowRoot.host.dispatchEvent(evt);
@@ -250,7 +254,7 @@ class GroupDisplay extends HTMLElement {
             let self = this,
                 elem_name =  `${key}_field`;
             self[elem_name].innerHTML = val;
-            let evt = new Event("change", {"bubbles": true, "cancelable": true});
+            let evt = new Event('change', { 'bubbles': true, 'cancelable': true });
             this.shadowRoot.host.dispatchEvent(evt);
         }
         super.setAttribute(key, val);
@@ -299,7 +303,7 @@ class GroupInput extends HTMLElement {
                 fnNameOnChange = `onchange_${key}`;
             self[elem_name] = this.shadowRoot.getElementById(key);
             self[fnNameOnChange] = function() {
-                let evt = new Event("change", {"bubbles": true, "cancelable": true});
+                let evt = new Event('change', { 'bubbles': true, 'cancelable': true });
                 self[key] = self[elem_name].value;
                 self.setAttribute(key, self[elem_name].value);
                 this.shadowRoot.host.dispatchEvent(evt);
@@ -350,7 +354,7 @@ class GroupInput extends HTMLElement {
             } else {
                 console.log(`ERROR: can't fund ${elem_name} <-- ${val}`);
             }
-            let evt = new Event("change", {"bubbles": true, "cancelable": true});
+            let evt = new Event('change', { 'bubbles': true, 'cancelable': true });
             this.shadowRoot.host.dispatchEvent(evt);
         }
         super.setAttribute(key, val);
@@ -481,7 +485,7 @@ class GroupInput extends HTMLElement {
             let self = this,
                 elem_name =  `${key}_input`;
             self[elem_name].value = val;
-            let evt = new Event("change",{"bubbles": true, "cancelable": true});
+            let evt = new Event('change', { 'bubbles': true, 'cancelable': true });
             this.shadowRoot.host.dispatchEvent(evt);
         }
         super.setAttribute(key, val);

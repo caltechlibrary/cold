@@ -21,11 +21,13 @@
 
 import { Cfg } from "./config.js";
 
+const prefix_path = Cfg.prefix_path;
+
 const version_info_template = document.createElement('template');
 
 version_info_template.innerHTML = `<style>
 /* Default CSS */
-@import "./version-info.css";
+@import "${prefix_path}/app/widgets/version-info.css";
 </style>
 <div id="version-info" class="version-info">
 </div>

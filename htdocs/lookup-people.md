@@ -62,6 +62,7 @@ function updatePeopleTable() {
         people_table = document.createElement('people-table');
     people_table.setAttribute('id', 'people-table');
     list_results.appendChild(people_table);
+    console.log(`DEBUG people src ${src}`);
     /* Update the list of keys from what we retrieved. */
     keys = JSON.parse(src);
     lookup_message.textContent = `${keys.length} people found`;
