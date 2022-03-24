@@ -16,9 +16,7 @@ import { Cfg } from "./widgets/config.js";
 import { Group } from "./widgets/groups.js";
 
 let group_viewer = document.getElementById('group-viewer'),
-    group_control = document.getElementById('group-controls'),
-    group_display = document.createElement('group-display'),
-    group_input = document.createElement('group-input'),
+    group_controls = document.getElementById('group-controls'),
     /* Edit controls */
     edit_button = document.createElement('button'),
     remove_button = document.createElement('button'),
@@ -27,97 +25,152 @@ let group_viewer = document.getElementById('group-viewer'),
     save_button = document.createElement('button'),
     cancel_button = document.createElement('button'),
     params = new URLSearchParams(window.location.search),
-    cl_group_id = params.get('cl_group_id');
+    cl_group_id = params.get('cl_group_id'),
+    prefix_path = Cfg.prefix_path;
 
+function as_bool(s) {
+    if (s.startsWith('t') || s.startsWith('T') || s.startsWith('1')) {
+        return true;
+    }
+    return false;
+}
+
+function normalize_group(data) {
+    let m = new Map();
+    for (const key of Object.keys(data)) {
+        switch(key) {
+            /* FIXME: validate and sanitize fields here */
+            default:
+                m[key] = data[key];
+        }
+    }
+    return m
+}
 
 function saveGroup() {
-    let obj = group_input.value;
-    group_display.value = obj;
-    //FIXME: Need to seen this back to service.
-    group_viewer.innerHTML = '';
-    group_viewer.appendChild(group_display);
-    show_edit_buttons();
-    console.log("DEBUG saveGroup() not fully implemented.");
+    let elem = document.querySelector('#group-viewer > group-input');
+    if (elem !== null) {
+        let data = elem.value,
+            src = JSON.stringify(normalize_group(data)),
+            method = 'POST';
+        if (cl_group_id == null) {
+            cl_group_id = data['cl_group_id'];
+            method = 'PUT';
+        }
+        let oReq = new XMLHttpRequest(),
+            api_path = `${prefix_path}/api/group/${cl_group_id}`;
+        oReq.addEventListener('load', function () {
+            window.history.go(-1);
+        });
+        oReq.open(method, api_path);
+        oReq.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+        oReq.send(src);
+    }
 }
 
 function cancelGroup() {
-    group_viewer.innerHTML = '';
-    group_viewer.appendChild(group_display);
-    show_edit_buttons();
-    console.log("DEBUG cancelGroup()");
+    if (cl_group_id == null) {
+        returnToGroupList();
+        return;
+    }
+    /* Reload the current page in display mode */
+    window.history.go();
 }
 
 function createGroup() {
-    let obj = new Group();
-    group_input.value = obj;
+    let group_viewer = document.getElementById('group-viewer'),
+        /* Editor for Group */
+        group_input = document.createElement('group-input');
     group_viewer.innerHTML = '';
     group_viewer.appendChild(group_input);
     show_save_buttons();
-    console.log("DEBUG createGroup() ");
-}
-
-function editGroup() {
-    let obj = group_display.value;
-    group_input.value = obj;
-    group_viewer.innerHTML = '';
-    group_viewer.appendChild(group_input);
-    show_save_buttons();
-    console.log("DEBUG editGroup() ");
 }
 
 function returnToGroupList() {
-    window.location.href = "groups.html";
+    let numberOfEntries = window.history.length;
+    if (numberOfEntries > 1) {
+        window.history.back();
+    } else {
+        window.location.href = `${prefix_path}/app/groups.html`;
+    }
 }
 
 function removeGroup() {
-    let obj = group_display.value,
-        cl_group_id = obj.cl_group_id;
-    //FIXME: Need to send delete request to service
-    console.log("DEBUG removeGroup() not fully implemented.");
-    returnToGroupList();
+    let oReq = new XMLHttpRequest(),
+        api_path = `${prefix_path}/api/group/${cl_group_id}`;
+    oReq.addEventListener('load', function () {
+        returnToGroupList();
+    });
+    oReq.open('DELETE', api_path);
+    oReq.send();
 }
 
-
 function show_edit_buttons() {
-    group_control.innerHTML = '';
-    group_control.appendChild(edit_button);
-    group_control.appendChild(remove_button);
-    group_control.appendChild(return_button);
+    group_controls.innerHTML = '';
+    group_controls.appendChild(edit_button);
+    group_controls.appendChild(remove_button);
+    group_controls.appendChild(return_button);
+    /* FIXME: Need to wire up actions of each button */
 }
 
 function show_save_buttons() {
-    group_control.innerHTML = '';
-    group_control.appendChild(save_button);
-    group_control.appendChild(cancel_button);
+    group_controls.innerHTML = '';
+    group_controls.appendChild(save_button);
+    group_controls.appendChild(cancel_button);
+    /* FIXME: Need to wire up actions of each button */
 }
 
-function updateDisplayGroup() {
+function editGroup() {
+    console.log("DEBUG editGroup() cl_group_id ->", cl_group_id);
     let src = this.responseText,
-        obj = JSON.parse(src);
+        obj = JSON.parse(src),
+        /* Display Editor for Group */
+        group_editor = document.createElement('group-input'),
+        group_viewer = document.getElementById('group-viewer');
+    group_editor.value = obj;
+    group_viewer.innerHTML = '';
+    group_viewer.appendChild(group_editor);
+    show_save_buttons();
+}
+
+function updateGroup() {
+    let elem = document.querySelector('div#group-viewer group-display'),
+        group_id = elem.getAttribute('cl_group_id'),
+        oReq = new XMLHttpRequest();
+
+    oReq.addEventListener('load', editGroup);
+    oReq.open('GET', `${prefix_path}/api/group/${group_id}`);
+    oReq.send();
+}
+
+function displayGroup() {
+    let src = this.responseText,
+        obj = JSON.parse(src),
+        /* Display Group */
+        group_display = document.createElement('group-display');
     group_display.value = obj;
     group_viewer.innerHTML = '';
     group_viewer.appendChild(group_display);
     show_edit_buttons();
-    console.log("DEBUG updateGroup() not fully implemented.");
 }
 
 function retrieveGroup(cl_group_id) {
     let oReq = new XMLHttpRequest();
-    oReq.addEventListener('load', updateDisplayGroup);
-    oReq.open('GET', `${Cfg.prefix_path}/api/group/${cl_group_id}`);
+    oReq.addEventListener('load', displayGroup);
+    oReq.open('GET', `${prefix_path}/api/group/${cl_group_id}`);
     oReq.send();
 }
 
 save_button.innerHTML = 'Save';
-save_button.addEventListener('click', saveGroup);
+save_button.addEventListener('click', saveGroup, false);
 cancel_button.innerHTML = 'Cancel';
-cancel_button.addEventListener('click', cancelGroup);
+cancel_button.addEventListener('click', cancelGroup, false);
 edit_button.innerHTML = 'Edit';
-edit_button.addEventListener('click', editGroup);
+edit_button.addEventListener('click', updateGroup, false);
 remove_button.innerHTML = 'Remove';
-remove_button.addEventListener('click', removeGroup);
+remove_button.addEventListener('click', removeGroup, false);
 return_button.innerHTML = "Return to list";
-return_button.addEventListener('click', returnToGroupList);
+return_button.addEventListener('click', returnToGroupList, false);
 if (! cl_group_id) {
     createGroup();
 } else {

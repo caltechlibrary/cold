@@ -536,7 +536,6 @@ func (api *API) APIRouteHandler(w http.ResponseWriter, r *http.Request) {
 	if api.Cfg.PrefixPath != "" {
 		requestPath = strings.TrimPrefix(r.URL.Path, api.Cfg.PrefixPath)
 	}
-	fmt.Printf("DEBUG requestPath -> %q\n", requestPath)
 
 	switch {
 	case strings.HasPrefix(requestPath, "/api/version"):
@@ -573,7 +572,7 @@ func (api *API) calcRedirect(newPathPart string) string {
 	return u.String()
 }
 
-func (api *API) RedirectToApp(w http.ResponseWriter, r *http.Request) {
+func (api *API) RedirectHandler(w http.ResponseWriter, r *http.Request) {
 	api.logRequest(w, r)
 	// NOTE: We need to strip the prefix path to normalize the expected
 	// API path call.
@@ -737,15 +736,15 @@ Press ctl-c to terminate.
 	http.Handle(appPrefixPath, http.StripPrefix(appPrefixPath, fs))
 	if api.Cfg.DisableRootRedirects == false {
 		if api.Cfg.PrefixPath != "" {
-			http.HandleFunc(fmt.Sprintf("%s/version", api.Cfg.PrefixPath), api.RedirectToApp)
-			http.HandleFunc(fmt.Sprintf("%s/index.html", api.Cfg.PrefixPath), api.RedirectToApp)
-			http.HandleFunc(fmt.Sprintf("%s/favicon.ico", api.Cfg.PrefixPath), api.RedirectToApp)
-			http.HandleFunc(fmt.Sprintf("%s/", api.Cfg.PrefixPath), api.RedirectToApp)
+			http.HandleFunc(fmt.Sprintf("%s/version", api.Cfg.PrefixPath), api.RedirectHandler)
+			http.HandleFunc(fmt.Sprintf("%s/index.html", api.Cfg.PrefixPath), api.RedirectHandler)
+			http.HandleFunc(fmt.Sprintf("%s/favicon.ico", api.Cfg.PrefixPath), api.RedirectHandler)
+			http.HandleFunc(fmt.Sprintf("%s/", api.Cfg.PrefixPath), api.RedirectHandler)
 		}
-		http.HandleFunc("/version", api.RedirectToApp)
-		http.HandleFunc("/index.html", api.RedirectToApp)
-		http.HandleFunc("/favicon.ico", api.RedirectToApp)
-		http.HandleFunc("/", api.RedirectToApp)
+		http.HandleFunc("/version", api.RedirectHandler)
+		http.HandleFunc("/index.html", api.RedirectHandler)
+		http.HandleFunc("/favicon.ico", api.RedirectHandler)
+		http.HandleFunc("/", api.RedirectHandler)
 	}
 	http.HandleFunc(apiPrefixPath, api.APIRouteHandler)
 	return http.ListenAndServe(api.Cfg.Hostname, nil)

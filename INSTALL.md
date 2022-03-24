@@ -1,58 +1,116 @@
 Installation of **cold**
 ========================
 
-**cold** is experimental software for managing controlled object lists and providing static vocabularies. It provides a JSON API for managing the objects as wel as a human user interface via static web pages using web components to wrap the JSON API and make it useful. Not **cold** does NOT manage access. Authentication and authorization is deferred to a front end web server like Apache 2 or NginX via mechanisms like Shibboleth or BasicAuth.  The setup and configuration of Apache 2 or NginX is beyond the scope of this installation instructions. These instructions only cover installation, configuration and setup to run as a service via systemd or launchd depending on your operating system.
+**cold** is experimental software for managing controlled object lists and providing static vocabularies. It provides a JSON API for managing the objects as well as a human user interface. The human user interface is implemented as static web pages using web components to wrap the JSON API and make it useful. The means installing **cold** is more than installing the **cold** binary and a `settings.json` file. 
+
+**cold** is intended to run behind a front facing web server (e.g. Apache 2) that controls access and authentication. This can be configured in Apache 2 or NginX by use of Shibboleth or BasicAuth.  An example apache2 configuration block is included in the source repository for **cold**. It will require adaptation to your specific web server configuration.
 
 Additionally **cold** relies on a working MySQL 8 setup with permissions for the cold user to create/manage the cold tables for managing objects. Installation, setup of user accounts and creating databases is beyond the scope of this documentation.
+
+You will need to build **cold** for your specific system configuration.  You need to rebuild the static web content (very likely) you'll need to have Git, GNU Make, Pandoc and golang 1.18 or better installed and working on your system.
+
+The example installation documentation below assumes that you have the
+**cold** repository cloned into `/usr/local/src`, that the configuration file
+is in `/usr/local/etc/cold/settings.json` and the htdocs documentation directory
+is in `/usr/local/src/cold/htdocs`.
 
 Required software
 -----------------
 
 Adjusting the web content to your host system requires the following
 
-1. Golang version 1.18 or better
-2. Pandoc
-3. MkPage
-4. Python 3
+1. Git (to clone the cold repository on GitHub)
+2. Golang version 1.18 or better
+3. Pandoc
+4. MkPage (available from https://github.com/caltechlibrary/mkpage)
 5. GNU Make
+6. Python 3
 
-Compiling **cold** requires Golang 1.18 or better (you need to recompile the daemon if you change the static vocabularies provided).
+Installation steps
+------------------
 
-This is experimental software the installation suggested should be adjusted based on your own system needs.
+1. Create necessary directories if needed.
+2. Change `/usr/local/src/` and make sure you have permissions to write to that directory
+3. Clone https://github.com/caltechlibrary/cold
+4. Change into the `cold` directory
+5. Run GNU Make
+6. copy the `cold` binary to `/usr/local/bin/`
+7. Make a directory `/usr/local/etc/cold`
+8. Create `/usr/local/etc/cold/settings.json` and configure for your local setup
+9. Copy the systemd service into place for your system
+10. Start up cold service using `systemctl` and verify everything works
 
-1. Download the most recent release of [cold](https://github.com/caltechlibrary/cold/releases)
-	a. pre-compiled versions are supplied for Linux, macOS and Windows
-	b. download the specific version for your OS and machine type (e.g. amd62 versys arm64)
-2. Unzip the downloaded archive in a suitable location (e.g. /usr/local/src/cold-release)
-3. Change directory into where you've placed the downloaded release
-4. Copy the contents of `bin` to `/usr/local/bin/` (make sure `/usr/local/bin` is in your path)
-5. Copy the contents of `etc` to `/usr/local/etc`
-6. Symbolically link or copy the plist or .service file into the appropriate folder for use with `launchd` or `systemd` depending on the host system
-7. Update `/usr/local/etc/cold/settings.json` to match your system
-8. Load the schema into MySQL 8's cold data base (see `schema/*.sql`)
-9. Start service and test with cURL and your web browser
+Here's an example of the steps I've taken. Note my user account has write and
+and execute permissions for `/usr/local/bin`, `/usr/local/etc` and `/usr/local/src`.
 
+```
+mkdir -p /usr/local/src
+mkdir -p /usr/local/etc/cold
+mkdir -p /usr/local/bin
+cd /usr/lcoal/src
+git clone https://github.com/caltechlibrary/cold cold
+cd cold
+make clean &&  make
+cp bin/cold /usr/local/bin/
+cp etc/setttings.json-example /usr/local/etc/cold/settings.json
+nano /usr/local/etc/cold/settings.json
+cp etc/systemd/cold.service /etc/systemd/system/
+systemctl start cold
+```
+
+You can review the logs for **cold** using the `journalctl -u cold.service` command.
+
+Example settings.json
+---------------------
+
+```
+{
+    "dsn": "DB_USER_NAME_HERE:SECRET_GOES_HERE@/cold",
+    "hostname": "localhost:8486",
+    "htdocs": "/usr/local/src/cold/htdocs",
+    "prefix_path": "/cold",
+    "disable_root_redirects": false
+}
+```
 
 Apache 2 Setup
 --------------
 
 **cold** is intended to run on localhost and relies on a front-end web server like Apache 2 for authentication and authorization via reverse proxy setup (see https://httpd.apache.org/docs/2.4/howto/reverse_proxy.html).
 
-Example configuration block
+Example configuration block for an Apache 2 virtual host configuration.
 
 ```
 #
-# Example Setup for reverse proxy in Apache 2.
+# NOTE: This following would go inside the Virtual host block of an Apache
+# configuration file.  It assumes the cold deamon was configued with a
+# prefix path of "/cold".
 #
-Proxy "/cold/" "http://localhost:8486/"
-ReverseProxy "/cold/" "http://localhost:8486/"
+
+#
+# Reverse proxy the cold service
+#
+Redirect /cold /cold/
+ProxyPass "/cold/" "http://localhost:8486/cold/"
+ProxyPassReverse "/cold/" "http://localhost:8486/cold/"
+#
+# Use Basic Auth for development purposes
+#
 <Location /cold>
-   AuthType Basic
-   AuthName "Cold Development"
-   AuthBasicProvider file
-   AuthUserfile "/usr/localhost/etc/cold/passwords.txt"
-   Require valid-user
+    AuthType Basic
+    AuthName "Cold DEV"
+    AuthBasicProvider file
+    AuthUserFile "/usr/local/etc/cold/passwords.txt"
+    Require valid-user
 </Location>
+#
+# Used to enable Shibboleth
+#<Location /cold>
+#	AuthType shibboleth
+#	ShibRequestSetting requireSession 1
+#	require valid-user
+#</Location>
+#
 ```
 
 

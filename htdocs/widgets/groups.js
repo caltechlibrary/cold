@@ -40,7 +40,6 @@ display_template.innerHTML = `<style>
     <div class="group-name"><label for="name">Name:</label> <span id="name" /></div>
     <div class="group-alternative"><label for="name">Alternative:</label> <span id="alternative" /></div>
     <div class="group-email"><label for="name">Email:</label> <span id="email" /></div>
-    <div class="group-date"><label for="date">Date:</label> <span id="date" /></div>
     <div class="group-description"><label for="description">Description:</label> <span id="description" /></div>
     <div class="group-start"><label for="start">Start:</label> <span id="start" /></div>
     <div class="group-approx_start"><label for="approx_start">Approx Start:</label> <span id="approx_start" /></div>
@@ -69,7 +68,6 @@ input_template.innerHTML = `<style>
     <div class="group-name"><label for="name">Name:</label> <input type="text" id="name" value="" size="80"></div>
     <div class="group-alternative"><label for="name">Alternative:</label> <input type="text" id="alternative" value="" size="80" ></div>
     <div class="group-email"><label for="name">Email:</label> <input type="email" id="email" value=""></div>
-    <div class="group-date"><label for="date">Date:</label> <input type="date" id="date" value=""></div>
     <div class="group-description"><label for="description">Description:</label> <textarea type="text" id="description" cols="80" rows="10"></textarea></div>
     <div class="group-start"><label for="start">Start:</label> <input type="text" pattern="[0-9][0-9][0-9][0-9]|[0-9][0-9][0-9][0-9]-[0-9][0-9]|[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]" id="start" value="" size="12"></div>
     <div class="group-approx_start"><label for="approx_start">Approx Start:</label> <input type="text" pattern="yes|no" id="approx_start" value="" size="80"></div>
@@ -85,7 +83,7 @@ input_template.innerHTML = `<style>
     <div class="group-ringgold"><label for="isni">Ringgold:</label> <input type="text" id="ringgold" value="" size="80"></div>
     <div class="group-viaf"><label for="isni">VIAF:</label> <input type="text" id="viaf" value="" size="80"></div>
     <div class="group-ror"><label for="isni">ROR:</label> <input type="text" id="ror" value="" size="80"></div>
-    <div class="group-updated"><label for="updated">Updated:</label> <input type="date" id="updated" value="" size="80"></div>
+    <div class="group-updated"><label for="updated">Updated:</label> <input type="date" id="updated" value="" size="80" readonly></div>
 </div>`;
 
 table_template.innerHTML = `<style>
@@ -99,7 +97,6 @@ table_template.innerHTML = `<style>
       <th class="group-col-name" title="click column to sort ascending, click again for descending">Name</th>
       <th class="group-col-alternative" title="click column to sort ascending, click again for descending">Alternative</th>
       <th class="group-col-email" title="click column to sort ascending, click again for descending">EMail</th>
-      <th class="group-col-date" title="click column to sort ascending, click again for descending">Date</th>
       <th class="group-col-description" title="click column to sort ascending, click again for descending">Description</th>
       <th class="group-col-start" title="click column to sort ascending, click again for descending">Start</th>
       <th class="group-col-start_approx" title="click column to sort ascending, click again for descending">Start Approx.</th>
@@ -138,7 +135,7 @@ function yyyymmdd(date) {
  ******************************/
 
  let group_field_names = [ 'cl_group_id',
-    'name', 'alternative', 'email', 'date', 
+    'name', 'alternative', 'email', 
     'description', 'start', 'approx_start', 
     'activity', 'end', 'approx_end', 'website', 
     'pi', 'parent', 'prefix', 'grid', 'isni', 
@@ -271,7 +268,6 @@ class GroupDisplay extends HTMLElement {
             if (val == null) {
                 val = '';
             }
-            console.log("DEBUG group-key -> ", key, "val ->", val);
             self[elem_name].innerHTML = val;
             self[elem_name].addEventListener('change', self[fnNameOnChange]);
         }
