@@ -590,6 +590,9 @@ func (api *API) RedirectToApp(w http.ResponseWriter, r *http.Request) {
 	case strings.HasSuffix(r.URL.Path, "/"):
 		http.Redirect(w, r, api.calcRedirect("/app/"), http.StatusPermanentRedirect)
 		api.logResponse(r, http.StatusPermanentRedirect, nil)
+	case r.URL.Path == "":
+		http.Redirect(w, r, api.calcRedirect("/app/"), http.StatusPermanentRedirect)
+		api.logResponse(r, http.StatusPermanentRedirect, nil)
 	default:
 		http.NotFound(w, r)
 		api.logResponse(r, http.StatusNotFound, fmt.Errorf(`not found`))
