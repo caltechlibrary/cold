@@ -496,13 +496,13 @@ class GroupInput extends HTMLElement {
                 if (cl_group_id === '') {
                     cl_group_id = 'unknown_group_id';
                 }
-                rowElem.setAttribute('id', `group-{cl_group_id}`);
+                rowElem.setAttribute('id', `group-${cl_group_id}`);
                 for (const col of this.row_attributes) {
                     let colElem = document.createElement('td');
                     colElem.classList.add(`group-col-${col}`);
                     if (obj.hasOwnProperty(col)) {
                         if (col == 'cl_group_id') {
-                            colElem.innerHTML = `<a href="group.html?cl_group_id=${cl_group_id}">${obj[col]}</a>`;
+                            colElem.innerHTML = `<a href="group.html?cl_group_id=${encodeURIComponent(cl_group_id)}">${obj[col]}</a>`;
                         } else {
                             colElem.innerHTML = obj[col];
                         }

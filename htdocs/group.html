@@ -90,8 +90,9 @@ function saveGroup() {
             cl_group_id = data['cl_group_id'];
             method = 'PUT';
         }
-        let oReq = new XMLHttpRequest(),
-            api_path = `${prefix_path}/api/group/${cl_group_id}`;
+        let group_id = encodeURIComponent(cl_group_id),
+            oReq = new XMLHttpRequest(),
+            api_path = `${prefix_path}/api/group/${group_id}`;
         oReq.addEventListener('load', function () {
             window.history.go(-1);
         });
@@ -130,7 +131,8 @@ function returnToGroupList() {
 
 function removeGroup() {
     let oReq = new XMLHttpRequest(),
-        api_path = `${prefix_path}/api/group/${cl_group_id}`;
+        group_id = encodeURIComponent(cl_group_id),
+        api_path = `${prefix_path}/api/group/${group_id}`;
     oReq.addEventListener('load', function () {
         returnToGroupList();
     });
@@ -154,7 +156,6 @@ function show_save_buttons() {
 }
 
 function editGroup() {
-    console.log("DEBUG editGroup() cl_group_id ->", cl_group_id);
     let src = this.responseText,
         obj = JSON.parse(src),
         /* Display Editor for Group */
@@ -170,7 +171,7 @@ function updateGroup() {
     let elem = document.querySelector('div#group-viewer group-display'),
         group_id = elem.getAttribute('cl_group_id'),
         oReq = new XMLHttpRequest();
-
+    group_id = encodeURIComponent(group_id);
     oReq.addEventListener('load', editGroup);
     oReq.open('GET', `${prefix_path}/api/group/${group_id}`);
     oReq.send();
@@ -188,9 +189,10 @@ function displayGroup() {
 }
 
 function retrieveGroup(cl_group_id) {
-    let oReq = new XMLHttpRequest();
+    let oReq = new XMLHttpRequest(),
+        group_id = encodeURIComponent(cl_group_id);
     oReq.addEventListener('load', displayGroup);
-    oReq.open('GET', `${prefix_path}/api/group/${cl_group_id}`);
+    oReq.open('GET', `${prefix_path}/api/group/${group_id}`);
     oReq.send();
 }
 

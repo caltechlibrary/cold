@@ -30,7 +30,8 @@ add_group.addEventListener('click', function () {
 
 function updateRow(key) {
     let oReq = new XMLHttpRequest(),
-        api_path = `${Cfg.prefix_path}/api/group/${key}`;
+        group_id = encodeURIComponent(key),
+        api_path = `${Cfg.prefix_path}/api/group/${group_id}`;
     oReq.addEventListener('load', function () {
         let src = this.responseText,
             obj = JSON.parse(src),
