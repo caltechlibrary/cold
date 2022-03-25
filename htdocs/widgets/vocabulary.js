@@ -19,14 +19,16 @@
  */
 "use strict";
 
+import { Cfg } from "./config.js";
+
 const pair_template = document.createElement('template');
 
 pair_template.innerHTML = `<style>
-@import "./vocabulary.css";
+@import "${Cfg.prefix_path}/app/widgets/vocabulary.css";
 </style>
 <span id="identifier" class="vocabulary-identifier"></span>
 <style>
-@import "./vocabulary.css";
+@import "${Cfg.prefix_path}/app/widgets/vocabulary.css";
 </style>
 <span id="name" class="vocabulary-name"></span>
 `;
