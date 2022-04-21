@@ -1,10 +1,7 @@
 # syntax=docker/dockerfile:1
-FROM ubuntu:20.04
-RUN apt update
-RUN apt upgrade
-# I need to include everything necessary to run make before running cold.
-RUN apt install build-essential golang pandoc
-COPY . /app
-WORKDIR /app
-RUN make
-CMD [ "./bin/cold" ]
+FROM golang:1.18
+WORKDIR /usr/src/cold
+COPY go.mod go.sum ./
+COPY . .
+RUN go build -v -o /usr/local/bin/cold ./cmd/cold/cold.go
+CMD [ "cold" ]
