@@ -26,6 +26,8 @@ import (
 	"database/sql"
 	"fmt"
 	"io/ioutil"
+	"os"
+	"strings"
 )
 
 // Config holds a configuration file structure used by EPrints Extended API
@@ -68,8 +70,38 @@ func CheckConfig(cfg *Config) error {
 	return nil
 }
 
+// LoadEnvConfig returns a *Config structure based on current process
+// environment or returns an error.
+// variables are set and uses those instead.
+func LoadEnvConfig() (*Config, error) {
+	config := new(Config)
+	config.Hostname = os.Getenv("HOST")
+	config.PrefixPath = os.Getenv("PREFIX_PATH")
+	config.Htdocs = os.Getenv("HTDOCS")
+	config.Logfile = os.Getenv("LOG_FILE")
+	config.DSType = os.Getenv("DS_TYPE")
+	config.DSN = os.Getenv("DSN")
+	drr := strings.ToLower(os.Getenv("DISABLE_ROOT_REDIRECTS"))
+	config.DisableRootRedirects = (drr == "1") || (drr == "true")
+	// Since we should be OK, unmarshal in into active config
+	if config.Hostname == "" {
+		config.Hostname = "localhost:8486"
+	}
+	if config.DSType == "" {
+		config.DSType = "mysql"
+	}
+	if config.Htdocs == "" {
+		config.Htdocs = "htdocs"
+	}
+	if config.PrefixPath == "" {
+		config.PrefixPath = ""
+	}
+	return config, nil
+}
+
 // LoadConfig reads a JSON file and returns a Config structure
-// or error.
+// or error. If fnamel isn't available it checks to see if environment
+// variables are set and uses those instead.
 func LoadConfig(fname string) (*Config, error) {
 	config := new(Config)
 	if src, err := ioutil.ReadFile(fname); err != nil {

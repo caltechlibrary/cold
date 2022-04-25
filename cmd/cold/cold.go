@@ -190,15 +190,39 @@ Widgets provide the user interface for humans to manage and view the objects. Wh
 Example
 -------
 
-To run the web service create a JSON file named settings.ini in the
-current directory where you're invoking _{app_name}_ from. The web
-service can be started with running
+_{app_name}_ can be configure from the environment or from a JSON
+settings file. Assuming you are using a JSON settings file (e.g.
+"settings.json") the web service can be started by passing it
+on the command line.
+
+    {app_name} settings.json
+
+If you are configuring via the environment (e.g. in a container
+environment) just envoke the command without options.
 
     {app_name}
 
-or to load "settings.json" from the current work directory.
 
-    {app_name} settings.json
+Here is an example settings.json file.
+
+	{
+		"dsn": "DB_USER_HERE:DB_PASSWORD_HERE@/cold",
+		"hostname": "localhost:8486",
+		"htdocs": "/usr/local/src/cold/htdocs",
+		"prefix_path": "",
+		"disable_root_redirects": false
+	}
+
+To run in a container you can pass the values in settings.json as
+environment variables. The environment variables are upper case.
+
+Here is an example of setting environment variables.
+
+    export DSN="DB_USER_HERE:DB_PASSWORD_HERE@/cold"
+	export HOST="localhost:8486"
+	export HTDOCS="./htdocs"
+	export PREFIX_PATH=""
+	export DISABLE_ROOT_REDIRECTS=0
 
 `
 
@@ -225,8 +249,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 	debugLogs bool
 
-	logFile string
-	logMode int
+	settings  string /* e.g. settings.json */
+	envConfig bool   /* if true, read settings from environment */
+	logFile   string
+	logMode   int
 )
 
 func checkConfig(cfg *cold.Config) {
@@ -243,6 +269,7 @@ func main() {
 	flagSet.BoolVar(&showHelp, "help", false, "Display this help message")
 	flagSet.BoolVar(&showVersion, "version", false, "Display software version")
 	flagSet.BoolVar(&showLicense, "license", false, "Display software license")
+
 	flagSet.IntVar(&logMode, "log-mode", cold.LogRequests, fmt.Sprintf("set log level, %d (quiet) to %d (verbose)", cold.LogQuiet, cold.LogVerbose))
 
 	flagSet.Parse(os.Args[1:])
@@ -265,11 +292,14 @@ func main() {
 	settings := "settings.json"
 	if len(args) > 0 {
 		settings = args[0]
+		envConfig = false
+	} else {
+		envConfig = true
 	}
 
 	/* Initialize Cold API web service */
 	api := new(cold.API)
-	if err := api.Init(appName, settings, logMode); err != nil {
+	if err := api.Init(appName, settings, logMode, envConfig); err != nil {
 		fmt.Fprintf(os.Stderr, "Init(%q, %q) failed, %s\n", appName, settings, err)
 		os.Exit(1)
 	}

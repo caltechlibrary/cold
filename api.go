@@ -642,19 +642,33 @@ func (api *API) Shutdown(sigName string) int {
 // in the settings.json file.
 func (api *API) Reload(sigName string) error {
 	settings := api.Settings
+	envConfig := (settings == "")
 	exitCode := api.Shutdown(sigName)
 	if exitCode != 0 {
 		return fmt.Errorf("reload failed, could not shutdown the current processes")
 	}
-	fmt.Fprintf(os.Stderr, "Restarting %s using %s", api.AppName, settings)
-	return api.Init(api.AppName, settings, api.logMode)
+	if envConfig {
+		fmt.Fprintf(os.Stderr, "Restarting %s using environment variables", api.AppName)
+	} else {
+		fmt.Fprintf(os.Stderr, "Restarting %s using %s", api.AppName, settings)
+	}
+	return api.Init(api.AppName, settings, api.logMode, envConfig)
 }
 
-func (api *API) Init(appName string, settings string, logMode int) error {
+func (api *API) Init(appName string, settings string, logMode int, envConfig bool) error {
+	var (
+		cfg *Config
+		err error
+	)
 	api.AppName = appName
 	api.Settings = settings
 	api.logMode = logMode
-	cfg, err := LoadConfig(settings)
+	if envConfig {
+		cfg, err = LoadEnvConfig()
+		api.Settings = ""
+	} else {
+		cfg, err = LoadConfig(settings)
+	}
 	if err != nil {
 		return err
 	}
