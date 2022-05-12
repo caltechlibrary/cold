@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Caltech Library's Digital Library Development Sandbox</title>
+    <link rel="stylesheet" href="/cold/app/css/site.css">
+    <link rel="icon" href="/cold/app/favicon.ico" type="image/x-icon">
+</head>
+<body>
+<header>
+<span id="library_logo"><a href="http://library.caltech.edu"><img src="/cold/app/assets/liblogo.gif" alt="Caltech Library logo"></a></span>
+<span id="project_logo"><img src="/cold/app/assets/iceberg-sketch.png" alt="Iceberg logo for cold"></span>
+</header>
+<nav>
+<ul>
+<li>
+<a href="/">Home</a>
+</li>
+<li>
+<a href="/cold/app/">Dashboard</a>
+</li>
+<li>
+<a href="/cold/app/help.html">Help</a>
+</li>
+<li>
+<a href="/cold/app/about.html">About</a>
+</li>
+<li>
+<a href="/Shibboleth.sso/Logout">Logout</a>
+</li>
+</ul>
+</nav>
+
+<section>
+<h1 id="about-cold">
+About Cold
+</h1>
+<p>
+cold is a micro service for managing controlled object lists, i.e.
+people and groups used by Caltech Library’s repositories and archival
+systems.
+</p>
+<h2 id="developers">
+Developers
+</h2>
+<p>
+(alphabetically)
+</p>
+<ul>
+<li>
+<a href="https://orcid.org/0000-0003-0900-6903"
+title="link to ORCID record">R. S. Doiel</a>
+</li>
+<li>
+<a href="https://orcid.org/0000-0001-9266-5146"
+title="link to ORCID record">Thomas E. Morrell</a>
+</li>
+</ul>
+<p>
+<version-info id="version-info"></version-info>
+</p>
+<script type="module" src="./widgets/config.js"></script>
+<script type="module" src="./widgets/version-info.js"></script>
+<script type="module">
+"use strict";
+
+import { Cfg } from "./widgets/config.js";
+
+let version_info = document.getElementById('version-info');
+
+function updateVersionInfo() {
+    let src = this.responseText,
+        obj = JSON.parse(src);
+    version_info.value = obj;
+}
+
+function retrieveVersionInfo() {
+    let oReq = new XMLHttpRequest();
+    oReq.addEventListener('load', updateVersionInfo);
+    oReq.open('GET', `${Cfg.prefix_path}/api/version`);
+    oReq.send();
+}
+retrieveVersionInfo();
+</script>
+</section>
+
+<footer>
+<span><h1><A href="http://caltech.edu">Caltech</a></h1></span>
+<span>&copy; 2022 <a href="https://www.library.caltech.edu/copyright">Caltech library</a></span>
+<address>1200 E California Blvd, Mail Code 1-32, Pasadena, CA 91125-3200</address> 
+<span>Phone: <a href="tel:+1-626-395-3405">(626)395-3405</a></span>
+<span><a href="mailto:library@caltech.edu">Email Us</a></span>
+<a class="cl-hide" href="sitemap.xml">Site Map</a>
+</footer>
+</body>
+</html>
