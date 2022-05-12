@@ -2,6 +2,6 @@
     "dsn": "DB_USER_HERE:DB_PASSWORD_HERE@/cold",
     "hostname": "localhost:8486",
     "htdocs": "/usr/local/src/cold/htdocs",
-    "prefix_path": "",
+    "prefix_path": "/cold",
     "disable_root_redirects": false
 }
