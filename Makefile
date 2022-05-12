@@ -36,7 +36,7 @@ ifeq ($(OS), Windows)
 	EXT = .exe
 endif
 
-build: $(PKGASSETS) version.go $(PROGRAMS) $(HTML_PAGES) htdocs/widgets/config.js htdocs/readme.html
+build: version.go settings.json $(PROGRAMS) $(HTML_PAGES) htdocs/widgets/config.js htdocs/readme.html
 
 
 version.go: .FORCE
@@ -49,6 +49,9 @@ version.go: .FORCE
 	@if [ -f bin/codemeta ]; then ./bin/codemeta; fi
 	$(CODEMETA2CFF)
 
+settings.json:
+	@if [ ! -f settings.json ]; then cp -pvi etc/settings.json-example settings.json;fi
+
 $(PROGRAMS): cmd/*/*.go $(PACKAGE)
 	@mkdir -p bin
 	go build -o bin/$@$(EXT) cmd/$@/*.go
@@ -60,7 +63,7 @@ $(HTML_PAGES): $(MD_PAGES) nav.md
 	@echo "PAGE html: "$@" PAGE md: "$(basename $@).md
 	mkpage settings=settings.json body=$(basename $@).md nav=nav.md templates/page.tmpl >$@
 
-htdocs/widgets/config.js: .FORCE
+htdocs/widgets/config.js:
 	mkpage codemeta=codemeta.json settings=settings.json templates/config-js.tmpl >htdocs/widgets/config.js	
 
 htdocs/readme.html: nav.md README.md
