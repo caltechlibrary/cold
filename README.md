@@ -1,4 +1,4 @@
-cold - (C)ontrolled (o)bject (l)ist (d)aemon
+cold - (c)ontrolled (o)bject (l)ist (d)aemon
 ============================================
 
 This repository implements a service to maintain a controlled list of objects at Caltech Library for people and groups.
