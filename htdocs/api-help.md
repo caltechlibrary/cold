@@ -1,4 +1,4 @@
-cold - (C)ontrolled (o)bject (l)ist (d)aemon
+cold - (c)ontrolled (o)bject (l)ist (d)aemon
 ============================================
 
 End Points

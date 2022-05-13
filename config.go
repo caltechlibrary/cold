@@ -94,7 +94,7 @@ func LoadEnvConfig() (*Config, error) {
 		config.Htdocs = "htdocs"
 	}
 	if config.PrefixPath == "" {
-		config.PrefixPath = ""
+		config.PrefixPath = "/cold"
 	}
 	return config, nil
 }

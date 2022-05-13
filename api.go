@@ -712,7 +712,7 @@ Using configuration %s
 
 Process id: %d
 
-Cold (Controlled Object Lists Daemon)
+cold (controlled object lists daemon)
 
 Listening on %s
 

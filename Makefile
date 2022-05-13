@@ -19,8 +19,9 @@ HTML_PAGES = $(addsuffix .html, $(PAGES))
 
 PACKAGE = $(shell ls -1 *.go)
 
+HTDOCS = "$(shell pwd)/htdocs"
 
-APP_PREFIX_PATH = $(shell grep '"prefix_path":' settings.json | cut -d\"  -f 4)
+APP_PREFIX_PATH = /cold
 
 #PREFIX = /usr/local/bin
 PREFIX = $(HOME)
@@ -36,7 +37,7 @@ ifeq ($(OS), Windows)
 	EXT = .exe
 endif
 
-build: version.go settings.json $(PROGRAMS) $(HTML_PAGES) htdocs/widgets/config.js htdocs/readme.html
+build: version.go $(PROGRAMS) $(HTML_PAGES) htdocs/widgets/config.js htdocs/readme.html
 
 
 version.go: .FORCE
@@ -57,17 +58,17 @@ $(PROGRAMS): cmd/*/*.go $(PACKAGE)
 	go build -o bin/$@$(EXT) cmd/$@/*.go
 
 nav.md: templates/nav.tmpl
-	mkpage settings=settings.json templates/nav.tmpl >nav.md
+	mkpage "prefix_path=text:$(APP_PREFIX_PATH)" templates/nav.tmpl >nav.md
 
 $(HTML_PAGES): $(MD_PAGES) nav.md
 	@echo "PAGE html: "$@" PAGE md: "$(basename $@).md
-	mkpage settings=settings.json body=$(basename $@).md nav=nav.md templates/page.tmpl >$@
+	mkpage "prefix_path=text:$(APP_PREFIX_PATH)" body=$(basename $@).md nav=nav.md templates/page.tmpl >$@
 
 htdocs/widgets/config.js:
-	mkpage codemeta=codemeta.json settings=settings.json templates/config-js.tmpl >htdocs/widgets/config.js	
+	mkpage codemeta=codemeta.json "prefix_path=text:$(APP_PREFIX_PATH)" templates/config-js.tmpl >htdocs/widgets/config.js	
 
 htdocs/readme.html: nav.md README.md
-	mkpage settings=settings.json body=README.md nav=nav.md templates/page.tmpl >htdocs/readme.html
+	mkpage "prefix_path=text:$(APP_PREFIX_PATH)" body=README.md nav=nav.md templates/page.tmpl >htdocs/readme.html
 
 harvest: .FORCE
 	./harvest_testdata.bash
