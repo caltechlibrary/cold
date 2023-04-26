@@ -1,13 +1,19 @@
 Installation of **cold**
 ========================
 
-**cold** is experimental software for managing controlled object lists and providing static vocabularies. It provides a JSON API for managing the objects as well as a human user interface. The human user interface is implemented as static web pages using web components to wrap the JSON API and make it useful. The means installing **cold** is more than installing the **cold** binary and a `settings.json` file. 
+**cold** is experimental software for managing controlled object lists and providing static vocabularies. It provides a JSON API for managing the objects via PostgreSQL and PostgREST. A human user interface is built via static HTML, CSS and JavaScript as well as with Pandoc templates processed via Pandoc in server mode. The means installing **cold** is more than installing the **cold** binary and a `settings.json` file. 
 
-**cold** is intended to run behind a front facing web server (e.g. Apache 2) that controls access and authentication. This can be configured in Apache 2 or NginX by use of Shibboleth or BasicAuth.  An example apache2 configuration block is included in the source repository for **cold**. It will require adaptation to your specific web server configuration.
+**cold** is intended to run behind a front facing web server (e.g. Apache 2 or NginX) that access control and authentication. This can be configured in Apache 2 or NginX by use of Shibboleth or BasicAuth.  An example apache2 configuration block is included in the source repository for **cold**. It will require adaptation to your specific web server configuration.
 
-Additionally **cold** relies on a working MySQL 8 setup with permissions for the cold user to create/manage the cold tables for managing objects. Installation, setup of user accounts and creating databases is beyond the scope of this documentation.
+**cold** requires access to a PostgreSQL 14 through PostgREST 10. Both need to be configured. Template rendering is provided by Pandoc running in server mode.  Installation, setup of user accounts and creating databases is beyond the scope of this documentation but is require to have a working cold instance.
 
-You will need to build **cold** for your specific system configuration.  You need to rebuild the static web content (very likely) you'll need to have Git, GNU Make, Pandoc and golang 1.18 or better installed and working on your system.
+You will need to build **cold** for your specific system configuration.  You need to rebuild the static web content (very likely) you'll need to have Git, GNU Make, Pandoc 3 and available and working on your system.
+
+Building the required software
+------------------------------
+
+Currently Pandoc 2 ships with many package systems (e.g. Ubuntu 22.04 LTS). **cold** requires Pandoc 3. Likewise PostgREST isn't found in some package
+management systems at all.
 
 The example installation documentation below assumes that you have the
 **cold** repository cloned into `/usr/local/src`, that the configuration file

@@ -1,17 +1,36 @@
 cold - (c)ontrolled (o)bject (l)ist (d)aemon
 ============================================
 
-This repository implements a service to maintain a controlled list of objects at Caltech Library for people and groups.
+This repository implements a service to maintain a controlled list of
+objects and vocabularies used at Caltech Library for people, organizations
+and funders. It is built from data modeled in PostgreSQL and managed via
+a series of microservices that combine to form a human user interface
+implemented in the web browser.
 
 Requirements
 ============
 
-- MySQL 8
+- PostgreSQL 14
+- PostgREST 11
+- Pandoc 3
 - To build the UI and compile the **cold** daemon
     - GNU Make
-    - [MkPage](https://github.com/caltechlibrary/mkpage) (to build UI)
     - [Pandoc](https://pandoc.org) (to build UI)
-    - Golang (for compiling the service, needed when updating static vocabularies)
+    - A text editor (e.g. Zed, VSCode, micro, nano, vi, emacs ...)
+- A front end web server with SSO or Basic Auth support
+- A web browser with JavaScript support 
+
+Recommended
+-----------
+
+Most package managers running on various flavors of Unix (e.g. macOS,
+Linux) do not provide Pandoc 3 or PostgREST. There is a good chance
+you will need to build this from source if they are not already available
+on the system where **cold** will run.
+
+- Install Haskell via [ghcup](https://www.haskell.org/ghcup/)
+    - See [Pandoc](https://pandoc.org/installing.html#quick-cabal-method) to for instructions to compile Pandoc 3
+    - See [https://postgrest.org/en/stable/install.html#building-from-source]) for instructions to compile PostgREST 10
 
 Overview
 --------
@@ -57,31 +76,37 @@ CREATE TABLE local_group (cl_group_id VARCHAR(255) PRIMARY KEY, object JSON);
 Approach
 --------
 
-This service is intended to run on localhost on a known port (e.g. localhost:8486). It is a mininal service relying on access control from the operating system or front-end web service (e.g. Apache 2 with Shibboleth).  The goal of the service is to provide a light weight layer between the database storing the objects and the applications that need to work with them.  Like ep3apid and datasetd *cold* is configured using a simple JSON "settings.json" file. Typically this would be stored in a sub-folder of "etc" on the system (e.g. /usr/local/etc/cold/settings.json).
-
-The service is made up of two parts, a set of "End Points" for managing and retrieving controlled object lists and vocabularies as JSON expressions and a set of static files providing the user interface to manage and display the vocabularies and controlled object lists.  The static website is build from HTML, CSS, JavaScript relying on Web Components for providing a human friendly interface.
+**cold** models it data in PostgreSQL which is responsible for defining
+views and procedures to implement end points in a JSON API provide by 
+PostgREST. The UI for **cold** is implemented in the web browser via
+static HTML, CSS and JavaScript. Since displaying data structures can
+be burdensome directly with JavaScript interacting with the DOM Pandoc
+running in server mode is available to compose the framents from
+the JSON API service. JavaScript running in the browser is then resposible
+for fetching the JSON represention, passing the results along with template
+info too the Pandoc server before injecting them into the browser DOM.
 
 End Points
 ----------
 
-JSON service defined end points are formed as the following. The following end point descriptions support the GET method.
+JSON API is provided by PostgREST. The following end point descriptions support the GET method.
 
 `/`
-: A description of the service
+: A description of PostgREST information
 
-`/api/version`
+`/cold/version`
 : Returns the version number of the service
 
-`/api/people`
+`/cold/people`
 : Returns a list of "cl_people_id" managed by *cold* 
 
-`/api/people/{CL_PEOPLE_ID}`
+`/cold/people/{CL_PEOPLE_ID}`
 : For a GET returns a people object, a PUT will create the people object, POST will replace the people object and DELETE will remove the people object
 
-`/api/group`
+`/cold/group`
 : Returns a list of "cl_group_id" managed by *cold*
 
-`/api/group/{CL_GROUP_ID}`
+`/cold/group/{CL_GROUP_ID}`
 : For a GET returns a group object, a PUT will create the group object, POST will replace the group object and DELETE will remove the group object
 
 Crosswalks
@@ -90,10 +115,10 @@ Crosswalks
 A cross walk lets you put in a collection name (e.g. people, group), a field name and a value and it returns a list of matching
 records.
 
-`/api/crosswalk/people/{IDENTIFIER_NAME}/{IDENTIFIER_VALUE}`
+`/cold/crosswalk/people/{IDENTIFIER_NAME}/{IDENTIFIER_VALUE}`
 : Returns a list of "cl_people_id" assocated with that identifier
 
-`/api/crosswalk/group/{IDENTIFIER_NAME}/{IDENTIFIER_VALUE}`
+`/cold/crosswalk/group/{IDENTIFIER_NAME}/{IDENTIFIER_VALUE}`
 : Returns a list of "cl_group__id" assocated with that identifier
 
 *cold* takes a REST approach to updates for managed objects.  PUT will create a new object, POST will update it, GET will retrieve it and DELETE will remove it.
@@ -103,23 +128,23 @@ Vocabularies
 
 *cold* also supports end points for stable vocabularies mapping an indentifier to a normalized name. These are set at compile time because they are so slow changing. 
 
-`/api/subject`
+`/cold/subject`
 : Returns a list of all the subject ids (codes)
 
-`/api/subject/{SUBJECT_ID}`
+`/cold/subject/{SUBJECT_ID}`
 : Returns the normalized text string for that subject id
 
-`/api/issn`
+`/cold/issn`
 : Returns a list of issn that are mapped to a publisher name
 
-`/api/issn/{ISSN}`
+`/cold/issn/{ISSN}`
 : Returns the normalized publisher name for that ISSN
 
 
-`/api/doi-prefix`
+`/cold/doi-prefix`
 : Returns a list of DOI prefixes that map to a normalize name
 
-`/api/doi-prefix/{DOI_PREFIX}`
+`/cold/doi-prefix/{DOI_PREFIX}`
 : Returns the normalized publisher name for that DOI prefix
 
 Manage interface
