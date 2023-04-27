@@ -1,5 +1,5 @@
-Installation of **cold**
-========================
+Installation for development of **cold**
+=======================================
 
 **cold** is experimental software for managing controlled object lists and providing static vocabularies. It provides a JSON API for managing the objects via PostgreSQL and PostgREST. A human user interface is built via static HTML, CSS and JavaScript as well as with Pandoc templates processed via Pandoc in server mode. The means installing **cold** is more than installing the **cold** binary and a `settings.json` file. 
 
@@ -9,114 +9,115 @@ Installation of **cold**
 
 You will need to build **cold** for your specific system configuration.  You need to rebuild the static web content (very likely) you'll need to have Git, GNU Make, Pandoc 3 and available and working on your system.
 
-Building the required software
-------------------------------
-
-Currently Pandoc 2 ships with many package systems (e.g. Ubuntu 22.04 LTS). **cold** requires Pandoc 3. Likewise PostgREST isn't found in some package
-management systems at all.
-
-The example installation documentation below assumes that you have the
-**cold** repository cloned into `/usr/local/src`, that the configuration file
-is in `/usr/local/etc/cold/settings.json` and the htdocs documentation directory
-is in `/usr/local/src/cold/htdocs`.
-
 Required software
 -----------------
 
 Adjusting the web content to your host system requires the following
 
 1. Git (to clone the cold repository on GitHub)
-2. Golang version 1.18 or better
-3. Pandoc
-4. MkPage (available from https://github.com/caltechlibrary/mkpage)
+2. PostgreSQL 15
+3. PostgREST 11
+4. Pandoc 3 (both cli and server)
 5. GNU Make
-6. Python 3
 
-Installation steps
-------------------
+Building the required software
+------------------------------
 
-1. Create necessary directories if needed.
-2. Change `/usr/local/src/` and make sure you have permissions to write to that directory
-3. Clone https://github.com/caltechlibrary/cold
-4. Change into the `cold` directory
-5. Run GNU Make
-6. copy the `cold` binary to `/usr/local/bin/`
-7. Make a directory `/usr/local/etc/cold`
-8. Create `/usr/local/etc/cold/settings.json` and configure for your local setup
-9. Copy the systemd service into place for your system
-10. Start up cold service using `systemctl` and verify everything works
+Currently Pandoc 2 ships with many packaging systems (e.g. Ubuntu 22.04 LTS). **cold** requires Pandoc 3 and PostrREST 11. These will need a modern Haskell installed (e.g. via [gchup](https://www.haskell.org/ghcup/)). Included in this repository is a [cloud-init.yaml](cloud-init.yaml) file that can be used with [multipass](https://multipass.run) to build **cold** is a virtual machine.
 
-Here's an example of the steps I've taken. Note my user account has write and
-and execute permissions for `/usr/local/bin`, `/usr/local/etc` and `/usr/local/src`.
+Here's an example of the commands you could using to build an VM 
+and then build the necessary software to run **cold**.
 
-```
-mkdir -p /usr/local/src
-mkdir -p /usr/local/etc/cold
-mkdir -p /usr/local/bin
-cd /usr/lcoal/src
-git clone https://github.com/caltechlibrary/cold cold
-cd cold
-make clean &&  make
-cp bin/cold /usr/local/bin/
-cp etc/setttings.json-example /usr/local/etc/cold/settings.json
-nano /usr/local/etc/cold/settings.json
-cp etc/systemd/cold.service /etc/systemd/system/
-systemctl start cold
-```
+~~~
+multipass -v launch --name cold --cloud-init cloud-init.yaml
+multipass shell cold
+ghcup-build.bash
+source $HOME/.ghcup/env
+pandoc-build.bash
+postgrest-build.bash
+git clone https://github.com:caltechlibrary/cold \
+          src/github.com/caltechlibrary/cold
+cd src/github.com/caltechlibrary/cold
+make build
+~~~
 
-You can review the logs for **cold** using the `journalctl -u cold.service` command.
-
-Example settings.json
+Installation on macOS
 ---------------------
 
-```
-{
-    "dsn": "DB_USER_NAME_HERE:SECRET_GOES_HERE@/cold",
-    "hostname": "localhost:8486",
-    "htdocs": "/usr/local/src/cold/htdocs",
-    "prefix_path": "/cold",
-    "disable_root_redirects": false
-}
-```
+1. Install Haskell via [ghcup](https://www.haskell.org/ghcup/)
+2. Make sure `$HOME/bin` exists and is in your path
+    a. `mkdir -p $HOME/bin`
+    b. Add it to your .bashrc, `echo 'export PATH="$HOME/bin:$PATH"' >>$HOME.bashrc`
+    c. Source .bashrc if needed `source $HOME/.bashrc`
+3. Build Pandoc 3 install as pandoc and pandoc-server
+    a. `cd`
+    b. `git clone https://github.com/jgm/pandoc src/github.com/jgm/pandoc`
+    c. `cd src/github.com/jgm/pandoc`
+    d. `make`
+    e. `cp -vi $(find . -type f -name pandoc) $HOME/bin/pandoc-server`
+    f. `cp -vi $(find . -type f -name pandoc) $HOME/bin/pandoc`
+3. Build PostgREST and install 
+    a. `cd`
+    b. `git clone https://github.com/PostgREST/postgrest src/postgrest`
+    c. `cd src/postgrest`
+    d. `stack build --install-ghc --copy-bins --local-bin-path $HOME/bin`
+4. Clone the Git repository for cold and run with Make
+    a. `cd`
+    b. `git clone https://github.com/caltechlibrary/cold src/github.com/caltechlibrary/cold`
+    b. `cd src/github.com/caltechlibrary/cold`
+    c. `make`
+5. Run PostgREST in the background, `postgrest postgrest.conf &`
+6. Run Pandoc in server mode in the back ground, `pandoc-server &`
+7. Run a static web server (e.g. via Python) for the htdocs directory
+    a. Change into the htdocs directory, `cd htdocs`
+    b. Use python to service files, ` python3 -m http.server`
+    c. Point your browser at `https://localhost:8000` and test.
 
-Apache 2 Setup
---------------
+Here's an example of the steps I'd take on my M1 Mac Mini. 
 
-**cold** is intended to run on localhost and relies on a front-end web server like Apache 2 for authentication and authorization via reverse proxy setup (see https://httpd.apache.org/docs/2.4/howto/reverse_proxy.html).
+~~~
+curl --proto '=https' --tlsv1.2 -sSf https://get-ghcup.haskell.org | sh
+source $HOME/.ghcup/env
+mkdir -p $HOME/bin
+echo 'export PATH="$HOME/bin:$PATH"' >>"$HOME/.bashrc"
+source $HOME/.bashrc
+cd
+git clone https://github.com/jgm/pandoc \
+    src/github.com/jgm/pandoc
+cd src/github.com/jgm/pandoc
+make
+cp -vi $(find . -type f -name pandoc) $HOME/bin/pandoc
+cp -vi $(find . -type f -name pandoc) $HOME/bin/pandoc-server
+cd
+git clone git@github.com:PostgREST/postgrest \
+    src/github.com/PostgREST/postgrest
+cd src/github.com/PostgREST/postgrest
+stack build --install-ghc --copy-bins --local-bin-path $HOME/bin
+cd
+git clone git@github.com:caltechlibrary/cold \
+   src/github.com/caltechlibrary/cold
+cd src/github.com/caltechlibrary/cold
+make 
+postgrest postgrest.conf &
+pandoc-server --port 3030 &
+cd htdocs
+python3 -m http.server
+~~~
 
-Example configuration block for an Apache 2 virtual host configuration.
+The cold application is visible to your web browser at
 
-```
-#
-# NOTE: This following would go inside the Virtual host block of an Apache
-# configuration file.  It assumes the cold deamon was configued with a
-# prefix path of "/cold".
-#
+The URL <http://localhost:8000>
 
-#
-# Reverse proxy the cold service
-#
-Redirect /cold /cold/
-ProxyPass "/cold/" "http://localhost:8486/cold/"
-ProxyPassReverse "/cold/" "http://localhost:8486/cold/"
-#
-# Use Basic Auth for development purposes
-#
-<Location /cold>
-    AuthType Basic
-    AuthName "Cold DEV"
-    AuthBasicProvider file
-    AuthUserFile "/usr/local/etc/cold/passwords.txt"
-    Require valid-user
-</Location>
-#
-# Used to enable Shibboleth
-#<Location /cold>
-#	AuthType shibboleth
-#	ShibRequestSetting requireSession 1
-#	require valid-user
-#</Location>
-#
-```
+The JSON API is visible from PostgREST at <http://localhost:3000>
+
+The Pandoc server is visible at <http://localhost:3030>
+
+To shutdown the running services I do the following
+
+- Press ctl-c to quick the Python localhost web server
+- "forground" the pandoc-server with `fg` and then press ctl-c
+- "foreground" the postgrest server with `fg` and then press ctl-c
+- Postgres can be stop using systemctl, `systemctl stop postgres`
+
 
 
