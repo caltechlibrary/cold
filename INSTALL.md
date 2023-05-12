@@ -29,7 +29,7 @@ Here's an example of the commands you could using to build an VM
 and then build the necessary software to run **cold**.
 
 ~~~
-multipass -v launch --name cold --cloud-init cloud-init.yaml
+multipass -v launch --name cold --cloud-init cold-init.yaml
 multipass shell cold
 ghcup-build.bash
 source $HOME/.ghcup/env

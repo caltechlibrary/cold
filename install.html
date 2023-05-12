@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>COLD (Controlled Object List Daemon (Concept))</title>
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="https://caltechlibrary.github.io/css/site.css">
+</head>
+<body>
+<header>
+<a href="http://library.caltech.edu" title="link to Caltech Library Homepage"><img src="https://caltechlibrary.github.io/assets/liblogo.gif" alt="Caltech Library logo"></a>
+</header>
+<nav>
+<ul>
+    <li><a href="/">Home</a></li>
+    <li><a href="index.html">README</a></li>
+    <li><a href="LICENSE">LICENSE</a></li>
+    <li><a href="install.html">INSTALL</a></li>
+    <li><a href="user-manual.html">User Manual</a></li>
+    <li><a href="about.html">About</a></li>
+    <li><a href="https://github.com/caltechlibrary/cold">GitHub</a></li>
+</ul>
+</nav>
+
+<section>
+<h1 id="installation-for-development-of-cold">Installation for
+development of <strong>cold</strong></h1>
+<p><strong>cold</strong> is experimental software for managing
+controlled object lists and providing static vocabularies. It provides a
+JSON API for managing the objects via PostgreSQL and PostgREST. A human
+user interface is built via static HTML, CSS and JavaScript as well as
+with Pandoc templates processed via Pandoc in server mode. The means
+installing <strong>cold</strong> is more than installing the
+<strong>cold</strong> binary and a <code>settings.json</code> file.</p>
+<p><strong>cold</strong> is intended to run behind a front facing web
+server (e.g. Apache 2 or NginX) that access control and authentication.
+This can be configured in Apache 2 or NginX by use of Shibboleth or
+BasicAuth. An example apache2 configuration block is included in the
+source repository for <strong>cold</strong>. It will require adaptation
+to your specific web server configuration.</p>
+<p><strong>cold</strong> requires access to a PostgreSQL 14 through
+PostgREST 10. Both need to be configured. Template rendering is provided
+by Pandoc running in server mode. Installation, setup of user accounts
+and creating databases is beyond the scope of this documentation but is
+require to have a working cold instance.</p>
+<p>You will need to build <strong>cold</strong> for your specific system
+configuration. You need to rebuild the static web content (very likely)
+you’ll need to have Git, GNU Make, Pandoc 3 and available and working on
+your system.</p>
+<h2 id="required-software">Required software</h2>
+<p>Adjusting the web content to your host system requires the
+following</p>
+<ol type="1">
+<li>Git (to clone the cold repository on GitHub)</li>
+<li>PostgreSQL 15</li>
+<li>PostgREST 11</li>
+<li>Pandoc 3 (both cli and server)</li>
+<li>GNU Make</li>
+</ol>
+<h2 id="building-the-required-software">Building the required
+software</h2>
+<p>Currently Pandoc 2 ships with many packaging systems (e.g. Ubuntu
+22.04 LTS). <strong>cold</strong> requires Pandoc 3 and PostrREST 11.
+These will need a modern Haskell installed (e.g. via <a
+href="https://www.haskell.org/ghcup/">gchup</a>). Included in this
+repository is a <a href="cloud-init.yaml">cloud-init.yaml</a> file that
+can be used with <a href="https://multipass.run">multipass</a> to build
+<strong>cold</strong> is a virtual machine.</p>
+<p>Here’s an example of the commands you could using to build an VM and
+then build the necessary software to run <strong>cold</strong>.</p>
+<pre><code>multipass -v launch --name cold --cloud-init cold-init.yaml
+multipass shell cold
+ghcup-build.bash
+source $HOME/.ghcup/env
+pandoc-build.bash
+postgrest-build.bash
+git clone https://github.com:caltechlibrary/cold \
+          src/github.com/caltechlibrary/cold
+cd src/github.com/caltechlibrary/cold
+make build</code></pre>
+<h2 id="installation-on-macos">Installation on macOS</h2>
+<ol type="1">
+<li>Install Haskell via <a
+href="https://www.haskell.org/ghcup/">ghcup</a></li>
+<li>Make sure <code>$HOME/bin</code> exists and is in your path
+<ol type="a">
+<li><code>mkdir -p $HOME/bin</code></li>
+<li>Add it to your .bashrc,
+<code>echo 'export PATH="$HOME/bin:$PATH"' &gt;&gt;$HOME.bashrc</code></li>
+<li>Source .bashrc if needed <code>source $HOME/.bashrc</code></li>
+</ol></li>
+<li>Build Pandoc 3 install as pandoc and pandoc-server
+<ol type="a">
+<li><code>cd</code></li>
+<li><code>git clone https://github.com/jgm/pandoc src/github.com/jgm/pandoc</code></li>
+<li><code>cd src/github.com/jgm/pandoc</code></li>
+<li><code>make</code></li>
+<li><code>cp -vi $(find . -type f -name pandoc) $HOME/bin/pandoc-server</code></li>
+<li><code>cp -vi $(find . -type f -name pandoc) $HOME/bin/pandoc</code></li>
+</ol></li>
+<li>Build PostgREST and install
+<ol type="a">
+<li><code>cd</code></li>
+<li><code>git clone https://github.com/PostgREST/postgrest src/postgrest</code></li>
+<li><code>cd src/postgrest</code></li>
+<li><code>stack build --install-ghc --copy-bins --local-bin-path $HOME/bin</code></li>
+</ol></li>
+<li>Clone the Git repository for cold and run with Make
+<ol type="a">
+<li><code>cd</code></li>
+<li><code>git clone https://github.com/caltechlibrary/cold src/github.com/caltechlibrary/cold</code></li>
+<li><code>cd src/github.com/caltechlibrary/cold</code></li>
+<li><code>make</code></li>
+</ol></li>
+<li>Run PostgREST in the background,
+<code>postgrest postgrest.conf &amp;</code></li>
+<li>Run Pandoc in server mode in the back ground,
+<code>pandoc-server &amp;</code></li>
+<li>Run a static web server (e.g. via Python) for the htdocs directory
+<ol type="a">
+<li>Change into the htdocs directory, <code>cd htdocs</code></li>
+<li>Use python to service files,
+<code>python3 -m http.server</code></li>
+<li>Point your browser at <code>https://localhost:8000</code> and
+test.</li>
+</ol></li>
+</ol>
+<p>Here’s an example of the steps I’d take on my M1 Mac Mini.</p>
+<pre><code>curl --proto &#39;=https&#39; --tlsv1.2 -sSf https://get-ghcup.haskell.org | sh
+source $HOME/.ghcup/env
+mkdir -p $HOME/bin
+echo &#39;export PATH=&quot;$HOME/bin:$PATH&quot;&#39; &gt;&gt;&quot;$HOME/.bashrc&quot;
+source $HOME/.bashrc
+cd
+git clone https://github.com/jgm/pandoc \
+    src/github.com/jgm/pandoc
+cd src/github.com/jgm/pandoc
+make
+cp -vi $(find . -type f -name pandoc) $HOME/bin/pandoc
+cp -vi $(find . -type f -name pandoc) $HOME/bin/pandoc-server
+cd
+git clone git@github.com:PostgREST/postgrest \
+    src/github.com/PostgREST/postgrest
+cd src/github.com/PostgREST/postgrest
+stack build --install-ghc --copy-bins --local-bin-path $HOME/bin
+cd
+git clone git@github.com:caltechlibrary/cold \
+   src/github.com/caltechlibrary/cold
+cd src/github.com/caltechlibrary/cold
+make 
+postgrest postgrest.conf &amp;
+pandoc-server --port 3030 &amp;
+cd htdocs
+python3 -m http.server</code></pre>
+<p>The cold application is visible to your web browser at</p>
+<p>The URL <a href="http://localhost:8000"
+class="uri">http://localhost:8000</a></p>
+<p>The JSON API is visible from PostgREST at <a
+href="http://localhost:3000" class="uri">http://localhost:3000</a></p>
+<p>The Pandoc server is visible at <a href="http://localhost:3030"
+class="uri">http://localhost:3030</a></p>
+<p>To shutdown the running services I do the following</p>
+<ul>
+<li>Press ctl-c to quick the Python localhost web server</li>
+<li>“forground” the pandoc-server with <code>fg</code> and then press
+ctl-c</li>
+<li>“foreground” the postgrest server with <code>fg</code> and then
+press ctl-c</li>
+<li>Postgres can be stop using systemctl,
+<code>systemctl stop postgres</code></li>
+</ul>
+</section>
+
+<footer>
+<span>&copy; 2022 <a href="https://www.library.caltech.edu/copyright">Caltech Library</a></span>
+<address>1200 E California Blvd, Mail Code 1-32, Pasadena, CA 91125-3200</address>
+<span><a href="mailto:library@caltech.edu">Email Us</a></span>
+<span>Phone: <a href="tel:+1-626-395-3405">(626)395-3405</a></span>
+</footer>
+</body>
+</html>

@@ -10,9 +10,10 @@ implemented in the web browser.
 Requirements
 ============
 
-- PostgreSQL 14
-- PostgREST 11
-- Pandoc 3
+- MySQL >= 8
+- PostgreSQL >= 15
+- PostgREST >= 11
+- Pandoc >= 3
 - To build the UI and compile the **cold** daemon
     - GNU Make
     - [Pandoc](https://pandoc.org) (to build UI)

@@ -70,6 +70,10 @@ package_upgrade: true
 # with the format [<package>, <version>] wherein the specific
 # package version will be installed.
 packages:
+  - vim
+  - micro
+  - tcsh
+  - emacs
   - aptitude
   - build-essential
   - autotools-dev

@@ -19,9 +19,7 @@
 package cold
 
 import (
-	"flag"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -595,29 +593,6 @@ func (api *API) RedirectHandler(w http.ResponseWriter, r *http.Request) {
 	default:
 		http.NotFound(w, r)
 		api.logResponse(r, http.StatusNotFound, fmt.Errorf(`not found`))
-	}
-}
-func DisplayLicense(out io.Writer, appName string, license string) {
-	fmt.Fprintln(out, strings.ReplaceAll(strings.ReplaceAll(license, "{app_name}", appName), "{version}", Version))
-}
-
-func DisplayVersion(out io.Writer, appName string) {
-	fmt.Fprintf(out, "%s %s\n", appName, Version)
-}
-
-func DisplayUsage(out io.Writer, appName string, flagSet *flag.FlagSet, description string, examples string, license string) {
-	// Convert {app_name} and {version} in description
-	if description != "" {
-		fmt.Fprintln(out, strings.ReplaceAll(description, "{app_name}", appName))
-	}
-	flagSet.SetOutput(out)
-	flagSet.PrintDefaults()
-
-	if examples != "" {
-		fmt.Fprintln(out, strings.ReplaceAll(examples, "{app_name}", appName))
-	}
-	if license != "" {
-		DisplayLicense(out, appName, license)
 	}
 }
 

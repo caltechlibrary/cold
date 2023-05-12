@@ -10,34 +10,41 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"strings"
 
 	// Caltech Library Modules
 	"github.com/caltechlibrary/cold"
 )
 
 var (
-	description = `
-USAGE
-=====
+	helpText = `% {app_name}(1) {app_name} user manual | Version {version}
+% R. S. Doiel and Tom Morrell
+% 2023-05-12
 
-    cold [OPTIONS] [SETTINGS_FILENAME]
+# NAME
 
-SYNOPSIS
---------
+{app_name}
+
+# SYNOPSIS
+
+{app_name} [OPTIONS] [SETTINGS_FILENAME]
+
+# DESCRIPTION
 
 Run the controlled object list daemon.
 
-
 This implements a service to maintain a controlled list of objects such as Caltech Library uses for crosswalking data using pid associated with a person, group or funding source.
 
-Requirements
-------------
+# Requirements
 
-- MySQL 8
-- Golang (for compiling the service)
+- Go >= 1.20
+- GNU Make
+- Pandoc >= 3
+- MySQL >= 8
+- Postgres >= 15
+- PostgREST >= 11
 
-Overview
---------
+# Overview
 
 Caltech Library maintains a list of people, groups and funders and their related pids. This started being managed in Google Sheets, then in CSV files but the number of objects in envoled has increased and it make sense to provide a more robust implementation allowing for easier curation of the list. The objects are relatively flat with the exception of the name attribute.  Here's an example JSON object representing R. S. Doiel showing the internal identifier named "cl_people_id", name object, email, orcid and '@affiliation' which contains a ROR.
 
@@ -63,15 +70,13 @@ CREATE TABLE local_group (cl_group_id VARCHAR(255) PRIMARY KEY, object JSON);
 CREATE TABLE funder (cl_funder_id VARCHAR(255) PRIMARY KEY, object JSON);
 ~~~
 
-Approach
---------
+# APPROACH
 
 This service, like ep3apid and datasetd is intended to run on localhost on a known port (e.g. localhost:8486). It is a mininal service relying on access control from the operating system or front-end web service (e.g. a Bottle application, Apache 2 with Shibboleth).  The goal of the service is to provide a light weight layer between the database storing the objects and the applications that need to work with them.  Also like ep3apid and datasetd *cold* is configured using a simple JSON "settings.json" file. Typically this would be stored in a sub-folder of "etc" on the system (e.g. /usr/local/etc/cold/settings.json).
 
 The service is made up of two parts, a set of "End Points" for managing and retrieving controlled object lists and vocabularies as JSON expressions and a set of static files providing the user interface to manage and display the vocabularies and controlled object lists.  The static website is build from HTML, CSS, JavaScript leveraging Web Components for providing a sufficient interface.
 
-End Points
-----------
+## End Points
 
 Plain text help is built in by adding a ` + "```" + `/help` + "```" + ` to the URL path. The defined end points are formed as the following. The following end point descriptions support the GET method.
 
@@ -122,12 +127,11 @@ Plain text help is built in by adding a ` + "```" + `/help` + "```" + ` to the U
 : Returns a list of "cl_funder_id" assocated with that identifier
 
 
-*cold* takes a REST approach to updates for managed objects.  PUT will create a new object, POST will update it, GET will retrieve it and DELETE Will replace it.
+*{app_name}* takes a REST approach to updates for managed objects.  PUT will create a new object, POST will update it, GET will retrieve it and DELETE Will replace it.
 
-Vocabularies
-------------
+## Vocabularies
 
-*cold* also supports end points for stable vocabularies mapping an indentifier to a normalized name. These are set at compile time because they are so slow changing. 
+*{app_name}* also supports end points for stable vocabularies mapping an indentifier to a normalized name. These are set at compile time because they are so slow changing. 
 
 ` + "```" + `/subject` + "```" + `
 : Returns a list of all the subject ids (codes)
@@ -148,8 +152,7 @@ Vocabularies
 ` + "```" + `/doi-prefix/{DOI_PREFIX}` + "```" + `
 : Returns the normalized publisher name for that DOI prefix
 
-Widgets
--------
+## Widgets
 
 Widgets provide the user interface for humans to manage and view the objects. While **cold** can directly host these it is equally possible to integrate the static components into another system, web service or web site. They are only static web assets.  The public facing web service needs to control access to **cold** and the static content does not contain anything that is priviliged. The Widgets can be loaded indepentently in the page using the following end points.
 
@@ -183,28 +186,27 @@ Widgets provide the user interface for humans to manage and view the objects. Wh
 ` + "```" + `/widget/input-doi-prefix.js` + "```" + `
 : This widget provides a consistent input interface for our DOI Prefix/Publisher Object, example ` + "```" + `<input-doi-prefix doi="XXXXXX/XXXXX.X" publisher="Publisher Name Here"></input-doi-prefix>` + "```" + `
 
-`
-
-	examples = `
-
-Example
--------
+# EXAMPLE
 
 _{app_name}_ can be configure from the environment or from a JSON
 settings file. Assuming you are using a JSON settings file (e.g.
 "settings.json") the web service can be started by passing it
 on the command line.
 
+~~~
     {app_name} settings.json
+~~~
 
 If you are configuring via the environment (e.g. in a container
 environment) just envoke the command without options.
 
+~~~
     {app_name}
-
+~~~
 
 Here is an example settings.json file.
 
+~~~
 	{
 		"dsn": "DB_USER_HERE:DB_PASSWORD_HERE@/cold",
 		"hostname": "localhost:8486",
@@ -212,35 +214,21 @@ Here is an example settings.json file.
 		"prefix_path": "",
 		"disable_root_redirects": false
 	}
+~~~
 
 To run in a container you can pass the values in settings.json as
 environment variables. The environment variables are upper case.
 
 Here is an example of setting environment variables.
 
+~~~
     export DSN="DB_USER_HERE:DB_PASSWORD_HERE@/cold"
 	export HOST="localhost:8486"
 	export HTDOCS="./htdocs"
 	export PREFIX_PATH=""
 	export DISABLE_ROOT_REDIRECTS=0
+~~~
 
-`
-
-	license = `
-{app_name} {version}
-
-Copyright (c) 2022, Caltech
-All rights not granted herein are expressly reserved by Caltech.
-
-Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
-
-1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
-
-2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
-
-3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 `
 
 	showHelp    bool
@@ -254,6 +242,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	logFile   string
 	logMode   int
 )
+
+
+func fmtTxt(txt string, appName string) string {
+        return strings.ReplaceAll(strings.ReplaceAll(txt, "{app_name}", appName), "{version}", cold.Version)
+}
 
 func checkConfig(cfg *cold.Config) {
 	if err := cold.CheckConfig(cfg); err != nil {
@@ -275,17 +268,19 @@ func main() {
 	flagSet.Parse(os.Args[1:])
 	args := flagSet.Args()
 
-	if showHelp {
-		cold.DisplayUsage(os.Stdout, appName, flagSet, description, examples, license)
-		os.Exit(0)
-	}
+
+    if showHelp {
+        fmt.Fprintf(os.Stdout, "%s\n", fmtTxt(helpText, appName))
+        os.Exit(0)
+    }
 	if showVersion {
-		cold.DisplayVersion(os.Stdout, appName)
+		fmt.Fprintf(os.Stdout, "%s %s\n", appName, cold.Version)
 		os.Exit(0)
 	}
 	if showLicense {
-		cold.DisplayLicense(os.Stdout, appName, license)
-		os.Exit(0)
+		fmt.Fprintf(os.Stdout, "%s %s\n", appName, cold.Version)
+       	fmt.Fprintf(os.Stdout, "%s\n", cold.LicenseText)
+       	os.Exit(0)
 	}
 
 	/* Looking settings.json */

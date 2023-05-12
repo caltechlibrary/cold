@@ -7,9 +7,9 @@ VERSION = $(shell grep '"version":' codemeta.json | cut -d\"  -f 4)
 
 BRANCH = $(shell git branch | grep '* ' | cut -d\  -f 2)
 
-CODEMETA2CFF = $(shell which codemeta2cff)
-
 PROGRAMS = $(shell ls -1 cmd)
+
+MAN_PAGES = $(shell ls -1 *.1.md | sed -E 's/\.1.md/.1/g')
 
 MD_PAGES = $(shell ls -1 htdocs/*.md)
 
@@ -37,18 +37,36 @@ ifeq ($(OS), Windows)
 	EXT = .exe
 endif
 
-build: version.go $(PROGRAMS) $(HTML_PAGES) htdocs/widgets/config.js htdocs/readme.html
+build: version.go CITATION.cff about.md $(PROGRAMS) $(HTML_PAGES) htdocs/widgets/config.js htdocs/readme.html
+
+man: $(MAN_PAGES)
+
+$(MAN_PAGES): .FORCE
+	mkdir -p man/man1
+	pandoc $@.md --from markdown --to man -s >man/man1/$@
+
+CITATION.cff: codemeta.json .FORCE
+	cat codemeta.json | sed -E   's/"@context"/"at__context"/g;s/"@type"/"at__type"/g;s/"@id"/"at__id"/g' >_codemeta.json
+	echo "" | pandoc --metadata title="Cite $(PROJECT)" --metadata-file=_codemeta.json --template=codemeta-cff.tmpl >CITATION.cff
+
+about.md: codemeta.json .FORCE
+	cat codemeta.json | sed -E 's/"@context"/"at__context"/g;s/"@type"/"at__type"/g;s/"@id"/"at__id"/g' >_codemeta.json
+	echo "" | pandoc --metadata-file=_codemeta.json --template codemeta-md.tmpl >about.md 2>/dev/null
+	if [ -f _codemeta.json ]; then rm _codemeta.json; fi
 
 
 version.go: .FORCE
 	@echo "package $(PROJECT)" >version.go
 	@echo '' >>version.go
-	@echo '// Version of package' >>version.go
-	@echo 'const Version = "$(VERSION)"' >>version.go
+	@echo 'const (' >>version.go
+	@echo '    Version = "$(VERSION)"' >>version.go
+	@echo '' >>version.go
+	@echo '    LicenseText = `' >>version.go
+	@cat LICENSE >>version.go
+	@echo '`' >>version.go
+	@echo ')' >>version.go
 	@echo '' >>version.go
 	@git add version.go
-	@if [ -f bin/codemeta ]; then ./bin/codemeta; fi
-	$(CODEMETA2CFF)
 
 settings.json:
 	@if [ ! -f settings.json ]; then cp -pvi etc/settings.json-example settings.json;fi
@@ -64,6 +82,8 @@ $(HTML_PAGES): $(MD_PAGES) nav.md
 	@echo "PAGE html: "$@" PAGE md: "$(basename $@).md
 	mkpage "prefix_path=text:$(APP_PREFIX_PATH)" body=$(basename $@).md nav=nav.md templates/page.tmpl >$@
 
+website: $(HTML_PAGES) .FORCE
+	
 htdocs/widgets/config.js:
 	mkpage codemeta=codemeta.json "prefix_path=text:$(APP_PREFIX_PATH)" templates/config-js.tmpl >htdocs/widgets/config.js	
 
@@ -76,13 +96,18 @@ harvest: .FORCE
 install: build
 	@if [ ! -d $(PREFIX)/bin ]; then mkdir -p $(PREFIX)/bin; fi
 	@echo "Installing programs in $(PREFIX)/bin"
-	@for FNAME in $(PROGRAMS); do if [ -f ./bin/$$FNAME ]; then cp -v ./bin/$$FNAME $(PREFIX)/bin/$$FNAME; fi; done
+	@for FNAME in $(PROGRAMS); do if [ -f "./bin/$${FNAME}" ]; then cp -v "./bin/$${FNAME}" "$(PREFIX)/bin/$${FNAME}"; fi; done
 	@echo ""
 	@echo "Make sure $(PREFIX)/bin is in your PATH"
+	@for FNAME in $(MAN_PAGES); do if [ -f "./man/man1/$${FNAME}" ]; then cp -v "./man/man1/$${FNAME}" "$(PREFIX)/man/man1/$${FNAME}"; fi; done
+	@echo ""
+	@echo "Make sure $(PREFIX)/man is in your MANPATH"
+	@echo ""
 
 uninstall: .FORCE
 	@echo "Removing programs in $(PREFIX)/bin"
 	@for FNAME in $(PROGRAMS); do if [ -f $(PREFIX)/bin/$$FNAME ]; then rm -v $(PREFIX)/bin/$$FNAME; fi; done
+	@for FNAME in $(MAN_PAGES); do if [ -f "$(PREFIX)/man/man1/$${FNAME}" ]; then rm -v "$(PREFIX)/man/man1/$$FNAME"; fi; done
 
 test: clean build
 	python3 csv_to_object_lists.py	
@@ -90,7 +115,7 @@ test: clean build
 	@if [ -f test_cmd.bash ]; then bash test_cmd.bash; fi
 
 cleanweb:
-	@if [ -f index.html ]; then rm *.html; fi
+	@for FNAME in $(HTML_PAGES); do rm "$${FNAME}"; done
 
 clean: 
 	@if [ -f nav.md ]; then rm nav.md; fi
@@ -167,6 +192,9 @@ status:
 save:
 	if [ "$(msg)" != "" ]; then git commit -am "$(msg)"; else git commit -am "Quick Save"; fi
 	git push origin $(BRANCH)
+
+website: .FORCE
+	make -f website.mak
 
 publish:
 	bash mk-website.bash

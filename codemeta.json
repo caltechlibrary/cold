@@ -5,7 +5,7 @@
     "name": "cold",
     "codeRepository": "https://github.com/caltechlibrary/cold",
     "issueTracker": "https://github.com/caltechlibrary/cold/issues",
-    "license": "https://caltechlibrary.github.io/cold/license.html",
+    "license": "https://caltechlibrary.github.io/cold/LICENSE",
     "version": "0.0.4",
     "author": [
         {
@@ -41,8 +41,18 @@
     "maintainer": "https://orcid.org/0000-0003-0900-6903",
     "programmingLanguage": [
         "Go",
+		"SQL",
         "JavaScript",
         "HTML",
         "CSS"
-    ]
+    ],
+    "softwareRequirements": [
+    	"Go >= 1.20.1",
+		"GNU Make",
+		"Pandoc >= 3",
+    	"MySQL >= 8",
+    	"SQLite >= 3",
+    	"PostgreSQL >= 15",
+    	"PostgREST >= 11"
+  	]
 }
