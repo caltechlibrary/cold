@@ -8,7 +8,7 @@
 #
 namespace: cold
 models:
-- model: cl_person
+- model: cold.cl_person
   var:
     cl_people_id: String*
     family_name: String
@@ -22,7 +22,7 @@ models:
     division: String
     updated: Date 2006-01-02
     ror: ROR
-- model: cl_group
+- model: cold.cl_group
   var:
     cl_group_id: String*
     name: String
@@ -53,15 +53,15 @@ models:
     ror: ROR
 #
 # Controlled vocabulary models, these are mostly key/value pairs
-- model: cl_subject
+- model: cold.cl_subject
   var:
     cl_subject_id: String*
     subject: String
-- model: cl_publishers
+- model: cold.cl_publishers
   var:
     issn: ISSN*
     publisher: String
-- model: cl_doi_prefixes
+- model: cold.cl_doi_prefixes
   var:
     prefix: String*
     name: String
