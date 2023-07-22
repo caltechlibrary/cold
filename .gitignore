@@ -58,3 +58,4 @@ settings.*
 pandoc.*.json
 config.js
 htdocs/lunr
+*setup*.sql
