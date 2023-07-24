@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <title>COLD (Controlled Object List Daemon (Concept))</title>
     <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
@@ -22,20 +22,21 @@
 </nav>
 
 <section>
-<h1 id="cold---controlled-object-list-daemon">cold - (c)ontrolled
-(o)bject (l)ist (d)aemon</h1>
+<h1 id="cold---controlled-object-lists-and-datum">cold - (c)ontrolled
+(o)bject (l)ists and (d)atum</h1>
 <p>This repository implements a service to maintain a controlled list of
 objects and vocabularies used at Caltech Library for people,
 organizations and funders. It is built from data modeled in PostgreSQL
 and managed via a series of microservices that combine to form a human
 user interface implemented in the web browser.</p>
-<h1 id="requirements">Requirements</h1>
+<h2 id="requirements">Requirements</h2>
 <ul>
-<li>MySQL &gt;= 8</li>
 <li>PostgreSQL &gt;= 15</li>
 <li>PostgREST &gt;= 11</li>
 <li>Pandoc &gt;= 3</li>
-<li>To build the UI and compile the <strong>cold</strong> daemon
+<li>Newt &gt;= 0.0.3</li>
+<li>To build the UI and compile the assets needed by
+<strong>cold</strong>
 <ul>
 <li>GNU Make</li>
 <li><a href="https://pandoc.org">Pandoc</a> (to build UI)</li>
@@ -48,19 +49,19 @@ user interface implemented in the web browser.</p>
 <p>Most package managers running on various flavors of Unix (e.g. macOS,
 Linux) do not provide Pandoc 3 or PostgREST. There is a good chance you
 will need to build this from source if they are not already available on
-the system where <strong>cold</strong> will run.</p>
-<ul>
+the system where <strong>cold</strong> will run. I recomment installing
+GHCup first then download and build Pandoc and PostgREST. GHCup provides
+a reliable Haskell development environment.</p>
+<ol type="1">
 <li>Install Haskell via <a
-href="https://www.haskell.org/ghcup/">ghcup</a>
-<ul>
+href="https://www.haskell.org/ghcup/">ghcup</a></li>
 <li>See <a
 href="https://pandoc.org/installing.html#quick-cabal-method">Pandoc</a>
-to for instructions to compile Pandoc 3</li>
+and follow instructions to compile Pandoc 3</li>
 <li>See
-[https://postgrest.org/en/stable/install.html#building-from-source]) for
-instructions to compile PostgREST 10</li>
-</ul></li>
-</ul>
+[https://postgrest.org/en/stable/install.html#building-from-source]) and
+following instructions to compile PostgREST 11</li>
+</ol>
 <h2 id="overview">Overview</h2>
 <p>Caltech Library maintains a list of people, groups and funders and
 their related pids. This started being managed in Google Sheets, then in
@@ -70,49 +71,106 @@ curation of the list. The objects are relatively flat. Here’s an example
 JSON object representing R. S. Doiel showing the internal identifier
 named “cl_people_id”, name object, email, orcid and Caltech affiliation
 is shown both via a boolean field and a ROR.</p>
-<pre><code>{
-    &quot;cl_people_id&quot;: &quot;Doiel-R-S&quot;,
-    &quot;family_name&quot;: &quot;Doiel&quot;,
-    &quot;given_name&quot;: &quot;Robert&quot;,
-    &quot;orcid&quot;: &quot;0000-0003-0900-6903&quot;,
-    &quot;authors_id&quot;: &quot;Doiel-R-S&quot;,
-    &quot;directory_id&quot;: &quot;rsdoiel&quot;,
-    &quot;caltech&quot;: true,
-    &quot;status&quot;: &quot;Active&quot;,
-    &quot;directory_person_type&quot;: &quot;Staff&quot;,
-    &quot;division&quot;: &quot;Libraries Group&quot;,
-    &quot;updated&quot;: &quot;2022-03-09&quot;
-    &quot;ror&quot;: &quot;https://ror.org/05dxps055&quot;
-} </code></pre>
-<p>A group object for Caltech Library is also flat.</p>
-<pre><code>{
-    &quot;cl_group_id&quot;: &quot;Caltech-Library&quot;,
-    &quot;name&quot;: &quot;Caltech Library&quot;,
-    &quot;alternative&quot;: &quot;Caltech Library System; Library System Papers and Publications&quot;,
-    &quot;updated&quot;: &quot;2020-03-26 00:00:00&quot;
-}</code></pre>
-<p>Some objects may have more attributes others less. A simple table
-schema containing a row id, an internal identifier (e.g. cl_people_id,
-cl_group_id), a “field” and a “value” can be used to represent all the
-types of fields associated with a given object. A separate table can be
-used for person, group and finder with the individual objects stored as
-a JSON type. This is well suited to a data collection that has sparse
-consistency (e.g. one person might have an ORCID but not a research id,
-the next might have a viaf or wikidata id but not a ORCID).</p>
-<pre><code>CREATE TABLE people (cl_people_id VARCHAR(255) PRIMARY KEY, object JSON);
-CREATE TABLE local_group (cl_group_id VARCHAR(255) PRIMARY KEY, object JSON);
-&lt;!-- CREATE TABLE funder (cl_funder_id VARCHAR(255) PRIMARY KEY, object JSON); --&gt;</code></pre>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;cl_people_id&quot;</span><span class="fu">:</span> <span class="st">&quot;Doiel-R-S&quot;</span><span class="fu">,</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;family_name&quot;</span><span class="fu">:</span> <span class="st">&quot;Doiel&quot;</span><span class="fu">,</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;given_name&quot;</span><span class="fu">:</span> <span class="st">&quot;Robert&quot;</span><span class="fu">,</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;orcid&quot;</span><span class="fu">:</span> <span class="st">&quot;0000-0003-0900-6903&quot;</span><span class="fu">,</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;authors_id&quot;</span><span class="fu">:</span> <span class="st">&quot;Doiel-R-S&quot;</span><span class="fu">,</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;directory_id&quot;</span><span class="fu">:</span> <span class="st">&quot;rsdoiel&quot;</span><span class="fu">,</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;caltech&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;status&quot;</span><span class="fu">:</span> <span class="st">&quot;Active&quot;</span><span class="fu">,</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;directory_person_type&quot;</span><span class="fu">:</span> <span class="st">&quot;Staff&quot;</span><span class="fu">,</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;division&quot;</span><span class="fu">:</span> <span class="st">&quot;Libraries Group&quot;</span><span class="fu">,</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;updated&quot;</span><span class="fu">:</span> <span class="st">&quot;2022-03-09&quot;</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;ror&quot;</span><span class="er">:</span> <span class="st">&quot;https://ror.org/05dxps055&quot;</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span> </span></code></pre></div>
+<p>A group object for Caltech Library is relatively flat.</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;cl_group_id&quot;</span><span class="fu">:</span> <span class="st">&quot;Caltech-Library&quot;</span><span class="fu">,</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;name&quot;</span><span class="fu">:</span> <span class="st">&quot;Caltech Library&quot;</span><span class="fu">,</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;alternative&quot;</span><span class="fu">:</span> <span class="ot">[</span> <span class="st">&quot;Caltech Library System&quot;</span><span class="ot">,</span> <span class="st">&quot;Library System Papers and Publications&quot;</span> <span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;updated&quot;</span><span class="fu">:</span> <span class="st">&quot;2023-07-21 00:08:00&quot;</span><span class="fu">,</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;created&quot;</span><span class="fu">:</span> <span class="st">&quot;2023-07-21&quot;</span><span class="fu">,</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;email&quot;</span><span class="fu">:</span> <span class="st">&quot;library@caltech.edu&quot;</span><span class="fu">,</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;description&quot;</span><span class="fu">:</span> <span class="st">&quot;Caltech Library serves teaching, research, and academic needs of its students, faculty, and staff of Caltech.&quot;</span><span class="fu">,</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;start&quot;</span><span class="fu">:</span> <span class="st">&quot;1965&quot;</span><span class="fu">,</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;start_is_approx&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;activity&quot;</span><span class="fu">:</span> <span class="st">&quot;active&quot;</span><span class="fu">,</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;end&quot;</span><span class="fu">:</span> <span class="st">&quot;&quot;</span><span class="fu">,</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;end_is_approx&quot;</span><span class="fu">:</span> <span class="kw">false</span><span class="fu">,</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;website&quot;</span><span class="fu">:</span> <span class="st">&quot;https://library.caltech.edu&quot;</span><span class="fu">,</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;pi&quot;</span><span class="fu">:</span> <span class="st">&quot;&quot;</span><span class="fu">,</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;parent&quot;</span><span class="fu">:</span> <span class="st">&quot;&quot;</span><span class="fu">,</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;prefix&quot;</span><span class="fu">:</span> <span class="st">&quot;&quot;</span><span class="fu">,</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;grid&quot;</span><span class="fu">:</span> <span class="st">&quot;&quot;</span><span class="fu">,</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;isni&quot;</span><span class="fu">:</span> <span class="st">&quot;&quot;</span><span class="fu">,</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;ringold&quot;</span><span class="fu">:</span> <span class="st">&quot;&quot;</span><span class="fu">,</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;viaf&quot;</span><span class="fu">:</span> <span class="st">&quot;&quot;</span><span class="fu">,</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;ror&quot;</span><span class="fu">:</span> <span class="st">&quot;https://ror.org/05dxps055&quot;</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<p>Newt can read a simple YAML based model description and generated the
+SQL too bootstrap Cold’s models. The management of the models can be
+defined through Newt’s routing capabilities as well as Postgres database
+procedures, functions, triggers and events.</p>
+<p>A Newt description of the person model would like the following. The
+SQL bootstrap is generated automatically by Newt using the option
+<code>-pg-models</code>.</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">models</span><span class="kw">:</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">-</span><span class="at"> </span><span class="fu">model</span><span class="kw">:</span><span class="at"> cl_people</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="kw">-</span><span class="at"> </span><span class="fu">var</span><span class="kw">:</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">cl_people_id</span><span class="kw">:</span><span class="at"> String</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">family_name</span><span class="kw">:</span><span class="at"> String</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">given_name</span><span class="kw">:</span><span class="at"> String</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">orcid</span><span class="kw">:</span><span class="at"> ORCID</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">author_id</span><span class="kw">:</span><span class="at"> String</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">directory_id</span><span class="kw">:</span><span class="at"> String</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">caltech</span><span class="kw">:</span><span class="at"> Boolean</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">status</span><span class="kw">:</span><span class="at"> Boolean</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">direcotry_person_type</span><span class="kw">:</span><span class="at"> String</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">division</span><span class="kw">:</span><span class="at"> String</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">updated</span><span class="kw">:</span><span class="at"> Date 2006-01-02</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">ror</span><span class="kw">:</span><span class="at"> ROR</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="kw">-</span><span class="at"> </span><span class="fu">model</span><span class="kw">:</span><span class="at"> cl_group</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="kw">-</span><span class="at"> </span><span class="fu">var</span><span class="kw">:</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">cl_group_id</span><span class="kw">:</span><span class="at"> String Primary Key</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">name</span><span class="kw">:</span><span class="at"> String</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">alternative</span><span class="kw">:</span><span class="at"> Array String</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">updated</span><span class="kw">:</span><span class="at"> Timestamp</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="co">  # Date group was added to Group List</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">date</span><span class="kw">:</span><span class="at"> Date 2006-01-02</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">email</span><span class="kw">:</span><span class="at"> EMail</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">description</span><span class="kw">:</span><span class="at"> Text</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">start</span><span class="kw">:</span><span class="at"> String</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a><span class="co">  # approx_starts indicates if the &quot;start&quot; is an approximate (true) or exact (false)</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">approx_start</span><span class="kw">:</span><span class="at"> Boolean</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a><span class="co">  # activity is a string value holding either &quot;active&quot; or &quot;inactive&quot;  </span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">activity</span><span class="kw">:</span><span class="at"> String</span></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">end</span><span class="kw">:</span><span class="at"> String</span></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a><span class="co">  # approx_end indicates if the &quot;start&quot; is an approximate (true) or exact (false)</span></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">approx_end</span><span class="kw">:</span><span class="at"> Boolean</span></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">website</span><span class="kw">:</span><span class="at"> Url</span></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">pi</span><span class="kw">:</span><span class="at"> String</span></span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">parent</span><span class="kw">:</span><span class="at"> String</span></span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a><span class="co">  # prefix holds the DOI prefix associated with the group</span></span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">prefix</span><span class="kw">:</span><span class="at"> String</span></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">grid</span><span class="kw">:</span><span class="at"> String</span></span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">isni</span><span class="kw">:</span><span class="at"> ISNI</span></span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">ringold</span><span class="kw">:</span><span class="at"> String</span></span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">viaf</span><span class="kw">:</span><span class="at"> String</span></span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">ror</span><span class="kw">:</span><span class="at"> ROR</span></span></code></pre></div>
 <h2 id="approach">Approach</h2>
-<p><strong>cold</strong> models it data in PostgreSQL which is
-responsible for defining views and procedures to implement end points in
-a JSON API provide by PostgREST. The UI for <strong>cold</strong> is
-implemented in the web browser via static HTML, CSS and JavaScript.
-Since displaying data structures can be burdensome directly with
-JavaScript interacting with the DOM Pandoc running in server mode is
-available to compose the framents from the JSON API service. JavaScript
-running in the browser is then resposible for fetching the JSON
-represention, passing the results along with template info too the
-Pandoc server before injecting them into the browser DOM.</p>
+<p><strong>cold</strong> is built using Newt. Newt is used to generate
+the basic SQL models deployed in Postgres. PostgREST is used to provide
+a JSON API for managing objects and controlled vocabularies. Pandoc
+server is used to render JSON into a human friendly UI with Newt running
+as a service orchestrating the conversation between PostgREST, Pandoc
+and the requestioning web browser. Access control is left to the
+front-end web server via SSO and user lists (e.g. Shibboleth and
+.htaccess files if using Apache 2).</p>
 <h2 id="end-points">End Points</h2>
 <p>JSON API is provided by PostgREST. The following end point
 descriptions support the GET method.</p>
@@ -192,7 +250,7 @@ Returns a list of DOI prefixes that map to a normalize name
 Returns the normalized publisher name for that DOI prefix
 </dd>
 </dl>
-<h1 id="manage-interface">Manage interface</h1>
+<h2 id="manage-interface">Manage interface</h2>
 <p>The management inteface is avialable at
 <code>/app/dashboard.html</code> path. This provides a dashboard which
 then interacts with the JSON side of the service to update content. The
@@ -202,11 +260,10 @@ be enabled in the browser.</p>
 <p>Widgets provide the user interface for humans to manage and view the
 objects. While <strong>cold</strong> can directly host these it is
 equally possible to integrate the static components into another system,
-web service or web site. They are only static web assets. The public
-facing web service needs to control access to <strong>cold</strong> and
-the static content does not contain anything that is priviliged. The
-Widgets can be loaded indepentently in the page using the following end
-points.</p>
+web service or web site. The public facing web service needs to control
+access to <strong>cold</strong> and the static content does not contain
+anything that is priviliged. The Widgets can be loaded indepentently in
+the page using the following end points.</p>
 <dl>
 <dt><code>/widgets/person.js</code></dt>
 <dd>

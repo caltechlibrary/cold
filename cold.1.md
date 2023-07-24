@@ -1,6 +1,6 @@
-% cold(1) cold user manual | Version 0.0.4
+% cold(1) cold user manual | Version 0.0.5
 % R. S. Doiel and Tom Morrell
-% 2023-05-12
+% 2023-07-24
 
 # NAME
 
@@ -12,15 +12,16 @@ cold [OPTIONS] [SETTINGS_FILENAME]
 
 # DESCRIPTION
 
-Run the controlled object list daemon.
+Run the controlled object list and datum.
 
-This implements a service to maintain a controlled list of objects such as Caltech Library uses for crosswalking data using pid associated with a person, group or funding source.
+This implements a service to maintain a controlled list of objects such as Caltech Library uses for crosswalking data using pid associated with a person, group or funding source. It is also used to maintain system independant vocabularies.
 
 # Requirements
 
+- Newt >= 0.0.5
 - Postgres 15
 - PostgREST 11
-- Golang (for compiling the service)
+- Pandoc > 3
 
 # Overview
 
@@ -40,41 +41,44 @@ Caltech Library maintains a list of people, groups and funders and their related
 } 
 ~~~
 
-Some objects may have more attributes others less. A simple table schema containing a row id, an internal identifier (e.g. cl_people_id, cl_group_id, cl_funder_id), a "field" and a "value" can be used to represent all the types of fields associated with a given object.  A separate table can be used for person, group and finder with the individual objects stored as a JSON type. This is well suited to a data collection that has sparse consistency (e.g. one person might have an ORCID but not a research id, the next might have a viaf or wikidata id but not a ORCID).
+Data like this can easily be manage in Postgres and then made available as a JSON data source via PostgREST. The prototype Newt let's us easily integrate PostgREST results with Pandoc server. As a result **cold** is now a Newt based web application.  It supports not just Caltech related People, Groups and Funders but also additional vocabularies which we need to cordinate between systems (e.g. RDM instances or publication systems like feeds.library.caltech.edu).
 
-~~~
-CREATE TABLE people (cl_people_id VARCHAR(255) PRIMARY KEY, object JSON);
-CREATE TABLE local_group (cl_group_id VARCHAR(255) PRIMARY KEY, object JSON);
-CREATE TABLE funder (cl_funder_id VARCHAR(255) PRIMARY KEY, object JSON);
-~~~
+# Build on N3P
 
-# APPROACH
+This iteration **cold** is implemented with Newt+Postgres+PostgREST+Pandoc (aka N3P). The `cold.yaml` file defines both the data models managed by cold as well as the URL routes and data flows needed to make available the people, groups, funder and vocabulary information in the desired formats (e.g. JSON, YAML, and CSV).
 
-This service, like ep3apid and datasetd is intended to run on localhost on a known port (e.g. localhost:8486). It is a mininal service relying on access control from the operating system or front-end web service (e.g. a Bottle application, Apache 2 with Shibboleth).  The goal of the service is to provide a light weight layer between the database storing the objects and the applications that need to work with them.  Also like ep3apid and datasetd *cold* is configured using a simple JSON "settings.json" file. Typically this would be stored in a sub-folder of "etc" on the system (e.g. /usr/local/etc/cold/settings.json).
+Each type of list is has its own model. Each model has a related set of PostgREST end points for managing the model lists and generating the formats needed for integration with other services.
 
-The service is made up of two parts, a set of "End Points" for managing and retrieving controlled object lists and vocabularies as JSON expressions and a set of static files providing the user interface to manage and display the vocabularies and controlled object lists.  The static website is build from HTML, CSS, JavaScript leveraging Web Components for providing a sufficient interface.
+In addition to the model definitions and route definitions found in `cold.yaml` there are several SQL files that define the behaviors and models managed by Postgres. These include `cold_setup.sql` which provides the initial setup and configuration for Postgres and PostgREST to talk to each other. `cold_models.sql` has the database schema, views, functions and PostgREST permissions needed to provide our data engine using Postgres+PostgREST as a microservice.  Finally additional templates found in the templates directory host the HTML rendering of data views and management related web forms.
+
+To run the **cold** service in development you need to be running Postgres with all the models code, PostgREST configured to support those models, Pandoc running in server model and Newt.  Newt provides the primary web UI by combined the data flow between Newt, PostgREST and Pandoc. For development this is all you need to run.
+
+In a production setting you will need a front end web server. Newt does not provide access control, that needs to be provided by a front end web server like Apache 2 or NginX. In an academic production setting this is done by integrating the front-end web server with a single sign-on system like Shibboleth.  You configure your front-end web server as a reverse proxy to Newt which only runs on localhost.
+
+Newt can host static content related to a Newt based web application. These are found in the directory pointed in `cold.yaml` by the `htdocs` attribute. The htdocs directory holds your static HTML, CSS, JavaScript and any image assets you use in your web UI.
+
 
 ## End Points
 
 Plain text help is built in by adding a ```/help``` to the URL path. The defined end points are formed as the following. The following end point descriptions support the GET method.
 
 ```/```
-: Plain text description of the service
+: Plain text description of the service (provided by htdocs/index.html)
 
-```/version```
-: Returns the version number of the service
+```/api/version```
+: Returns the version number of the service based on the value set in the codemeta.json when the make command has been run to (re) version.sql
 
 ```/people```
-: Returns a list of "cl_people_id" managed by *cold*
+: Returns a list of "cl_people_id" managed by *cold* as an HTML content. 
 
 ```/people/{CL_PEOPLE_ID}```
-: For a GET returns a people object, a PUT will create the people object, POST will replace the people object and DELETE will remove the people object
+: For a GET returns a people object, a POST will create the people object, PUT will replace the people object, PATCH will replace part of an object and DELETE will remove the people object
 
 ```/group```
 : Returns a list of "cl_group_id" managed by *cold*
 
 ```/group/{CL_GROUP_ID}```
-: For a GET returns a group object, a PUT will create the group object, POST will replace the group object and DELETE will remove the group object
+: For a GET returns a group object, a POST will create the group object, PUT will replace the group object, PATCH will replace part of an object and DELETE will remove the group object
 
 ```/funder```
 : Returns a list of "cl_funder" managed by *cold*
@@ -83,29 +87,29 @@ Plain text help is built in by adding a ```/help``` to the URL path. The defined
 : For a GET returns a funder object, a PUT will create the funder object, POST will replace the funder object and DELETE will remove the funder object
 
 
-```/crosswalk```
+```/api/crosswalk```
 : Returns help on how to crosswalk from one identifier to the internal identifier
 
-```/crosswalk/people```
+```/api/crosswalk/people```
 : Returns a list of identifiers available for "people" objects
 
-```/crosswalk/people/{IDENTIFIER_NAME}/{IDENTIFIER}```
+```/api/crosswalk/people/{IDENTIFIER_NAME}/{IDENTIFIER}```
 : Returns a list of "cl_people_id" assocated with that identifier
 
-```/crosswalk/group```
+```/api/crosswalk/group```
 : Returns a list of identifiers available for "group" objects
 
-```/crosswalk/group/{IDENTIFIER_NAME}/{IDENTIFIER}```
+```/api/crosswalk/group/{IDENTIFIER_NAME}/{IDENTIFIER}```
 : Returns a list of "cl_group__id" assocated with that identifier
 
-```/crosswalk/funder```
+```/api/crosswalk/funder```
 : Returns a list of identifiers available for "funder" objects
 
-```/crosswalk/funder/{IDENTIFIER_NAME}/{IDENTIFIER}```
+```/api/crosswalk/funder/{IDENTIFIER_NAME}/{IDENTIFIER}```
 : Returns a list of "cl_funder_id" assocated with that identifier
 
 
-*cold* takes a REST approach to updates for managed objects.  PUT will create a new object, POST will update it, GET will retrieve it and DELETE Will replace it.
+*cold* takes a REST approach to updates for managed objects.  POST will create a new object, PATH will update a part of it and PUT will update the whole object. GET will retrieve it and DELETE Will replace it.
 
 ## Vocabularies
 

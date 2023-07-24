@@ -53,18 +53,18 @@ models:
     ror: ROR
 #
 # Controlled vocabulary models, these are mostly key/value pairs
-- model: cold.cl_subject
+#
+- model: cold.vocabulary
   var:
-    cl_subject_id: String*
-    subject: String
-- model: cold.cl_publishers
+    voc_id: Integer*
+    namespace: String
+    key: String
+    value: String
+- model: cold.vocabulary_description
   var:
-    issn: ISSN*
-    publisher: String
-- model: cold.cl_doi_prefixes
-  var:
-    prefix: String*
-    name: String
+    namespace: String*
+    description: Text
+#
 #
 # cold service web configuration 
 #
