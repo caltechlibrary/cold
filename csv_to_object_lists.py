@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
 #
-# csv_to_object_lists.py converts the CSV files from feeds into a JSON array of objects for person, groups and funders.
+# csv_to_object_lists.py converts the CSV files from feeds into a
+# JSON array of objects for person, groups and funders.
 #
 import sys
 import os

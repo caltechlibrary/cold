@@ -1,324 +1,325 @@
 --
--- Define Models for cold.cl_person in cold.yaml, 2023-07-21
+-- Define Models for cold.people in cold.yaml, 2023-07-26
 --
 \c cold
 SET search_path TO cold, public;
 
 --
--- Model: cold.cl_person
--- Based on cold.yaml, 2023-07-21
+-- Model: cold.people
+-- Based on cold.yaml, 2023-07-26
 --
 
-DROP TABLE IF EXISTS cold.cl_person CASCADE;
-CREATE TABLE cold.cl_person (
+DROP TABLE IF EXISTS cold.people CASCADE;
+CREATE TABLE cold.people (
     given_name VARCHAR(256) DEFAULT '',
     orcid VARCHAR(19) DEFAULT '',
+    author_id VARCHAR(256) DEFAULT '',
     caltech BOOLEAN,
     status BOOLEAN,
     division VARCHAR(256) DEFAULT '',
     ror VARCHAR(25),
     cl_people_id VARCHAR(256) DEFAULT '' PRIMARY KEY,
     family_name VARCHAR(256) DEFAULT '',
-    author_id VARCHAR(256) DEFAULT '',
     directory_id VARCHAR(256) DEFAULT '',
-    direcotry_person_type VARCHAR(256) DEFAULT '',
+    directory_person_type VARCHAR(256) DEFAULT '',
     updated DATE
 );
 
 --
--- LIST VIEW: cold.cl_person 
+-- LIST VIEW: cold.people 
 -- FIXME: You probably want to customized this statement 
 -- (e.g. add WHERE CLAUSE, ORDER BY, GROUP BY).
 --
-CREATE OR REPLACE VIEW cold.cl_person_view AS
-    SELECT author_id, directory_id, direcotry_person_type, updated, cl_people_id, family_name, caltech, status, division, ror, given_name, orcid
-    FROM cold.cl_person;
+CREATE OR REPLACE VIEW cold.people_view AS
+    SELECT division, ror, given_name, orcid, author_id, caltech, status, cl_people_id, family_name, directory_id, directory_person_type, updated
+    FROM cold.people;
 
 --
--- get_cl_person provides a 'get record' for model cold.cl_person
+-- get_people provides a 'get record' for model cold.people
 --
-DROP FUNCTION IF EXISTS cold.get_cl_person(_cl_people_id VARCHAR(256) DEFAULT '' PRIMARY KEY);
-CREATE FUNCTION cold.get_cl_person(_cl_people_id VARCHAR(256) DEFAULT '' PRIMARY KEY)
-RETURNS TABLE (cl_people_id VARCHAR(256) DEFAULT '' PRIMARY KEY, family_name VARCHAR(256) DEFAULT '', author_id VARCHAR(256) DEFAULT '', directory_id VARCHAR(256) DEFAULT '', direcotry_person_type VARCHAR(256) DEFAULT '', updated DATE, given_name VARCHAR(256) DEFAULT '', orcid VARCHAR(19) DEFAULT '', caltech BOOLEAN, status BOOLEAN, division VARCHAR(256) DEFAULT '', ror VARCHAR(25)) AS $$
-	SELECT cl_people_id, family_name, author_id, directory_id, direcotry_person_type, updated, given_name, orcid, caltech, status, division, ror FROM cold.cl_person WHERE cl_people_id = _cl_people_id LIMIT 1
+DROP FUNCTION IF EXISTS cold.get_people(_cl_people_id VARCHAR(256));
+CREATE FUNCTION cold.get_people(_cl_people_id VARCHAR(256))
+RETURNS TABLE (directory_person_type VARCHAR(256), updated DATE, cl_people_id VARCHAR(256), family_name VARCHAR(256), directory_id VARCHAR(256), caltech BOOLEAN, status BOOLEAN, division VARCHAR(256), ror VARCHAR(25), given_name VARCHAR(256), orcid VARCHAR(19), author_id VARCHAR(256)) AS $$
+	SELECT directory_person_type, updated, cl_people_id, family_name, directory_id, caltech, status, division, ror, given_name, orcid, author_id FROM cold.people WHERE cl_people_id = _cl_people_id LIMIT 1
 $$ LANGUAGE SQL;
 
 --
--- add_cl_person provides an 'add record' for model cold.cl_person
+-- add_people provides an 'add record' for model cold.people
 -- It returns the row inserted including the primary key
-DROP FUNCTION IF EXISTS cold.add_cl_person(cl_people_id VARCHAR(256) DEFAULT '' PRIMARY KEY, family_name VARCHAR(256) DEFAULT '', author_id VARCHAR(256) DEFAULT '', directory_id VARCHAR(256) DEFAULT '', direcotry_person_type VARCHAR(256) DEFAULT '', updated DATE, given_name VARCHAR(256) DEFAULT '', orcid VARCHAR(19) DEFAULT '', caltech BOOLEAN, status BOOLEAN, division VARCHAR(256) DEFAULT '', ror VARCHAR(25));
-CREATE FUNCTION cold.add_cl_person(cl_people_id VARCHAR(256) DEFAULT '' PRIMARY KEY, family_name VARCHAR(256) DEFAULT '', author_id VARCHAR(256) DEFAULT '', directory_id VARCHAR(256) DEFAULT '', direcotry_person_type VARCHAR(256) DEFAULT '', updated DATE, given_name VARCHAR(256) DEFAULT '', orcid VARCHAR(19) DEFAULT '', caltech BOOLEAN, status BOOLEAN, division VARCHAR(256) DEFAULT '', ror VARCHAR(25))
-RETURNS VARCHAR(256) DEFAULT '' PRIMARY KEY AS $$
-    INSERT INTO cold.cl_person 
-               (cl_people_id, family_name, author_id, directory_id, direcotry_person_type, updated, given_name, orcid, caltech, status, division, ror) 
-        VALUES (cl_people_id, family_name, author_id, directory_id, direcotry_person_type, updated, given_name, orcid, caltech, status, division, ror)
+DROP FUNCTION IF EXISTS cold.add_people(status BOOLEAN, division VARCHAR(256), ror VARCHAR(25), given_name VARCHAR(256), orcid VARCHAR(19), author_id VARCHAR(256), caltech BOOLEAN, updated DATE, cl_people_id VARCHAR(256), family_name VARCHAR(256), directory_id VARCHAR(256), directory_person_type VARCHAR(256));
+CREATE FUNCTION cold.add_people(status BOOLEAN, division VARCHAR(256), ror VARCHAR(25), given_name VARCHAR(256), orcid VARCHAR(19), author_id VARCHAR(256), caltech BOOLEAN, updated DATE, cl_people_id VARCHAR(256), family_name VARCHAR(256), directory_id VARCHAR(256), directory_person_type VARCHAR(256))
+RETURNS VARCHAR(256) AS $$
+    INSERT INTO cold.people 
+               (status, division, ror, given_name, orcid, author_id, caltech, updated, cl_people_id, family_name, directory_id, directory_person_type) 
+        VALUES (status, division, ror, given_name, orcid, author_id, caltech, updated, cl_people_id, family_name, directory_id, directory_person_type)
     RETURNING cl_people_id
 $$ LANGUAGE SQL;
 
 --
--- update_cl_person provides an 'update record' for model cold.cl_person
+-- update_people provides an 'update record' for model cold.people
 -- It returns the updated row primary key
-DROP FUNCTION IF EXISTS cold.update_cl_person(_cl_people_id VARCHAR(256) DEFAULT '' PRIMARY KEY, _orcid orcid VARCHAR(19) DEFAULT '', _caltech caltech BOOLEAN, _status status BOOLEAN, _division division VARCHAR(256) DEFAULT '', _ror ror VARCHAR(25), _given_name given_name VARCHAR(256) DEFAULT '', _family_name family_name VARCHAR(256) DEFAULT '', _author_id author_id VARCHAR(256) DEFAULT '', _directory_id directory_id VARCHAR(256) DEFAULT '', _direcotry_person_type direcotry_person_type VARCHAR(256) DEFAULT '', _updated updated DATE);
-CREATE FUNCTION cold.update_cl_person(_cl_people_id VARCHAR(256) DEFAULT '' PRIMARY KEY, _orcid orcid VARCHAR(19) DEFAULT '', _caltech caltech BOOLEAN, _status status BOOLEAN, _division division VARCHAR(256) DEFAULT '', _ror ror VARCHAR(25), _given_name given_name VARCHAR(256) DEFAULT '', _family_name family_name VARCHAR(256) DEFAULT '', _author_id author_id VARCHAR(256) DEFAULT '', _directory_id directory_id VARCHAR(256) DEFAULT '', _direcotry_person_type direcotry_person_type VARCHAR(256) DEFAULT '', _updated updated DATE)
-RETURNS VARCHAR(256) DEFAULT '' PRIMARY KEY AS $$
-    UPDATE cold.cl_person SET orcid = _orcid, caltech = _caltech, status = _status, division = _division, ror = _ror, given_name = _given_name, family_name = _family_name, author_id = _author_id, directory_id = _directory_id, direcotry_person_type = _direcotry_person_type, updated = _updated
+DROP FUNCTION IF EXISTS cold.update_people(_cl_people_id VARCHAR(256), _orcid VARCHAR(19), _author_id VARCHAR(256), _caltech BOOLEAN, _status BOOLEAN, _division VARCHAR(256), _ror VARCHAR(25), _given_name VARCHAR(256), _family_name VARCHAR(256), _directory_id VARCHAR(256), _directory_person_type VARCHAR(256), _updated DATE);
+CREATE FUNCTION cold.update_people(_cl_people_id VARCHAR(256), _orcid VARCHAR(19), _author_id VARCHAR(256), _caltech BOOLEAN, _status BOOLEAN, _division VARCHAR(256), _ror VARCHAR(25), _given_name VARCHAR(256), _family_name VARCHAR(256), _directory_id VARCHAR(256), _directory_person_type VARCHAR(256), _updated DATE)
+RETURNS VARCHAR(256) AS $$
+    UPDATE cold.people SET orcid = _orcid, author_id = _author_id, caltech = _caltech, status = _status, division = _division, ror = _ror, given_name = _given_name, family_name = _family_name, directory_id = _directory_id, directory_person_type = _directory_person_type, updated = _updated
     WHERE cl_people_id = _cl_people_id
     RETURNING cl_people_id
 $$ LANGUAGE SQL;
 
 
 --
--- Define Models for cold.cl_group in cold.yaml, 2023-07-21
+-- Define Models for cold.groups in cold.yaml, 2023-07-26
 --
 \c cold
 SET search_path TO cold, public;
 
 --
--- Model: cold.cl_group
--- Based on cold.yaml, 2023-07-21
+-- Model: cold.groups
+-- Based on cold.yaml, 2023-07-26
 --
 
-DROP TABLE IF EXISTS cold.cl_group CASCADE;
-CREATE TABLE cold.cl_group (
-    cl_group_id VARCHAR(256) DEFAULT '' PRIMARY KEY,
-    email VARCHAR(256),
+DROP TABLE IF EXISTS cold.groups CASCADE;
+CREATE TABLE cold.groups (
+    viaf VARCHAR(256) DEFAULT '',
+    ror VARCHAR(25),
     updated TIMESTAMP,
-    approx_start BOOLEAN,
-    approx_end BOOLEAN,
-    grid VARCHAR(256) DEFAULT '',
-    start VARCHAR(256) DEFAULT '',
-    end VARCHAR(256) DEFAULT '',
+    email VARCHAR(256),
+    website VARCHAR(1028),
     parent VARCHAR(256) DEFAULT '',
     prefix VARCHAR(256) DEFAULT '',
-    name VARCHAR(256) DEFAULT '',
-    date DATE,
-    website VARCHAR(1028),
-    description TEXT DEFAULT '',
-    viaf VARCHAR(256) DEFAULT '',
-    ringold VARCHAR(256) DEFAULT '',
-    ror VARCHAR(25),
-    alternative VARCHAR(256) DEFAULT '',
-    activity VARCHAR(256) DEFAULT '',
+    approx_start BOOLEAN,
+    end_date VARCHAR(256) DEFAULT '',
     pi VARCHAR(256) DEFAULT '',
+    grid VARCHAR(256) DEFAULT '',
+    ringold VARCHAR(256) DEFAULT '',
+    name VARCHAR(256) DEFAULT '',
+    alternative VARCHAR(256) DEFAULT '',
+    start_date VARCHAR(256) DEFAULT '',
+    activity VARCHAR(256) DEFAULT '',
+    cl_group_id VARCHAR(256) DEFAULT '' PRIMARY KEY,
+    date DATE,
+    description TEXT DEFAULT '',
+    approx_end BOOLEAN,
     isni VARCHAR(16) DEFAULT ''
 );
 
 --
--- LIST VIEW: cold.cl_group 
+-- LIST VIEW: cold.groups 
 -- FIXME: You probably want to customized this statement 
 -- (e.g. add WHERE CLAUSE, ORDER BY, GROUP BY).
 --
-CREATE OR REPLACE VIEW cold.cl_group_view AS
-    SELECT cl_group_id, email, approx_end, grid, updated, approx_start, website, description, start, end, parent, prefix, name, date, viaf, pi, isni, ringold, ror, alternative, activity
-    FROM cold.cl_group;
+CREATE OR REPLACE VIEW cold.groups_view AS
+    SELECT approx_start, end_date, pi, grid, ringold, name, alternative, start_date, activity, cl_group_id, date, description, approx_end, isni, ror, updated, email, website, parent, prefix, viaf
+    FROM cold.groups;
 
 --
--- get_cl_group provides a 'get record' for model cold.cl_group
+-- get_groups provides a 'get record' for model cold.groups
 --
-DROP FUNCTION IF EXISTS cold.get_cl_group(_cl_group_id VARCHAR(256) DEFAULT '' PRIMARY KEY);
-CREATE FUNCTION cold.get_cl_group(_cl_group_id VARCHAR(256) DEFAULT '' PRIMARY KEY)
-RETURNS TABLE (cl_group_id VARCHAR(256) DEFAULT '' PRIMARY KEY, email VARCHAR(256), updated TIMESTAMP, approx_start BOOLEAN, approx_end BOOLEAN, grid VARCHAR(256) DEFAULT '', name VARCHAR(256) DEFAULT '', date DATE, website VARCHAR(1028), description TEXT DEFAULT '', start VARCHAR(256) DEFAULT '', end VARCHAR(256) DEFAULT '', parent VARCHAR(256) DEFAULT '', prefix VARCHAR(256) DEFAULT '', viaf VARCHAR(256) DEFAULT '', alternative VARCHAR(256) DEFAULT '', activity VARCHAR(256) DEFAULT '', pi VARCHAR(256) DEFAULT '', isni VARCHAR(16) DEFAULT '', ringold VARCHAR(256) DEFAULT '', ror VARCHAR(25)) AS $$
-	SELECT cl_group_id, email, updated, approx_start, approx_end, grid, name, date, website, description, start, end, parent, prefix, viaf, alternative, activity, pi, isni, ringold, ror FROM cold.cl_group WHERE cl_group_id = _cl_group_id LIMIT 1
+DROP FUNCTION IF EXISTS cold.get_groups(_cl_group_id VARCHAR(256));
+CREATE FUNCTION cold.get_groups(_cl_group_id VARCHAR(256))
+RETURNS TABLE (cl_group_id VARCHAR(256), date DATE, description TEXT, approx_end BOOLEAN, isni VARCHAR(16), viaf VARCHAR(256), ror VARCHAR(25), updated TIMESTAMP, email VARCHAR(256), website VARCHAR(1028), parent VARCHAR(256), prefix VARCHAR(256), approx_start BOOLEAN, end_date VARCHAR(256), pi VARCHAR(256), grid VARCHAR(256), ringold VARCHAR(256), name VARCHAR(256), alternative VARCHAR(256), start_date VARCHAR(256), activity VARCHAR(256)) AS $$
+	SELECT cl_group_id, date, description, approx_end, isni, viaf, ror, updated, email, website, parent, prefix, approx_start, end_date, pi, grid, ringold, name, alternative, start_date, activity FROM cold.groups WHERE cl_group_id = _cl_group_id LIMIT 1
 $$ LANGUAGE SQL;
 
 --
--- add_cl_group provides an 'add record' for model cold.cl_group
+-- add_groups provides an 'add record' for model cold.groups
 -- It returns the row inserted including the primary key
-DROP FUNCTION IF EXISTS cold.add_cl_group(end VARCHAR(256) DEFAULT '', parent VARCHAR(256) DEFAULT '', prefix VARCHAR(256) DEFAULT '', name VARCHAR(256) DEFAULT '', date DATE, website VARCHAR(1028), description TEXT DEFAULT '', start VARCHAR(256) DEFAULT '', viaf VARCHAR(256) DEFAULT '', ror VARCHAR(25), alternative VARCHAR(256) DEFAULT '', activity VARCHAR(256) DEFAULT '', pi VARCHAR(256) DEFAULT '', isni VARCHAR(16) DEFAULT '', ringold VARCHAR(256) DEFAULT '', cl_group_id VARCHAR(256) DEFAULT '' PRIMARY KEY, email VARCHAR(256), updated TIMESTAMP, approx_start BOOLEAN, approx_end BOOLEAN, grid VARCHAR(256) DEFAULT '');
-CREATE FUNCTION cold.add_cl_group(end VARCHAR(256) DEFAULT '', parent VARCHAR(256) DEFAULT '', prefix VARCHAR(256) DEFAULT '', name VARCHAR(256) DEFAULT '', date DATE, website VARCHAR(1028), description TEXT DEFAULT '', start VARCHAR(256) DEFAULT '', viaf VARCHAR(256) DEFAULT '', ror VARCHAR(25), alternative VARCHAR(256) DEFAULT '', activity VARCHAR(256) DEFAULT '', pi VARCHAR(256) DEFAULT '', isni VARCHAR(16) DEFAULT '', ringold VARCHAR(256) DEFAULT '', cl_group_id VARCHAR(256) DEFAULT '' PRIMARY KEY, email VARCHAR(256), updated TIMESTAMP, approx_start BOOLEAN, approx_end BOOLEAN, grid VARCHAR(256) DEFAULT '')
-RETURNS VARCHAR(256) DEFAULT '' PRIMARY KEY AS $$
-    INSERT INTO cold.cl_group 
-               (end, parent, prefix, name, date, website, description, start, viaf, ror, alternative, activity, pi, isni, ringold, cl_group_id, email, updated, approx_start, approx_end, grid) 
-        VALUES (end, parent, prefix, name, date, website, description, start, viaf, ror, alternative, activity, pi, isni, ringold, cl_group_id, email, updated, approx_start, approx_end, grid)
+DROP FUNCTION IF EXISTS cold.add_groups(alternative VARCHAR(256), start_date VARCHAR(256), activity VARCHAR(256), name VARCHAR(256), date DATE, description TEXT, approx_end BOOLEAN, isni VARCHAR(16), cl_group_id VARCHAR(256), email VARCHAR(256), website VARCHAR(1028), parent VARCHAR(256), prefix VARCHAR(256), viaf VARCHAR(256), ror VARCHAR(25), updated TIMESTAMP, end_date VARCHAR(256), pi VARCHAR(256), grid VARCHAR(256), ringold VARCHAR(256), approx_start BOOLEAN);
+CREATE FUNCTION cold.add_groups(alternative VARCHAR(256), start_date VARCHAR(256), activity VARCHAR(256), name VARCHAR(256), date DATE, description TEXT, approx_end BOOLEAN, isni VARCHAR(16), cl_group_id VARCHAR(256), email VARCHAR(256), website VARCHAR(1028), parent VARCHAR(256), prefix VARCHAR(256), viaf VARCHAR(256), ror VARCHAR(25), updated TIMESTAMP, end_date VARCHAR(256), pi VARCHAR(256), grid VARCHAR(256), ringold VARCHAR(256), approx_start BOOLEAN)
+RETURNS VARCHAR(256) AS $$
+    INSERT INTO cold.groups 
+               (alternative, start_date, activity, name, date, description, approx_end, isni, cl_group_id, email, website, parent, prefix, viaf, ror, updated, end_date, pi, grid, ringold, approx_start) 
+        VALUES (alternative, start_date, activity, name, date, description, approx_end, isni, cl_group_id, email, website, parent, prefix, viaf, ror, updated, end_date, pi, grid, ringold, approx_start)
     RETURNING cl_group_id
 $$ LANGUAGE SQL;
 
 --
--- update_cl_group provides an 'update record' for model cold.cl_group
+-- update_groups provides an 'update record' for model cold.groups
 -- It returns the updated row primary key
-DROP FUNCTION IF EXISTS cold.update_cl_group(_cl_group_id VARCHAR(256) DEFAULT '' PRIMARY KEY, _parent parent VARCHAR(256) DEFAULT '', _prefix prefix VARCHAR(256) DEFAULT '', _name name VARCHAR(256) DEFAULT '', _date date DATE, _website website VARCHAR(1028), _description description TEXT DEFAULT '', _start start VARCHAR(256) DEFAULT '', _end end VARCHAR(256) DEFAULT '', _viaf viaf VARCHAR(256) DEFAULT '', _alternative alternative VARCHAR(256) DEFAULT '', _activity activity VARCHAR(256) DEFAULT '', _pi pi VARCHAR(256) DEFAULT '', _isni isni VARCHAR(16) DEFAULT '', _ringold ringold VARCHAR(256) DEFAULT '', _ror ror VARCHAR(25), _email email VARCHAR(256), _updated updated TIMESTAMP, _approx_start approx_start BOOLEAN, _approx_end approx_end BOOLEAN, _grid grid VARCHAR(256) DEFAULT '');
-CREATE FUNCTION cold.update_cl_group(_cl_group_id VARCHAR(256) DEFAULT '' PRIMARY KEY, _parent parent VARCHAR(256) DEFAULT '', _prefix prefix VARCHAR(256) DEFAULT '', _name name VARCHAR(256) DEFAULT '', _date date DATE, _website website VARCHAR(1028), _description description TEXT DEFAULT '', _start start VARCHAR(256) DEFAULT '', _end end VARCHAR(256) DEFAULT '', _viaf viaf VARCHAR(256) DEFAULT '', _alternative alternative VARCHAR(256) DEFAULT '', _activity activity VARCHAR(256) DEFAULT '', _pi pi VARCHAR(256) DEFAULT '', _isni isni VARCHAR(16) DEFAULT '', _ringold ringold VARCHAR(256) DEFAULT '', _ror ror VARCHAR(25), _email email VARCHAR(256), _updated updated TIMESTAMP, _approx_start approx_start BOOLEAN, _approx_end approx_end BOOLEAN, _grid grid VARCHAR(256) DEFAULT '')
-RETURNS VARCHAR(256) DEFAULT '' PRIMARY KEY AS $$
-    UPDATE cold.cl_group SET parent = _parent, prefix = _prefix, name = _name, date = _date, website = _website, description = _description, start = _start, end = _end, viaf = _viaf, alternative = _alternative, activity = _activity, pi = _pi, isni = _isni, ringold = _ringold, ror = _ror, email = _email, updated = _updated, approx_start = _approx_start, approx_end = _approx_end, grid = _grid
+DROP FUNCTION IF EXISTS cold.update_groups(_cl_group_id VARCHAR(256), _name VARCHAR(256), _alternative VARCHAR(256), _start_date VARCHAR(256), _activity VARCHAR(256), _date DATE, _description TEXT, _approx_end BOOLEAN, _isni VARCHAR(16), _updated TIMESTAMP, _email VARCHAR(256), _website VARCHAR(1028), _parent VARCHAR(256), _prefix VARCHAR(256), _viaf VARCHAR(256), _ror VARCHAR(25), _approx_start BOOLEAN, _end_date VARCHAR(256), _pi VARCHAR(256), _grid VARCHAR(256), _ringold VARCHAR(256));
+CREATE FUNCTION cold.update_groups(_cl_group_id VARCHAR(256), _name VARCHAR(256), _alternative VARCHAR(256), _start_date VARCHAR(256), _activity VARCHAR(256), _date DATE, _description TEXT, _approx_end BOOLEAN, _isni VARCHAR(16), _updated TIMESTAMP, _email VARCHAR(256), _website VARCHAR(1028), _parent VARCHAR(256), _prefix VARCHAR(256), _viaf VARCHAR(256), _ror VARCHAR(25), _approx_start BOOLEAN, _end_date VARCHAR(256), _pi VARCHAR(256), _grid VARCHAR(256), _ringold VARCHAR(256))
+RETURNS VARCHAR(256) AS $$
+    UPDATE cold.groups SET name = _name, alternative = _alternative, start_date = _start_date, activity = _activity, date = _date, description = _description, approx_end = _approx_end, isni = _isni, updated = _updated, email = _email, website = _website, parent = _parent, prefix = _prefix, viaf = _viaf, ror = _ror, approx_start = _approx_start, end_date = _end_date, pi = _pi, grid = _grid, ringold = _ringold
     WHERE cl_group_id = _cl_group_id
     RETURNING cl_group_id
 $$ LANGUAGE SQL;
 
 
 --
--- Define Models for cold.cl_subject in cold.yaml, 2023-07-21
+-- Define Models for cold.subjects in cold.yaml, 2023-07-26
 --
 \c cold
 SET search_path TO cold, public;
 
 --
--- Model: cold.cl_subject
--- Based on cold.yaml, 2023-07-21
+-- Model: cold.subjects
+-- Based on cold.yaml, 2023-07-26
 --
 
-DROP TABLE IF EXISTS cold.cl_subject CASCADE;
-CREATE TABLE cold.cl_subject (
-    cl_subject_id VARCHAR(256) DEFAULT '' PRIMARY KEY,
-    subject VARCHAR(256) DEFAULT ''
+DROP TABLE IF EXISTS cold.subjects CASCADE;
+CREATE TABLE cold.subjects (
+    key VARCHAR(256) DEFAULT '' PRIMARY KEY,
+    value VARCHAR(256) DEFAULT ''
 );
 
 --
--- LIST VIEW: cold.cl_subject 
+-- LIST VIEW: cold.subjects 
 -- FIXME: You probably want to customized this statement 
 -- (e.g. add WHERE CLAUSE, ORDER BY, GROUP BY).
 --
-CREATE OR REPLACE VIEW cold.cl_subject_view AS
-    SELECT cl_subject_id, subject
-    FROM cold.cl_subject;
+CREATE OR REPLACE VIEW cold.subjects_view AS
+    SELECT key, value
+    FROM cold.subjects;
 
 --
--- get_cl_subject provides a 'get record' for model cold.cl_subject
+-- get_subjects provides a 'get record' for model cold.subjects
 --
-DROP FUNCTION IF EXISTS cold.get_cl_subject(_cl_subject_id VARCHAR(256) DEFAULT '' PRIMARY KEY);
-CREATE FUNCTION cold.get_cl_subject(_cl_subject_id VARCHAR(256) DEFAULT '' PRIMARY KEY)
-RETURNS TABLE (cl_subject_id VARCHAR(256) DEFAULT '' PRIMARY KEY, subject VARCHAR(256) DEFAULT '') AS $$
-	SELECT cl_subject_id, subject FROM cold.cl_subject WHERE cl_subject_id = _cl_subject_id LIMIT 1
+DROP FUNCTION IF EXISTS cold.get_subjects(_key VARCHAR(256));
+CREATE FUNCTION cold.get_subjects(_key VARCHAR(256))
+RETURNS TABLE (key VARCHAR(256), value VARCHAR(256)) AS $$
+	SELECT key, value FROM cold.subjects WHERE key = _key LIMIT 1
 $$ LANGUAGE SQL;
 
 --
--- add_cl_subject provides an 'add record' for model cold.cl_subject
+-- add_subjects provides an 'add record' for model cold.subjects
 -- It returns the row inserted including the primary key
-DROP FUNCTION IF EXISTS cold.add_cl_subject(subject VARCHAR(256) DEFAULT '', cl_subject_id VARCHAR(256) DEFAULT '' PRIMARY KEY);
-CREATE FUNCTION cold.add_cl_subject(subject VARCHAR(256) DEFAULT '', cl_subject_id VARCHAR(256) DEFAULT '' PRIMARY KEY)
-RETURNS VARCHAR(256) DEFAULT '' PRIMARY KEY AS $$
-    INSERT INTO cold.cl_subject 
-               (subject, cl_subject_id) 
-        VALUES (subject, cl_subject_id)
-    RETURNING cl_subject_id
+DROP FUNCTION IF EXISTS cold.add_subjects(key VARCHAR(256), value VARCHAR(256));
+CREATE FUNCTION cold.add_subjects(key VARCHAR(256), value VARCHAR(256))
+RETURNS VARCHAR(256) AS $$
+    INSERT INTO cold.subjects 
+               (key, value) 
+        VALUES (key, value)
+    RETURNING key
 $$ LANGUAGE SQL;
 
 --
--- update_cl_subject provides an 'update record' for model cold.cl_subject
+-- update_subjects provides an 'update record' for model cold.subjects
 -- It returns the updated row primary key
-DROP FUNCTION IF EXISTS cold.update_cl_subject(_cl_subject_id VARCHAR(256) DEFAULT '' PRIMARY KEY, _subject subject VARCHAR(256) DEFAULT '');
-CREATE FUNCTION cold.update_cl_subject(_cl_subject_id VARCHAR(256) DEFAULT '' PRIMARY KEY, _subject subject VARCHAR(256) DEFAULT '')
-RETURNS VARCHAR(256) DEFAULT '' PRIMARY KEY AS $$
-    UPDATE cold.cl_subject SET subject = _subject
-    WHERE cl_subject_id = _cl_subject_id
-    RETURNING cl_subject_id
+DROP FUNCTION IF EXISTS cold.update_subjects(_key VARCHAR(256), _value VARCHAR(256));
+CREATE FUNCTION cold.update_subjects(_key VARCHAR(256), _value VARCHAR(256))
+RETURNS VARCHAR(256) AS $$
+    UPDATE cold.subjects SET value = _value
+    WHERE key = _key
+    RETURNING key
 $$ LANGUAGE SQL;
 
 
 --
--- Define Models for cold.cl_publishers in cold.yaml, 2023-07-21
+-- Define Models for cold.doi_prefixes in cold.yaml, 2023-07-26
 --
 \c cold
 SET search_path TO cold, public;
 
 --
--- Model: cold.cl_publishers
--- Based on cold.yaml, 2023-07-21
+-- Model: cold.doi_prefixes
+-- Based on cold.yaml, 2023-07-26
 --
 
-DROP TABLE IF EXISTS cold.cl_publishers CASCADE;
-CREATE TABLE cold.cl_publishers (
-    issn VARCHAR(9) DEFAULT '' PRIMARY KEY,
+DROP TABLE IF EXISTS cold.doi_prefixes CASCADE;
+CREATE TABLE cold.doi_prefixes (
+    key VARCHAR(256) DEFAULT '' PRIMARY KEY,
+    value VARCHAR(256) DEFAULT ''
+);
+
+--
+-- LIST VIEW: cold.doi_prefixes 
+-- FIXME: You probably want to customized this statement 
+-- (e.g. add WHERE CLAUSE, ORDER BY, GROUP BY).
+--
+CREATE OR REPLACE VIEW cold.doi_prefixes_view AS
+    SELECT key, value
+    FROM cold.doi_prefixes;
+
+--
+-- get_doi_prefixes provides a 'get record' for model cold.doi_prefixes
+--
+DROP FUNCTION IF EXISTS cold.get_doi_prefixes(_key VARCHAR(256));
+CREATE FUNCTION cold.get_doi_prefixes(_key VARCHAR(256))
+RETURNS TABLE (key VARCHAR(256), value VARCHAR(256)) AS $$
+	SELECT key, value FROM cold.doi_prefixes WHERE key = _key LIMIT 1
+$$ LANGUAGE SQL;
+
+--
+-- add_doi_prefixes provides an 'add record' for model cold.doi_prefixes
+-- It returns the row inserted including the primary key
+DROP FUNCTION IF EXISTS cold.add_doi_prefixes(key VARCHAR(256), value VARCHAR(256));
+CREATE FUNCTION cold.add_doi_prefixes(key VARCHAR(256), value VARCHAR(256))
+RETURNS VARCHAR(256) AS $$
+    INSERT INTO cold.doi_prefixes 
+               (key, value) 
+        VALUES (key, value)
+    RETURNING key
+$$ LANGUAGE SQL;
+
+--
+-- update_doi_prefixes provides an 'update record' for model cold.doi_prefixes
+-- It returns the updated row primary key
+DROP FUNCTION IF EXISTS cold.update_doi_prefixes(_key VARCHAR(256), _value VARCHAR(256));
+CREATE FUNCTION cold.update_doi_prefixes(_key VARCHAR(256), _value VARCHAR(256))
+RETURNS VARCHAR(256) AS $$
+    UPDATE cold.doi_prefixes SET value = _value
+    WHERE key = _key
+    RETURNING key
+$$ LANGUAGE SQL;
+
+
+--
+-- Define Models for cold.journal_names in cold.yaml, 2023-07-26
+--
+\c cold
+SET search_path TO cold, public;
+
+--
+-- Model: cold.journal_names
+-- Based on cold.yaml, 2023-07-26
+--
+
+DROP TABLE IF EXISTS cold.journal_names CASCADE;
+CREATE TABLE cold.journal_names (
+    issn VARCHAR(256) DEFAULT '' PRIMARY KEY,
+    journal VARCHAR(256) DEFAULT '',
     publisher VARCHAR(256) DEFAULT ''
 );
 
 --
--- LIST VIEW: cold.cl_publishers 
+-- LIST VIEW: cold.journal_names 
 -- FIXME: You probably want to customized this statement 
 -- (e.g. add WHERE CLAUSE, ORDER BY, GROUP BY).
 --
-CREATE OR REPLACE VIEW cold.cl_publishers_view AS
-    SELECT issn, publisher
-    FROM cold.cl_publishers;
+CREATE OR REPLACE VIEW cold.journal_names_view AS
+    SELECT issn, journal, publisher
+    FROM cold.journal_names;
 
 --
--- get_cl_publishers provides a 'get record' for model cold.cl_publishers
+-- get_journal_names provides a 'get record' for model cold.journal_names
 --
-DROP FUNCTION IF EXISTS cold.get_cl_publishers(_issn VARCHAR(9) DEFAULT '' PRIMARY KEY);
-CREATE FUNCTION cold.get_cl_publishers(_issn VARCHAR(9) DEFAULT '' PRIMARY KEY)
-RETURNS TABLE (issn VARCHAR(9) DEFAULT '' PRIMARY KEY, publisher VARCHAR(256) DEFAULT '') AS $$
-	SELECT issn, publisher FROM cold.cl_publishers WHERE issn = _issn LIMIT 1
+DROP FUNCTION IF EXISTS cold.get_journal_names(_issn VARCHAR(256));
+CREATE FUNCTION cold.get_journal_names(_issn VARCHAR(256))
+RETURNS TABLE (issn VARCHAR(256), journal VARCHAR(256), publisher VARCHAR(256)) AS $$
+	SELECT issn, journal, publisher FROM cold.journal_names WHERE issn = _issn LIMIT 1
 $$ LANGUAGE SQL;
 
 --
--- add_cl_publishers provides an 'add record' for model cold.cl_publishers
+-- add_journal_names provides an 'add record' for model cold.journal_names
 -- It returns the row inserted including the primary key
-DROP FUNCTION IF EXISTS cold.add_cl_publishers(issn VARCHAR(9) DEFAULT '' PRIMARY KEY, publisher VARCHAR(256) DEFAULT '');
-CREATE FUNCTION cold.add_cl_publishers(issn VARCHAR(9) DEFAULT '' PRIMARY KEY, publisher VARCHAR(256) DEFAULT '')
-RETURNS VARCHAR(9) DEFAULT '' PRIMARY KEY AS $$
-    INSERT INTO cold.cl_publishers 
-               (issn, publisher) 
-        VALUES (issn, publisher)
+DROP FUNCTION IF EXISTS cold.add_journal_names(issn VARCHAR(256), journal VARCHAR(256), publisher VARCHAR(256));
+CREATE FUNCTION cold.add_journal_names(issn VARCHAR(256), journal VARCHAR(256), publisher VARCHAR(256))
+RETURNS VARCHAR(256) AS $$
+    INSERT INTO cold.journal_names 
+               (issn, journal, publisher) 
+        VALUES (issn, journal, publisher)
     RETURNING issn
 $$ LANGUAGE SQL;
 
 --
--- update_cl_publishers provides an 'update record' for model cold.cl_publishers
+-- update_journal_names provides an 'update record' for model cold.journal_names
 -- It returns the updated row primary key
-DROP FUNCTION IF EXISTS cold.update_cl_publishers(_issn VARCHAR(9) DEFAULT '' PRIMARY KEY, _publisher publisher VARCHAR(256) DEFAULT '');
-CREATE FUNCTION cold.update_cl_publishers(_issn VARCHAR(9) DEFAULT '' PRIMARY KEY, _publisher publisher VARCHAR(256) DEFAULT '')
-RETURNS VARCHAR(9) DEFAULT '' PRIMARY KEY AS $$
-    UPDATE cold.cl_publishers SET publisher = _publisher
+DROP FUNCTION IF EXISTS cold.update_journal_names(_issn VARCHAR(256), _journal VARCHAR(256), _publisher VARCHAR(256));
+CREATE FUNCTION cold.update_journal_names(_issn VARCHAR(256), _journal VARCHAR(256), _publisher VARCHAR(256))
+RETURNS VARCHAR(256) AS $$
+    UPDATE cold.journal_names SET journal = _journal, publisher = _publisher
     WHERE issn = _issn
     RETURNING issn
-$$ LANGUAGE SQL;
-
-
---
--- Define Models for cold.cl_doi_prefixes in cold.yaml, 2023-07-21
---
-\c cold
-SET search_path TO cold, public;
-
---
--- Model: cold.cl_doi_prefixes
--- Based on cold.yaml, 2023-07-21
---
-
-DROP TABLE IF EXISTS cold.cl_doi_prefixes CASCADE;
-CREATE TABLE cold.cl_doi_prefixes (
-    prefix VARCHAR(256) DEFAULT '' PRIMARY KEY,
-    name VARCHAR(256) DEFAULT ''
-);
-
---
--- LIST VIEW: cold.cl_doi_prefixes 
--- FIXME: You probably want to customized this statement 
--- (e.g. add WHERE CLAUSE, ORDER BY, GROUP BY).
---
-CREATE OR REPLACE VIEW cold.cl_doi_prefixes_view AS
-    SELECT prefix, name
-    FROM cold.cl_doi_prefixes;
-
---
--- get_cl_doi_prefixes provides a 'get record' for model cold.cl_doi_prefixes
---
-DROP FUNCTION IF EXISTS cold.get_cl_doi_prefixes(_prefix VARCHAR(256) DEFAULT '' PRIMARY KEY);
-CREATE FUNCTION cold.get_cl_doi_prefixes(_prefix VARCHAR(256) DEFAULT '' PRIMARY KEY)
-RETURNS TABLE (prefix VARCHAR(256) DEFAULT '' PRIMARY KEY, name VARCHAR(256) DEFAULT '') AS $$
-	SELECT prefix, name FROM cold.cl_doi_prefixes WHERE prefix = _prefix LIMIT 1
-$$ LANGUAGE SQL;
-
---
--- add_cl_doi_prefixes provides an 'add record' for model cold.cl_doi_prefixes
--- It returns the row inserted including the primary key
-DROP FUNCTION IF EXISTS cold.add_cl_doi_prefixes(prefix VARCHAR(256) DEFAULT '' PRIMARY KEY, name VARCHAR(256) DEFAULT '');
-CREATE FUNCTION cold.add_cl_doi_prefixes(prefix VARCHAR(256) DEFAULT '' PRIMARY KEY, name VARCHAR(256) DEFAULT '')
-RETURNS VARCHAR(256) DEFAULT '' PRIMARY KEY AS $$
-    INSERT INTO cold.cl_doi_prefixes 
-               (prefix, name) 
-        VALUES (prefix, name)
-    RETURNING prefix
-$$ LANGUAGE SQL;
-
---
--- update_cl_doi_prefixes provides an 'update record' for model cold.cl_doi_prefixes
--- It returns the updated row primary key
-DROP FUNCTION IF EXISTS cold.update_cl_doi_prefixes(_prefix VARCHAR(256) DEFAULT '' PRIMARY KEY, _name name VARCHAR(256) DEFAULT '');
-CREATE FUNCTION cold.update_cl_doi_prefixes(_prefix VARCHAR(256) DEFAULT '' PRIMARY KEY, _name name VARCHAR(256) DEFAULT '')
-RETURNS VARCHAR(256) DEFAULT '' PRIMARY KEY AS $$
-    UPDATE cold.cl_doi_prefixes SET name = _name
-    WHERE prefix = _prefix
-    RETURNING prefix
 $$ LANGUAGE SQL;
 
 
@@ -333,83 +334,83 @@ GRANT USAGE ON SCHEMA cold TO cold_anonymous;
 GRANT USAGE ON SCHEMA cold TO cold;
 
 --
--- Permissions for model cold.cl_person
+-- Permissions for model cold.people
 --
 
 -- Access for our anonymous role cold_anonymous
-GRANT SELECT ON cold.cl_person TO cold_anonymous;
-GRANT SELECT ON cold.cl_person_view TO cold_anonymous;
-GRANT EXECUTE ON FUNCTION cold.get_cl_person TO cold_anonymous;
+GRANT SELECT ON cold.people TO cold_anonymous;
+GRANT SELECT ON cold.people_view TO cold_anonymous;
+GRANT EXECUTE ON FUNCTION cold.get_people TO cold_anonymous;
 
 -- Access for our authenticated role cold
-GRANT SELECT, INSERT, UPDATE, DELETE ON cold.cl_person TO cold;
-GRANT SELECT ON cold.cl_person_view TO cold;
-GRANT EXECUTE ON FUNCTION cold.get_cl_person TO cold;
-GRANT EXECUTE ON FUNCTION cold.add_cl_person TO cold;
-GRANT EXECUTE ON FUNCTION cold.update_cl_person TO cold;
+GRANT SELECT, INSERT, UPDATE, DELETE ON cold.people TO cold;
+GRANT SELECT ON cold.people_view TO cold;
+GRANT EXECUTE ON FUNCTION cold.get_people TO cold;
+GRANT EXECUTE ON FUNCTION cold.add_people TO cold;
+GRANT EXECUTE ON FUNCTION cold.update_people TO cold;
 
 --
--- Permissions for model cold.cl_group
+-- Permissions for model cold.groups
 --
 
 -- Access for our anonymous role cold_anonymous
-GRANT SELECT ON cold.cl_group TO cold_anonymous;
-GRANT SELECT ON cold.cl_group_view TO cold_anonymous;
-GRANT EXECUTE ON FUNCTION cold.get_cl_group TO cold_anonymous;
+GRANT SELECT ON cold.groups TO cold_anonymous;
+GRANT SELECT ON cold.groups_view TO cold_anonymous;
+GRANT EXECUTE ON FUNCTION cold.get_groups TO cold_anonymous;
 
 -- Access for our authenticated role cold
-GRANT SELECT, INSERT, UPDATE, DELETE ON cold.cl_group TO cold;
-GRANT SELECT ON cold.cl_group_view TO cold;
-GRANT EXECUTE ON FUNCTION cold.get_cl_group TO cold;
-GRANT EXECUTE ON FUNCTION cold.add_cl_group TO cold;
-GRANT EXECUTE ON FUNCTION cold.update_cl_group TO cold;
+GRANT SELECT, INSERT, UPDATE, DELETE ON cold.groups TO cold;
+GRANT SELECT ON cold.groups_view TO cold;
+GRANT EXECUTE ON FUNCTION cold.get_groups TO cold;
+GRANT EXECUTE ON FUNCTION cold.add_groups TO cold;
+GRANT EXECUTE ON FUNCTION cold.update_groups TO cold;
 
 --
--- Permissions for model cold.cl_subject
+-- Permissions for model cold.subjects
 --
 
 -- Access for our anonymous role cold_anonymous
-GRANT SELECT ON cold.cl_subject TO cold_anonymous;
-GRANT SELECT ON cold.cl_subject_view TO cold_anonymous;
-GRANT EXECUTE ON FUNCTION cold.get_cl_subject TO cold_anonymous;
+GRANT SELECT ON cold.subjects TO cold_anonymous;
+GRANT SELECT ON cold.subjects_view TO cold_anonymous;
+GRANT EXECUTE ON FUNCTION cold.get_subjects TO cold_anonymous;
 
 -- Access for our authenticated role cold
-GRANT SELECT, INSERT, UPDATE, DELETE ON cold.cl_subject TO cold;
-GRANT SELECT ON cold.cl_subject_view TO cold;
-GRANT EXECUTE ON FUNCTION cold.get_cl_subject TO cold;
-GRANT EXECUTE ON FUNCTION cold.add_cl_subject TO cold;
-GRANT EXECUTE ON FUNCTION cold.update_cl_subject TO cold;
+GRANT SELECT, INSERT, UPDATE, DELETE ON cold.subjects TO cold;
+GRANT SELECT ON cold.subjects_view TO cold;
+GRANT EXECUTE ON FUNCTION cold.get_subjects TO cold;
+GRANT EXECUTE ON FUNCTION cold.add_subjects TO cold;
+GRANT EXECUTE ON FUNCTION cold.update_subjects TO cold;
 
 --
--- Permissions for model cold.cl_publishers
+-- Permissions for model cold.doi_prefixes
 --
 
 -- Access for our anonymous role cold_anonymous
-GRANT SELECT ON cold.cl_publishers TO cold_anonymous;
-GRANT SELECT ON cold.cl_publishers_view TO cold_anonymous;
-GRANT EXECUTE ON FUNCTION cold.get_cl_publishers TO cold_anonymous;
+GRANT SELECT ON cold.doi_prefixes TO cold_anonymous;
+GRANT SELECT ON cold.doi_prefixes_view TO cold_anonymous;
+GRANT EXECUTE ON FUNCTION cold.get_doi_prefixes TO cold_anonymous;
 
 -- Access for our authenticated role cold
-GRANT SELECT, INSERT, UPDATE, DELETE ON cold.cl_publishers TO cold;
-GRANT SELECT ON cold.cl_publishers_view TO cold;
-GRANT EXECUTE ON FUNCTION cold.get_cl_publishers TO cold;
-GRANT EXECUTE ON FUNCTION cold.add_cl_publishers TO cold;
-GRANT EXECUTE ON FUNCTION cold.update_cl_publishers TO cold;
+GRANT SELECT, INSERT, UPDATE, DELETE ON cold.doi_prefixes TO cold;
+GRANT SELECT ON cold.doi_prefixes_view TO cold;
+GRANT EXECUTE ON FUNCTION cold.get_doi_prefixes TO cold;
+GRANT EXECUTE ON FUNCTION cold.add_doi_prefixes TO cold;
+GRANT EXECUTE ON FUNCTION cold.update_doi_prefixes TO cold;
 
 --
--- Permissions for model cold.cl_doi_prefixes
+-- Permissions for model cold.journal_names
 --
 
 -- Access for our anonymous role cold_anonymous
-GRANT SELECT ON cold.cl_doi_prefixes TO cold_anonymous;
-GRANT SELECT ON cold.cl_doi_prefixes_view TO cold_anonymous;
-GRANT EXECUTE ON FUNCTION cold.get_cl_doi_prefixes TO cold_anonymous;
+GRANT SELECT ON cold.journal_names TO cold_anonymous;
+GRANT SELECT ON cold.journal_names_view TO cold_anonymous;
+GRANT EXECUTE ON FUNCTION cold.get_journal_names TO cold_anonymous;
 
 -- Access for our authenticated role cold
-GRANT SELECT, INSERT, UPDATE, DELETE ON cold.cl_doi_prefixes TO cold;
-GRANT SELECT ON cold.cl_doi_prefixes_view TO cold;
-GRANT EXECUTE ON FUNCTION cold.get_cl_doi_prefixes TO cold;
-GRANT EXECUTE ON FUNCTION cold.add_cl_doi_prefixes TO cold;
-GRANT EXECUTE ON FUNCTION cold.update_cl_doi_prefixes TO cold;
+GRANT SELECT, INSERT, UPDATE, DELETE ON cold.journal_names TO cold;
+GRANT SELECT ON cold.journal_names_view TO cold;
+GRANT EXECUTE ON FUNCTION cold.get_journal_names TO cold;
+GRANT EXECUTE ON FUNCTION cold.add_journal_names TO cold;
+GRANT EXECUTE ON FUNCTION cold.update_journal_names TO cold;
 
 

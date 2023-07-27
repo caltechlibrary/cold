@@ -1,15 +1,12 @@
 package main
 
 import (
+	"encoding/csv"
 	"flag"
 	"fmt"
-	"io"
 	"os"
 	"path"
 	"strings"
-
-	// 3rd Party
-	"gopkg.in/yaml.v3"
 )
 
 var (
@@ -23,11 +20,11 @@ var (
 
 # SYNOPIS
 
-{app_name} < vocabulary.yaml >vocabulary.sql
+{app_name} < issn_journal_publisher.tsv >issn_journal_publisher.sql
 
 # DESCRIPTION
 
-{app_name} translates a vocabulary file into Postgres SQL.
+{app_name} translates a tsv vocabulary file into Postgres SQL.
 
 # OPTIONS
 
@@ -43,20 +40,21 @@ var (
 # EXAMPLES
 
 ~~~
-{app_name} < vocabulary.yaml >vocabulary.sql
+{app_name} < issn_journal_publisher.tsv >issn_journal_publisher.sql
 ~~~
 
 `
 )
 
-type Vocabulary struct {
-	Name        string            `json:"name,omitempty" yaml:"name,omitempty"`
-	Description string            `json:"description,omitempty" yaml:"omitempty"`
-	Dict        map[string]string `json:"dict,omitempty" yaml:"dict,omitempty"`
-}
-
 func fmtText(txt string, appName string) string {
 	return strings.ReplaceAll(txt, "{app_name}", appName)
+}
+
+func quote(s string) string {
+	if strings.Contains(s, "'") {
+		return strings.ReplaceAll(s, "'", "''")
+	}
+	return s
 }
 
 func main() {
@@ -100,21 +98,20 @@ func main() {
 		os.Exit(0)
 	}
 
-	src, err := io.ReadAll(in)
+	r := csv.NewReader(in)
+	r.Comma = '\t'
+	r.Comment = '#'
+	fmt.Fprintf(out, "\\c cold\n");
+	rows, err := r.ReadAll()
 	if err != nil {
 		fmt.Fprintf(eout, "%s\n", err)
 		os.Exit(1)
 	}
-	vocs := []*Vocabulary{}
-	if err := yaml.Unmarshal(src, &vocs); err != nil {
-		fmt.Fprintf(eout, "%s\n", err)
-		os.Exit(1)
-	}
-	fmt.Fprintln(out, "\\c cold")
-	for _, voc := range vocs {
-		for k, v := range voc.Dict {
-			fmt.Fprintf(out, `INSERT INTO cold.%s (key, value) VALUES ('%s', '%s');
-`, voc.Name, k, v)
+	for i, row := range rows {
+		if i == 0 {
+			fmt.Fprintf(out, `-- Inserting records with : %s`, strings.Join(row, ", "))
+		} else {
+			fmt.Fprintf(out, `INSERT INTO cold.journal_names (issn, journal, publisher) VALUES ('%s', '%s', '%s');`, row[0], quote(row[1]), quote(row[2]));
 		}
 		fmt.Fprintln(out, "")
 	}

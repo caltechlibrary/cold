@@ -8,7 +8,7 @@
 #
 namespace: cold
 models:
-- model: cold.cl_person
+- model: cold.people
   var:
     cl_people_id: String*
     family_name: String
@@ -18,11 +18,11 @@ models:
     directory_id: String
     caltech: Boolean
     status: Boolean
-    direcotry_person_type: String
+    directory_person_type: String
     division: String
     updated: Date 2006-01-02
     ror: ROR
-- model: cold.cl_group
+- model: cold.groups
   var:
     cl_group_id: String*
     name: String
@@ -34,13 +34,13 @@ models:
     email: EMail
     website: URL
     description: Text
-    start: String
-# approx_starts indicates if the "start" is an approximate (true) or exact (false)
+    start_date: String
+# approx_starts indicates if the "start_date" is an approximate (true) or exact (false)
     approx_start: Boolean
 # activity is a string value holding either "active" or "inactive"  
     activity: String
-    end: String
-# approx_end indicates if the "start" is an approximate (true) or exact (false)
+    end_date: String
+# approx_end indicates if the "start_date" is an approximate (true) or exact (false)
     approx_end: Boolean
     pi: String
     parent: String
@@ -52,18 +52,22 @@ models:
     viaf: String
     ror: ROR
 #
-# Controlled vocabulary models, these are mostly key/value pairs
+# Controlled vocabulary model, these get translated into RDM vocabularies
 #
-- model: cold.vocabulary
+- model: cold.subjects
   var:
-    voc_id: Integer*
-    namespace: String
-    key: String
+    key: String*
     value: String
-- model: cold.vocabulary_description
+- model: cold.doi_prefixes
   var:
-    namespace: String*
-    description: Text
+    key: String*
+    value: String
+# NOTE: cold.journal_names is a tripple of issn, journal name and publisher name
+- model: cold.journal_names
+  var:
+    issn: String*
+    journal: String
+    publisher: String
 #
 #
 # cold service web configuration 
@@ -85,7 +89,7 @@ routes:
   request_method: GET
   api_method: GET
 # cl_people_ids is implemented as a SQL view of cl_person model
-  api_url: http://localhost:3000/cl_people_ids
+  api_url: http://localhost:3000/people_ids
 # 
 # cold people {cl_people_id} returns a single person record
 #
@@ -97,7 +101,7 @@ routes:
 # person_object is implemented as a SQL function of cl_person model
   api_url: http://localhost:3000/rpc/person_object?cl_people_id=${cl_people_id}
 #
-# /cold/group returns a list of all cl_group_ids
+# /cold/group returns a list of all group_ids
 #
 - request_path: /cold/group
   request_method: GET

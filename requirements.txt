@@ -1,3 +1,2 @@
 # Python 3 required modules for running tests and loading testdata
 progressbar2 >= 4.0.0
-lunr >= 0.6.2

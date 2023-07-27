@@ -10,10 +10,10 @@ Managable Objects
 - [People](people.html)
 - [Groups](groups.html)
 
-Static Vocabularies
--------------------
+Vocabularies
+------------
 
-Vocabularies are static. They are read only key/value pair lists provided by the **cold** application.  **cold** source code must be updated and compiled to change the key/value pairs in the lists.
+Vocabularies are touples containing a namespace, key and value. 
 
 - [Subjects](subjects.html)
 - [ISSN/Publishers](issns.html)

@@ -59,3 +59,9 @@ pandoc.*.json
 config.js
 htdocs/lunr
 *setup*.sql
+voc2sql
+voc2sql.exe
+issn_voc2sql
+issn_voc2sql.exe
+_codemeta.json
+postgrest.conf

@@ -33,7 +33,7 @@ About this software
 
 ### Maintainers
 
--  
+- R. S. Doiel
 
 cold is a localhost web service for managing controlled object lists.
 

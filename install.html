@@ -25,20 +25,26 @@
 <h1 id="installation-for-development-of-cold">Installation for
 development of <strong>cold</strong></h1>
 <p><strong>cold</strong> is experimental software for managing
-controlled object lists and providing static vocabularies. It provides a
-JSON API for managing the objects via PostgreSQL and PostgREST. A human
-user interface is built via static HTML, CSS and JavaScript as well as
-with Pandoc templates processed via Pandoc in server mode. The means
-installing <strong>cold</strong> is more than installing the
-<strong>cold</strong> binary and a <code>settings.json</code> file.</p>
+controlled object lists and datum (e.g. controlled vocabularies). It is
+built from microservices - Newt, Postgres+PostgREST and Pandoc server.
+It can run where those microservices have already been installed.
+<strong>cold</strong> provides both a human web interface for managing
+objects and datum but also a JSON API for integrating those lists into
+other application via HTTP calls.</p>
+<p>The main configuration file is cold.yaml which defines the models and
+routes needed by Newt. You will also need to create an appropriate
+PostgREST configuration file and have a Postgres instance available.
+Connection to the PostgREST from Newt is handled by passing environment
+variables PG_USER and PG_PASSWORD which is used in forming the calls to
+PostgREST to manage and retrieve data.</p>
 <p><strong>cold</strong> is intended to run behind a front facing web
 server (e.g. Apache 2 or NginX) that access control and authentication.
 This can be configured in Apache 2 or NginX by use of Shibboleth or
 BasicAuth. An example apache2 configuration block is included in the
 source repository for <strong>cold</strong>. It will require adaptation
 to your specific web server configuration.</p>
-<p><strong>cold</strong> requires access to a PostgreSQL 14 through
-PostgREST 10. Both need to be configured. Template rendering is provided
+<p><strong>cold</strong> requires access to a PostgreSQL 15 through
+PostgREST 11. Both need to be configured. Template rendering is provided
 by Pandoc running in server mode. Installation, setup of user accounts
 and creating databases is beyond the scope of this documentation but is
 require to have a working cold instance.</p>
@@ -51,13 +57,13 @@ your system.</p>
 following</p>
 <ol type="1">
 <li>Git (to clone the cold repository on GitHub)</li>
-<li>PostgreSQL 15</li>
-<li>PostgREST 11</li>
-<li>Pandoc 3 (both cli and server)</li>
+<li>Newt &gt;= 0.0.5</li>
+<li>PostgreSQL &gt;= 15</li>
+<li>PostgREST &gt;= 11</li>
+<li>Pandoc &gt; 3 (both cli and server)</li>
 <li>GNU Make</li>
 </ol>
-<h2 id="building-the-required-software">Building the required
-software</h2>
+<h2 id="running-newt-on-unix-systems">Running Newt on Unix systems</h2>
 <p>Currently Pandoc 2 ships with many packaging systems (e.g. Ubuntu
 22.04 LTS). <strong>cold</strong> requires Pandoc 3 and PostrREST 11.
 These will need a modern Haskell installed (e.g. via <a
@@ -65,19 +71,22 @@ href="https://www.haskell.org/ghcup/">gchup</a>). Included in this
 repository is a <a href="cloud-init.yaml">cloud-init.yaml</a> file that
 can be used with <a href="https://multipass.run">multipass</a> to build
 <strong>cold</strong> is a virtual machine.</p>
-<p>Here’s an example of the commands you could using to build an VM and
-then build the necessary software to run <strong>cold</strong>.</p>
-<pre><code>multipass -v launch --name cold --cloud-init cold-init.yaml
-multipass shell cold
-ghcup-build.bash
-source $HOME/.ghcup/env
-pandoc-build.bash
-postgrest-build.bash
-git clone https://github.com:caltechlibrary/cold \
-          src/github.com/caltechlibrary/cold
-cd src/github.com/caltechlibrary/cold
-make build</code></pre>
-<h2 id="installation-on-macos">Installation on macOS</h2>
+<p>Here’s an example of the commands you could use for development.</p>
+<pre><code>make htdocs
+pandoc server &amp; 
+postgrest postgrest.conf &amp;
+newt cold.yaml</code></pre>
+<p>If you update the SQL source or cold.yaml files you will need to
+restart PostgREST and Newt. You can connect to Newt on localhost via the
+port number found in cold.yaml. You can view the web application by
+pointing your browser at that URL.</p>
+<h2 id="running-newt-on-windows-11">Running Newt on Windows 11</h2>
+<p>The easiest way to run Newt on Windows is via the Linux Subsystem for
+Windows. If you installed Newt, Postgres, PostgREST and Pandoc under the
+subsystem then you can run normally as you would on any other Unix
+system.</p>
+<h2 id="building-pandoc-postgrest-on-linuxmacos">Building Pandoc,
+PostgREST on Linux/macOS</h2>
 <ol type="1">
 <li>Install Haskell via <a
 href="https://www.haskell.org/ghcup/">ghcup</a></li>
@@ -141,16 +150,7 @@ cd
 git clone git@github.com:PostgREST/postgrest \
     src/github.com/PostgREST/postgrest
 cd src/github.com/PostgREST/postgrest
-stack build --install-ghc --copy-bins --local-bin-path $HOME/bin
-cd
-git clone git@github.com:caltechlibrary/cold \
-   src/github.com/caltechlibrary/cold
-cd src/github.com/caltechlibrary/cold
-make 
-postgrest postgrest.conf &amp;
-pandoc-server --port 3030 &amp;
-cd htdocs
-python3 -m http.server</code></pre>
+stack build --install-ghc --copy-bins --local-bin-path $HOME/bin</code></pre>
 <p>The cold application is visible to your web browser at</p>
 <p>The URL <a href="http://localhost:8000"
 class="uri">http://localhost:8000</a></p>
@@ -168,6 +168,15 @@ press ctl-c</li>
 <li>Postgres can be stop using systemctl,
 <code>systemctl stop postgres</code></li>
 </ul>
+<h2
+id="building-newt-on-macos-linux-and-linux-subsystem-for-windows">Building
+Newt on macOS, Linux and Linux subsystem for Windows</h2>
+<p>Newt requires Go 1.20.4 or better to compile. If this is installed
+the easiest way to install Newt is with using curl and sh.</p>
+<pre><code>curl https://caltechlibrary.github.io/newt/installer.sh | sh</code></pre>
+<p>If that does not work you can follow the installation instruction at
+<a href="https://caltechlibrary.github.io/newt/INSTALL.html"
+class="uri">https://caltechlibrary.github.io/newt/INSTALL.html</a></p>
 </section>
 
 <footer>

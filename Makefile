@@ -7,8 +7,6 @@ VERSION = $(shell grep '"version":' codemeta.json | cut -d\"  -f 4)
 
 BRANCH = $(shell git branch | grep '* ' | cut -d\  -f 2)
 
-PROGRAMS = $(shell ls -1 cmd)
-
 MAN_PAGES = $(shell ls -1 *.1.md | sed -E 's/\.1.md/.1/g')
 
 MD_PAGES = $(shell ls -1 htdocs/*.md)
@@ -16,8 +14,6 @@ MD_PAGES = $(shell ls -1 htdocs/*.md)
 PAGES = $(basename $(MD_PAGES))
 
 HTML_PAGES = $(addsuffix .html, $(PAGES))
-
-PACKAGE = $(shell ls -1 *.go)
 
 HTDOCS = "$(shell pwd)/htdocs"
 
@@ -32,12 +28,19 @@ endif
 
 OS = $(shell uname)
 
-EXT = 
+EXT =
 ifeq ($(OS), Windows)
-	EXT = .exe
+        EXT = .exe
 endif
 
-build: version.sql CITATION.cff about.md $(PROGRAMS) $(HTML_PAGES) htdocs/widgets/config.js htdocs/readme.html
+PROGRAMS = $(shell ls -1 cmd)
+
+build: version.sql CITATION.cff about.md $(PROGRAMS) $(HTML_PAGES) htdocs/widgets/config.js htdocs/readme.html cold_setup.sql cold_models.sql cold_models_test.sql
+
+$(PROGRAMS): $(PACKAGE)
+	@mkdir -p bin
+	go build -o "bin/$@$(EXT)" cmd/$@/*.go
+	@./bin/$@ -help >$@.1.md
 
 man: $(MAN_PAGES)
 
@@ -56,16 +59,43 @@ about.md: codemeta.json .FORCE
 
 
 version.sql: .FORCE
+	cat codemeta.json | sed -E   's/"@context"/"at__context"/g;s/"@type"/"at__type"/g;s/"@id"/"at__id"/g' >_codemeta.json
 	@echo '' | pandoc --metadata title=${PROJECT} --metadata-file codemeta.json --template codemeta-version-sql.tmpl >version.sql
+
+sql: version.sql cold_setup.sql cold_models.sql cold_models_test.sql vocabularies.sql issn_journal_publisher.sql .FORCE
+
+cold_setup.sql: cold.yaml
+	newt -pg-setup cold.yaml >cold_setup.sql
+
+cold_models.sql: cold.yaml
+	newt -pg-models cold.yaml >cold_models.sql
+
+cold_models_test.sql: cold.yaml
+	newt -pg-models-test cold.yaml >cold_models_test.sql
+
+vocabularies.sql: 
+	./voc2sql < vocabularies.yaml >vocabularies.sql
+
+issn_journal_publisher.sql:
+	./issn_voc2sql < issn_journal_publisher.tsv > issn_journal_publisher.sql
 
 website: $(HTML_PAGES) .FORCE
 	make -f website.mak
 	
+
 htdocs/widgets/config.js:
 	mkpage codemeta=codemeta.json "prefix_path=text:$(APP_PREFIX_PATH)" templates/config-js.tmpl >htdocs/widgets/config.js	
 
 htdocs/readme.html: nav.md README.md
 	mkpage "prefix_path=text:$(APP_PREFIX_PATH)" body=README.md nav=nav.md templates/page.tmpl >htdocs/readme.html
+
+load: .FORCE
+	psql -f cold_setup.sql
+	psql -f version.sql
+	psql -f cold_models.sql
+	psql -f vocabularies.sql
+	psql -f issn_journal_publisher.sql
+	psql -f cold_models_test.sql
 
 harvest: .FORCE
 	./harvest_testdata.bash
@@ -83,6 +113,7 @@ test: clean build
 	psql -f cold_setup.sql
 	psql -f version.sql
 	psql -f cold_models.sql
+	psql -f vocabularies.sql
 	psql -f cold_models_test.sql
 	@if [ -f test_cmd.bash ]; then bash test_cmd.bash; fi
 
@@ -133,9 +164,6 @@ status:
 save:
 	if [ "$(msg)" != "" ]; then git commit -am "$(msg)"; else git commit -am "Quick Save"; fi
 	git push origin $(BRANCH)
-
-website: .FORCE
-	make -f website.mak
 
 publish:
 	make -f website.mak
