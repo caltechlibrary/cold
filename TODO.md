@@ -5,6 +5,7 @@ Action items
 next
 ----
 
+- [ ] Remove mkpage dependency, replace with Pandoc 3 templates from github.com/caltechlibrary/codemeta-pandoc-examples
 - [ ] Setup PostgreSQL user and cold database
 - [ ] Migrate current SQL schema to PostgreSQL schema
 - [ ] Replace MySQL with PostgreSQL

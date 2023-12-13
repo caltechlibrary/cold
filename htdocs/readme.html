@@ -51,72 +51,6 @@ The “stack” is based on the primose of cooprative microservices using
 PostgREST, Pandoc) and a thin layer of UI work running in your web
 browser.
 </p>
-<h2 id="requirements">
-Requirements
-</h2>
-<ul>
-<li>
-PostgreSQL &gt;= 15
-</li>
-<li>
-PostgREST &gt;= 11
-</li>
-<li>
-Pandoc &gt;= 3
-</li>
-<li>
-Newt &gt;= 0.0.3
-</li>
-<li>
-To build the UI and compile the assets needed by <strong>cold</strong>
-<ul>
-<li>
-GNU Make
-</li>
-<li>
-<a href="https://pandoc.org">Pandoc</a> (to build UI)
-</li>
-<li>
-A text editor (e.g. Zed, VSCode, micro, nano, vi, emacs …)
-</li>
-</ul>
-</li>
-<li>
-A front end web server with SSO or Basic Auth support
-</li>
-<li>
-A web browser with JavaScript support
-</li>
-</ul>
-<h2 id="recommended">
-Recommended
-</h2>
-<p>
-Most package managers running on various flavors of Unix (e.g. macOS,
-Linux) do not provide Pandoc 3 or PostgREST at this time (2023-12).
-There is a good chance you will need to build this from source.
-</p>
-<p>
-Pandoc and PostgREST are Haskell programs (i.e. they are written in
-Haskell programming langauge and use it’s tool chain). I recomment
-installing GHCup first then download and build Pandoc and PostgREST.
-GHCup provides a reliable Haskell development environment.
-</p>
-<ol type="1">
-<li>
-Install Haskell via <a
-href="https://www.haskell.org/ghcup/">ghcup</a>
-</li>
-<li>
-See <a
-href="https://pandoc.org/installing.html#quick-cabal-method">Pandoc</a>
-and follow instructions to compile Pandoc 3
-</li>
-<li>
-See [https://postgrest.org/en/stable/install.html#building-from-source])
-and following instructions to compile PostgREST 11
-</li>
-</ol>
 <h2 id="overview">
 Overview
 </h2>
@@ -474,6 +408,88 @@ for displaying subjects, issn/publisher info and doi-prefix/publisher
 info.
 </dd>
 </dl>
+<h2 id="requirements">
+Requirements
+</h2>
+<ul>
+<li>
+PostgreSQL &gt;= 14
+</li>
+<li>
+PostgREST &gt;= 11
+</li>
+<li>
+Pandoc &gt;= 3
+</li>
+<li>
+Newt &gt;= 0.0.3
+</li>
+<li>
+To build the UI and compile the assets needed by <strong>cold</strong>
+<ul>
+<li>
+GNU Make
+</li>
+<li>
+<a href="https://pandoc.org">Pandoc</a> (to build UI)
+</li>
+<li>
+A text editor (e.g. Zed, VSCode, micro, nano, vi, emacs …)
+</li>
+</ul>
+</li>
+<li>
+A front end web server with SSO or Basic Auth support
+</li>
+<li>
+A web browser with JavaScript support
+</li>
+</ul>
+<h2 id="recommended">
+Recommended
+</h2>
+<p>
+Most package managers running on various flavors of Unix (e.g. macOS,
+Linux) do not provide Pandoc 3 or PostgREST at this time (2023-12).
+There is a good chance you will need to build this from source.
+</p>
+<p>
+Pandoc and PostgREST are Haskell programs (i.e. they are written in
+Haskell programming langauge and use it’s tool chain). I recomment
+installing GHCup first then download and build Pandoc and PostgREST.
+GHCup provides a reliable Haskell development environment.
+</p>
+<ol type="1">
+<li>
+Install Haskell via <a
+href="https://www.haskell.org/ghcup/">ghcup</a>
+</li>
+<li>
+See <a
+href="https://pandoc.org/installing.html#quick-cabal-method">Pandoc</a>
+and follow instructions to compile Pandoc 3
+</li>
+<li>
+See [https://postgrest.org/en/stable/install.html#building-from-source])
+and following instructions to compile PostgREST 11
+</li>
+</ol>
+<h3 id="a-note-about-macos-postgres-and-postgrest">
+A note about macOS, Postgres and PostgREST
+</h3>
+<p>
+I have found the easiest most reliable way to get Postgres and PostgREST
+up and running on macOS is via <a
+href="https://postgres.app">Postgres APP</a>.
+</p>
+<p>
+If you take this route you want to install the version with the heading
+<a href="https://postgresapp.com/downloads.html">Postgres.app with all
+currently supported versions (Universal/Intel)</a>. This will insure you
+have the necessary libraries install that <a
+href="https://postgrest.org">PostgREST</a> needs when compiling from
+source (i.e. <code>libpg</code>).
+</p>
 </section>
 
 <footer>
