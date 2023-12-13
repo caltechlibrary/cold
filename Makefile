@@ -83,6 +83,9 @@ website: $(HTML_PAGES) .FORCE
 	make -f website.mak
 	
 
+htdocs/vocabulary.html:
+	pandoc --metadata title="Vocabulary" -f markdown -t html5 -s --template=templates/page.tmpl htdocs/vocabulary.md >htdocs/vocabulary.html
+
 htdocs/widgets/config.js:
 	mkpage codemeta=codemeta.json "prefix_path=text:$(APP_PREFIX_PATH)" templates/config-js.tmpl >htdocs/widgets/config.js	
 

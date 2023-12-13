@@ -53,10 +53,8 @@ cold is a localhost web service for managing controlled object lists.
 
 ### Software Requiremets
 
-- Go &gt;= 1.20.1
+- Go &gt;= 1.20.4
 - GNU Make
 - Pandoc &gt;= 3
-- MySQL &gt;= 8
-- SQLite &gt;= 3
 - PostgreSQL &gt;= 15
 - PostgREST &gt;= 11

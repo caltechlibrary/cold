@@ -6,6 +6,7 @@
     "codeRepository": "https://github.com/caltechlibrary/cold",
     "issueTracker": "https://github.com/caltechlibrary/cold/issues",
     "license": "https://caltechlibrary.github.io/cold/LICENSE",
+	"dateReleased": "2023-12-12",
     "version": "0.0.4",
     "author": [
         {
@@ -59,11 +60,9 @@
         "CSS"
     ],
     "softwareRequirements": [
-    	"Go >= 1.20.1",
+    	"Go >= 1.20.4",
 		"GNU Make",
 		"Pandoc >= 3",
-    	"MySQL >= 8",
-    	"SQLite >= 3",
     	"PostgreSQL >= 15",
     	"PostgREST >= 11"
   	]
