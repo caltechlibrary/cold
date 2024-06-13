@@ -76,23 +76,30 @@ port: 8000
 htdocs: htdocs
 #
 # cold routes, static content routes are noted only in comments. Dynamic
-# ones are notated for orchestration by Newt
+# ones are notated for orchestration by Newt. Newt's JSON data sources include
+# two datasetd instances. The first running on port 8485 provides a read only
+# service and the second running on port 8486 runs a read/write service and 
+# must be restricted.
+#
+# Datasetd configuration files: cold_ds_readonly.yaml and cold_ds_readwrite.yaml
+#
 routes:
-# Root path provides a description of PostgREST information (static asset path)
-#- request_path: /
-# Returns the version number of the service (static asset path
-#- request_path: /cold/version
 #
-# /cold/people returns a list of all cl people ID
+# /cold/people returns a list of all people names linking to /cold/people/{clpid}
 # 
-- request_path: /cold/people
-  request_method: GET
-  api_method: GET
-# cl_people_ids is implemented as a SQL view of cl_person model
-  api_url: http://localhost:3000/people_ids
+
 # 
-# cold people {cl_people_id} returns a single person record
+# /cold/people/{clpid} returns a single person object
 #
+
+#
+# /cold/groups returns a list of all group names linking to /cold/groups/{clgid}
+#
+
+#
+# /cold/groups/{clgid} returns a single group object
+#
+
 - var:
     cl_people_id: String
   request_path: /cold/people/${cl_people_id}

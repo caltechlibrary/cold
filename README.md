@@ -1,9 +1,9 @@
 cold - (c)ontrolled (o)bject (l)ists and (d)atum
 ================================================
 
-This repository implements a service to maintain a controlled list of objects and vocabularies used at Caltech Library for people, organizations and funders. It is built from data modeled in PostgreSQL, a JSON API provided by PostgREST and a template engine provided by Pandoc (in server mode).  This leaves the backend development in Postgres SQL and the front end development in HTML, CSS and JavaScript using all the current (2023) capabilities of your common popular browsers (e.g. Firefox, Chrome, Edge and Safari).
+This repository implements a service to maintain a controlled list of objects and vocabularies used at Caltech Library for people, organizations and funders. It is built on two projects from Caltech Library -- [Newt](https://github.com/caltechlibrary/newt) and [dataset](https://github.com/caltechlibrary/dataset) providing a data management backend via it's RESTful JSON API.
 
-The "stack" is based on the primose of cooprative microservices using "off the shelf" Open Source software (e.g. Apache2+Shibboleth, Postgres, PostgREST, Pandoc) and a thin layer of UI work running in your web browser.
+The deployed app will come in two forms. It will include a read only API along with connecting JavaScript for using the cold data by application. A private read/write implementation will be included for managing the cold objects. This will have access control inforced by Shibboleth on our application web server.
 
 Overview
 --------
@@ -112,33 +112,22 @@ Newt takes a declarative approach to defining the backend, middleware data flow 
 Approach Details
 ----------------
 
-- **cold** is built using Newt. 
-- Newt is used to generate the basic SQL models deployed in Postgres
-- PostgREST is used to provide a JSON API for managing objects and controlled vocabularies
-- Pandoc server is used to render JSON in a human friendly UI
-- Newt orchestrates the conversation between the web browser and the backend
-    - Newt gets a request from a web browser
-    - Newt talks to PostgREST
-    - Newt talks to Pandoc (if needed)
-    - Newt Responds to the browser
+- **cold** is built to run against datasetd providing the back end with a front end built from templated HTML plus static CSS and JavaScript
+- Newt is used to speed application development through code generation, mostly HTML and JavaScript
+- Newt is also used for code generatation, e.g. Newt's Mustache templates
 
-An important distinction to note is Newt has zero concept of users or access control (unless you build that
-into your database setup, views and functions). **cold** as is typical at Caltech Library uses our single
-sign-on system, Shibboleth, to hand user authentication. Apache2 uses the user data provided by Shibboelth
-along with an access control list to control access to Newt (which listens via localhost only).  
+An important point to taking this approach. The application has zero concept of users and access control. 
+Access control is defered to our front end web server using Shibboleth.
 
-**cold** like current Newt based projects assumes a shallow model of access crontrol.  If you need more then
-you need to build that from within Postgres itself.
+**cold** is implemented as two deployments of datasetd. One instance provides a read only JSON API, the
+other instances is a restricted read/write API.
 
-Pandoc as a template engine has no concept of session or who is accessing it. It just gets a request and
-if the the request is valid processes the result through the included JSON encoded data and pandoc template.
-Pandoc un server mode doesn't read from disk after launch, doesn't procude logs and does not maintain state.
-
-
-**cold**'s End Points
+**cold**'s Read-Only End Points
 ---------------------
 
 JSON API is provided by PostgREST. The following end point descriptions support the GET method.
+
+The public endpoints are (using the HTTP GET method)
 
 `/`
 : A description of PostgREST information
@@ -147,22 +136,45 @@ JSON API is provided by PostgREST. The following end point descriptions support 
 : Returns the version number of the service
 
 `/cold/people`
-: Returns a list of "cl_people_id" managed by *cold* 
+: Returns a Caltech People "cl_people_id" managed by *cold* 
 
 `/cold/people/{CL_PEOPLE_ID}`
-: For a GET returns a people object, a PUT will create the people object, POST will replace the people object and DELETE will remove the people object
+: Returns sanitized people object (e.g. email is redacted)
 
 `/cold/group`
 : Returns a list of "cl_group_id" managed by *cold*
 
 `/cold/group/{CL_GROUP_ID}`
-: For a GET returns a group object, a PUT will create the group object, POST will replace the group object and DELETE will remove the group object
+: Returns a santized group object (e.g. email is redacted)
+
+**cold**'s Read/Write End Points
+---------------------
+
+JSON API is provided by PostgREST. The following end point descriptions support the GET method.
+
+The public endpoints are (using the HTTP GET method)
+
+`/cold/admin`
+: A description of PostgREST information
+
+`/cold/admin/people`
+: Returns a Caltech People "cl_people_id" managed by *cold*.
+
+`/cold/admin/people/{CL_PEOPLE_ID}`
+: Returns complete people objects (e.g. has full contact information). A POST will create a people object, PUT will update a people object, DELETE will remove a people object
+
+`/cold/admin/group`
+: Returns a list of "cl_group_id" managed by *cold*
+
+`/cold/admin/group/{CL_GROUP_ID}`
+: For a GET returns a group object, a POST will create the group object, PUT will replace the group object and DELETE will remove the group object
+
 
 Crosswalks
 ----------
 
 A cross walk lets you put in a collection name (e.g. people, group), a field name and a value and it returns a list of matching
-records.
+records. These are available from the public API.
 
 `/cold/crosswalk/people/{IDENTIFIER_NAME}/{IDENTIFIER_VALUE}`
 : Returns a list of "cl_people_id" assocated with that identifier
@@ -218,13 +230,11 @@ Widgets are implementations of one or more Web Components. They provide the user
 Requirements
 ------------
 
-- PostgreSQL >= 14
-- PostgREST >= 11
-- Pandoc >= 3
-- Newt >= 0.0.3
+- Newt >= 0.0.8
+- Dataset >= 2.2.13 (using SQL JSON storage) and PostgreSQL >= 16
 - To build the UI and compile the assets needed by **cold**
   - GNU Make
-  - [Pandoc](https://pandoc.org) (to build UI)
+  - [Pandoc](https://pandoc.org) >= 3 (to build documentation and man page)
   - A text editor (e.g. Zed, VSCode, micro, nano, vi, emacs ...)
 - A front end web server with SSO or Basic Auth support
 - A web browser with JavaScript support 
