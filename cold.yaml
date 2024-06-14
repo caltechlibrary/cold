@@ -100,56 +100,24 @@ routes:
 # /cold/groups/{clgid} returns a single group object
 #
 
-- var:
-    cl_people_id: String
-  request_path: /cold/people/${cl_people_id}
-  request_method: GET
-  api_method: GET
-# person_object is implemented as a SQL function of cl_person model
-  api_url: http://localhost:3000/rpc/person_object?cl_people_id=${cl_people_id}
-#
-# /cold/group returns a list of all group_ids
-#
-- request_path: /cold/group
-  request_method: GET
-  api_method: GET
-  api_url: http://localhost:3000/cl_group_ids
-#
-# /cold/group/${cl_group_id}
-# For a GET returns a group object, a PUT will create the group object, POST will replace the group object and DELETE will remove the group object
-- var:
-    cl_group_id: String
-  request_path: /cold/group/${cl_group_id}
-  request_method: GET
-  api_method: GET
-# group_object is imlpemented as an SQL function of the cl_group model
-  api_url: http://localhost:3000/rpc/group_object?cl_group_id=${cl_group_id}
-#
-# Crosswalks
-#
 #
 # A cross walk lets you put in a collection name (e.g. people, group), 
 # a field name and a value and it returns a list of matching records.
 #
+
+#
 # /cold/crosswalk/people/${identifier_name}/${identifier_value}
 # Returns a list of "cl_people_id" assocated with that identifier
-- var: 
-    identifier_name: String
-    identifier_value: String
-  request_path: /cold/crosswalk/people/${identifier_name}/${identifier_value}
-  request_method: GET
-  api_content_method: GET
+#
+
+#
 # people_crosswalk is implemented as an SQL function operating on the cl_person model
-  api_url: http://localhost:3000/rpc/people_crosswalk?identifier=${identifier_name}&value=${identifier_value}
+#
+
 #
 # /cold/crosswalk/group/${identifier_name}/${identifier_value}
 # Returns a list of "cl_group__id" assocated with that identifier
-- var:
-    identifier_name: String
-    identifier_value: String
-  request_path: /cold/crosswalk/group/${identifier_name}/${identifier_value}
-  api_content_method: GET
-  api_url: http://localhost:3000/rpc/group_crosswalk?identifier=${identifier_name}&value=${identifier_value}
+
 #
 # Vocabularies
 # ------------
