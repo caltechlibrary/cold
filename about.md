@@ -16,7 +16,10 @@ authors:
 repository-code: "https://github.com/caltechlibrary/cold"
 version: 0.0.4
 license-url: "https://caltechlibrary.github.io/cold/LICENSE"
-keywords: [ "metadata", "objects", "controlled vocabulary" ]
+keywords:
+ - metadata
+ - objects
+ - controlled vocabulary
 
 ---
 

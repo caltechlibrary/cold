@@ -38,18 +38,17 @@ cold - (c)ontrolled (o)bject (l)ists and (d)atum
 <p>
 This repository implements a service to maintain a controlled list of
 objects and vocabularies used at Caltech Library for people,
-organizations and funders. It is built from data modeled in PostgreSQL,
-a JSON API provided by PostgREST and a template engine provided by
-Pandoc (in server mode). This leaves the backend development in Postgres
-SQL and the front end development in HTML, CSS and JavaScript using all
-the current (2023) capabilities of your common popular browsers
-(e.g. Firefox, Chrome, Edge and Safari).
+organizations and funders. It is built on two projects from Caltech
+Library – <a href="https://github.com/caltechlibrary/newt">Newt</a> and
+<a href="https://github.com/caltechlibrary/dataset">dataset</a>
+providing a data management backend via it’s RESTful JSON API.
 </p>
 <p>
-The “stack” is based on the primose of cooprative microservices using
-“off the shelf” Open Source software (e.g. Apache2+Shibboleth, Postgres,
-PostgREST, Pandoc) and a thin layer of UI work running in your web
-browser.
+The deployed app will come in two forms. It will include a read only API
+along with connecting JavaScript for using the cold data by application.
+A private read/write implementation will be included for managing the
+cold objects. This will have access control inforced by Shibboleth on
+our application web server.
 </p>
 <h2 id="overview">
 Overview
@@ -183,64 +182,37 @@ Approach Details
 </h2>
 <ul>
 <li>
-<strong>cold</strong> is built using Newt.
+<strong>cold</strong> is built to run against datasetd providing the
+back end with a front end built from templated HTML plus static CSS and
+JavaScript
 </li>
 <li>
-Newt is used to generate the basic SQL models deployed in Postgres
+Newt is used to speed application development through code generation,
+mostly HTML and JavaScript
 </li>
 <li>
-PostgREST is used to provide a JSON API for managing objects and
-controlled vocabularies
-</li>
-<li>
-Pandoc server is used to render JSON in a human friendly UI
-</li>
-<li>
-Newt orchestrates the conversation between the web browser and the
-backend
-<ul>
-<li>
-Newt gets a request from a web browser
-</li>
-<li>
-Newt talks to PostgREST
-</li>
-<li>
-Newt talks to Pandoc (if needed)
-</li>
-<li>
-Newt Responds to the browser
-</li>
-</ul>
+Newt is also used for code generatation, e.g. Newt’s Mustache templates
 </li>
 </ul>
 <p>
-An important distinction to note is Newt has zero concept of users or
-access control (unless you build that into your database setup, views
-and functions). <strong>cold</strong> as is typical at Caltech Library
-uses our single sign-on system, Shibboleth, to hand user authentication.
-Apache2 uses the user data provided by Shibboelth along with an access
-control list to control access to Newt (which listens via localhost
-only).
+An important point to taking this approach. The application has zero
+concept of users and access control. Access control is defered to our
+front end web server using Shibboleth.
 </p>
 <p>
-<strong>cold</strong> like current Newt based projects assumes a shallow
-model of access crontrol. If you need more then you need to build that
-from within Postgres itself.
+<strong>cold</strong> is implemented as two deployments of datasetd. One
+instance provides a read only JSON API, the other instances is a
+restricted read/write API.
 </p>
-<p>
-Pandoc as a template engine has no concept of session or who is
-accessing it. It just gets a request and if the the request is valid
-processes the result through the included JSON encoded data and pandoc
-template. Pandoc un server mode doesn’t read from disk after launch,
-doesn’t procude logs and does not maintain state.
-</p>
-<h2 id="colds-end-points">
-<strong>cold</strong>’s End Points
+<h2 id="colds-read-only-end-points">
+<strong>cold</strong>’s Read-Only End Points
 </h2>
 <p>
 JSON API is provided by PostgREST. The following end point descriptions
 support the GET method.
+</p>
+<p>
+The public endpoints are (using the HTTP GET method)
 </p>
 <dl>
 <dt>
@@ -259,15 +231,13 @@ Returns the version number of the service
 <code>/cold/people</code>
 </dt>
 <dd>
-Returns a list of “cl_people_id” managed by <em>cold</em>
+Returns a Caltech People “cl_people_id” managed by <em>cold</em>
 </dd>
 <dt>
 <code>/cold/people/{CL_PEOPLE_ID}</code>
 </dt>
 <dd>
-For a GET returns a people object, a PUT will create the people object,
-POST will replace the people object and DELETE will remove the people
-object
+Returns sanitized people object (e.g. email is redacted)
 </dd>
 <dt>
 <code>/cold/group</code>
@@ -279,8 +249,52 @@ Returns a list of “cl_group_id” managed by <em>cold</em>
 <code>/cold/group/{CL_GROUP_ID}</code>
 </dt>
 <dd>
-For a GET returns a group object, a PUT will create the group object,
-POST will replace the group object and DELETE will remove the group
+Returns a santized group object (e.g. email is redacted)
+</dd>
+</dl>
+<h2 id="colds-readwrite-end-points">
+<strong>cold</strong>’s Read/Write End Points
+</h2>
+<p>
+JSON API is provided by PostgREST. The following end point descriptions
+support the GET method.
+</p>
+<p>
+The public endpoints are (using the HTTP GET method)
+</p>
+<dl>
+<dt>
+<code>/cold/admin</code>
+</dt>
+<dd>
+A description of PostgREST information
+</dd>
+<dt>
+<code>/cold/admin/people</code>
+</dt>
+<dd>
+Returns a Caltech People “cl_people_id” managed by <em>cold</em>.
+</dd>
+<dt>
+<code>/cold/admin/people/{CL_PEOPLE_ID}</code>
+</dt>
+<dd>
+Returns complete people objects (e.g. has full contact information). A
+POST will create a people object, PUT will update a people object,
+DELETE will remove a people object
+</dd>
+<dt>
+<code>/cold/admin/group</code>
+</dt>
+<dd>
+Returns a list of “cl_group_id” managed by <em>cold</em>
+</dd>
+<dt>
+<code>/cold/admin/group/{CL_GROUP_ID}</code>
+</dt>
+<dd>
+For a GET returns a group object, a POST will create the group object,
+PUT will replace the group object and DELETE will remove the group
 object
 </dd>
 </dl>
@@ -289,7 +303,8 @@ Crosswalks
 </h2>
 <p>
 A cross walk lets you put in a collection name (e.g. people, group), a
-field name and a value and it returns a list of matching records.
+field name and a value and it returns a list of matching records. These
+are available from the public API.
 </p>
 <dl>
 <dt>
@@ -413,16 +428,10 @@ Requirements
 </h2>
 <ul>
 <li>
-PostgreSQL &gt;= 14
+Newt &gt;= 0.0.8
 </li>
 <li>
-PostgREST &gt;= 11
-</li>
-<li>
-Pandoc &gt;= 3
-</li>
-<li>
-Newt &gt;= 0.0.3
+Dataset &gt;= 2.2.13 (using SQL JSON storage) and PostgreSQL &gt;= 16
 </li>
 <li>
 To build the UI and compile the assets needed by <strong>cold</strong>
@@ -431,7 +440,8 @@ To build the UI and compile the assets needed by <strong>cold</strong>
 GNU Make
 </li>
 <li>
-<a href="https://pandoc.org">Pandoc</a> (to build UI)
+<a href="https://pandoc.org">Pandoc</a> &gt;= 3 (to build documentation
+and man page)
 </li>
 <li>
 A text editor (e.g. Zed, VSCode, micro, nano, vi, emacs …)
