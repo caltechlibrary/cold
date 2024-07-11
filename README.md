@@ -1,7 +1,9 @@
 cold - (c)ontrolled (o)bject (l)ists and (d)atum
 ================================================
 
-This repository implements a service to maintain a controlled list of objects and vocabularies used at Caltech Library for people, organizations and funders. It is built on two projects from Caltech Library -- [Newt](https://github.com/caltechlibrary/newt) and [dataset](https://github.com/caltechlibrary/dataset) providing a data management backend via it's RESTful JSON API.
+This repository implements a service to manage a controlled objects and datum (e.g. vocabularies). The public facing API is in this repository. It is built using TypeScript and Deno to presnet the public facing implementaiton.  The management user interface is in a separate GitHub repository, [cold_ui](https://github.com/caltechlibrary/cold_ui). It should be restricted to staff access and since it allows creating, replacing and deleting of objects and datum.  The public facing API is here. It uses it's own datasetd YAML file restricting access to read only methods.  
+
+If you are using Git then you can do a recursive checkout to get both the public safing API and the staff cold_ui repositories together in the same tree structure (e.g. `./cold` and `./cold/cold_ui`).
 
 The deployed app will come in two forms. It will include a read only API along with connecting JavaScript for using the cold data by application. A private read/write implementation will be included for managing the cold objects. This will have access control inforced by Shibboleth on our application web server.
 
