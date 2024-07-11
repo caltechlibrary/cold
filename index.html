@@ -15,7 +15,7 @@
     <li><a href="index.html">README</a></li>
     <li><a href="LICENSE">LICENSE</a></li>
     <li><a href="install.html">INSTALL</a></li>
-    <li><a href="user-manual.html">User Manual</a></li>
+    <li><a href="user_manual.html">User Manual</a></li>
     <li><a href="about.html">About</a></li>
     <li><a href="https://github.com/caltechlibrary/cold">GitHub</a></li>
 </ul>
@@ -24,12 +24,20 @@
 <section>
 <h1 id="cold---controlled-object-lists-and-datum">cold - (c)ontrolled
 (o)bject (l)ists and (d)atum</h1>
-<p>This repository implements a service to maintain a controlled list of
-objects and vocabularies used at Caltech Library for people,
-organizations and funders. It is built on two projects from Caltech
-Library – <a href="https://github.com/caltechlibrary/newt">Newt</a> and
-<a href="https://github.com/caltechlibrary/dataset">dataset</a>
-providing a data management backend via it’s RESTful JSON API.</p>
+<p>This repository implements a service to manage a controlled objects
+and datum (e.g. vocabularies). The public facing API is in this
+repository. It is built using TypeScript and Deno to presnet the public
+facing implementaiton. The management user interface is in a separate
+GitHub repository, <a
+href="https://github.com/caltechlibrary/cold_ui">cold_ui</a>. It should
+be restricted to staff access and since it allows creating, replacing
+and deleting of objects and datum. The public facing API is here. It
+uses it’s own datasetd YAML file restricting access to read only
+methods.</p>
+<p>If you are using Git then you can do a recursive checkout to get both
+the public safing API and the staff cold_ui repositories together in the
+same tree structure (e.g. <code>./cold</code> and
+<code>./cold/cold_ui</code>).</p>
 <p>The deployed app will come in two forms. It will include a read only
 API along with connecting JavaScript for using the cold data by
 application. A private read/write implementation will be included for

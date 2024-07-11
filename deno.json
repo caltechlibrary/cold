@@ -1,0 +1,8 @@
+{
+  "tasks": {
+    "public_service": "datasetd cold_public.yaml",
+    "public_service_debug": "datasetd --debug cold_public.yaml",
+    "build": "deno run --allow-read --allow-write=htdocs build.ts"
+  },
+  "imports": { "@std/path": "jsr:@std/path@^0.225.2" }
+}

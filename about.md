@@ -9,17 +9,11 @@ authors:
   - family-names: Doiel
     given-names: R. S.
     orcid: "https://orcid.org/0000-0003-0900-6903"
-  - family-names: Morrell
-    given-names: Thomas E
-    orcid: "https://orcid.org/0000-0001-9266-5146"
 
 repository-code: "https://github.com/caltechlibrary/cold"
 version: 0.0.4
 license-url: "https://caltechlibrary.github.io/cold/LICENSE"
-keywords:
- - metadata
- - objects
- - controlled vocabulary
+keywords: [ "metadata", "objects", "controlled vocabulary" ]
 
 ---
 
@@ -31,8 +25,11 @@ About this software
 ### Authors
 
 - R. S. Doiel
-- Thomas E Morrell
 
+### Contributors
+
+- Kathy Johnson
+- Thomas E Morrell
 
 ### Maintainers
 

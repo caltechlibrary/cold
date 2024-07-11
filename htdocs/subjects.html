@@ -1,47 +1,24 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-US">
 <head>
-    <meta charset="utf-8">
-    <title>Caltech Library's Digital Library Development Sandbox</title>
-    <link rel="stylesheet" href="/cold/app/css/site.css">
-    <link rel="icon" href="/cold/app/favicon.ico" type="image/x-icon">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>COLD Public API</title>
+    <link rel="stylesheet" href="/css/site.css">
 </head>
 <body>
 <header>
-<span id="library_logo"><a href="http://library.caltech.edu"><img src="/cold/app/assets/liblogo.gif" alt="Caltech Library logo"></a></span>
-<span id="project_logo"><img src="/cold/app/assets/iceberg-sketch.png" alt="Iceberg logo for cold"></span>
+<a href="http://library.caltech.edu" title="link to Caltech Library Homepage"><img src="/assets/liblogo.gif" alt="Caltech Library logo"></a>
 </header>
 <nav>
 <ul>
-<li>
-<a href="/">Home</a>
-</li>
-<li>
-<a href="/cold/app/">Dashboard</a>
-</li>
-<li>
-<a href="/cold/app/help.html">Help</a>
-</li>
-<li>
-<a href="/cold/app/about.html">About</a>
-</li>
-<li>
-<a href="/Shibboleth.sso/Logout">Logout</a>
-</li>
+<li><a href="/" title="return to dashboard">Dashboard</a></li>
 </ul>
 </nav>
-
 <section>
-<h1 id="subjects">
-Subjects
-</h1>
-<p>
-This page lists the subjects by subject id and the text description
-(i.e. name).
-</p>
-<div id="subject-list">
-<p>Fetching subject list</p>
-</div>
+
+<h1>Subjects</h1>
+<p>This page lists the subjects by subject id and the text description (i.e. name).</p>
+<div id="subject-list">Fetching subject list</div>
 <script type="module" src="./widgets/config.js"></script>
 <script type="module" src="./widgets/vocabulary.js"></script>
 <script type="module">
@@ -75,15 +52,15 @@ oReq.addEventListener('load', updatePage);
 oReq.open('GET', `${prefix_path}/api/subject`);
 oReq.send();
 </script>
-</section>
 
+
+</section>
 <footer>
-<span><h1><A href="http://caltech.edu">Caltech</a></h1></span>
-<span>&copy; 2022 <a href="https://www.library.caltech.edu/copyright">Caltech library</a></span>
-<address>1200 E California Blvd, Mail Code 1-32, Pasadena, CA 91125-3200</address> 
-<span>Phone: <a href="tel:+1-626-395-3405">(626)395-3405</a></span>
+<span>&copy; 2024 <a href="https://www.library.caltech.edu/copyright">Caltech Library</a></span>
+<address>1200 E California Blvd, Mail Code 2-32, Pasadena, CA 91125-3200</address>
 <span><a href="mailto:library@caltech.edu">Email Us</a></span>
-<a class="cl-hide" href="sitemap.xml">Site Map</a>
+<span>Phone: <a href="tel:+1-626-395-3405">(626)395-3405</a></span>
 </footer>
+<code><pre></pre></code>
 </body>
 </html>

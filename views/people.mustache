@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en-US">
+{{>head}}
+<body>
+{{>header}}
+<nav>
+<ul>
+<li><a href="{{base_path}}/" title="return to dashboard">Dashboard</a></li>
+<li><a href="{{base_path}}/people/" title="return to group list">People</a></li>
+<li><a href="{{base_path}}/people/{{people.clpid}}?view=edit">Edit {{people.clpid}}</a></li>
+</ul>
+</nav>
+<section>
+
+<h1>{{people.family_name}}{{#if people.given_name}}, {{people.given_name}}{{/if}}</h1>
+
+<div class="identifier">clpid: {{people.clpid}}</div>
+
+<div class="title">{{#people.title}}Title: {{.}}<p>{{/people.title}}</div>
+
+<div class="boi">{{#people.bio}}Boi: {{.}}<p>{{/people.bio}}</div>
+
+<div class="education">{{#people.education}}Education: {{.}}<p>{{/people.education}}</div>
+
+<div class="division">{{#people.division}}Division: {{.}}{{/people.division}}</div>
+
+<div class="email">{{#people.email}}EMail: {{.}}{{/people.email}}</div>
+
+<div class="status">{{#people.status}}Status: {{.}}{{/people.status}}</div>
+
+<div class="directory_user_id">{{#people.directory_user_id}}IMSS userid: {{.}}{{/people.directory_user_id}}</div>
+
+<div class="directory_person_type">{{#people.directory_person_type}}Person Type: {{.}}{{/people.directory_person_type}}</div>
+
+<div class="identifiers">
+  <div class="orcid">{{#people.orcid}}ORCID: {{.}}{{/people.orcid}}</div>
+  <div class="isni">{{#people.isni}}ISNI: {{.}}{{/people.isni}}</div>
+  <div class="archivesspace_id">{{#people.archivesspace_id}}ArchivesSpace ID: {{.}}{{/people.archivesspace_id}}</div>
+  <div class="viaf">{{#people.viaf}}VIAF: {{.}}{{/people.viaf}}</div>
+  <div class="lcnaf">{{#people.lcnaf}}LCNAF: {{.}}{{/people.lcnaf}}</div>
+  <div class="wikidata">{{#people.wikidata}}Wikidata: {{.}}{{/people.wikidata}}</div>
+  <div class="snac">{{#people.snac}}SNAC: {{.}}{{/people.snac}}</div>
+  <div class="author_id">{{#people.author_id}}:CaltechAUTHORS ID: {{.}}{{/people.author_id}}</div>
+  <div class="author_id">{{#people.thesis_id}}:CaltechTHESIS ID: {{.}}{{/people.thesis_id}}</div>
+</div>
+
+<div class="image_url">{{#people.image_url}}Image URL: <a href="{{.}}">{{.}}</a>{{/people.image_url}}</div>
+
+<div class="affiliations"><p>Affiliations:
+  <ul>
+  {{#people.caltech}}<li class="is_caltech">Caltech</li>{{/people.caltech}}
+  {{#people.caltech}}<li class="is_jpl">JPL</li>{{/people.caltech}}
+  {{#people.faculty}}<li class="is_faculty">Faculty</li>{{/people.faculty}}
+  {{#people.alumn}}<li class="is_alumn">Alumn</li>{{/people.alumn}}
+  </ul>
+</div>
+
+<div class="updated">{{#people.updated}}Updated: {{.}}{{/people.updated}}</div>
+
+<p>
+</section>
+{{>footer}}
+<code>{{debug_src}}</code>
+</body>
+</html>
