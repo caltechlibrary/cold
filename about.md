@@ -11,7 +11,7 @@ authors:
     orcid: "https://orcid.org/0000-0003-0900-6903"
 
 repository-code: "https://github.com/caltechlibrary/cold"
-version: 0.0.4
+version: 0.0.5
 license-url: "https://caltechlibrary.github.io/cold/LICENSE"
 keywords: [ "metadata", "objects", "controlled vocabulary" ]
 
@@ -20,7 +20,7 @@ keywords: [ "metadata", "objects", "controlled vocabulary" ]
 About this software
 ===================
 
-## cold 0.0.4
+## cold 0.0.5
 
 ### Authors
 
@@ -44,17 +44,15 @@ cold is a localhost web service for managing controlled object lists.
 
 ### Programming languages
 
-- Go
-- SQL
+- TypeScript
 - JavaScript
 - HTML
 - CSS
+- YAML
 
 
 ### Software Requiremets
 
-- Go &gt;= 1.20.4
-- GNU Make
-- Pandoc &gt;= 3
-- PostgreSQL &gt;= 15
-- PostgREST &gt;= 11
+- Deno &gt;= 1.44
+- Dataset &gt;= 2.1.15
+- Pandoc &gt;= 3.1

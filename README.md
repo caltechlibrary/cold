@@ -1,16 +1,18 @@
 cold - (c)ontrolled (o)bject (l)ists and (d)atum
 ================================================
 
-This repository implements a service to manage a controlled objects and datum (e.g. vocabularies). The public facing API is in this repository. It is built using TypeScript and Deno to presnet the public facing implementaiton.  The management user interface is in a separate GitHub repository, [cold_ui](https://github.com/caltechlibrary/cold_ui). It should be restricted to staff access and since it allows creating, replacing and deleting of objects and datum.  The public facing API is here. It uses it's own datasetd YAML file restricting access to read only methods.
+This repository implements the public facing web service of managed controlled object lists and datum (e.g. vocabularies). It is built using TypeScript and Deno.  The management user interface is in a separate GitHub repository, [cold_ui](https://github.com/caltechlibrary/cold_ui).
 
-If you are using Git then you can do a recursive checkout to get both the public safing API and the staff cold_ui repositories together in the same tree structure (e.g. `./cold` and `./cold/cold_ui`).
+**cold** has it's own datasetd YAML file creating a read only JSON API in addition to static content.
 
-The deployed app will come in two forms. It will include a read only API along with connecting JavaScript for using the cold data by application. A private read/write implementation will be included for managing the cold objects. This will have access control inforced by Shibboleth on our application web server.
+To combine the public and management repositories into a common directory structure tou can use Git's recursive clone to get both the public API and the management API implemented in the **cold_ui** repository as a submodule of **cold**.
+
+You will need to configure (control access) via your front end web server software (e.g. Apache2, NginX , Lighttpd) using a single sign-on implementation like Shibboleth.
 
 Overview
 --------
 
-Caltech Library maintains a list of people, groups and funders and their related pids. This started being managed in Google Sheets, then in CSV files. The number of objects involved has increased. It makes sense to provide a more robust implementation allowing for easier curation of objects. The objects currently are relatively flat.  Here's an example JSON object representing R. S. Doiel showing the internal identifier named "cl_people_id", name object, email, orcid and Caltech affiliation is shown both via a boolean field and a ROR.
+Caltech Library maintains a list of people, groups and funders and their related pids. For many years this was managed using a spreadsheet, then Google Sheets, and more recently in CSV files. Over time the number of objects involved has increased. It makes sense to provide a more robust implementation allowing for easier curation of objects. The objects currently are relatively flat.  Here's an example JSON object representing R. S. Doiel showing the internal identifier named "cl_people_id", name object, email, orcid and Caltech affiliation is shown both via a boolean field and a ROR.
 
 ~~~json
 {
@@ -61,15 +63,13 @@ Approach Details
 ----------------
 
 - **cold** is built on datasetd providing static file hosting as well as a readonly JSON API to a selection of dataset collections (e.g. Caltech People and Groups).
-- **cold_ui** (a sub repositoru) provides a management interface. It uses a different instance of datasetd providing a read/write JSON API and a typescript web service for the management UI.
-- **cold** and **cold_ui** uses [handlerbars](https://handlerbarsjs.com) templates, each with their own views template heirarchy.
+- **cold_ui** (a submodule repository) provides a management interface. It uses a different instance of datasetd providing a read/write JSON API and a typescript web service for the managing the data.
+- **cold** and **cold_ui** use [handlerbars](https://handlerbarsjs.com) templates, each with their own "view" template heirarchies.
 
-An important point to taking this approach. The application has zero concept of users and access control.
-Access control is defered to our front end web server using Shibboleth.
-
+__An important point is access control is deferred to the front end web server (e.g. Apache2+Shibboleth).__
 
 **cold**'s Read-Only End Points
----------------------
+-------------------------------
 
 JSON API is provided by datasetd. The following end point descriptions support the GET method.
 
@@ -81,29 +81,29 @@ The public endpoints are (using the HTTP GET method)
 `/cold/version`
 : Returns the version number of the service
 
-`/cold/people`
+`/cold/people.ds`
 : Returns a Caltech People "cl_people_id" managed by *cold*
 
-`/cold/people/{CL_PEOPLE_ID}`
+`/cold/people.ds/{CL_PEOPLE_ID}`
 : Returns sanitized people object (e.g. email is redacted)
 
-`/cold/group`
+`/cold/groups.ds`
 : Returns a list of "cl_group_id" managed by *cold*
 
-`/cold/group/{CL_GROUP_ID}`
+`/cold/group.ds/{CL_GROUP_ID}`
 : Returns a santized group object (e.g. email is redacted)
 
 
 Crosswalks (planned)
 --------------------
 
-A cross walk lets you put in a collection name (e.g. people, group), a field name and a value and it returns a list of matching
+A cross walk lets you put in a collection name (e.g. people.ds, group.ds), a field name and a value and it returns a list of matching
 records. These are available from the public API.
 
-`/cold/crosswalk/people/{IDENTIFIER_NAME}/{IDENTIFIER_VALUE}`
+`/cold/crosswalk/people.ds/{IDENTIFIER_NAME}/{IDENTIFIER_VALUE}`
 : Returns a list of "cl_people_id" assocated with that identifier
 
-`/cold/crosswalk/group/{IDENTIFIER_NAME}/{IDENTIFIER_VALUE}`
+`/cold/crosswalk/group.ds/{IDENTIFIER_NAME}/{IDENTIFIER_VALUE}`
 : Returns a list of "cl_group__id" assocated with that identifier
 
 *cold* takes a REST approach to updates for managed objects.  PUT will create a new object, POST will update it, GET will retrieve it and DELETE will remove it.
@@ -111,40 +111,40 @@ records. These are available from the public API.
 Vocabularies
 ------------
 
-*cold* also supports end points for stable vocabularies mapping an indentifier to a normalized name. These are set at compile time because they are so slow changing.
+**cold** and **cold_ui** also support end points for stable vocabularies mapping an indentifier to a normalized name. These are set at compile time because they are so slow changing.
 
-`/cold/subject`
+`/cold/subject.ds`
 : Returns a list of all the subject ids (codes)
 
-`/cold/subject/{SUBJECT_ID}`
+`/cold/subject.ds/{SUBJECT_ID}`
 : Returns the normalized text string for that subject id
 
-`/cold/issn`
+`/cold/issn.ds`
 : Returns a list of issn that are mapped to a publisher name
 
-`/cold/issn/{ISSN}`
+`/cold/issn.ds/{ISSN}`
 : Returns the normalized publisher name for that ISSN
 
-`/cold/doi-prefix`
+`/cold/doi_prefix.ds`
 : Returns a list of DOI prefixes that map to a normalize name
 
-`/cold/doi-prefix/{DOI_PREFIX}`
+`/cold/doi-prefix.ds/{DOI_PREFIX}`
 : Returns the normalized publisher name for that DOI prefix
 
 Manage interface
 ----------------
 
-The management inteface is avialable at `/app/dashboard.html` path. This provides a dashboard which then interacts with the JSON side of the service to update content. The manage interface is built from Web Components and requires JavaScript to be enabled in the browser.
+The management inteface is avialable at `/cold/cold_ui/` path. This provides a dashboard which then interacts with the JSON side of the service to update content. The manage interface is built includes Web Components and requires JavaScript to be enabled in the browser.
 
 Widgets
 -------
 
-Widgets are implementations of one or more Web Components. They provide the user interface for humans to manage and view the objects. While **cold** can directly host these it is equally possible to integrate the static components into another system, web service or web site. The public facing web service needs to control access to **cold** and the static content does not contain anything that is priviliged. The Widgets can be loaded indepentently in the page using the following end points.
+Widgets are implementations of one or more Web Components. They provide the user interface for humans to manage and view objects. While **cold** can directly host these it is equally possible to integrate the static components into another system, web service or web site. The public facing web service needs to control access to **cold** and the static content does not contain anything that is priviliged. The Widgets can be loaded indepentently in the page using the following end points.
 
-`/widgets/person.js`
+`/widgets/people.js`
 : This JavaScript file provides a display and input set of web components for our Person Object. Markup example `<person-display honorific="Mr." given="R. S." family="Doiel" lineage="" orcid="0000-0003-0900-6903"></person-display>` and `<person-input honorific="Mr." given="R. S." family="Doiel" lineage="" orcid="0000-0003-0900-6903"></person-input>`
 
-`/widgets/group.js`
+`/widgets/groups.js`
 : This JavaScript file provides a display and input set of web components for our Markup example `<group-display name="GALCIT" ror=""></group-display>` and `<group-input  name="GALCIT" ror="" label=""></group-input>`
 
 `/widgets/vocabulary.js`
@@ -154,14 +154,13 @@ Widgets are implementations of one or more Web Components. They provide the user
 Requirements
 ------------
 
-- Newt >= 0.0.8
-- Dataset >= 2.2.13 (using SQL JSON storage) and PostgreSQL >= 16
+- Dataset >= 2.2.15 (using SQL JSON storage) and PostgreSQL >= 16
 - To build the UI and compile the assets needed by **cold**
   - GNU Make
   - [Pandoc](https://pandoc.org) >= 3 (to build documentation and man page)
   - A text editor (e.g. Zed, VSCode, micro, nano, vi, emacs ...)
-- A front end web server with SSO or Basic Auth support
-- A web browser with JavaScript support
+- A front end web server with SSO or Basic Auth (e.g. during development) support
+- A web browser with JavaScript support enabled
 
 Recommended
 -----------
@@ -173,9 +172,3 @@ Pandoc and PostgREST are Haskell programs (i.e. they are written in Haskell prog
 1. Install Haskell via [ghcup](https://www.haskell.org/ghcup/)
 2. See [Pandoc](https://pandoc.org/installing.html#quick-cabal-method) and follow instructions to compile Pandoc 3
 3. See [https://postgrest.org/en/stable/install.html#building-from-source]) and following instructions to compile PostgREST 11
-
-### A note about macOS, Postgres and PostgREST
-
-I have found the easiest most reliable way to get Postgres and PostgREST up and running on macOS is via [Postgres APP](https://postgres.app).
-
-If you take this route you want to install the version with the heading [Postgres.app with all currently supported versions (Universal/Intel)](https://postgresapp.com/downloads.html). This will insure you have the necessary libraries install that [PostgREST](https://postgrest.org) needs when compiling from source (i.e. `libpg`).

@@ -1,11 +1,13 @@
-Installation for development of **cold**
-========================================
+Installation for development of **cold** and **cold_ui
+======================================================
 
-**cold** is experimental software for managing controlled object lists and datum (e.g. controlled vocabularies). It buit from two Git repositories. The main repository **cold** provides the public facing repository and JSON API for integration with other services. The management interface is held in [cold_ui](https://github.com/caltechlibrary/cold_ui) repository which is a submodule of **cold**.
+**cold** is experimental software providing a read only view of managed controlled object lists and datum (e.g. controlled vocabularies). The **cold** repository provides the public facing JSON API for integration with other services.
 
-**cold** and **cold_ui** are intended to run behind a front facing web server (e.g. Apache 2 or NginX) that access controls and authentication. This can be configured in Apache 2 or NginX by use of Shibboleth or BasicAuth.  An example apache2 configuration block is included in the source repository for **cold**. It will require adaptation to your specific web server configuration.
+The management interface **cold_ui** is held in the [github.com/caltechlibrary/cold_ui](https://github.com/caltechlibrary/cold_ui) repository. **cold** implements **cold_ui** as Git submodule. When you clone **cold** you should do so recursively.
 
-**cold** requires the datasetd web service to provide access to the managed people and group collections. For **cold** and **cold_ui** you need to configure two dataset collections using SQLite3 for storage. This can be done form the cold_ui submodule using a Deno task or via the Makefile (which calls the deno task).
+**cold** and **cold_ui** are intended to run behind a front facing web server (e.g. Apache 2) providing access control and authentication. In a development setting this can be as simple as configuring BasicAuth.  In a production setting you need something robust like Shibboleth.  An example apache2 configuration is included in the source repository for **cold**. It will require adaptation to your specific web server configuration.
+
+**cold** requires the datasetd web service to provide access to people.ds and group.ds collections. For **cold** and **cold_ui** you should configure your collections to use sql storage, e.g. SQLite3 or PostgreSQL. This can be done form the cold_ui submodule using a Deno task or via the Makefile (which calls the deno task).
 
 If you are setting up to run in production you should compile the services and
 install the systemd service scripts so that systemd can manage the applications.
@@ -46,7 +48,12 @@ if you are setting up for production.
     c. start a third shell session in the cold repository
       a. `deno task public_service`
 
-You should now have four web services running.
+You should now have three web services running running on localhost.
+
+Port 8485
+: This is the management JSON API for cold_ui
+
+Port: ison four web services running.
 
 - a public JSON API and management JSON API
 - a public web service and a managment web service
