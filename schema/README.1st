@@ -1,2 +1,0 @@
-
-This directory holds the schema used by the database server for managed obejcts.  Each SQL file should contain a version number and support evolving schema from the previous semver value. In this way the database schema can be brought up to date by apply successive SQL schema changes.

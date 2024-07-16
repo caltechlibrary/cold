@@ -1,10 +1,10 @@
 #
-# cold.yaml defines the controlled object list and datum application's
-# Public JSON API running via datasetd.
+# cold_public.yaml defines the controlled object list and datum application's
+# Public JSON API and static content service. It is run via datasetd.
 #
 # @author: R. S. Doiel <rsdoiel@caltech.edu>
 #
-host: localhost:8481
+host: localhost:8080
 # This htdocs directory is provided by cold_ui so we don't enable it.
 htdocs: htdocs
 collections:
