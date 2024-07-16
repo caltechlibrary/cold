@@ -1,75 +1,152 @@
 <!DOCTYPE html>
-<html lang="en-US">
+<html lang="en">
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <title>COLD Public API</title>
-    <link rel="stylesheet" href="/css/site.css">
+    <title>COLD (Controlled Object List and Datum (Concept))</title>
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="https://caltechlibrary.github.io/css/site.css">
 </head>
 <body>
 <header>
-<a href="http://library.caltech.edu" title="link to Caltech Library Homepage"><img src="/assets/liblogo.gif" alt="Caltech Library logo"></a>
+<a href="http://library.caltech.edu" title="link to Caltech Library Homepage"><img src="https://caltechlibrary.github.io/assets/liblogo.gif" alt="Caltech Library logo"></a>
 </header>
 <nav>
 <ul>
-<li><a href="/" title="return to dashboard">Dashboard</a></li>
+    <li><a href="/">Home</a></li>
+    <li><a href="index.html">README</a></li>
+    <li><a href="LICENSE">LICENSE</a></li>
+    <li><a href="install.html">INSTALL</a></li>
+    <li><a href="user_manual.html">User Manual</a></li>
+    <li><a href="about.html">About</a></li>
+    <li><a href="https://github.com/caltechlibrary/cold">GitHub</a></li>
 </ul>
 </nav>
+
 <section>
-
-<h1>cold - (c)ontrolled (o)bject (l)ist (d)aemon</h1>
-<h2>End Points</h2>
-<p>JSON service defined end points are formed as the following. The following end point descriptions support the GET method.</p>
-<p><code>/</code>
-: A description of the service</p>
-<p><code>/api/version</code>
-: Returns the version number of the service</p>
-<p><code>/api/people</code>
-: Returns a list of &quot;cl_people_id&quot; managed by <em>cold</em> </p>
-<p><code>/api/people/{CL_PEOPLE_ID}</code>
-: For a GET returns a people object, a PUT will create the people object, POST will replace the people object and DELETE will remove the people object</p>
-<p><code>/api/group</code>
-: Returns a list of &quot;cl_group_id&quot; managed by <em>cold</em></p>
-<p><code>/api/group/{CL_GROUP_ID}</code>
-: For a GET returns a group object, a PUT will create the group object, POST will replace the group object and DELETE will remove the group object</p>
-<h2>Crosswalks</h2>
-<p><code>/api/crosswalk/people/{IDENTIFIER_NAME}/{IDENTIFIER_VALUE}</code>
-: Returns a list of &quot;cl_people_id&quot; assocated with that identifier</p>
-<p><code>/api/crosswalk/group/{IDENTIFIER_NAME}/{IDENTIFIER_VALUE}</code>
-: Returns a list of &quot;cl_group__id&quot; assocated with that identifier</p>
-<p><em>cold</em> takes a REST approach to updates for managed objects.  PUT will create a new object, POST will update it, GET will retrieve it and DELETE will remove it.</p>
-<h2>Vocabularies</h2>
-<p><em>cold</em> also supports end points for stable vocabularies mapping an indentifier to a normalized name. These are set at compile time because they are so slow changing. </p>
-<p><code>/api/subject</code>
-: Returns a list of all the subject ids (codes)</p>
-<p><code>/api/subject/{SUBJECT_ID}</code>
-: Returns the normalized text string for that subject id</p>
-<p><code>/api/issn</code>
-: Returns a list of issn that are mapped to a publisher name</p>
-<p><code>/api/issn/{ISSN}</code>
-: Returns the normalized publisher name for that ISSN</p>
-<p><code>/api/doi-prefix</code>
-: Returns a list of DOI prefixes that map to a normalize name</p>
-<p><code>/api/doi-prefix/{DOI_PREFIX}</code>
-: Returns the normalized publisher name for that DOI prefix</p>
-<h1>Manage interface</h1>
-<p>The management inteface is avialable at <code>/app/dashboard.html</code> path. This provides a dashboard which then interacts with the JSON side of the service to update content. The manage interface is built from Web Components and requires JavaScript to be enabled in the browser.</p>
-<h2>Widgets</h2>
-<p>Widgets provide the user interface for humans to manage and view the objects. While <strong>cold</strong> can directly host these it is equally possible to integrate the static components into another system, web service or web site. They are only static web assets.  The public facing web service needs to control access to <strong>cold</strong> and the static content does not contain anything that is priviliged. The Widgets can be loaded indepentently in the page using the following end points.</p>
-<p><code>/widgets/people.js</code>
-: This JavaScript file provides a display and input set of web components for our Person Object. Markup example <code>&lt;person-display honorific=&quot;Mr.&quot; given=&quot;R. S.&quot; family=&quot;Doiel&quot; lineage=&quot;&quot; orcid=&quot;0000-0003-0900-6903&quot;&gt;&lt;/person-display&gt;</code> and <code>&lt;person-input honorific=&quot;Mr.&quot; given=&quot;R. S.&quot; family=&quot;Doiel&quot; lineage=&quot;&quot; orcid=&quot;0000-0003-0900-6903&quot;&gt;&lt;/person-input&gt;</code></p>
-<p><code>/widgets/groups.js</code>
-: This JavaScript file provides a display and input set of web components for our Markup example <code>&lt;group-display name=&quot;GALCIT&quot; ror=&quot;&quot;&gt;&lt;/group-display&gt;</code> and <code>&lt;group-input  name=&quot;GALCIT&quot; ror=&quot;&quot; label=&quot;&quot;&gt;&lt;/group-input&gt;</code></p>
-<p><code>/widgets/vocabulary.js</code>
-: This JavaScript file provides a identifier/name web component suitable for displaying subjects, issn/publisher info and doi-prefix/publisher info.</p>
-
-
+<h1 id="cold---controlled-object-list-daemon">cold - (c)ontrolled
+(o)bject (l)ist (d)aemon</h1>
+<h2 id="end-points">End Points</h2>
+<p>JSON service defined end points are formed as the following. The
+following end point descriptions support the GET method.</p>
+<dl>
+<dt><code>/</code></dt>
+<dd>
+A description of the service
+</dd>
+<dt><code>/api/version</code></dt>
+<dd>
+Returns the version number of the service
+</dd>
+<dt><code>/api/people</code></dt>
+<dd>
+Returns a list of “cl_people_id” managed by <em>cold</em>
+</dd>
+<dt><code>/api/people/{CL_PEOPLE_ID}</code></dt>
+<dd>
+For a GET returns a people object, a PUT will create the people object,
+POST will replace the people object and DELETE will remove the people
+object
+</dd>
+<dt><code>/api/group</code></dt>
+<dd>
+Returns a list of “cl_group_id” managed by <em>cold</em>
+</dd>
+<dt><code>/api/group/{CL_GROUP_ID}</code></dt>
+<dd>
+For a GET returns a group object, a PUT will create the group object,
+POST will replace the group object and DELETE will remove the group
+object
+</dd>
+</dl>
+<h2 id="crosswalks">Crosswalks</h2>
+<dl>
+<dt><code>/api/crosswalk/people/{IDENTIFIER_NAME}/{IDENTIFIER_VALUE}</code></dt>
+<dd>
+Returns a list of “cl_people_id” assocated with that identifier
+</dd>
+<dt><code>/api/crosswalk/group/{IDENTIFIER_NAME}/{IDENTIFIER_VALUE}</code></dt>
+<dd>
+Returns a list of “cl_group__id” assocated with that identifier
+</dd>
+</dl>
+<p><em>cold</em> takes a REST approach to updates for managed objects.
+PUT will create a new object, POST will update it, GET will retrieve it
+and DELETE will remove it.</p>
+<h2 id="vocabularies">Vocabularies</h2>
+<p><em>cold</em> also supports end points for stable vocabularies
+mapping an indentifier to a normalized name. These are set at compile
+time because they are so slow changing.</p>
+<dl>
+<dt><code>/api/subject</code></dt>
+<dd>
+Returns a list of all the subject ids (codes)
+</dd>
+<dt><code>/api/subject/{SUBJECT_ID}</code></dt>
+<dd>
+Returns the normalized text string for that subject id
+</dd>
+<dt><code>/api/issn</code></dt>
+<dd>
+Returns a list of issn that are mapped to a publisher name
+</dd>
+<dt><code>/api/issn/{ISSN}</code></dt>
+<dd>
+Returns the normalized publisher name for that ISSN
+</dd>
+<dt><code>/api/doi-prefix</code></dt>
+<dd>
+Returns a list of DOI prefixes that map to a normalize name
+</dd>
+<dt><code>/api/doi-prefix/{DOI_PREFIX}</code></dt>
+<dd>
+Returns the normalized publisher name for that DOI prefix
+</dd>
+</dl>
+<h1 id="manage-interface">Manage interface</h1>
+<p>The management inteface is avialable at
+<code>/app/dashboard.html</code> path. This provides a dashboard which
+then interacts with the JSON side of the service to update content. The
+manage interface is built from Web Components and requires JavaScript to
+be enabled in the browser.</p>
+<h2 id="widgets">Widgets</h2>
+<p>Widgets provide the user interface for humans to manage and view the
+objects. While <strong>cold</strong> can directly host these it is
+equally possible to integrate the static components into another system,
+web service or web site. They are only static web assets. The public
+facing web service needs to control access to <strong>cold</strong> and
+the static content does not contain anything that is priviliged. The
+Widgets can be loaded indepentently in the page using the following end
+points.</p>
+<dl>
+<dt><code>/widgets/people.js</code></dt>
+<dd>
+This JavaScript file provides a display and input set of web components
+for our Person Object. Markup example
+<code>&lt;person-display honorific="Mr." given="R. S." family="Doiel" lineage="" orcid="0000-0003-0900-6903"&gt;&lt;/person-display&gt;</code>
+and
+<code>&lt;person-input honorific="Mr." given="R. S." family="Doiel" lineage="" orcid="0000-0003-0900-6903"&gt;&lt;/person-input&gt;</code>
+</dd>
+<dt><code>/widgets/groups.js</code></dt>
+<dd>
+This JavaScript file provides a display and input set of web components
+for our Markup example
+<code>&lt;group-display name="GALCIT" ror=""&gt;&lt;/group-display&gt;</code>
+and
+<code>&lt;group-input  name="GALCIT" ror="" label=""&gt;&lt;/group-input&gt;</code>
+</dd>
+<dt><code>/widgets/vocabulary.js</code></dt>
+<dd>
+This JavaScript file provides a identifier/name web component suitable
+for displaying subjects, issn/publisher info and doi-prefix/publisher
+info.
+</dd>
+</dl>
 </section>
+
 <footer>
-<span>&copy; 2024 <a href="https://www.library.caltech.edu/copyright">Caltech Library</a></span>
-<address>1200 E California Blvd, Mail Code 2-32, Pasadena, CA 91125-3200</address>
+<span>&copy; 2022 <a href="https://www.library.caltech.edu/copyright">Caltech Library</a></span>
+<address>1200 E California Blvd, Mail Code 1-32, Pasadena, CA 91125-3200</address>
 <span><a href="mailto:library@caltech.edu">Email Us</a></span>
 <span>Phone: <a href="tel:+1-626-395-3405">(626)395-3405</a></span>
 </footer>
-<code><pre></pre></code>
 </body>
 </html>

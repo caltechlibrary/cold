@@ -75,24 +75,35 @@ JSON API is provided by datasetd. The following end point descriptions support t
 
 The public endpoints are (using the HTTP GET method)
 
-`/cold/api/<collection_name>`
-: A description of PostgREST information
+`/api/version`
+: Returns the version number of the datasetd service
 
-`/cold/version`
-: Returns the version number of the service
+`/api/people.ds`
+: Returns Caltech People "clpid" managed by **cold**
 
-`/cold/people.ds`
-: Returns a Caltech People "cl_people_id" managed by *cold*
-
-`/cold/people.ds/{CL_PEOPLE_ID}`
+`/api/people.ds/{CLPID}`
 : Returns sanitized people object (e.g. email is redacted)
 
-`/cold/groups.ds`
-: Returns a list of "cl_group_id" managed by *cold*
+`/api/people.ds/query/people_names`
+: Returns sanitized list of minimal people objects (clpid and name)
 
-`/cold/group.ds/{CL_GROUP_ID}`
+`/api/groups.ds`
+: Returns a list of "clgid" managed by *cold*
+
+`/api/groups.ds/{CLGID}`
 : Returns a santized group object (e.g. email is redacted)
 
+`/api/groups.ds/query/group_names`
+: Returns sanitized list of minimal group objects (clgid and name)
+
+`/api/funders.ds`
+: Returns Caltech Funders "clfid" managed by **cold**
+
+`/api/funders.ds/{CLFID}`
+: Returns a santized funder object (e.g. email is redacted)
+
+`/api/funders.ds/query/funder_names`
+: Returns sanitized list of minimal funder objects (clfid and name)
 
 Crosswalks (planned)
 --------------------
@@ -100,11 +111,14 @@ Crosswalks (planned)
 A cross walk lets you put in a collection name (e.g. people.ds, group.ds), a field name and a value and it returns a list of matching
 records. These are available from the public API.
 
-`/cold/crosswalk/people.ds/{IDENTIFIER_NAME}/{IDENTIFIER_VALUE}`
-: Returns a list of "cl_people_id" assocated with that identifier
+`/api/people.ds/query/crosswalk/{IDENTIFIER_NAME}/{IDENTIFIER_VALUE}`
+: Returns a list of "clpid" assocated with that identifier
 
-`/cold/crosswalk/group.ds/{IDENTIFIER_NAME}/{IDENTIFIER_VALUE}`
-: Returns a list of "cl_group__id" assocated with that identifier
+`/api/groups.ds/query/crosswalk/{IDENTIFIER_NAME}/{IDENTIFIER_VALUE}`
+: Returns a list of "clgid" assocated with that identifier
+
+`/api/funders.ds/query/crosswalk/{IDENTIFIER_NAME}/{IDENTIFIER_VALUE}`
+: Returns a list of "clgid" assocated with that identifier
 
 *cold* takes a REST approach to updates for managed objects.  PUT will create a new object, POST will update it, GET will retrieve it and DELETE will remove it.
 
@@ -113,22 +127,22 @@ Vocabularies
 
 **cold** and **cold_ui** also support end points for stable vocabularies mapping an indentifier to a normalized name. These are set at compile time because they are so slow changing.
 
-`/cold/subject.ds`
+`/api/subject.ds`
 : Returns a list of all the subject ids (codes)
 
-`/cold/subject.ds/{SUBJECT_ID}`
+`/api/subject.ds/{SUBJECT_ID}`
 : Returns the normalized text string for that subject id
 
-`/cold/issn.ds`
+`/api/issn.ds`
 : Returns a list of issn that are mapped to a publisher name
 
-`/cold/issn.ds/{ISSN}`
+`/api/issn.ds/{ISSN}`
 : Returns the normalized publisher name for that ISSN
 
-`/cold/doi_prefix.ds`
+`/api/doi_prefix.ds`
 : Returns a list of DOI prefixes that map to a normalize name
 
-`/cold/doi_prefix.ds/{DOI_PREFIX}`
+`/api/doi_prefix.ds/{DOI_PREFIX}`
 : Returns the normalized publisher name for that DOI prefix
 
 Management interface

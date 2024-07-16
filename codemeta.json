@@ -6,8 +6,11 @@
   "codeRepository": "https://github.com/caltechlibrary/cold",
   "issueTracker": "https://github.com/caltechlibrary/cold/issues",
   "license": "https://caltechlibrary.github.io/cold/LICENSE",
+  "copyrightYear": 2024,
+  "isAccessibleForFree": true,
   "dateCreated": "2023-12-12",
   "dateModified": "2024-07-11",
+  "releaseNotes": "Cold is a proof of concept and subject to change and not suitable for production.",
   "version": "0.0.5",
   "author": [
     {
@@ -46,6 +49,20 @@
       "@id": "https://orcid.org/0000-0001-9266-5146"
     }
   ],
+  "funder": [
+    {
+      "@id": "https://doi.org/10.13039/100006961",
+      "@type": "Organization",
+      "name": "Caltech Library"
+    }
+  ],
+  "copyrightHolder": [
+    {
+      "@id": "https://ror.org/05dxps055",
+      "@type": "Organization",
+      "name": "California Institute of Technology"
+    }
+  ],
   "developmentStatus": "concept",
   "downloadUrl": "https://github.com/caltechlibrary/cold/release/latest",
   "keywords": ["metadata", "objects", "controlled vocabulary"],
@@ -61,6 +78,10 @@
       "email": "rsdoiel@caltech.edu",
       "@id": "https://orcid.org/0000-0003-0900-6903"
     }
+  ],
+  "relatedLink": [
+    "https://github.com/caltechlibrary/cold_ui",
+    "https://github.com/caltechlibrary/dataset"
   ],
   "programmingLanguage": ["TypeScript", "JavaScript", "HTML", "CSS", "YAML"],
   "softwareRequirements": ["Deno >= 1.44", "Dataset >= 2.1.15", "Pandoc >= 3.1"]

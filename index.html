@@ -110,29 +110,45 @@ End Points</h2>
 descriptions support the GET method.</p>
 <p>The public endpoints are (using the HTTP GET method)</p>
 <dl>
-<dt><code>/cold/api/&lt;collection_name&gt;</code></dt>
+<dt><code>/api/version</code></dt>
 <dd>
-A description of PostgREST information
+Returns the version number of the datasetd service
 </dd>
-<dt><code>/cold/version</code></dt>
+<dt><code>/api/people.ds</code></dt>
 <dd>
-Returns the version number of the service
+Returns Caltech People “clpid” managed by <strong>cold</strong>
 </dd>
-<dt><code>/cold/people.ds</code></dt>
-<dd>
-Returns a Caltech People “cl_people_id” managed by <em>cold</em>
-</dd>
-<dt><code>/cold/people.ds/{CL_PEOPLE_ID}</code></dt>
+<dt><code>/api/people.ds/{CLPID}</code></dt>
 <dd>
 Returns sanitized people object (e.g. email is redacted)
 </dd>
-<dt><code>/cold/groups.ds</code></dt>
+<dt><code>/api/people.ds/query/people_names</code></dt>
 <dd>
-Returns a list of “cl_group_id” managed by <em>cold</em>
+Returns sanitized list of minimal people objects (clpid and name)
 </dd>
-<dt><code>/cold/group.ds/{CL_GROUP_ID}</code></dt>
+<dt><code>/api/groups.ds</code></dt>
+<dd>
+Returns a list of “clgid” managed by <em>cold</em>
+</dd>
+<dt><code>/api/groups.ds/{CLGID}</code></dt>
 <dd>
 Returns a santized group object (e.g. email is redacted)
+</dd>
+<dt><code>/api/groups.ds/query/group_names</code></dt>
+<dd>
+Returns sanitized list of minimal group objects (clgid and name)
+</dd>
+<dt><code>/api/funders.ds</code></dt>
+<dd>
+Returns Caltech Funders “clfid” managed by <strong>cold</strong>
+</dd>
+<dt><code>/api/funders.ds/{CLFID}</code></dt>
+<dd>
+Returns a santized funder object (e.g. email is redacted)
+</dd>
+<dt><code>/api/funders.ds/query/funder_names</code></dt>
+<dd>
+Returns sanitized list of minimal funder objects (clfid and name)
 </dd>
 </dl>
 <h2 id="crosswalks-planned">Crosswalks (planned)</h2>
@@ -140,13 +156,17 @@ Returns a santized group object (e.g. email is redacted)
 group.ds), a field name and a value and it returns a list of matching
 records. These are available from the public API.</p>
 <dl>
-<dt><code>/cold/crosswalk/people.ds/{IDENTIFIER_NAME}/{IDENTIFIER_VALUE}</code></dt>
+<dt><code>/api/people.ds/query/crosswalk/{IDENTIFIER_NAME}/{IDENTIFIER_VALUE}</code></dt>
 <dd>
-Returns a list of “cl_people_id” assocated with that identifier
+Returns a list of “clpid” assocated with that identifier
 </dd>
-<dt><code>/cold/crosswalk/group.ds/{IDENTIFIER_NAME}/{IDENTIFIER_VALUE}</code></dt>
+<dt><code>/api/groups.ds/query/crosswalk/{IDENTIFIER_NAME}/{IDENTIFIER_VALUE}</code></dt>
 <dd>
-Returns a list of “cl_group__id” assocated with that identifier
+Returns a list of “clgid” assocated with that identifier
+</dd>
+<dt><code>/api/funders.ds/query/crosswalk/{IDENTIFIER_NAME}/{IDENTIFIER_VALUE}</code></dt>
+<dd>
+Returns a list of “clgid” assocated with that identifier
 </dd>
 </dl>
 <p><em>cold</em> takes a REST approach to updates for managed objects.
@@ -158,27 +178,27 @@ points for stable vocabularies mapping an indentifier to a normalized
 name. These are set at compile time because they are so slow
 changing.</p>
 <dl>
-<dt><code>/cold/subject.ds</code></dt>
+<dt><code>/api/subject.ds</code></dt>
 <dd>
 Returns a list of all the subject ids (codes)
 </dd>
-<dt><code>/cold/subject.ds/{SUBJECT_ID}</code></dt>
+<dt><code>/api/subject.ds/{SUBJECT_ID}</code></dt>
 <dd>
 Returns the normalized text string for that subject id
 </dd>
-<dt><code>/cold/issn.ds</code></dt>
+<dt><code>/api/issn.ds</code></dt>
 <dd>
 Returns a list of issn that are mapped to a publisher name
 </dd>
-<dt><code>/cold/issn.ds/{ISSN}</code></dt>
+<dt><code>/api/issn.ds/{ISSN}</code></dt>
 <dd>
 Returns the normalized publisher name for that ISSN
 </dd>
-<dt><code>/cold/doi_prefix.ds</code></dt>
+<dt><code>/api/doi_prefix.ds</code></dt>
 <dd>
 Returns a list of DOI prefixes that map to a normalize name
 </dd>
-<dt><code>/cold/doi_prefix.ds/{DOI_PREFIX}</code></dt>
+<dt><code>/api/doi_prefix.ds/{DOI_PREFIX}</code></dt>
 <dd>
 Returns the normalized publisher name for that DOI prefix
 </dd>

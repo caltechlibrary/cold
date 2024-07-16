@@ -81,29 +81,8 @@ The following end point descriptions support the GET method. They could be prefi
 : For a GET returns a funder object, a PUT will create the funder object, POST will replace the funder object and DELETE will remove the funder object
 
 
-```/api/crosswalk```
+```/api/<<COLLDECTION_NAME>>/query/crosswalk/<<IDENTIFIER_NAME>>/<<IDENTIFIER_NAME>>```
 : Returns help on how to crosswalk from one identifier to the internal identifier
-
-```/api/crosswalk/people.ds```
-: Returns a list of identifiers available for "people" objects
-
-```/api/crosswalk/people.ds/{IDENTIFIER_NAME}/{IDENTIFIER}```
-: Returns a list of "cl_people_id" assocated with that identifier
-
-```/api/crosswalk/groups.ds```
-: Returns a list of identifiers available for "group" objects
-
-```/api/crosswalk/groups.ds/{IDENTIFIER_NAME}/{IDENTIFIER}```
-: Returns a list of "cl_group__id" assocated with that identifier
-
-```/api/crosswalk/funders.ds```
-: Returns a list of identifiers available for "funder" objects
-
-```/api/crosswalk/funders.ds/{IDENTIFIER_NAME}/{IDENTIFIER}```
-: Returns a list of "cl_funder_id" assocated with that identifier
-
-
-*cold* takes a REST approach to updates for managed objects.  POST will create a new object, PATH will update a part of it and PUT will update the whole object. GET will retrieve it and DELETE Will replace it.
 
 ## Vocabularies
 
@@ -120,7 +99,6 @@ The following end point descriptions support the GET method. They could be prefi
 
 ```/api/issn.ds/{ISSN}```
 : Returns the normalized publisher name for that ISSN
-
 
 ```/api/doi_prefix.ds```
 : Returns a list of DOI prefixes that map to a normalize name

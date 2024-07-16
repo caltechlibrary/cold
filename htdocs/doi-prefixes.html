@@ -1,23 +1,31 @@
 <!DOCTYPE html>
-<html lang="en-US">
+<html lang="en">
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <title>COLD Public API</title>
-    <link rel="stylesheet" href="/css/site.css">
+    <title>COLD (Controlled Object List and Datum (Concept))</title>
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="https://caltechlibrary.github.io/css/site.css">
 </head>
 <body>
 <header>
-<a href="http://library.caltech.edu" title="link to Caltech Library Homepage"><img src="/assets/liblogo.gif" alt="Caltech Library logo"></a>
+<a href="http://library.caltech.edu" title="link to Caltech Library Homepage"><img src="https://caltechlibrary.github.io/assets/liblogo.gif" alt="Caltech Library logo"></a>
 </header>
 <nav>
 <ul>
-<li><a href="/" title="return to dashboard">Dashboard</a></li>
+    <li><a href="/">Home</a></li>
+    <li><a href="index.html">README</a></li>
+    <li><a href="LICENSE">LICENSE</a></li>
+    <li><a href="install.html">INSTALL</a></li>
+    <li><a href="user_manual.html">User Manual</a></li>
+    <li><a href="about.html">About</a></li>
+    <li><a href="https://github.com/caltechlibrary/cold">GitHub</a></li>
 </ul>
 </nav>
-<section>
 
-<h1>DOI Prefix</h1>
-<div id="doi-prefix-list">Fetching doi-prefix list</div>
+<section>
+<h1 id="doi-prefix">DOI Prefix</h1>
+<div id="doi-prefix-list">
+Fetching doi-prefix list
+</div>
 <script type="module" src="./widgets/config.js"></script>
 <script type="module" src="./widgets/vocabulary.js"></script>
 <script type="module">
@@ -51,15 +59,13 @@ oReq.addEventListener('load', updatePage);
 oReq.open('GET', `${Cfg.prefix_path}/api/doi-prefix`);
 oReq.send();
 </script>
-
-
 </section>
+
 <footer>
-<span>&copy; 2024 <a href="https://www.library.caltech.edu/copyright">Caltech Library</a></span>
-<address>1200 E California Blvd, Mail Code 2-32, Pasadena, CA 91125-3200</address>
+<span>&copy; 2022 <a href="https://www.library.caltech.edu/copyright">Caltech Library</a></span>
+<address>1200 E California Blvd, Mail Code 1-32, Pasadena, CA 91125-3200</address>
 <span><a href="mailto:library@caltech.edu">Email Us</a></span>
 <span>Phone: <a href="tel:+1-626-395-3405">(626)395-3405</a></span>
 </footer>
-<code><pre></pre></code>
 </body>
 </html>

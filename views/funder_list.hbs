@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en-US">
 {{>head}}
-<body>
 {{>header}}
 <nav>
 <ul>
@@ -9,13 +8,12 @@
 </ul>
 </nav>
 <section>
-<h1>CaltechGROUPS</h1>
+<h1>CaltechFUNDERS</h1>
 <ul>
-{{#people_list}}
-  <li><a href="{{base_path}}/people/{{clpid}}" title="view people details">{{family_name}}, {{given_name}}</a></li>
-{{/people_list}}
+{{#funder_list}}
+  <li><a href="{{base_path}}/funders/{{clfid}}" title="view funder details">{{name}}</a></li>
+{{/funder_list}}
 </ul>
 </section>
 {{>footer}}
-</body>
 </html>

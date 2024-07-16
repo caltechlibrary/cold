@@ -131,40 +131,12 @@ For a GET returns a funder object, a PUT will create the funder object,
 POST will replace the funder object and DELETE will remove the funder
 object
 </dd>
-<dt><code>/api/crosswalk</code></dt>
+<dt><code>/api/&lt;&lt;COLLDECTION_NAME&gt;&gt;/query/crosswalk/&lt;&lt;IDENTIFIER_NAME&gt;&gt;/&lt;&lt;IDENTIFIER_NAME&gt;&gt;</code></dt>
 <dd>
 Returns help on how to crosswalk from one identifier to the internal
 identifier
 </dd>
-<dt><code>/api/crosswalk/people.ds</code></dt>
-<dd>
-Returns a list of identifiers available for “people” objects
-</dd>
-<dt><code>/api/crosswalk/people.ds/{IDENTIFIER_NAME}/{IDENTIFIER}</code></dt>
-<dd>
-Returns a list of “cl_people_id” assocated with that identifier
-</dd>
-<dt><code>/api/crosswalk/groups.ds</code></dt>
-<dd>
-Returns a list of identifiers available for “group” objects
-</dd>
-<dt><code>/api/crosswalk/groups.ds/{IDENTIFIER_NAME}/{IDENTIFIER}</code></dt>
-<dd>
-Returns a list of “cl_group__id” assocated with that identifier
-</dd>
-<dt><code>/api/crosswalk/funders.ds</code></dt>
-<dd>
-Returns a list of identifiers available for “funder” objects
-</dd>
-<dt><code>/api/crosswalk/funders.ds/{IDENTIFIER_NAME}/{IDENTIFIER}</code></dt>
-<dd>
-Returns a list of “cl_funder_id” assocated with that identifier
-</dd>
 </dl>
-<p><em>cold</em> takes a REST approach to updates for managed objects.
-POST will create a new object, PATH will update a part of it and PUT
-will update the whole object. GET will retrieve it and DELETE Will
-replace it.</p>
 <h2 id="vocabularies">Vocabularies</h2>
 <p><em>cold</em> also supports end points for stable vocabularies
 mapping an indentifier to a normalized name. These are set at compile
@@ -178,7 +150,7 @@ Returns a list of all the subject ids (codes)
 <dd>
 Returns the normalized text string for that subject id
 </dd>
-<dt><code>/api/issn./ds</code></dt>
+<dt><code>/api/issn.ds</code></dt>
 <dd>
 Returns a list of issn that are mapped to a publisher name
 </dd>

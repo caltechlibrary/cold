@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en-US">
+{{>head}}
+<body>
+{{>header}}
+<nav>
+<ul>
+<li><a href="{{base_path}}/" title="return to dashboard">Dashboard</a></li>
+<li><a href="{{base_path}}/doi_prefix/" title="return to doi_prefix list">DOI Prefixs</a></li>
+</ul>
+</nav>
+<section>
+
+<h1>{{doi_prefix.name}}</h1>
+<div class="identifier">{{doi_prefix}}</div>
+
+{{#if doi_prefix.description}}<div class="description">{{doi_prefix.description}}</div>{{/if}}
+
+<div class="labeled_dates">
+{{#if doi_prefix.updated}}<span class="updated">updated: {{doi_prefix.updated}}</span>{{/if}}
+</div>
+
+
+<p>
+</section>
+{{>footer}}
+<code><pre>{{debug_src}}</pre></code>
+</body>
+</html>

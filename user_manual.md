@@ -1,5 +1,5 @@
 
 # User Manual
 
-- [cold](cold.1.md)
-
+- [Installation](INSTALL.html)
+- [Site search](search.html)
