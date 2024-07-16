@@ -48,3 +48,81 @@ collections:
     frame_write: false
     # This sets versioning behavior
     versions: false
+  - dataset: cold_ui/funders.ds
+    query:
+      funder_names: select json_object('clfid', src->'clfid', 'funder_name', src->'name') as src from funders order by src->'name' ASC;
+    # What follows are object level permissions
+    keys: true
+    create: false
+    read: true
+    update: false
+    delete: false
+    # These are attachment related permissions
+    attachments: false
+    attach: false
+    retrieve: false
+    prune: false
+    # These are frame level permissions
+    frame_read: false
+    frame_write: false
+    # This sets versioning behavior
+    versions: false
+  - dataset: cold_ui/subjects.ds
+    query:
+      subject_names: select json_object('clsid', src->'clsid', 'subject_name', src->'name') as src from subjects order by src->'name' ASC;
+    # What follows are object level permissions
+    keys: true
+    create: false
+    read: true
+    update: false
+    delete: false
+    # These are attachment related permissions
+    attachments: false
+    attach: false
+    retrieve: false
+    prune: false
+    # These are frame level permissions
+    frame_read: false
+    frame_write: false
+    # This sets versioning behavior
+    versions: false
+  - dataset: cold_ui/issn.ds
+    query:
+      issn_names: select json_object('issn', src->'issn', 'issn_name', src->'name') as src from issn order by src->'name' ASC;
+    # What follows are object level permissions
+    keys: true
+    create: false
+    read: true
+    update: false
+    delete: false
+    # These are attachment related permissions
+    attachments: false
+    attach: false
+    retrieve: false
+    prune: false
+    # These are frame level permissions
+    frame_read: false
+    frame_write: false
+    # This sets versioning behavior
+    versions: false
+  - dataset: cold_ui/doi_prefix.ds
+    query:
+      doi_prefix_names: select json_object('doi_prefix', src->'doi_prefix', 'doi_prefix', src->'name') as src from doi_prefix order by src->'name' ASC;
+    # What follows are object level permissions
+    keys: true
+    create: false
+    read: true
+    update: false
+    delete: false
+    # These are attachment related permissions
+    attachments: false
+    attach: false
+    retrieve: false
+    prune: false
+    # These are frame level permissions
+    frame_read: false
+    frame_write: false
+    # This sets versioning behavior
+    versions: false
+
+

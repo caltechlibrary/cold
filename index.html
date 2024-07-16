@@ -24,34 +24,31 @@
 <section>
 <h1 id="cold---controlled-object-lists-and-datum">cold - (c)ontrolled
 (o)bject (l)ists and (d)atum</h1>
-<p>This repository implements a service to manage a controlled objects
-and datum (e.g. vocabularies). The public facing API is in this
-repository. It is built using TypeScript and Deno to presnet the public
-facing implementaiton. The management user interface is in a separate
+<p>This repository implements the public facing web service of managed
+controlled object lists and datum (e.g. vocabularies). It is built using
+TypeScript and Deno. The management user interface is in a separate
 GitHub repository, <a
-href="https://github.com/caltechlibrary/cold_ui">cold_ui</a>. It should
-be restricted to staff access and since it allows creating, replacing
-and deleting of objects and datum. The public facing API is here. It
-uses it’s own datasetd YAML file restricting access to read only
-methods.</p>
-<p>If you are using Git then you can do a recursive checkout to get both
-the public safing API and the staff cold_ui repositories together in the
-same tree structure (e.g. <code>./cold</code> and
-<code>./cold/cold_ui</code>).</p>
-<p>The deployed app will come in two forms. It will include a read only
-API along with connecting JavaScript for using the cold data by
-application. A private read/write implementation will be included for
-managing the cold objects. This will have access control inforced by
-Shibboleth on our application web server.</p>
+href="https://github.com/caltechlibrary/cold_ui">github.com/caltechlibrary/cold_ui</a>.</p>
+<p><strong>cold</strong> has it’s own datasetd YAML file creating a read
+only JSON API in addition to providing a static content web service.</p>
+<p>To combine the public and management repositories into a common
+directory structure tou can use Git’s recursive clone to get both the
+public API and the management API implemented in the
+<strong>cold_ui</strong> repository as a submodule of
+<strong>cold</strong>.</p>
+<p>You will need to configure (control access) via your front end web
+server software (e.g. Apache2, NginX , Lighttpd) using a single sign-on
+implementation like Shibboleth.</p>
 <h2 id="overview">Overview</h2>
 <p>Caltech Library maintains a list of people, groups and funders and
-their related pids. This started being managed in Google Sheets, then in
-CSV files. The number of objects involved has increased. It makes sense
-to provide a more robust implementation allowing for easier curation of
-objects. The objects currently are relatively flat. Here’s an example
-JSON object representing R. S. Doiel showing the internal identifier
-named “cl_people_id”, name object, email, orcid and Caltech affiliation
-is shown both via a boolean field and a ROR.</p>
+their related pids. For many years this was managed using a spreadsheet,
+then Google Sheets, and more recently in CSV files. Over time the number
+of objects involved has increased. It makes sense to provide a more
+robust implementation allowing for easier curation of objects. The
+objects currently are relatively flat. Here’s an example JSON object
+representing R. S. Doiel showing the internal identifier named
+“cl_people_id”, name object, email, orcid and Caltech affiliation is
+shown both via a boolean field and a ROR.</p>
 <div class="sourceCode" id="cb1"><pre
 class="sourceCode json"><code class="sourceCode json"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;cl_people_id&quot;</span><span class="fu">:</span> <span class="st">&quot;Doiel-R-S&quot;</span><span class="fu">,</span></span>
@@ -66,7 +63,7 @@ class="sourceCode json"><code class="sourceCode json"><span id="cb1-1"><a href="
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;division&quot;</span><span class="fu">:</span> <span class="st">&quot;Libraries Group&quot;</span><span class="fu">,</span></span>
 <span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;updated&quot;</span><span class="fu">:</span> <span class="st">&quot;2022-03-09&quot;</span></span>
 <span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;ror&quot;</span><span class="er">:</span> <span class="st">&quot;https://ror.org/05dxps055&quot;</span></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span> </span></code></pre></div>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
 <p>A group object for Caltech Library is relatively flat.</p>
 <div class="sourceCode" id="cb2"><pre
 class="sourceCode json"><code class="sourceCode json"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
@@ -92,87 +89,28 @@ class="sourceCode json"><code class="sourceCode json"><span id="cb2-1"><a href="
 <span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;viaf&quot;</span><span class="fu">:</span> <span class="st">&quot;&quot;</span><span class="fu">,</span></span>
 <span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;ror&quot;</span><span class="fu">:</span> <span class="st">&quot;https://ror.org/05dxps055&quot;</span></span>
 <span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
-<p>Both these records can easily be represented in a Postgres table and
-the SQL to bookstrap that can be generated by Newt.</p>
-<p>A simple YAML based model description used to by Newt to generate the
-SQL too bootstrap Cold’s models. Further improvement to the modules,
-views and functions can then be maintained in the SQL sources generated.
-In addition to providing the outline of the models the YAML file also
-defines the route handling (the path mapping of urls) that Newt uses to
-provide access to Postgres via PostgREST as well as optionally
-templating the result via Pandoc service.</p>
-<p>A Newt description of the person model would like the following. The
-SQL bootstrap is generated automatically by Newt using the option
-<code>-pg-models</code>.</p>
-<div class="sourceCode" id="cb3"><pre
-class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">models</span><span class="kw">:</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">-</span><span class="at"> </span><span class="fu">model</span><span class="kw">:</span><span class="at"> cl_people</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="kw">-</span><span class="at"> </span><span class="fu">var</span><span class="kw">:</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">cl_people_id</span><span class="kw">:</span><span class="at"> String</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">family_name</span><span class="kw">:</span><span class="at"> String</span></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">given_name</span><span class="kw">:</span><span class="at"> String</span></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">orcid</span><span class="kw">:</span><span class="at"> ORCID</span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">author_id</span><span class="kw">:</span><span class="at"> String</span></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">directory_id</span><span class="kw">:</span><span class="at"> String</span></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">caltech</span><span class="kw">:</span><span class="at"> Boolean</span></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">status</span><span class="kw">:</span><span class="at"> Boolean</span></span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">direcotry_person_type</span><span class="kw">:</span><span class="at"> String</span></span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">division</span><span class="kw">:</span><span class="at"> String</span></span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">updated</span><span class="kw">:</span><span class="at"> Date 2006-01-02</span></span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">ror</span><span class="kw">:</span><span class="at"> ROR</span></span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="kw">-</span><span class="at"> </span><span class="fu">model</span><span class="kw">:</span><span class="at"> cl_group</span></span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="kw">-</span><span class="at"> </span><span class="fu">var</span><span class="kw">:</span></span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">cl_group_id</span><span class="kw">:</span><span class="at"> String Primary Key</span></span>
-<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">name</span><span class="kw">:</span><span class="at"> String</span></span>
-<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">alternative</span><span class="kw">:</span><span class="at"> Array String</span></span>
-<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">updated</span><span class="kw">:</span><span class="at"> Timestamp</span></span>
-<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="co">  # Date group was added to Group List</span></span>
-<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">date</span><span class="kw">:</span><span class="at"> Date 2006-01-02</span></span>
-<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">email</span><span class="kw">:</span><span class="at"> EMail</span></span>
-<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">description</span><span class="kw">:</span><span class="at"> Text</span></span>
-<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">start</span><span class="kw">:</span><span class="at"> String</span></span>
-<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a><span class="co">  # approx_starts indicates if the &quot;start&quot; is an approximate (true) or exact (false)</span></span>
-<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">approx_start</span><span class="kw">:</span><span class="at"> Boolean</span></span>
-<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a><span class="co">  # activity is a string value holding either &quot;active&quot; or &quot;inactive&quot;  </span></span>
-<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">activity</span><span class="kw">:</span><span class="at"> String</span></span>
-<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">end</span><span class="kw">:</span><span class="at"> String</span></span>
-<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a><span class="co">  # approx_end indicates if the &quot;start&quot; is an approximate (true) or exact (false)</span></span>
-<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">approx_end</span><span class="kw">:</span><span class="at"> Boolean</span></span>
-<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">website</span><span class="kw">:</span><span class="at"> Url</span></span>
-<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">pi</span><span class="kw">:</span><span class="at"> String</span></span>
-<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">parent</span><span class="kw">:</span><span class="at"> String</span></span>
-<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a><span class="co">  # prefix holds the DOI prefix associated with the group</span></span>
-<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">prefix</span><span class="kw">:</span><span class="at"> String</span></span>
-<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">grid</span><span class="kw">:</span><span class="at"> String</span></span>
-<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">isni</span><span class="kw">:</span><span class="at"> ISNI</span></span>
-<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">ringold</span><span class="kw">:</span><span class="at"> String</span></span>
-<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">viaf</span><span class="kw">:</span><span class="at"> String</span></span>
-<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">ror</span><span class="kw">:</span><span class="at"> ROR</span></span></code></pre></div>
-<p>Newt takes a declarative approach to defining the backend, middleware
-data flow and generate resulting web content.</p>
 <h2 id="approach-details">Approach Details</h2>
 <ul>
-<li><strong>cold</strong> is built to run against datasetd providing the
-back end with a front end built from templated HTML plus static CSS and
-JavaScript</li>
-<li>Newt is used to speed application development through code
-generation, mostly HTML and JavaScript</li>
-<li>Newt is also used for code generatation, e.g. Newt’s Mustache
-templates</li>
+<li><strong>cold</strong> is built on datasetd providing static file
+hosting as well as a readonly JSON API to a selection of dataset
+collections (e.g. Caltech People and Groups).</li>
+<li><strong>cold_ui</strong> (a submodule repository) provides a
+management interface. It uses a different instance of datasetd providing
+a read/write JSON API and a typescript web service for the managing the
+data.</li>
+<li><strong>cold</strong> and <strong>cold_ui</strong> use <a
+href="https://handlerbarsjs.com">handlerbars</a> templates, each with
+their own “view” template heirarchies.</li>
 </ul>
-<p>An important point to taking this approach. The application has zero
-concept of users and access control. Access control is defered to our
-front end web server using Shibboleth.</p>
-<p><strong>cold</strong> is implemented as two deployments of datasetd.
-One instance provides a read only JSON API, the other instances is a
-restricted read/write API.</p>
+<p><strong>An important point is access control is deferred to the front
+end web server (e.g. Apache2+Shibboleth).</strong></p>
 <h2 id="colds-read-only-end-points"><strong>cold</strong>’s Read-Only
 End Points</h2>
-<p>JSON API is provided by PostgREST. The following end point
+<p>JSON API is provided by datasetd. The following end point
 descriptions support the GET method.</p>
 <p>The public endpoints are (using the HTTP GET method)</p>
 <dl>
-<dt><code>/</code></dt>
+<dt><code>/cold/api/&lt;collection_name&gt;</code></dt>
 <dd>
 A description of PostgREST information
 </dd>
@@ -180,64 +118,33 @@ A description of PostgREST information
 <dd>
 Returns the version number of the service
 </dd>
-<dt><code>/cold/people</code></dt>
+<dt><code>/cold/people.ds</code></dt>
 <dd>
 Returns a Caltech People “cl_people_id” managed by <em>cold</em>
 </dd>
-<dt><code>/cold/people/{CL_PEOPLE_ID}</code></dt>
+<dt><code>/cold/people.ds/{CL_PEOPLE_ID}</code></dt>
 <dd>
 Returns sanitized people object (e.g. email is redacted)
 </dd>
-<dt><code>/cold/group</code></dt>
+<dt><code>/cold/groups.ds</code></dt>
 <dd>
 Returns a list of “cl_group_id” managed by <em>cold</em>
 </dd>
-<dt><code>/cold/group/{CL_GROUP_ID}</code></dt>
+<dt><code>/cold/group.ds/{CL_GROUP_ID}</code></dt>
 <dd>
 Returns a santized group object (e.g. email is redacted)
 </dd>
 </dl>
-<h2 id="colds-readwrite-end-points"><strong>cold</strong>’s Read/Write
-End Points</h2>
-<p>JSON API is provided by PostgREST. The following end point
-descriptions support the GET method.</p>
-<p>The public endpoints are (using the HTTP GET method)</p>
+<h2 id="crosswalks-planned">Crosswalks (planned)</h2>
+<p>A cross walk lets you put in a collection name (e.g. people.ds,
+group.ds), a field name and a value and it returns a list of matching
+records. These are available from the public API.</p>
 <dl>
-<dt><code>/cold/admin</code></dt>
-<dd>
-A description of PostgREST information
-</dd>
-<dt><code>/cold/admin/people</code></dt>
-<dd>
-Returns a Caltech People “cl_people_id” managed by <em>cold</em>.
-</dd>
-<dt><code>/cold/admin/people/{CL_PEOPLE_ID}</code></dt>
-<dd>
-Returns complete people objects (e.g. has full contact information). A
-POST will create a people object, PUT will update a people object,
-DELETE will remove a people object
-</dd>
-<dt><code>/cold/admin/group</code></dt>
-<dd>
-Returns a list of “cl_group_id” managed by <em>cold</em>
-</dd>
-<dt><code>/cold/admin/group/{CL_GROUP_ID}</code></dt>
-<dd>
-For a GET returns a group object, a POST will create the group object,
-PUT will replace the group object and DELETE will remove the group
-object
-</dd>
-</dl>
-<h2 id="crosswalks">Crosswalks</h2>
-<p>A cross walk lets you put in a collection name (e.g. people, group),
-a field name and a value and it returns a list of matching records.
-These are available from the public API.</p>
-<dl>
-<dt><code>/cold/crosswalk/people/{IDENTIFIER_NAME}/{IDENTIFIER_VALUE}</code></dt>
+<dt><code>/cold/crosswalk/people.ds/{IDENTIFIER_NAME}/{IDENTIFIER_VALUE}</code></dt>
 <dd>
 Returns a list of “cl_people_id” assocated with that identifier
 </dd>
-<dt><code>/cold/crosswalk/group/{IDENTIFIER_NAME}/{IDENTIFIER_VALUE}</code></dt>
+<dt><code>/cold/crosswalk/group.ds/{IDENTIFIER_NAME}/{IDENTIFIER_VALUE}</code></dt>
 <dd>
 Returns a list of “cl_group__id” assocated with that identifier
 </dd>
@@ -246,78 +153,44 @@ Returns a list of “cl_group__id” assocated with that identifier
 PUT will create a new object, POST will update it, GET will retrieve it
 and DELETE will remove it.</p>
 <h2 id="vocabularies">Vocabularies</h2>
-<p><em>cold</em> also supports end points for stable vocabularies
-mapping an indentifier to a normalized name. These are set at compile
-time because they are so slow changing.</p>
+<p><strong>cold</strong> and <strong>cold_ui</strong> also support end
+points for stable vocabularies mapping an indentifier to a normalized
+name. These are set at compile time because they are so slow
+changing.</p>
 <dl>
-<dt><code>/cold/subject</code></dt>
+<dt><code>/cold/subject.ds</code></dt>
 <dd>
 Returns a list of all the subject ids (codes)
 </dd>
-<dt><code>/cold/subject/{SUBJECT_ID}</code></dt>
+<dt><code>/cold/subject.ds/{SUBJECT_ID}</code></dt>
 <dd>
 Returns the normalized text string for that subject id
 </dd>
-<dt><code>/cold/issn</code></dt>
+<dt><code>/cold/issn.ds</code></dt>
 <dd>
 Returns a list of issn that are mapped to a publisher name
 </dd>
-<dt><code>/cold/issn/{ISSN}</code></dt>
+<dt><code>/cold/issn.ds/{ISSN}</code></dt>
 <dd>
 Returns the normalized publisher name for that ISSN
 </dd>
-<dt><code>/cold/doi-prefix</code></dt>
+<dt><code>/cold/doi_prefix.ds</code></dt>
 <dd>
 Returns a list of DOI prefixes that map to a normalize name
 </dd>
-<dt><code>/cold/doi-prefix/{DOI_PREFIX}</code></dt>
+<dt><code>/cold/doi_prefix.ds/{DOI_PREFIX}</code></dt>
 <dd>
 Returns the normalized publisher name for that DOI prefix
 </dd>
 </dl>
-<h2 id="manage-interface">Manage interface</h2>
-<p>The management inteface is avialable at
-<code>/app/dashboard.html</code> path. This provides a dashboard which
-then interacts with the JSON side of the service to update content. The
-manage interface is built from Web Components and requires JavaScript to
-be enabled in the browser.</p>
-<h2 id="widgets">Widgets</h2>
-<p>Widgets are implementations of one or more Web Components. They
-provide the user interface for humans to manage and view the objects.
-While <strong>cold</strong> can directly host these it is equally
-possible to integrate the static components into another system, web
-service or web site. The public facing web service needs to control
-access to <strong>cold</strong> and the static content does not contain
-anything that is priviliged. The Widgets can be loaded indepentently in
-the page using the following end points.</p>
-<dl>
-<dt><code>/widgets/person.js</code></dt>
-<dd>
-This JavaScript file provides a display and input set of web components
-for our Person Object. Markup example
-<code>&lt;person-display honorific="Mr." given="R. S." family="Doiel" lineage="" orcid="0000-0003-0900-6903"&gt;&lt;/person-display&gt;</code>
-and
-<code>&lt;person-input honorific="Mr." given="R. S." family="Doiel" lineage="" orcid="0000-0003-0900-6903"&gt;&lt;/person-input&gt;</code>
-</dd>
-<dt><code>/widgets/group.js</code></dt>
-<dd>
-This JavaScript file provides a display and input set of web components
-for our Markup example
-<code>&lt;group-display name="GALCIT" ror=""&gt;&lt;/group-display&gt;</code>
-and
-<code>&lt;group-input  name="GALCIT" ror="" label=""&gt;&lt;/group-input&gt;</code>
-</dd>
-<dt><code>/widgets/vocabulary.js</code></dt>
-<dd>
-This JavaScript file provides a identifier/name web component suitable
-for displaying subjects, issn/publisher info and doi-prefix/publisher
-info.
-</dd>
-</dl>
+<h2 id="management-interface">Management interface</h2>
+<p>The management inteface is avialable at <code>/cold/cold_ui/</code>
+path. This provides a dashboard which then interacts with the JSON side
+of the service to update content. The manage interface is built includes
+Web Components and requires JavaScript to be enabled in the browser.</p>
 <h2 id="requirements">Requirements</h2>
 <ul>
-<li>Newt &gt;= 0.0.8</li>
-<li>Dataset &gt;= 2.2.13 (using SQL JSON storage) and PostgreSQL &gt;=
+<li>Dataset &gt;= 2.2.15 (using SQL JSON storage) and PostgreSQL &gt;=
 16</li>
 <li>To build the UI and compile the assets needed by
 <strong>cold</strong>
@@ -327,8 +200,9 @@ info.
 documentation and man page)</li>
 <li>A text editor (e.g. Zed, VSCode, micro, nano, vi, emacs …)</li>
 </ul></li>
-<li>A front end web server with SSO or Basic Auth support</li>
-<li>A web browser with JavaScript support</li>
+<li>A front end web server with SSO or Basic Auth (e.g. during
+development) support</li>
+<li>A web browser with JavaScript support enabled</li>
 </ul>
 <h2 id="recommended">Recommended</h2>
 <p>Most package managers running on various flavors of Unix (e.g. macOS,
@@ -348,17 +222,6 @@ and follow instructions to compile Pandoc 3</li>
 [https://postgrest.org/en/stable/install.html#building-from-source]) and
 following instructions to compile PostgREST 11</li>
 </ol>
-<h3 id="a-note-about-macos-postgres-and-postgrest">A note about macOS,
-Postgres and PostgREST</h3>
-<p>I have found the easiest most reliable way to get Postgres and
-PostgREST up and running on macOS is via <a
-href="https://postgres.app">Postgres APP</a>.</p>
-<p>If you take this route you want to install the version with the
-heading <a href="https://postgresapp.com/downloads.html">Postgres.app
-with all currently supported versions (Universal/Intel)</a>. This will
-insure you have the necessary libraries install that <a
-href="https://postgrest.org">PostgREST</a> needs when compiling from
-source (i.e. <code>libpg</code>).</p>
 </section>
 
 <footer>

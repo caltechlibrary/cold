@@ -28,16 +28,15 @@
 <p>cold [OPTIONS] [SETTINGS_FILENAME]</p>
 <h1 id="description">DESCRIPTION</h1>
 <p>Run the controlled object list and datum.</p>
-<p>This implements a service to maintain a controlled list of objects
-such as Caltech Library uses for crosswalking data using pid associated
-with a person, group or funding source. It is also used to maintain
-system independant vocabularies.</p>
+<p><strong>cold</strong> implements a web service to maintain a
+controlled list of objects such as Caltech Library uses for crosswalking
+data using pid associated with a person, group or funding source. It is
+also used to maintain system independant vocabularies.</p>
 <h1 id="requirements">Requirements</h1>
 <ul>
-<li>Newt &gt;= 0.0.5</li>
-<li>Postgres 15</li>
-<li>PostgREST 11</li>
-<li>Pandoc &gt; 3</li>
+<li>Dataset &gt;= 2.1.15</li>
+<li>Deno &gt;= 1.44</li>
+<li>Pandoc &gt; 3.1 (for building repository documentation)</li>
 </ul>
 <h1 id="overview">Overview</h1>
 <p>Caltech Library maintains a list of people, groups and funders and
@@ -49,17 +48,18 @@ of the name attribute. Here’s an example JSON object representing R. S.
 Doiel showing the internal identifier named “cl_people_id”, name object,
 email, orcid and ‘<span class="citation"
 data-cites="affiliation">@affiliation</span>’ which contains a ROR.</p>
-<pre><code>{
-    &quot;cl_people_id&quot;: &quot;Doiel-R-S&quot;,
-    &quot;name&quot;: {
-        &quot;family&quot;: &quot;Doiel&quot;,
-        &quot;given&quot;: &quot;Robert&quot;,
-        &quot;display_name&quot;: &quot;R. S. Doiel&quot;
-    },
-    &quot;email&quot;: &quot;rsdoiel@caltech.edu&quot;,
-    &quot;orcid: &quot;0000-0003-0900-6903&quot;,
-    &quot;ror&quot;: &quot;https://ror.org/05dxps055&quot;
-} </code></pre>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;cl_people_id&quot;</span><span class="fu">:</span> <span class="st">&quot;Doiel-R-S&quot;</span><span class="fu">,</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;name&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;family&quot;</span><span class="fu">:</span> <span class="st">&quot;Doiel&quot;</span><span class="fu">,</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;given&quot;</span><span class="fu">:</span> <span class="st">&quot;Robert&quot;</span><span class="fu">,</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;display_name&quot;</span><span class="fu">:</span> <span class="st">&quot;R. S. Doiel&quot;</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">},</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;email&quot;</span><span class="fu">:</span> <span class="st">&quot;rsdoiel@caltech.edu&quot;</span><span class="fu">,</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;orcid: &quot;</span><span class="er">0000-0003-0900-6903</span><span class="dt">&quot;,</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="dt">    &quot;</span><span class="er">ror</span><span class="dt">&quot;: &quot;</span><span class="er">https</span><span class="fu">:</span><span class="er">//ror.org/05dxps055</span><span class="st">&quot;</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="st">}</span></span></code></pre></div>
 <p>Data like this can easily be manage in Postgres and then made
 available as a JSON data source via PostgREST. The prototype Newt let’s
 us easily integrate PostgREST results with Pandoc server. As a result
@@ -67,82 +67,65 @@ us easily integrate PostgREST results with Pandoc server. As a result
 not just Caltech related People, Groups and Funders but also additional
 vocabularies which we need to cordinate between systems (e.g. RDM
 instances or publication systems like feeds.library.caltech.edu).</p>
-<h1 id="build-on-n3p">Build on N3P</h1>
-<p>This iteration <strong>cold</strong> is implemented with
-Newt+Postgres+PostgREST+Pandoc (aka N3P). The <code>cold.yaml</code>
-file defines both the data models managed by cold as well as the URL
-routes and data flows needed to make available the people, groups,
-funder and vocabulary information in the desired formats (e.g. JSON,
-YAML, and CSV).</p>
-<p>Each type of list is has its own model. Each model has a related set
-of PostgREST end points for managing the model lists and generating the
-formats needed for integration with other services.</p>
-<p>In addition to the model definitions and route definitions found in
-<code>cold.yaml</code> there are several SQL files that define the
-behaviors and models managed by Postgres. These include
-<code>cold_setup.sql</code> which provides the initial setup and
-configuration for Postgres and PostgREST to talk to each other.
-<code>cold_models.sql</code> has the database schema, views, functions
-and PostgREST permissions needed to provide our data engine using
-Postgres+PostgREST as a microservice. Finally additional templates found
-in the templates directory host the HTML rendering of data views and
-management related web forms.</p>
-<p>To run the <strong>cold</strong> service in development you need to
-be running Postgres with all the models code, PostgREST configured to
-support those models, Pandoc running in server model and Newt. Newt
-provides the primary web UI by combined the data flow between Newt,
-PostgREST and Pandoc. For development this is all you need to run.</p>
-<p>In a production setting you will need a front end web server. Newt
-does not provide access control, that needs to be provided by a front
-end web server like Apache 2 or NginX. In an academic production setting
-this is done by integrating the front-end web server with a single
-sign-on system like Shibboleth. You configure your front-end web server
-as a reverse proxy to Newt which only runs on localhost.</p>
-<p>Newt can host static content related to a Newt based web application.
-These are found in the directory pointed in <code>cold.yaml</code> by
-the <code>htdocs</code> attribute. The htdocs directory holds your
-static HTML, CSS, JavaScript and any image assets you use in your web
-UI.</p>
+<h1 id="build-on-dataset-collections">Build on dataset collections</h1>
+<p>This iteration of <strong>cold</strong> is implemented using dataset
+collections and the datasetd web service. The
+<code>cold_public.yaml</code> configures datasetd to provide a read only
+JSON API as well as static file service.</p>
+<p>In the release we support two collections collections, groups.ds and
+people.ds. Additional collections will be added to support addition
+types of object lists (e.g. funders, isni mappings, doi prefix
+mappings).</p>
+<p>Each type of list is has its own model. Each model is implemented as
+a TypeScript interface. A collection of functions are also provided to
+work with the various TypeScript interfaces. These are rendered as
+JavaScript to support browser side widgets where appropriate.</p>
+<p>Deno provides the middle layer (middleware) between datasetd and your
+front end web server. You can start the middleware using a Deno task.
+There is also one supplied to start datasetd. In development you would
+execute these from a shell session(s). In production you should wrap
+these services in a systemd script (examples included in this
+repository).</p>
 <h2 id="end-points">End Points</h2>
-<p>Plain text help is built in by adding a <code>/help</code> to the URL
-path. The defined end points are formed as the following. The following
-end point descriptions support the GET method.</p>
+<p>The following end point descriptions support the GET method. They
+could be prefixed with additional path elements in a production setting
+(e.g. <code>/apps/cold/...</code>).</p>
 <dl>
 <dt><code>/</code></dt>
 <dd>
-Plain text description of the service (provided by htdocs/index.html)
+Description of the service (provided by htdocs/index.html)
 </dd>
 <dt><code>/api/version</code></dt>
 <dd>
 Returns the version number of the service based on the value set in the
 codemeta.json when the make command has been run to (re) version.sql
 </dd>
-<dt><code>/people</code></dt>
+<dt><code>/api/people.ds</code></dt>
 <dd>
 Returns a list of “cl_people_id” managed by <em>cold</em> as an HTML
 content.
 </dd>
-<dt><code>/people/{CL_PEOPLE_ID}</code></dt>
+<dt><code>/api/people.ds/{CL_PEOPLE_ID}</code></dt>
 <dd>
 For a GET returns a people object, a POST will create the people object,
 PUT will replace the people object, PATCH will replace part of an object
 and DELETE will remove the people object
 </dd>
-<dt><code>/group</code></dt>
+<dt><code>/api/groups.ds</code></dt>
 <dd>
 Returns a list of “cl_group_id” managed by <em>cold</em>
 </dd>
-<dt><code>/group/{CL_GROUP_ID}</code></dt>
+<dt><code>/api/groups.ds/{CL_GROUP_ID}</code></dt>
 <dd>
 For a GET returns a group object, a POST will create the group object,
 PUT will replace the group object, PATCH will replace part of an object
 and DELETE will remove the group object
 </dd>
-<dt><code>/funder</code></dt>
+<dt><code>/api/funder.ds</code></dt>
 <dd>
 Returns a list of “cl_funder” managed by <em>cold</em>
 </dd>
-<dt><code>/funder/{CL_funder_ID}</code></dt>
+<dt><code>/api/funder.ds/{CL_funder_ID}</code></dt>
 <dd>
 For a GET returns a funder object, a PUT will create the funder object,
 POST will replace the funder object and DELETE will remove the funder
@@ -153,27 +136,27 @@ object
 Returns help on how to crosswalk from one identifier to the internal
 identifier
 </dd>
-<dt><code>/api/crosswalk/people</code></dt>
+<dt><code>/api/crosswalk/people.ds</code></dt>
 <dd>
 Returns a list of identifiers available for “people” objects
 </dd>
-<dt><code>/api/crosswalk/people/{IDENTIFIER_NAME}/{IDENTIFIER}</code></dt>
+<dt><code>/api/crosswalk/people.ds/{IDENTIFIER_NAME}/{IDENTIFIER}</code></dt>
 <dd>
 Returns a list of “cl_people_id” assocated with that identifier
 </dd>
-<dt><code>/api/crosswalk/group</code></dt>
+<dt><code>/api/crosswalk/groups.ds</code></dt>
 <dd>
 Returns a list of identifiers available for “group” objects
 </dd>
-<dt><code>/api/crosswalk/group/{IDENTIFIER_NAME}/{IDENTIFIER}</code></dt>
+<dt><code>/api/crosswalk/groups.ds/{IDENTIFIER_NAME}/{IDENTIFIER}</code></dt>
 <dd>
 Returns a list of “cl_group__id” assocated with that identifier
 </dd>
-<dt><code>/api/crosswalk/funder</code></dt>
+<dt><code>/api/crosswalk/funders.ds</code></dt>
 <dd>
 Returns a list of identifiers available for “funder” objects
 </dd>
-<dt><code>/api/crosswalk/funder/{IDENTIFIER_NAME}/{IDENTIFIER}</code></dt>
+<dt><code>/api/crosswalk/funders.ds/{IDENTIFIER_NAME}/{IDENTIFIER}</code></dt>
 <dd>
 Returns a list of “cl_funder_id” assocated with that identifier
 </dd>
@@ -187,124 +170,31 @@ replace it.</p>
 mapping an indentifier to a normalized name. These are set at compile
 time because they are so slow changing.</p>
 <dl>
-<dt><code>/subject</code></dt>
+<dt><code>/api/subject.ds</code></dt>
 <dd>
 Returns a list of all the subject ids (codes)
 </dd>
-<dt><code>/subject/{SUBJECT_ID}</code></dt>
+<dt><code>/api/subjects.ds/{SUBJECT_ID}</code></dt>
 <dd>
 Returns the normalized text string for that subject id
 </dd>
-<dt><code>/issn</code></dt>
+<dt><code>/api/issn./ds</code></dt>
 <dd>
 Returns a list of issn that are mapped to a publisher name
 </dd>
-<dt><code>/issn/{ISSN}</code></dt>
+<dt><code>/api/issn.ds/{ISSN}</code></dt>
 <dd>
 Returns the normalized publisher name for that ISSN
 </dd>
-<dt><code>/doi-prefix</code></dt>
+<dt><code>/api/doi_prefix.ds</code></dt>
 <dd>
 Returns a list of DOI prefixes that map to a normalize name
 </dd>
-<dt><code>/doi-prefix/{DOI_PREFIX}</code></dt>
+<dt><code>/api/doi_prefix.ds/{DOI_PREFIX}</code></dt>
 <dd>
 Returns the normalized publisher name for that DOI prefix
 </dd>
 </dl>
-<h2 id="widgets">Widgets</h2>
-<p>Widgets provide the user interface for humans to manage and view the
-objects. While <strong>cold</strong> can directly host these it is
-equally possible to integrate the static components into another system,
-web service or web site. They are only static web assets. The public
-facing web service needs to control access to <strong>cold</strong> and
-the static content does not contain anything that is priviliged. The
-Widgets can be loaded indepentently in the page using the following end
-points.</p>
-<dl>
-<dt><code>/widgets/display-person.js</code></dt>
-<dd>
-This widget provides a consistent display for our Person Object. Markup
-example
-<code>&lt;display-person honorific="Mr." given="R. S." family="Doiel" lineage="" orcid="0000-0003-0900-6903"&gt;&lt;/display-person&gt;</code>
-</dd>
-<dt><code>/widgets/input-person.js</code></dt>
-<dd>
-This widget provides a consistent input interface for our Person Object.
-Markup example
-<code>&lt;input-person honorific="Mr." given="R. S." family="Doiel" lineage="" orcid="0000-0003-0900-6903"&gt;&lt;/input-person&gt;</code>
-</dd>
-<dt><code>/widgets/display-group.js</code></dt>
-<dd>
-This widget provides a consistent display for our Group Object. Markup
-example
-<code>&lt;display-group name="GALCIT" ror=""&gt;&lt;/display-person&gt;</code>
-</dd>
-<dt><code>/widgets/input-group.js</code></dt>
-<dd>
-This widget provides a consistent input interface for our Group Object.
-Markup example
-<code>&lt;input-group  name="GALCIT" ror="" label=""&gt;&lt;/input-person&gt;</code>
-</dd>
-<dt><code>/widgets/display-subject.js</code></dt>
-<dd>
-This widget provides a consistent display of a Subject Object, example
-<code>&lt;display-subject name="biology" label="Biology"&gt;&lt;/display-subject&gt;</code>
-</dd>
-<dt><code>/widgets/input-subject.js</code></dt>
-<dd>
-This widget provides a consistent input interface for our Subject
-Object, example
-<code>&lt;input-subject name="biology"&gt;&lt;/input-subject&gt;</code>
-</dd>
-<dt><code>/widget/display-issn-publisher.js</code></dt>
-<dd>
-This widget provides a consistent display of ISSN and publisher, example
-<code>&lt;display-issn-publisher issn="XXXXXXXXXX"&gt;&lt;/display-issn-publisher&gt;</code>
-</dd>
-<dt><code>/widget/input-issn-publisher.js</code></dt>
-<dd>
-This widget provides a consistent input interface for our ISSN/Publisher
-Object, example
-<code>&lt;input-issn-publisher issn="XXXXXXXXXX" publisher="Publisher Name"&gt;&lt;/input-issn-publisher&gt;</code>
-</dd>
-<dt><code>/widget/display-doi-prefix.js</code></dt>
-<dd>
-This widget lists a DOI-prefix and publisher, example
-<code>&lt;display-doi-prefix doi="XXXXXX/XXXXXX.X"&gt;&lt;/display-doi-prefix&gt;</code>
-</dd>
-<dt><code>/widget/input-doi-prefix.js</code></dt>
-<dd>
-This widget provides a consistent input interface for our DOI
-Prefix/Publisher Object, example
-<code>&lt;input-doi-prefix doi="XXXXXX/XXXXX.X" publisher="Publisher Name Here"&gt;&lt;/input-doi-prefix&gt;</code>
-</dd>
-</dl>
-<h1 id="example">EXAMPLE</h1>
-<p><em>cold</em> can be configure from the environment or from a JSON
-settings file. Assuming you are using a JSON settings file (e.g.
-“settings.json”) the web service can be started by passing it on the
-command line.</p>
-<pre><code>    cold settings.json</code></pre>
-<p>If you are configuring via the environment (e.g. in a container
-environment) just envoke the command without options.</p>
-<pre><code>    cold</code></pre>
-<p>Here is an example settings.json file.</p>
-<pre><code>    {
-        &quot;dsn&quot;: &quot;DB_USER_HERE:DB_PASSWORD_HERE@/cold&quot;,
-        &quot;hostname&quot;: &quot;localhost:8486&quot;,
-        &quot;htdocs&quot;: &quot;/usr/local/src/cold/htdocs&quot;,
-        &quot;prefix_path&quot;: &quot;&quot;,
-        &quot;disable_root_redirects&quot;: false
-    }</code></pre>
-<p>To run in a container you can pass the values in settings.json as
-environment variables. The environment variables are upper case.</p>
-<p>Here is an example of setting environment variables.</p>
-<pre><code>    export DSN=&quot;DB_USER_HERE:DB_PASSWORD_HERE@/cold&quot;
-    export HOST=&quot;localhost:8486&quot;
-    export HTDOCS=&quot;./htdocs&quot;
-    export PREFIX_PATH=&quot;&quot;
-    export DISABLE_ROOT_REDIRECTS=0</code></pre>
 </section>
 
 <footer>

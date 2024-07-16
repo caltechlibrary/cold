@@ -1,9 +1,9 @@
 cold - (c)ontrolled (o)bject (l)ists and (d)atum
 ================================================
 
-This repository implements the public facing web service of managed controlled object lists and datum (e.g. vocabularies). It is built using TypeScript and Deno.  The management user interface is in a separate GitHub repository, [cold_ui](https://github.com/caltechlibrary/cold_ui).
+This repository implements the public facing web service of managed controlled object lists and datum (e.g. vocabularies). It is built using TypeScript and Deno.  The management user interface is in a separate GitHub repository, [github.com/caltechlibrary/cold_ui](https://github.com/caltechlibrary/cold_ui).
 
-**cold** has it's own datasetd YAML file creating a read only JSON API in addition to static content.
+**cold** has it's own datasetd YAML file creating a read only JSON API in addition to providing a static content web service.
 
 To combine the public and management repositories into a common directory structure tou can use Git's recursive clone to get both the public API and the management API implemented in the **cold_ui** repository as a submodule of **cold**.
 
@@ -75,7 +75,7 @@ JSON API is provided by datasetd. The following end point descriptions support t
 
 The public endpoints are (using the HTTP GET method)
 
-`/api/<collection_name>`
+`/cold/api/<collection_name>`
 : A description of PostgREST information
 
 `/cold/version`
@@ -128,28 +128,13 @@ Vocabularies
 `/cold/doi_prefix.ds`
 : Returns a list of DOI prefixes that map to a normalize name
 
-`/cold/doi-prefix.ds/{DOI_PREFIX}`
+`/cold/doi_prefix.ds/{DOI_PREFIX}`
 : Returns the normalized publisher name for that DOI prefix
 
-Manage interface
-----------------
+Management interface
+--------------------
 
 The management inteface is avialable at `/cold/cold_ui/` path. This provides a dashboard which then interacts with the JSON side of the service to update content. The manage interface is built includes Web Components and requires JavaScript to be enabled in the browser.
-
-Widgets
--------
-
-Widgets are implementations of one or more Web Components. They provide the user interface for humans to manage and view objects. While **cold** can directly host these it is equally possible to integrate the static components into another system, web service or web site. The public facing web service needs to control access to **cold** and the static content does not contain anything that is priviliged. The Widgets can be loaded indepentently in the page using the following end points.
-
-`/widgets/people.js`
-: This JavaScript file provides a display and input set of web components for our Person Object. Markup example `<person-display honorific="Mr." given="R. S." family="Doiel" lineage="" orcid="0000-0003-0900-6903"></person-display>` and `<person-input honorific="Mr." given="R. S." family="Doiel" lineage="" orcid="0000-0003-0900-6903"></person-input>`
-
-`/widgets/groups.js`
-: This JavaScript file provides a display and input set of web components for our Markup example `<group-display name="GALCIT" ror=""></group-display>` and `<group-input  name="GALCIT" ror="" label=""></group-input>`
-
-`/widgets/vocabulary.js`
-: This JavaScript file provides a identifier/name web component suitable for displaying subjects, issn/publisher info and doi-prefix/publisher info.
-
 
 Requirements
 ------------
