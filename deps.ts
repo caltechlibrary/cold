@@ -28,3 +28,4 @@ export { handleSubjects, Subject } from "./cold_ui/subjects.ts";
 export { handleISSN, ISSN } from "./cold_ui/issn.ts";
 export { handleDOIPrefix, DOIPrefix } from "./cold_ui/doi_prefix.ts";
 export { renderHtdocs } from "./cold_ui/build.ts";
+export { ColdReadOnlyHandler } from "./cold_ui/cold_ui.ts";
