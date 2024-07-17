@@ -5,42 +5,51 @@ Action items
 next
 ----
 
-- [ ] Remove mkpage dependency, replace with Pandoc 3 templates from github.com/caltechlibrary/codemeta-pandoc-examples
-- [ ] Setup PostgreSQL user and cold database
-- [ ] Migrate current SQL schema to PostgreSQL schema
-- [ ] Replace MySQL with PostgreSQL
-- [ ] Configure PostgREST to provide JSON API
-- [ ] Configure Pandoc in server mode to provide a template engine
-- [ ] Implement paging views in PostgreSQL view SQL views
-- [ ] Data Models in PostgreSQL (convert from RDM and current Go structs)
-    - [ ] Person
-    - [ ] Organization
-    - [ ] Funder
-    - [ ] Vocabularies
-- [ ] UI Widgets to manage objects in list
-    - [ ] Person and Organization widget
-    - [ ] Group widget
-    - [ ] Funder widget
-    - [ ] Vocabulary widget
-- [ ] Implement (SQL) tests
-    - [ ] People
-    - [ ] Organziation
-    - [ ] Funders
-    - [ ] Vocabulary
-- [ ] Implement end point tests
-    - [ ] Funders end points
-    - [ ] Groups end points
-    - [ ] People end points
-    - [ ] Vocabulary end points
-- [ ] Implement http API end points
-    - [x] Funders end points
-    - [x] Groups end points
-    - [x] People end points
-    - [x] Vocabulary end points
+- [x] Remove mkpage dependency, replace with Pandoc 3 templates from github.com/caltechlibrary/codemeta-pandoc-examples
+- [X] Setup PostgreSQL user and cold database (replaced with SQLite3 and datasetd)
+- [X] Migrate current SQL schema to PostgreSQL schema (replaced with SQLite3 and datasetd)
+- [X] Replace MySQL with PostgreSQL
+- [X] Configure PostgREST to provide JSON API (replaced with datasetd)
+- [X] Configure Pandoc in server mode to provide a template engine (replaced with handlebars via Deno)
+- [X] Implement paging views in PostgreSQL view SQL views (replaced with datasetd plus Deno)
+- [X] Data Models (convert from RDM and current Go structs then to TypeScript interfaces)
+ - [X] People
+ - [X] Groups
+ - [X] Funder
+ - [X] Vocabularies (implemented example vocabularies as individual dataset collections)
+- [X] Implement end point tests
+ - [X] Funders end points
+ - [X] Groups end points
+ - [X] People end points
+ - [X] Vocabulary end points
+- [X] Implement http API end points (using datasetd for API)
+ - [X] Funders end points
+ - [X] Groups end points
+ - [X] People end points
+ - [X] Vocabulary end points
+- [ ] Implement client/server validation for objects and attributes
+ - [ ] People
+   - [ ] Need to implement validators for each identifier type supported (look at convert idutils to WASM module and integrating that way)
+ - [ ] Groups
+   - [ ] Need to implement validators for each identifier type supported (look at convert idutils to WASM module and integrating that way)
+ - [ ] Funder
+   - [ ] Need to implement validators for each identifier type supported (look at convert idutils to WASM module and integrating that way)
+ - [ ] Vocabularies
+   - [ ] Need to implement validators for each identifier type supported (look at convert idutils to WASM module and integrating that way)
 - [ ] Document setup, configuration and database requirements
 - [ ] Add Makefile
+
 
 Someday, maybe
 --------------
 
-
+- [ ] UI Widgets to manage objects in list
+    - [ ] Person and Organization widget
+    - [ ] Group widget
+    - [ ] Funder widget
+    - [ ] Vocabulary widgets
+- [ ] Implement (SQL) tests
+    - [ ] People
+    - [ ] Organziation
+    - [ ] Funders
+    - [ ] Vocabularies
