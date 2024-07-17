@@ -1,19 +1,21 @@
-Controlled Object Lists & Vocabularies
-======================================
+---
+title: Welcome to COLD
+---
 
-This is the management interface for [cold](readme.html). It is organized around managed objects and static vocabularies.
+Controlled Object Lists & Datum
+===============================
 
-Managable Objects
+View Feed Objects
 -----------------
 
 - [People](./people/)
 - [Groups](./groups/)
 - [Funders](./funders/)
 
-Static Vocabularies
--------------------
+View Datum
+----------
 
-Vocabularies are static. They are read only key/value pair lists provided by the **cold** application.  **cold** source code must be updated and compiled to change the key/value pairs in the lists.
+(Datum are those metadata that do not appear directectly in feeds)
 
 - [Subjects](./subjects/)
 - [ISSN/Publishers](./issn/)

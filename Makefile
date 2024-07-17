@@ -39,21 +39,23 @@ endif
 
 PROGRAMS = $(shell ls -1 cmd)
 
-build: CITATION.cff about.md $(HTML_PAGES)
+build: CITATION.cff about.md $(HTML_PAGES) htdocs docs
 
-man: $(MAN_PAGES_1) $(MAN_PAGES_3) $(MAN_PAGES_7)
+man: $(MAN_PAGES_1) # $(MAN_PAGES_3) $(MAN_PAGES_7)
 
 $(MAN_PAGES_1): .FORCE
 	mkdir -p man/man1
 	pandoc $@.md --from markdown --to man -s >man/man1/$@
 
-$(MAN_PAGES_3): .FORCE
-	mkdir -p man/man3
-	pandoc $@.md --from markdown --to man -s >man/man3/$@
-
-$(MAN_PAGES_7): .FORCE
-	mkdir -p man/man7
-	pandoc $@.md --from markdown --to man -s >man/man7/$@
+### 
+### $(MAN_PAGES_3): .FORCE
+### 	mkdir -p man/man3
+### 	pandoc $@.md --from markdown --to man -s >man/man3/$@
+### 
+### $(MAN_PAGES_7): .FORCE
+### 	mkdir -p man/man7
+### 	pandoc $@.md --from markdown --to man -s >man/man7/$@
+### 
 
 CITATION.cff: codemeta.json .FORCE
 	cat codemeta.json | sed -E   's/"@context"/"at__context"/g;s/"@type"/"at__type"/g;s/"@id"/"at__id"/g' >_codemeta.json
@@ -63,13 +65,13 @@ about.md: codemeta.json .FORCE
 	cat codemeta.json | sed -E 's/"@context"/"at__context"/g;s/"@type"/"at__type"/g;s/"@id"/"at__id"/g' >_codemeta.json
 	echo "" | pandoc --metadata-file=_codemeta.json --template codemeta-md.tmpl >about.md 2>/dev/null
 	if [ -f _codemeta.json ]; then rm _codemeta.json; fi
+	cp about.md htdocs/
 
 website: $(HTML_PAGES) .FORCE
 	make -f website.mak
 	
-
-harvest: .FORCE
-	./harvest_testdata.bash
+htdocs: .FORCE
+	deno task htdocs
 
 install: build
 	@for FNAME in $(MAN_PAGES_1); do if [ -f "./man/man1/$${FNAME}" ]; then cp -v "./man/man1/$${FNAME}" "$(PREFIX)/man/man1/$${FNAME}"; fi; done

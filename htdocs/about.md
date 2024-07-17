@@ -1,47 +1,58 @@
 ---
-title : About to cold
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: "cold"
+abstract: "cold is a localhost web service for managing controlled
+object lists."
+authors:
+  - family-names: Doiel
+    given-names: R. S.
+    orcid: "https://orcid.org/0000-0003-0900-6903"
+
+repository-code: "https://github.com/caltechlibrary/cold"
+version: 0.0.5
+license-url: "https://caltechlibrary.github.io/cold/LICENSE"
+keywords: [ "metadata", "objects", "controlled vocabulary" ]
+
 ---
 
-About Cold
-==========
+About this software
+===================
 
-cold is a micro service for managing controlled object lists, i.e.
-people and groups used by Caltech Library's repositories
-and archival systems.
+## cold 0.0.5
 
-Developers
-----------
+### Authors
 
-(alphabetically)
+- R. S. Doiel
 
-- [R. S. Doiel](https://orcid.org/0000-0003-0900-6903 "link to ORCID record")
-- [Thomas E. Morrell](https://orcid.org/0000-0001-9266-5146 "link to ORCID record")
+### Contributors
+
+- Kathy Johnson
+- Thomas E Morrell
+
+### Maintainers
+
+- R. S. Doiel
+
+cold is a localhost web service for managing controlled object lists.
+
+- License: <https://caltechlibrary.github.io/cold/LICENSE>
+- GitHub: <https://github.com/caltechlibrary/cold>
+- Issues: <https://github.com/caltechlibrary/cold/issues>
 
 
-<version-info id="version-info"></version-info>
+### Programming languages
 
-<script type="module" src="./widgets/config.js"></script>
+- TypeScript
+- JavaScript
+- HTML
+- CSS
+- YAML
 
-<script type="module" src="./widgets/version-info.js"></script>
 
-<script type="module">
-"use strict";
+### Software Requiremets
 
-import { Cfg } from "./widgets/config.js";
-
-let version_info = document.getElementById('version-info');
-
-function updateVersionInfo() {
-    let src = this.responseText,
-        obj = JSON.parse(src);
-    version_info.value = obj;
-}
-
-function retrieveVersionInfo() {
-    let oReq = new XMLHttpRequest();
-    oReq.addEventListener('load', updateVersionInfo);
-    oReq.open('GET', `${Cfg.prefix_path}/api/version`);
-    oReq.send();
-}
-retrieveVersionInfo();
-</script>
+- Deno &gt;= 1.44
+- Dataset &gt;= 2.1.15
+- Pandoc &gt;= 3.1

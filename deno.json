@@ -1,8 +1,16 @@
 {
   "tasks": {
-    "public_service": "datasetd cold_public.yaml",
-    "public_service_debug": "datasetd --debug cold_public.yaml",
-    "build": "deno run --allow-read --allow-write=htdocs build.ts"
+    "json_api": "datasetd cold_api.yaml",
+    "json_api_debug": "datasetd --debug cold_api.yaml",
+    "start": "deno run --allow-read --allow-env --allow-net cold.ts --htdocs=./htdocs",
+    "dev": "deno run --watch --allow-read --allow-env --allow-net cold.ts --htdocs=./htdocs",
+    "htdocs": "deno run --allow-read --allow-write=htdocs build.ts"
   },
-  "imports": { "@std/path": "jsr:@std/path@^0.225.2" }
+  "imports": {
+    "@std/dotenv": "jsr:@std/dotenv@^0.224.2",
+    "@std/fs": "jsr:@std/fs@^0.229.3",
+    "@std/http": "jsr:@std/http@^0.224.5",
+    "@std/path": "jsr:@std/path@^0.225.2",
+    "@std/yaml": "jsr:@std/yaml@^0.224.3"
+  }
 }
