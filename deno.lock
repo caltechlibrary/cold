@@ -3,30 +3,53 @@
   "packages": {
     "specifiers": {
       "jsr:@std/assert@^0.226.0": "jsr:@std/assert@0.226.0",
+      "jsr:@std/assert@^1.0.0": "jsr:@std/assert@1.0.0",
       "jsr:@std/async@^1.0.0-rc.1": "jsr:@std/async@1.0.0-rc.3",
       "jsr:@std/cli@^0.224.7": "jsr:@std/cli@0.224.7",
+      "jsr:@std/collections@^1.0.4": "jsr:@std/collections@1.0.4",
+      "jsr:@std/csv@^0.224.3": "jsr:@std/csv@0.224.3",
       "jsr:@std/dotenv@^0.224.2": "jsr:@std/dotenv@0.224.2",
       "jsr:@std/encoding@1.0.0-rc.2": "jsr:@std/encoding@1.0.0-rc.2",
       "jsr:@std/fmt@^0.225.4": "jsr:@std/fmt@0.225.5",
+      "jsr:@std/front-matter@^0.224.3": "jsr:@std/front-matter@0.224.3",
       "jsr:@std/fs@^0.229.3": "jsr:@std/fs@0.229.3",
       "jsr:@std/http@^0.224.5": "jsr:@std/http@0.224.5",
+      "jsr:@std/internal@^1.0.1": "jsr:@std/internal@1.0.1",
       "jsr:@std/media-types@^1.0.0-rc.1": "jsr:@std/media-types@1.0.1",
       "jsr:@std/net@^0.224.3": "jsr:@std/net@0.224.4",
       "jsr:@std/path@1.0.0-rc.1": "jsr:@std/path@1.0.0-rc.1",
       "jsr:@std/path@1.0.0-rc.2": "jsr:@std/path@1.0.0-rc.2",
       "jsr:@std/path@^0.225.2": "jsr:@std/path@0.225.2",
+      "jsr:@std/streams@^0.224.4": "jsr:@std/streams@0.224.5",
       "jsr:@std/streams@^0.224.5": "jsr:@std/streams@0.224.5",
-      "jsr:@std/yaml@^0.224.3": "jsr:@std/yaml@0.224.3"
+      "jsr:@std/toml@^1.0.0-rc.3": "jsr:@std/toml@1.0.0",
+      "jsr:@std/yaml@^0.224.3": "jsr:@std/yaml@0.224.3",
+      "jsr:@std/yaml@^1.0.0-rc.1": "jsr:@std/yaml@1.0.0-rc.3"
     },
     "jsr": {
       "@std/assert@0.226.0": {
         "integrity": "0dfb5f7c7723c18cec118e080fec76ce15b4c31154b15ad2bd74822603ef75b3"
+      },
+      "@std/assert@1.0.0": {
+        "integrity": "0e4f6d873f7f35e2a1e6194ceee39686c996b9e5d134948e644d35d4c4df2008",
+        "dependencies": [
+          "jsr:@std/internal@^1.0.1"
+        ]
       },
       "@std/async@1.0.0-rc.3": {
         "integrity": "f0f1cb8cca0981c1ed0a5cf1b264bc3f0a44129e53a94be1e80cebeb2817633b"
       },
       "@std/cli@0.224.7": {
         "integrity": "654ca6477518e5e3a0d3fabafb2789e92b8c0febf1a1d24ba4b567aba94b5977"
+      },
+      "@std/collections@1.0.4": {
+        "integrity": "bcc90800e489dc6bacdf68eb5dc746d6d8a033cb4f3311f0f9cf8094de429ce7"
+      },
+      "@std/csv@0.224.3": {
+        "integrity": "cf9cb88954a029b9997a613f67771d39b4d1602c8ea1a289328c89b48460fae3",
+        "dependencies": [
+          "jsr:@std/streams@^0.224.4"
+        ]
       },
       "@std/dotenv@0.224.2": {
         "integrity": "29081695357e4534696c9e986b2560be29c141ccf52daa32b6c20ff5b5c64ab9"
@@ -36,6 +59,13 @@
       },
       "@std/fmt@0.225.5": {
         "integrity": "38aa42528584873378a521f7842c1a1e99f0235d3f7d3db5ca02795312f439b8"
+      },
+      "@std/front-matter@0.224.3": {
+        "integrity": "983e98b6fc90d614540d2176350e4edf7b6ec067b384c03245e2e795b66de9bb",
+        "dependencies": [
+          "jsr:@std/toml@^1.0.0-rc.3",
+          "jsr:@std/yaml@^1.0.0-rc.1"
+        ]
       },
       "@std/fs@0.229.3": {
         "integrity": "783bca21f24da92e04c3893c9e79653227ab016c48e96b3078377ebd5222e6eb",
@@ -55,6 +85,9 @@
           "jsr:@std/path@1.0.0-rc.2",
           "jsr:@std/streams@^0.224.5"
         ]
+      },
+      "@std/internal@1.0.1": {
+        "integrity": "6f8c7544d06a11dd256c8d6ba54b11ed870aac6c5aeafff499892662c57673e6"
       },
       "@std/media-types@1.0.1": {
         "integrity": "f2ddc3497be0bd87ac0c9b9b26bb454f76bdc45e1b9a12146af47fab3ba2828c"
@@ -77,8 +110,17 @@
       "@std/streams@0.224.5": {
         "integrity": "bcde7818dd5460d474cdbd674b15f6638b9cd73cd64e52bd852fba2bd4d8ec91"
       },
+      "@std/toml@1.0.0": {
+        "integrity": "c9e37564eedd84084871c66238e00196ec67aa958e09a7f761b3f36273a7a8a5",
+        "dependencies": [
+          "jsr:@std/collections@^1.0.4"
+        ]
+      },
       "@std/yaml@0.224.3": {
         "integrity": "9da1ed0094f42ba24570b4d88a094b44a793ac7f2bc085c1939d3ac7e11cc0bb"
+      },
+      "@std/yaml@1.0.0-rc.3": {
+        "integrity": "0c9878c9af708d0837311480f87619ad86333de74a817420bd461d8ae83997b8"
       }
     }
   },
@@ -178,7 +220,10 @@
   },
   "workspace": {
     "dependencies": [
+      "jsr:@std/assert@^1.0.0",
+      "jsr:@std/csv@^0.224.3",
       "jsr:@std/dotenv@^0.224.2",
+      "jsr:@std/front-matter@^0.224.3",
       "jsr:@std/fs@^0.229.3",
       "jsr:@std/http@^0.224.5",
       "jsr:@std/path@^0.225.2",
