@@ -24,21 +24,16 @@
 <section>
 <h1 id="cold---controlled-object-lists-and-datum">cold - (c)ontrolled
 (o)bject (l)ists and (d)atum</h1>
-<p>This repository implements the public facing web service of managed
+<p>This repository implements the public read only web service for
 controlled object lists and datum (e.g. vocabularies). It is built using
-TypeScript and Deno. The management user interface is in a separate
-GitHub repository, <a
-href="https://github.com/caltechlibrary/cold_ui">github.com/caltechlibrary/cold_ui</a>.</p>
-<p><strong>cold</strong> has it’s own datasetd YAML file creating a read
-only JSON API in addition to providing a static content web service.</p>
-<p>To combine the public and management repositories into a common
-directory structure tou can use Git’s recursive clone to get both the
-public API and the management API implemented in the
-<strong>cold_ui</strong> repository as a submodule of
-<strong>cold</strong>.</p>
-<p>You will need to configure (control access) via your front end web
-server software (e.g. Apache2, NginX , Lighttpd) using a single sign-on
-implementation like Shibboleth.</p>
+TypeScript and Deno. It depends on the JSON API provided by <a
+href="https://github.com/caltechlibrary/cold_admin">github.com/caltechlibrary/cold_admin</a>.</p>
+<p>You front end web server (e.g. Apache 2 + Shibboleth) needs to be
+configure to reverse proxy the <strong>cold</strong> public interface as
+well as the <strong>cold_admin</strong> interface with control access
+enfoced. Ideally your front end web server software (e.g. Apache2, NginX
+, Lighttpd) is configured with a a single sign-on implementation like
+Shibboleth.</p>
 <h2 id="overview">Overview</h2>
 <p>Caltech Library maintains a list of people, groups and funders and
 their related pids. For many years this was managed using a spreadsheet,
@@ -46,12 +41,12 @@ then Google Sheets, and more recently in CSV files. Over time the number
 of objects involved has increased. It makes sense to provide a more
 robust implementation allowing for easier curation of objects. The
 objects currently are relatively flat. Here’s an example JSON object
-representing R. S. Doiel showing the internal identifier named
-“cl_people_id”, name object, email, orcid and Caltech affiliation is
-shown both via a boolean field and a ROR.</p>
+representing R. S. Doiel showing the internal identifier named “clpid”,
+name object, email, orcid and Caltech affiliation is shown both via a
+boolean field and a ROR.</p>
 <div class="sourceCode" id="cb1"><pre
 class="sourceCode json"><code class="sourceCode json"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;cl_people_id&quot;</span><span class="fu">:</span> <span class="st">&quot;Doiel-R-S&quot;</span><span class="fu">,</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;clpid&quot;</span><span class="fu">:</span> <span class="st">&quot;Doiel-R-S&quot;</span><span class="fu">,</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;family_name&quot;</span><span class="fu">:</span> <span class="st">&quot;Doiel&quot;</span><span class="fu">,</span></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;given_name&quot;</span><span class="fu">:</span> <span class="st">&quot;Robert&quot;</span><span class="fu">,</span></span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;orcid&quot;</span><span class="fu">:</span> <span class="st">&quot;0000-0003-0900-6903&quot;</span><span class="fu">,</span></span>
@@ -67,7 +62,7 @@ class="sourceCode json"><code class="sourceCode json"><span id="cb1-1"><a href="
 <p>A group object for Caltech Library is relatively flat.</p>
 <div class="sourceCode" id="cb2"><pre
 class="sourceCode json"><code class="sourceCode json"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;cl_group_id&quot;</span><span class="fu">:</span> <span class="st">&quot;Caltech-Library&quot;</span><span class="fu">,</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;clgid&quot;</span><span class="fu">:</span> <span class="st">&quot;Caltech-Library&quot;</span><span class="fu">,</span></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;name&quot;</span><span class="fu">:</span> <span class="st">&quot;Caltech Library&quot;</span><span class="fu">,</span></span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;alternative&quot;</span><span class="fu">:</span> <span class="ot">[</span> <span class="st">&quot;Caltech Library System&quot;</span><span class="ot">,</span> <span class="st">&quot;Library System Papers and Publications&quot;</span> <span class="ot">]</span><span class="fu">,</span></span>
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;updated&quot;</span><span class="fu">:</span> <span class="st">&quot;2023-07-21 00:08:00&quot;</span><span class="fu">,</span></span>
@@ -94,21 +89,20 @@ class="sourceCode json"><code class="sourceCode json"><span id="cb2-1"><a href="
 <li><strong>cold</strong> is built on datasetd providing static file
 hosting as well as a readonly JSON API to a selection of dataset
 collections (e.g. Caltech People and Groups).</li>
-<li><strong>cold_ui</strong> (a submodule repository) provides a
+<li><strong>cold_admin</strong> (a Git submodule repository) provides a
 management interface. It uses a different instance of datasetd providing
 a read/write JSON API and a typescript web service for the managing the
 data.</li>
-<li><strong>cold</strong> and <strong>cold_ui</strong> use <a
+<li><strong>cold</strong> and <strong>cold_admin</strong> use <a
 href="https://handlerbarsjs.com">handlerbars</a> templates, each with
 their own “view” template heirarchies.</li>
 </ul>
 <p><strong>An important point is access control is deferred to the front
 end web server (e.g. Apache2+Shibboleth).</strong></p>
-<h2 id="colds-read-only-end-points"><strong>cold</strong>’s Read-Only
-End Points</h2>
-<p>JSON API is provided by datasetd. The following end point
-descriptions support the GET method.</p>
-<p>The public endpoints are (using the HTTP GET method)</p>
+<h2 id="colds-read-only-json-end-points"><strong>cold</strong>’s
+Read-Only JSON End Points</h2>
+<p>The public endpoints use the HTTP GET method. Requests should be made
+with the content type of “application/json”.</p>
 <dl>
 <dt><code>/api/version</code></dt>
 <dd>
@@ -151,72 +145,64 @@ Returns a santized funder object (e.g. email is redacted)
 Returns sanitized list of minimal funder objects (clfid and name)
 </dd>
 </dl>
-<h2 id="crosswalks-planned">Crosswalks (planned)</h2>
-<p>A cross walk lets you put in a collection name (e.g. people.ds,
-group.ds), a field name and a value and it returns a list of matching
-records. These are available from the public API.</p>
-<dl>
-<dt><code>/api/people.ds/query/crosswalk/{IDENTIFIER_NAME}/{IDENTIFIER_VALUE}</code></dt>
-<dd>
-Returns a list of “clpid” assocated with that identifier
-</dd>
-<dt><code>/api/groups.ds/query/crosswalk/{IDENTIFIER_NAME}/{IDENTIFIER_VALUE}</code></dt>
-<dd>
-Returns a list of “clgid” assocated with that identifier
-</dd>
-<dt><code>/api/funders.ds/query/crosswalk/{IDENTIFIER_NAME}/{IDENTIFIER_VALUE}</code></dt>
-<dd>
-Returns a list of “clgid” assocated with that identifier
-</dd>
-</dl>
-<p><em>cold</em> takes a REST approach to updates for managed objects.
-PUT will create a new object, POST will update it, GET will retrieve it
-and DELETE will remove it.</p>
-<h2 id="vocabularies">Vocabularies</h2>
-<p><strong>cold</strong> and <strong>cold_ui</strong> also support end
-points for stable vocabularies mapping an indentifier to a normalized
-name. These are set at compile time because they are so slow
-changing.</p>
-<dl>
-<dt><code>/api/subject.ds</code></dt>
-<dd>
-Returns a list of all the subject ids (codes)
-</dd>
-<dt><code>/api/subject.ds/{SUBJECT_ID}</code></dt>
-<dd>
-Returns the normalized text string for that subject id
-</dd>
-<dt><code>/api/issn.ds</code></dt>
-<dd>
-Returns a list of issn that are mapped to a publisher name
-</dd>
-<dt><code>/api/issn.ds/{ISSN}</code></dt>
-<dd>
-Returns the normalized publisher name for that ISSN
-</dd>
-<dt><code>/api/doi_prefix.ds</code></dt>
-<dd>
-Returns a list of DOI prefixes that map to a normalize name
-</dd>
-<dt><code>/api/doi_prefix.ds/{DOI_PREFIX}</code></dt>
-<dd>
-Returns the normalized publisher name for that DOI prefix
-</dd>
-</dl>
+<!-- 
+
+Crosswalks (planned)
+--------------------
+
+A cross walk lets you put in a collection name (e.g. people.ds, group.ds), a field name and a value and it returns a list of matching
+records. These are available from the public API.
+
+`/api/people.ds/query/crosswalk/{IDENTIFIER_NAME}/{IDENTIFIER_VALUE}`
+: Returns a list of "clpid" assocated with that identifier
+
+`/api/groups.ds/query/crosswalk/{IDENTIFIER_NAME}/{IDENTIFIER_VALUE}`
+: Returns a list of "clgid" assocated with that identifier
+
+`/api/funders.ds/query/crosswalk/{IDENTIFIER_NAME}/{IDENTIFIER_VALUE}`
+: Returns a list of "clgid" assocated with that identifier
+
+*cold* takes a REST approach to updates for managed objects.  PUT will create a new object, POST will update it, GET will retrieve it and DELETE will remove it.
+
+Vocabularies
+------------
+
+**cold** and **cold_admin** also support end points for stable vocabularies mapping an indentifier to a normalized name. These are set at compile time because they are so slow changing.
+
+`/api/subject.ds`
+: Returns a list of all the subject ids (codes)
+
+`/api/subject.ds/{SUBJECT_ID}`
+: Returns the normalized text string for that subject id
+
+`/api/issn.ds`
+: Returns a list of issn that are mapped to a publisher name
+
+`/api/issn.ds/{ISSN}`
+: Returns the normalized publisher name for that ISSN
+
+`/api/doi_prefix.ds`
+: Returns a list of DOI prefixes that map to a normalize name
+
+`/api/doi_prefix.ds/{DOI_PREFIX}`
+: Returns the normalized publisher name for that DOI prefix
+
+-->
 <h2 id="management-interface">Management interface</h2>
-<p>The management inteface is avialable at <code>/cold/cold_ui/</code>
-path. This provides a dashboard which then interacts with the JSON side
-of the service to update content. The manage interface is built includes
-Web Components and requires JavaScript to be enabled in the browser.</p>
+<p>The management interface is avialable at <code>/cold/admin/</code>
+path. This provides a dashboard which then interacts with the read/write
+JSON API. See <a href="https://github.com/caltechlibrary/cold_admin"
+class="uri">https://github.com/caltechlibrary/cold_admin</a> for
+details.</p>
 <h2 id="requirements">Requirements</h2>
 <ul>
-<li>Dataset &gt;= 2.2.15 (using SQL JSON storage) and PostgreSQL &gt;=
-16</li>
+<li>Deno &gt;= 1.45.5</li>
+<li>Dataset &gt;= 2.2.15 (using SQL JSON storage)</li>
 <li>To build the UI and compile the assets needed by
 <strong>cold</strong>
 <ul>
 <li>GNU Make</li>
-<li><a href="https://pandoc.org">Pandoc</a> &gt;= 3 (to build
+<li><a href="https://pandoc.org">Pandoc</a> &gt;= 3.1 (to build
 documentation and man page)</li>
 <li>A text editor (e.g. Zed, VSCode, micro, nano, vi, emacs …)</li>
 </ul></li>
@@ -237,10 +223,10 @@ GHCup provides a reliable Haskell development environment.</p>
 href="https://www.haskell.org/ghcup/">ghcup</a></li>
 <li>See <a
 href="https://pandoc.org/installing.html#quick-cabal-method">Pandoc</a>
-and follow instructions to compile Pandoc 3</li>
+and follow instructions to compile Pandoc 3.1</li>
 <li>See
 [https://postgrest.org/en/stable/install.html#building-from-source]) and
-following instructions to compile PostgREST 11</li>
+following instructions to compile PostgREST 16</li>
 </ol>
 </section>
 

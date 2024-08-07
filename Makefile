@@ -3,6 +3,8 @@
 #
 PROJECT = cold
 
+PACKAGE =  $(shell ls -1 *.ts | grep -v 'version.ts')
+
 VERSION = $(shell grep '"version":' codemeta.json | cut -d\"  -f 4)
 
 BRANCH = $(shell git branch | grep '* ' | cut -d\  -f 2)
@@ -39,9 +41,20 @@ endif
 
 PROGRAMS = $(shell ls -1 cmd)
 
-build: CITATION.cff about.md $(HTML_PAGES) htdocs docs
+build: version.ts CITATION.cff about.md $(HTML_PAGES) htdocs
+
+version.ts: codemeta.json .FORCE
+	echo '' | pandoc --from t2t --to plain \
+                --metadata-file codemeta.json \
+                --metadata package=$(PROJECT) \
+                --metadata version=$(VERSION) \
+                --metadata release_date=$(RELEASE_DATE) \
+                --metadata release_hash=$(RELEASE_HASH) \
+                --template codemeta-version-ts.tmpl \
+                LICENSE >version.ts
 
 man: $(MAN_PAGES_1) # $(MAN_PAGES_3) $(MAN_PAGES_7)
+
 
 $(MAN_PAGES_1): .FORCE
 	mkdir -p man/man1
@@ -98,38 +111,31 @@ clean:
 	@if [ -d testout ]; then rm -fR testout; fi
 	@if [ -d htdocs/widgets/config.js ]; then rm -fR htdocs/widgets/config.js; fi
 
-### dist: .FORCE
-### 	@mkdir -p dist
-### 	@cd dist && zip -r $(PROJECT)-$(VERSION).zip LICENSE codemeta.json CITATION.cff cold.yaml *.sql *.md man/* docs/* htdocs/*
-### 
-### distribute_docs: build
-### 	if [ -d dist ]; then rm -fR dist; fi
-### 	mkdir -p dist
-### 	cp -v codemeta.json dist/
-### 	cp -v CITATION.cff dist/
-### 	cp -v README.md dist/
-### 	cp -v LICENSE dist/
-### 	cp -v INSTALL.md dist/
-### 	cp -vR docs dist/
-### 	cp -vR htdocs dist/
-### 
-### distribute_tools:
-### 	@mkdir -p dist
-### 	cp -vR dataloader dist/
-### 	cp -vp build_lunr_index.py dist/
-### 	cp -vp csv_to_object_lists.py dist/
-### 	cp -vp load_testdata.py dist/
-### 	cp -vp unload_testdata.py dist/
-### 	
-### update_version:
-### 	$(EDITOR) codemeta.json
-### 	@echo '' | pandoc --metadata title=$(PROJECT) --metadata-file codemeta.json --template codemeta-cff.tml >CITATION.cff
-### 
-### ui: .FORCE clean htdocs/index.html $(HTML_PAGES) htdocs/widgets/config.js
-### 
-### 
-### release: clean version.sql $(HTML_PAGES) htdocs/index.html htdocs/widgets/config.js distribute_docs distribute_tools dist
-### 
+dist: .FORCE
+	@mkdir -p dist
+	@cd dist && zip -r $(PROJECT)-$(VERSION).zip LICENSE codemeta.json CITATION.cff cold.yaml *.md man/* htdocs/*
+
+distribute_docs: build
+	if [ -d dist ]; then rm -fR dist; fi
+	mkdir -p dist
+	cp -v codemeta.json dist/
+	cp -v CITATION.cff dist/
+	cp -v README.md dist/
+	cp -v LICENSE dist/
+	cp -v INSTALL.md dist/
+	cp -vR htdocs dist/
+
+distribute_tools:
+	@mkdir -p dist
+
+update_version:
+	$(EDITOR) codemeta.json
+	@echo '' | pandoc --metadata title=$(PROJECT) --metadata-file codemeta.json --template codemeta-cff.tml >CITATION.cff
+
+ui: .FORCE clean htdocs/index.html $(HTML_PAGES) htdocs/widgets/config.js
+
+
+release: clean version.sql $(HTML_PAGES) htdocs/index.html htdocs/widgets/config.js distribute_docs distribute_tools dist
 
 status:
 	git status

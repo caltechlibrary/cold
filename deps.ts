@@ -17,15 +17,20 @@ export {
   DatasetApiClient,
 } from "https://caltechlibrary.github.io/ts_dataset/mod.ts";
 
-/* COLD related packages */
-export { makePage } from "./cold_ui/render.ts";
-export { appInfo, fmtHelp } from "./cold_ui/version.ts";
-export { OptionsProcessor } from "./cold_ui/options.ts";
-export { handlePeople, People } from "./cold_ui/people.ts";
-export { handleGroups, Group } from "./cold_ui/groups.ts";
-export { handleFunders, Funder } from "./cold_ui/funders.ts";
-export { handleSubjects, Subject } from "./cold_ui/subjects.ts";
-export { handleISSN, ISSN } from "./cold_ui/issn.ts";
-export { handleDOIPrefix, DOIPrefix } from "./cold_ui/doi_prefix.ts";
-export { renderHtdocs } from "./cold_ui/build.ts";
-export { ColdReadOnlyHandler } from "./cold_ui/cold_ui.ts";
+/* COLD Admin packages */
+export { OptionsProcessor, matchType } from "./admin/options.ts";
+export { renderHtdocs } from "./admin/build.ts";
+export { formDataToObject, pathIdentifier } from "./admin/utils.ts";
+export { People } from "./admin/people.ts";
+export { Group } from "./admin/groups.ts";
+export { Funder } from "./admin/funders.ts";
+
+/* COLD packages */
+export { appInfo, fmtHelp } from "./version.ts";
+export { makePage, renderPage } from "./render.ts";
+export { handlePeople } from "./people.ts";
+export { handleGroups } from "./groups.ts";
+export { handleFunders } from "./funders.ts";
+
+/* Make sure the apiPort is known to other modules */
+export { apiPort } from "./api_config.ts";

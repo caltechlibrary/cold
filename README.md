@@ -1,22 +1,18 @@
 cold - (c)ontrolled (o)bject (l)ists and (d)atum
 ================================================
 
-This repository implements the public facing web service of managed controlled object lists and datum (e.g. vocabularies). It is built using TypeScript and Deno.  The management user interface is in a separate GitHub repository, [github.com/caltechlibrary/cold_ui](https://github.com/caltechlibrary/cold_ui).
+This repository implements the public read only web service for controlled object lists and datum (e.g. vocabularies). It is built using TypeScript and Deno.  It depends on the JSON API provided by [github.com/caltechlibrary/cold_admin](https://github.com/caltechlibrary/cold_admin).
 
-**cold** has it's own datasetd YAML file creating a read only JSON API in addition to providing a static content web service.
-
-To combine the public and management repositories into a common directory structure tou can use Git's recursive clone to get both the public API and the management API implemented in the **cold_ui** repository as a submodule of **cold**.
-
-You will need to configure (control access) via your front end web server software (e.g. Apache2, NginX , Lighttpd) using a single sign-on implementation like Shibboleth.
+You front end web server (e.g. Apache 2 + Shibboleth) needs to be configure to reverse proxy the **cold** public interface as well as the **cold_admin** interface with control access enfoced. Ideally your front end web server software (e.g. Apache2, NginX , Lighttpd) is configured with a a single sign-on implementation like Shibboleth.
 
 Overview
 --------
 
-Caltech Library maintains a list of people, groups and funders and their related pids. For many years this was managed using a spreadsheet, then Google Sheets, and more recently in CSV files. Over time the number of objects involved has increased. It makes sense to provide a more robust implementation allowing for easier curation of objects. The objects currently are relatively flat.  Here's an example JSON object representing R. S. Doiel showing the internal identifier named "cl_people_id", name object, email, orcid and Caltech affiliation is shown both via a boolean field and a ROR.
+Caltech Library maintains a list of people, groups and funders and their related pids. For many years this was managed using a spreadsheet, then Google Sheets, and more recently in CSV files. Over time the number of objects involved has increased. It makes sense to provide a more robust implementation allowing for easier curation of objects. The objects currently are relatively flat.  Here's an example JSON object representing R. S. Doiel showing the internal identifier named "clpid", name object, email, orcid and Caltech affiliation is shown both via a boolean field and a ROR.
 
 ~~~json
 {
-    "cl_people_id": "Doiel-R-S",
+    "clpid": "Doiel-R-S",
     "family_name": "Doiel",
     "given_name": "Robert",
     "orcid": "0000-0003-0900-6903",
@@ -35,7 +31,7 @@ A group object for Caltech Library is relatively flat.
 
 ~~~json
 {
-    "cl_group_id": "Caltech-Library",
+    "clgid": "Caltech-Library",
     "name": "Caltech Library",
     "alternative": [ "Caltech Library System", "Library System Papers and Publications" ],
     "updated": "2023-07-21 00:08:00",
@@ -63,47 +59,48 @@ Approach Details
 ----------------
 
 - **cold** is built on datasetd providing static file hosting as well as a readonly JSON API to a selection of dataset collections (e.g. Caltech People and Groups).
-- **cold_ui** (a submodule repository) provides a management interface. It uses a different instance of datasetd providing a read/write JSON API and a typescript web service for the managing the data.
-- **cold** and **cold_ui** use [handlerbars](https://handlerbarsjs.com) templates, each with their own "view" template heirarchies.
+- **cold_admin** (a Git submodule repository) provides a management interface. It uses a different instance of datasetd providing a read/write JSON API and a typescript web service for the managing the data.
+- **cold** and **cold_admin** use [handlerbars](https://handlerbarsjs.com) templates, each with their own "view" template heirarchies.
 
 __An important point is access control is deferred to the front end web server (e.g. Apache2+Shibboleth).__
 
-**cold**'s Read-Only End Points
--------------------------------
+**cold**'s Read-Only JSON End Points
+------------------------------------
 
-JSON API is provided by datasetd. The following end point descriptions support the GET method.
+The public endpoints use the HTTP GET method. Requests should be made with the content type of "application/json".
 
-The public endpoints are (using the HTTP GET method)
 
 `/api/version`
-: Returns the version number of the datasetd service
+: Returns the version number of the datasetd service version
 
-`/api/people.ds`
-: Returns Caltech People "clpid" managed by **cold**
+`/api/people`
+: Returns a list of Caltech People's "clpid" managed by **cold**
 
-`/api/people.ds/{CLPID}`
+`/api/people/{CLPID}`
 : Returns sanitized people object (e.g. email is redacted)
 
-`/api/people.ds/query/people_names`
+`/api/people/query/people_names`
 : Returns sanitized list of minimal people objects (clpid and name)
 
-`/api/groups.ds`
+`/api/groups`
 : Returns a list of "clgid" managed by *cold*
 
-`/api/groups.ds/{CLGID}`
+`/api/groups/{CLGID}`
 : Returns a santized group object (e.g. email is redacted)
 
-`/api/groups.ds/query/group_names`
+`/api/groups/query/group_names`
 : Returns sanitized list of minimal group objects (clgid and name)
 
-`/api/funders.ds`
+`/api/funders`
 : Returns Caltech Funders "clfid" managed by **cold**
 
-`/api/funders.ds/{CLFID}`
+`/api/funders/{CLFID}`
 : Returns a santized funder object (e.g. email is redacted)
 
-`/api/funders.ds/query/funder_names`
+`/api/funders/query/funder_names`
 : Returns sanitized list of minimal funder objects (clfid and name)
+
+<!-- 
 
 Crosswalks (planned)
 --------------------
@@ -125,7 +122,7 @@ records. These are available from the public API.
 Vocabularies
 ------------
 
-**cold** and **cold_ui** also support end points for stable vocabularies mapping an indentifier to a normalized name. These are set at compile time because they are so slow changing.
+**cold** and **cold_admin** also support end points for stable vocabularies mapping an indentifier to a normalized name. These are set at compile time because they are so slow changing.
 
 `/api/subject.ds`
 : Returns a list of all the subject ids (codes)
@@ -145,18 +142,21 @@ Vocabularies
 `/api/doi_prefix.ds/{DOI_PREFIX}`
 : Returns the normalized publisher name for that DOI prefix
 
+-->
+
 Management interface
 --------------------
 
-The management inteface is avialable at `/cold/cold_ui/` path. This provides a dashboard which then interacts with the JSON side of the service to update content. The manage interface is built includes Web Components and requires JavaScript to be enabled in the browser.
+The management interface is avialable at `/cold/admin/` path. This provides a dashboard which then interacts with the read/write JSON API. See <https://github.com/caltechlibrary/cold_admin> for details.
 
 Requirements
 ------------
 
-- Dataset >= 2.2.15 (using SQL JSON storage) and PostgreSQL >= 16
+- Deno >= 1.45.5
+- Dataset >= 2.2.15 (using SQL JSON storage)
 - To build the UI and compile the assets needed by **cold**
   - GNU Make
-  - [Pandoc](https://pandoc.org) >= 3 (to build documentation and man page)
+  - [Pandoc](https://pandoc.org) >= 3.1 (to build documentation and man page)
   - A text editor (e.g. Zed, VSCode, micro, nano, vi, emacs ...)
 - A front end web server with SSO or Basic Auth (e.g. during development) support
 - A web browser with JavaScript support enabled
@@ -169,5 +169,6 @@ Most package managers running on various flavors of Unix (e.g. macOS, Linux) do 
 Pandoc and PostgREST are Haskell programs (i.e. they are written in Haskell programming langauge and use it's tool chain).  I recomment installing GHCup first then download and build Pandoc and PostgREST.  GHCup provides a reliable Haskell development environment.
 
 1. Install Haskell via [ghcup](https://www.haskell.org/ghcup/)
-2. See [Pandoc](https://pandoc.org/installing.html#quick-cabal-method) and follow instructions to compile Pandoc 3
-3. See [https://postgrest.org/en/stable/install.html#building-from-source]) and following instructions to compile PostgREST 11
+2. See [Pandoc](https://pandoc.org/installing.html#quick-cabal-method) and follow instructions to compile Pandoc 3.1
+3. See [https://postgrest.org/en/stable/install.html#building-from-source]) and following instructions to compile PostgREST 16
+
