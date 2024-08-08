@@ -65,3 +65,5 @@ issn_voc2sql
 issn_voc2sql.exe
 _codemeta.json
 postgrest.conf
+*.service
+*.env
