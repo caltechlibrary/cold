@@ -106,41 +106,42 @@ with the content type of “application/json”.</p>
 <dl>
 <dt><code>/api/version</code></dt>
 <dd>
-Returns the version number of the datasetd service
+Returns the version number of the datasetd service version
 </dd>
-<dt><code>/api/people.ds</code></dt>
+<dt><code>/api/people</code></dt>
 <dd>
-Returns Caltech People “clpid” managed by <strong>cold</strong>
+Returns a list of Caltech People’s “clpid” managed by
+<strong>cold</strong>
 </dd>
-<dt><code>/api/people.ds/{CLPID}</code></dt>
+<dt><code>/api/people/{CLPID}</code></dt>
 <dd>
 Returns sanitized people object (e.g. email is redacted)
 </dd>
-<dt><code>/api/people.ds/query/people_names</code></dt>
+<dt><code>/api/people/query/people_names</code></dt>
 <dd>
 Returns sanitized list of minimal people objects (clpid and name)
 </dd>
-<dt><code>/api/groups.ds</code></dt>
+<dt><code>/api/groups</code></dt>
 <dd>
 Returns a list of “clgid” managed by <em>cold</em>
 </dd>
-<dt><code>/api/groups.ds/{CLGID}</code></dt>
+<dt><code>/api/groups/{CLGID}</code></dt>
 <dd>
 Returns a santized group object (e.g. email is redacted)
 </dd>
-<dt><code>/api/groups.ds/query/group_names</code></dt>
+<dt><code>/api/groups/query/group_names</code></dt>
 <dd>
 Returns sanitized list of minimal group objects (clgid and name)
 </dd>
-<dt><code>/api/funders.ds</code></dt>
+<dt><code>/api/funders</code></dt>
 <dd>
 Returns Caltech Funders “clfid” managed by <strong>cold</strong>
 </dd>
-<dt><code>/api/funders.ds/{CLFID}</code></dt>
+<dt><code>/api/funders/{CLFID}</code></dt>
 <dd>
 Returns a santized funder object (e.g. email is redacted)
 </dd>
-<dt><code>/api/funders.ds/query/funder_names</code></dt>
+<dt><code>/api/funders/query/funder_names</code></dt>
 <dd>
 Returns sanitized list of minimal funder objects (clfid and name)
 </dd>

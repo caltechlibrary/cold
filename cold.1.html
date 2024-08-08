@@ -22,13 +22,53 @@
 </nav>
 
 <section>
-<h1 id="user-manual">User Manual</h1>
-<ul>
-<li><a href="INSTALL.html">Installation</a></li>
-<li><a href="search.html">Site search</a></li>
-<li><a href="deployment.html">deployments</a></li>
-<li><a href="cold.1.html">cold</a></li>
-</ul>
+<h1 id="name">NAME</h1>
+<p>cold</p>
+<h1 id="synopsis">SYNOPSIS</h1>
+<p>cold <a href="#options">OPTIONS</a></p>
+<h1 id="description">DESCRIPTION</h1>
+<p>cold provides the public human user interface for cold. It uses a set
+of dataset collections for persistence and relies on datasetd for JSON
+API to each collection. <strong>cold</strong> is a read only
+service.</p>
+<h1 id="options">OPTIONS</h1>
+<dl>
+<dt>help</dt>
+<dd>
+display help
+</dd>
+<dt>license</dt>
+<dd>
+display license
+</dd>
+<dt>version</dt>
+<dd>
+display version
+</dd>
+<dt>debug</dt>
+<dd>
+turn on debug logging
+</dd>
+<dt>port</dt>
+<dd>
+set the port number, default 8110
+</dd>
+<dt>htdocs</dt>
+<dd>
+set the static content directory, default ./htdocs
+</dd>
+<dt>apiUrl</dt>
+<dd>
+set the url to the datasetd API provided for cold
+</dd>
+</dl>
+<h1 id="example">EXAMPLE</h1>
+<p>cold is setup to run at <a href="http://localhost:8110"
+class="uri">http://localhost:8110</a>. The static content hosted in the
+“htdocs” directory. The datasetd service is setup to run at <a
+href="http://localhost:8112" class="uri">http://localhost:8112</a>
+supporting the people, groups and funders dataset collections.</p>
+<pre class="shell"><code>deno task start</code></pre>
 </section>
 
 <footer>

@@ -3,6 +3,8 @@
 #
 PROJECT = cold
 
+GIT_GROUP = caltechlibrary
+
 PACKAGE =  $(shell ls -1 *.ts | grep -v 'version.ts')
 
 VERSION = $(shell grep '"version":' codemeta.json | cut -d\"  -f 4)
@@ -20,6 +22,8 @@ MD_PAGES = $(shell ls -1 htdocs/*.md)
 PAGES = $(basename $(MD_PAGES))
 
 HTML_PAGES = $(addsuffix .html, $(PAGES))
+
+TS_MODS = $(shell ls -1 *.ts | grep -v _test.ts | grep -v deps.ts | grep -v version.ts)
 
 HTDOCS = "$(shell pwd)/htdocs"
 
@@ -41,7 +45,13 @@ endif
 
 PROGRAMS = $(shell ls -1 cmd)
 
-build: version.ts CITATION.cff about.md $(HTML_PAGES) htdocs
+build: version.ts CITATION.cff about.md $(HTML_PAGES) htdocs compile installer.sh installer.ps1
+
+compile: .FORCE
+compile: $(TS_MODS)
+	deno check *.ts
+	deno task build
+	./bin/cold$(EXT) --help >cold.1.md
 
 version.ts: codemeta.json .FORCE
 	echo '' | pandoc --from t2t --to plain \
@@ -134,6 +144,15 @@ update_version:
 
 ui: .FORCE clean htdocs/index.html $(HTML_PAGES) htdocs/widgets/config.js
 
+installer.sh: .FORCE
+	@echo '' | pandoc --metadata title="Installer" --metadata git_org_or_person="$(GIT_GROUP)" --metadata-file codemeta.json --template codemeta-bash-installer.tmpl >installer.sh
+	chmod 775 installer.sh
+	git add -f installer.sh
+
+installer.ps1: .FORCE
+	@echo '' | pandoc --metadata title="Installer" --metadata git_org_or_person="$(GIT_GROUP)" --metadata-file codemeta.json --template codemeta-ps1-installer.tmpl >installer.ps1
+	chmod 775 installer.ps1
+	git add -f installer.ps1
 
 release: clean version.sql $(HTML_PAGES) htdocs/index.html htdocs/widgets/config.js distribute_docs distribute_tools dist
 

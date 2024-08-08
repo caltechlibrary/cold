@@ -1,0 +1,15 @@
+[Unit]
+Description=COLD Public service
+Documentation=man:cold(1)
+After=network.target
+ConditionPathExists=!/Sites/cold/cold_not_to_be_run
+
+[Service]
+WorkingDirectory=/Sites/cold
+ExecStart=/Sites/cold/bin/cold
+Type=simple
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+Alias=cold_admin.service

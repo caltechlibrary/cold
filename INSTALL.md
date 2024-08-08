@@ -30,7 +30,7 @@ if you are setting up for production.
     a. `cd`
     b. `git clone https://github.com/caltechlibrary/cold --recursive`
     c. `cd cold`
-    d. `git pull origin --recurse-submodules`
+    d. `git pull origin --recursive-submodules`
 2. Setup cold
     a. `deno task build`
 3. Setup cold_admin
@@ -40,25 +40,28 @@ if you are setting up for production.
 4. You need to start three web services, I recommend using tmux. You can then split the window to create each session and still see everything going on.
     a. from the cold admin directory start up tmux
       a. `tmux`
-    a. start the JSON API 
-      a. `deno task json_api`
-    b. open another tmux window and start the admin web service
-      a. `deno task start`
+    a. change to the admin directory, start the JSON API and setup your dataset collections
+      a. `cd admin`
+      b. `deno task setup`
+      c. `deno task json_api`
+    b. open another tmux window, change to the admin directory, start the admin web service
+      a. split the screen, e.g. `Ctl-%`
+      b. `cd admin`
+      c. `deno task start`
     c. open a third tmux window, change to the cold repository location and start the public web service
-      a. `cd ..`
+      a. split the screen, e.g. `Ctl-"`
       a. `deno task start`
 
-You should now have three web services running running on localhost.
+You should now have three web services running running on localhost at ports 8110 (public service), 8111 (admin service), 8112 (JSON API).
 
-Port 8185
-: This is the management JSON API for cold_admin
-
-Port 8180
-: This is the management web service
-
-Port 8080
+Port 8110
 : This is the public web service
 
-In a production deployment you'd create systemd service scripts to run each service via systemctl.  If you need to use different portss you can set this in the
-configuration files or via command line options.
+Port 8111
+: This is the management web service
+
+Port 8112
+: This is the management JSON API for `cold_admin` and `cold`
+
+In a remote deployment you'd setup up to run these services using systemd service scripts. See [deployments](deployment.md) documentation for details.
 

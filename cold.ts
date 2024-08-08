@@ -57,9 +57,9 @@ for JSON API to each collection. **{app_name}** is a read only service.
   txt.push(`
 # EXAMPLE
 
-{app_name} is setup to run at <http://localhost:8080>. The static content hosted in
+{app_name} is setup to run at <http://localhost:8110>. The static content hosted in
 the "htdocs" directory.  The datasetd service is setup to run at
-<http://localhost:8085> supporting the people, groups and funders dataset
+<http://localhost:8112> supporting the people, groups and funders dataset
 collections.
 
 ~~~shell
@@ -197,9 +197,9 @@ export function ColdReadOnlyHandler(
 //
 function main() {
   const op: OptionsProcessor = new OptionsProcessor();
-  const defaultPort: number = 8080;
+  const defaultPort: number = 8110;
   const defaultHtdocs: string = "./htdocs";
-  const defaultApiUrl: string = "http://localhost:8085";
+  const defaultApiUrl: string = "http://localhost:8112";
 
   op.booleanVar("help", false, "display help");
   op.booleanVar("license", false, "display license");

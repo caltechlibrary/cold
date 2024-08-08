@@ -71,7 +71,7 @@ changes if you are setting up for production.</p>
 <li><code>cd</code></li>
 <li><code>git clone https://github.com/caltechlibrary/cold --recursive</code></li>
 <li><code>cd cold</code></li>
-<li><code>git pull origin --recurse-submodules</code></li>
+<li><code>git pull origin --recursive-submodules</code></li>
 </ol></li>
 <li>Setup cold
 <ol type="a">
@@ -90,35 +90,41 @@ everything going on.
 <ol type="a">
 <li>from the cold admin directory start up tmux</li>
 <li><code>tmux</code></li>
-<li>start the JSON API</li>
+<li>change to the admin directory and start the JSON API</li>
+<li><code>cd admin</code></li>
 <li><code>deno task json_api</code></li>
-<li>open another tmux window and start the admin web service</li>
+<li>open another tmux window, change to the admin directory, start the
+admin web service</li>
+<li>split the screen, e.g. <code>Ctl-%</code></li>
+<li><code>cd admin</code></li>
 <li><code>deno task start</code></li>
 <li>open a third tmux window, change to the cold repository location and
 start the public web service</li>
-<li><code>cd ..</code></li>
+<li>split the screen, e.g. <code>Ctl-"</code></li>
 <li><code>deno task start</code></li>
 </ol></li>
 </ol>
-<p>You should now have three web services running running on
-localhost.</p>
+<p>You should now have three web services running running on localhost
+at ports 8110 (public service), 8111 (admin service), 8112 (JSON
+API).</p>
 <dl>
-<dt>Port 8185</dt>
-<dd>
-This is the management JSON API for cold_admin
-</dd>
-<dt>Port 8180</dt>
-<dd>
-This is the management web service
-</dd>
-<dt>Port 8080</dt>
+<dt>Port 8110</dt>
 <dd>
 This is the public web service
 </dd>
+<dt>Port 8111</dt>
+<dd>
+This is the management web service
+</dd>
+<dt>Port 8112</dt>
+<dd>
+This is the management JSON API for <code>cold_admin</code> and
+<code>cold</code>
+</dd>
 </dl>
-<p>In a production deployment you’d create systemd service scripts to
-run each service via systemctl. If you need to use different portss you
-can set this in the configuration files or via command line options.</p>
+<p>In a remote deployment you’d setup up to run these services using
+systemd service scripts. See <a href="deployment.html">deployments</a>
+documentation for details.</p>
 </section>
 
 <footer>
