@@ -5,14 +5,14 @@
 {{>header}}
 <nav>
 <ul>
-<li><a href="{{base_path}}/" title="return to dashboard">Dashboard</a></li>
+<li><a href="../" title="return to dashboard">Dashboard</a></li>
 </ul>
 </nav>
 <section>
 <h1>CaltechPEOPLE</h1>
 <ul>
 {{#people_list}}
-  <li><a href="{{base_path}}/people/{{clpid}}" title="view people details">{{family_name}}, {{given_name}}</a></li>
+  <li><a href="{{clpid}}" title="view people details">{{family_name}}, {{given_name}}</a></li>
 {{/people_list}}
 </ul>
 </section>

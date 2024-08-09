@@ -4,14 +4,14 @@
 {{>header}}
 <nav>
 <ul>
-<li><a href="{{base_path}}/" title="return to dashboard">Dashboard</a></li>
+<li><a href="../" title="return to dashboard">Dashboard</a></li>
 </ul>
 </nav>
 <section>
 <h1>ISSN Mapping</h1>
 <ul>
 {{#issn_list}}
-  <li><a href="{{base_path}}/issn/{{issn}}" title="view issn details">{{name}}</a></li>
+  <li><a href="{{issn}}" title="view issn details">{{name}}</a></li>
 {{/issn_list}}
 </ul>
 </section>

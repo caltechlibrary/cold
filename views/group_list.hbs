@@ -4,14 +4,14 @@
 {{>header}}
 <nav>
 <ul>
-<li><a href="{{base_path}}/" title="return to dashboard">Dashboard</a></li>
+<li><a href="../" title="return to dashboard">Dashboard</a></li>
 </ul>
 </nav>
 <section>
 <h1>CaltechGROUPS</h1>
 <ul>
 {{#group_list}}
-  <li><a href="{{base_path}}/groups/{{clgid}}" title="view group details">{{group_name}}</a></li>
+  <li><a href="{{clgid}}" title="view group details">{{group_name}}</a></li>
 {{/group_list}}
 </ul>
 </section>

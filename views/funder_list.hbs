@@ -4,14 +4,14 @@
 {{>header}}
 <nav>
 <ul>
-<li><a href="{{base_path}}/" title="return to dashboard">Dashboard</a></li>
+<li><a href="../" title="return to dashboard">Dashboard</a></li>
 </ul>
 </nav>
 <section>
 <h1>CaltechFUNDERS</h1>
 <ul>
 {{#funder_list}}
-  <li><a href="{{base_path}}/funders/{{clfid}}" title="view funder details">{{name}}</a></li>
+  <li><a href="{{clfid}}" title="view funder details">{{name}}</a></li>
 {{/funder_list}}
 </ul>
 </section>

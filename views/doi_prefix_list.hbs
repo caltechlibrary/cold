@@ -4,14 +4,14 @@
 {{>header}}
 <nav>
 <ul>
-<li><a href="{{base_path}}/" title="return to dashboard">Dashboard</a></li>
+<li><a href="../" title="return to dashboard">Dashboard</a></li>
 </ul>
 </nav>
 <section>
 <h1>DOI Prefixes</h1>
 <ul>
 {{#doi_prefix_list}}
-  <li><a href="{{base_path}}/doi_prefix/{{doi_prefix}}" title="view doi_prefix details">{{name}}</a></li>
+  <li><a href="{{doi_prefix}}" title="view doi_prefix details">{{name}}</a></li>
 {{/doi_prefix_list}}
 </ul>
 </section>

@@ -11,7 +11,7 @@ import {
 } from "./deps.ts";
 
 //import type { People } from "./admin/deps.ts";
-
+const base_path = "";
 const ds = new Dataset(apiPort, "people.ds");
 
 /**
@@ -90,12 +90,12 @@ async function handleGetPeople(
     const people_list = await ds.query("people_names", [], {});
     if (people_list !== undefined) {
       return renderPage(tmpl, {
-        base_path: "",
+        base_path: base_path,
         people_list: people_list,
       });
     } else {
       return renderPage(tmpl, {
-        base_path: "",
+        base_path: base_path,
         people_list: [],
       });
     }
@@ -106,7 +106,7 @@ async function handleGetPeople(
     const obj = await ds.read(clpid);
     console.log(`We have a GET for people object ${clpid}, view = ${view}`);
     return renderPage(tmpl, {
-      base_path: "",
+      base_path: base_path,
       isCreateObject: isCreateObject,
       people: obj,
       debug_src: JSON.stringify(obj, null, 2),

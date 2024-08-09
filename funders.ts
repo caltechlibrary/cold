@@ -9,6 +9,7 @@ import {
   renderPage,
 } from "./deps.ts";
 
+const base_path = "";
 const ds = new Dataset(apiPort, "funders.ds");
 
 /**
@@ -87,12 +88,12 @@ async function handleGetFunders(
     const funder_list = await ds.query("funder_names", [], {});
     if (funder_list !== undefined) {
       return renderPage(tmpl, {
-        base_path: "",
+        base_path: base_path,
         funder_list: funder_list,
       });
     } else {
       return renderPage(tmpl, {
-        base_path: "",
+        base_path: base_path,
         funder_list: [],
       });
     }
@@ -104,7 +105,7 @@ async function handleGetFunders(
     const obj = await ds.read(clfid);
     console.log(`We have a GET for funder object ${clfid}, view = ${view}`);
     return renderPage(tmpl, {
-      base_path: "",
+      base_path: base_path,
       isCreateObject: isCreateObject,
       funder: obj,
       debug_src: JSON.stringify(obj, null, 2),

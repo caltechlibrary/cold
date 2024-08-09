@@ -4,14 +4,14 @@
 {{>header}}
 <nav>
 <ul>
-<li><a href="{{base_path}}/" title="return to dashboard">Dashboard</a></li>
+<li><a href="../" title="return to dashboard">Dashboard</a></li>
 </ul>
 </nav>
 <section>
 <h1>Subjects</h1>
 <ul>
 {{#subject_list}}
-  <li><a href="{{base_path}}/subjects/{{clsid}}" title="view subject details">{{name}}</a></li>
+  <li><a href="{{clsid}}" title="view subject details">{{name}}</a></li>
 {{/subject_list}}
 </ul>
 </section>
