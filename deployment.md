@@ -80,4 +80,32 @@ elinks http://localhost:8110
 elinks http://localhost:8111
 ~~~
 
-NOTE: The TypeScript services need to be compile before running with Systemd.
+NOTE: The TypeScript services need to be compile before running them with Systemd.
+
+## Apache 2 and Shibboleth
+
+Both **cold** and **cold_admin** are designed to be reverse proxy targets. Using Apache you need to to include the following code in the main host definition.
+
+~~~
+#<!-- start cold admin -->
+ProxyPreserveHost On
+ProxyPass "^/cold/admin" "http://localhost:8111/"
+ProxyPassMatch "^/cold/admin/(.*)" "http://localhost:8111/$1"
+#ProxyPassMatch "^/cold/admin/(.*)/(.*)" "http://localhost:8111/$1/$2"
+ProxyPassReverse "/cold/admin/" "http://localhost:8111/"
+<Location /cold/admin>
+  AuthType shibboleth
+  ShibRequestSetting requireSession 1
+  require user rsdoiel@caltech.edu sdavison@caltech.edu tmorrell@caltech.edu tkeswick@caltech.edu kjohnson@caltech.edu melray@caltech.edu
+  #require valid-user
+</Location>
+#<!-- end cold admin -->
+
+#<!-- start cold -->
+ProxyPass "^/cold" "http://localhost:8110/"
+ProxyPassMatch "^/cold/(.*)" "http://localhost:8110/$1"
+ProxyPassReverse "/cold/" "http://localhost:8110/"
+ProxyPassMatch "^/cold/(.*)/(.*)" "http://localhost:8110/$1/$2"
+#<!-- cold is publically accessible while cold admin should be restricted with Shib -->
+#<!-- end cold -->
+~~~
