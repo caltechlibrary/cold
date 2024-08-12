@@ -1,8 +1,10 @@
 #<!-- start cold admin -->
 ProxyPreserveHost On
 ProxyPass "^/cold/admin" "http://localhost:8111/"
+ProxyPassMatch "^/cold/admin$" "http://localhost:8111/"
 ProxyPassMatch "^/cold/admin/(.*)" "http://localhost:8111/$1"
 #ProxyPassMatch "^/cold/admin/(.*)/(.*)" "http://localhost:8111/$1/$2"
+ProxyPassReverse "/cold/admin" "http://localhost:8111/"
 ProxyPassReverse "/cold/admin/" "http://localhost:8111/"
 <Location /cold/admin>
   AuthType shibboleth
@@ -14,9 +16,11 @@ ProxyPassReverse "/cold/admin/" "http://localhost:8111/"
 
 #<!-- start cold -->
 ProxyPass "^/cold" "http://localhost:8110/"
+ProxyPassMatch "^/cold$" "http://localhost:8110/"
 ProxyPassMatch "^/cold/(.*)" "http://localhost:8110/$1"
-ProxyPassReverse "/cold/" "http://localhost:8110/"
 ProxyPassMatch "^/cold/(.*)/(.*)" "http://localhost:8110/$1/$2"
+ProxyPassReverse "/cold" "http://localhost:8110/"
+ProxyPassReverse "/cold/" "http://localhost:8110/"
 #<!-- cold is publically accessible while cold admin should be restricted with Shib -->
 #<!-- end cold -->
 
