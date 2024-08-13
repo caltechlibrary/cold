@@ -27,6 +27,8 @@ next
  - [X] Groups end points
  - [X] People end points
  - [X] Vocabulary end points
+- [X] Document setup, configuration and database requirements
+- [X] Add Makefile
 - [ ] Implement client/server validation for objects and attributes
  - [ ] People
    - [ ] Need to implement validators for each identifier type supported (look at convert idutils to WASM module and integrating that way)
@@ -36,8 +38,6 @@ next
    - [ ] Need to implement validators for each identifier type supported (look at convert idutils to WASM module and integrating that way)
  - [ ] Vocabularies
    - [ ] Need to implement validators for each identifier type supported (look at convert idutils to WASM module and integrating that way)
-- [ ] Document setup, configuration and database requirements
-- [ ] Add Makefile
 
 
 Someday, maybe
