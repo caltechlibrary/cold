@@ -10,6 +10,14 @@ next
 3. [ ] Write report that generates the YAML needed by RDM
 4. [ ] Write a cronjob that updates COLD from directory using the old cdh harvester code or public vcard
   - [ ] investigate how much of the vcard is useful, important use case is dual appointments
+    - Does not necessarily show division affiliation
+    - If "ORG" is shown it maybe a semi-colon delimited list
+    - Doesn't show BIO field
+    - Can be seen off campus so information provided is public
+    - There are a few better Golang packages supporting decoding VCARD data depending on our needs
+    - Very easy to retrieve and doesn't require API key, must know IMSS username
+    - Only supports the vcf format of data (not XML or JSON)
+  - [ ] investigate what we get from the current implementation LDAP API provided by IMSS
   - [ ] division associations for people should be additive but require manuall removals on autoupdates
   - [ ] Fields like bio and descriptions can be overwritten by directory data
 5. [ ] Add button to pull in current directory data

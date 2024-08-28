@@ -67,3 +67,5 @@ _codemeta.json
 postgrest.conf
 *.service
 *.env
+cdh.yaml
+cold_directory_sync.yaml
