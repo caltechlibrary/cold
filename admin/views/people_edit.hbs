@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en-US">
+{{>head}}
+<body>
+{{>header}}
+<nav>
+<ul>
+<li><a href="/" title="return home">Home</a></li>
+<li><a href="../" title="return to dashboard">Dashboard</a></li>
+<li><a href="./" title="return to group list">People</a></li>
+<li><a href="{{people.clpid}}">View {{people.clpid}}</a></li>
+</ul>
+</nav>
+<section>
+<h1>{{#isCreateObject}}Create:{{/isCreateObject}}{{^isCreateObject}}Edit:{{/isCreateObject}} {{people.name}}</h1>
+
+<form action="{{people.clpid}}" method="post">
+
+<div>
+<label set="clpid">clpid</label> <input type="text" id="clpid" name="clpid" value="{{people.clpid}}" {{^isCreateObject}}readonly{{/isCreateObject}} required="true" />
+</div>
+
+<div>
+<label set="display_name">Display Name</label> <input type="text" id="display_name" name="display_name" value="{{people.display_name}}" /> 
+</div>
+
+<div>
+<label set="family_name">Family Name</label> <input type="text" id="family_name" name="family_name" value="{{people.family_name}}" required="true" />
+</div>
+
+<div>
+<label set="given_name">Given/Lived Name</label> <input type="text" id="given_name" name="given_name" value="{{people.given_name}}" required="true" />
+</div>
+
+<div>
+<label set="bio">Bio</label><br >
+<textarea id="bio" name="bio" rows="10" cols="60">{{people.bio}}</textarea>
+</div>
+
+<div>
+<label set="education">Education</label><br > <textarea id="education" name="education" rows="10" cols="60">{{people.education}}</textarea>
+</div>
+
+<div>
+<label set="email">Contact Email</label> <input type="email" id="email" name="email" pattern=".+@.+\.edu" value="{{people.email}}">
+</div>
+
+<div>
+<label set="directory_person_type">Directory Person Type</label> <input type="directory_person_type" id="directory_person_type" name="directory_person_type" value="{{people.directory_person_type}}">
+</div>
+
+<div>
+<label set="directory_user_id">Directory User ID</label> <input type="directory_user_id" id="directory_user_id" name="directory_user_id" value="{{people.directory_user_id}}">
+</div>
+
+<!--
+<div>
+<label set="image_url">Image URL</label> <input type="url" id="image_url" name="image_url" value="{{people.image_url}}">
+</div>
+-->
+
+<div>
+<label set="division">Division</label> <input type="text" id="division" name="division" value="{{people.division}}">
+</div>
+
+
+<!-- <div>
+<label set="status">Status</label> <input type="text" id="status" name="status" value="{{people.status}}">
+</div> -->
+
+<div class="identifiers">
+<div>
+<label set="orcid">ORCID</label> <input type="text" id="orcid" name="orcid" pattern="[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9X]" value="{{people.orcid}}">
+</div>
+
+<div>
+<label set="ror">Affiliation (ROR)</label> <input type="text" id="ror" name="ror" value="{{people.ror}}" >
+</div>
+
+<div>
+<label set="isni">ISNI</label> <input type="text" id="isni" name="isni" value="{{people.isni}}">
+</div>
+
+<div>
+<label set="lcnaf">ringold</label> <input type="text" id="lcnaf" name="lcnaf" value="{{people.lcnaf}}">
+</div>
+
+<div>
+<label set="viaf">viaf</label> <input type="text" id="viaf" name="viaf" value="{{people.viaf}}" >
+</div>
+
+<div>
+<label set="wikidata">Wikidata</label> <input type="text" id="wikidata" name="wikidata" value="{{people.wikidata}}" >
+</div>
+
+<div>
+<label set="snac">SNAC</label> <input type="text" id="snac" name="snac" value="{{people.snac}}" >
+</div>
+
+<div>
+<label set="archivesspace_id">ArchivesSpace ID</label> <input type="text" id="archivesspace_id" name="archivesspace_id" value="{{people.archivesspace_id}}" >
+</div>
+
+<div>
+<label set="authors_id">CaltechAUTHORS ID</label> <input type="text" id="authors_id" name="authors_id" value="{{people.authors_id}}" >
+</div>
+
+<div>
+<label set="thesis_id">CaltechTHESIS ID</label> <input type="text" id="thesis_id" name="thesis_id" value="{{people.thesis_id}}" >
+</div>
+
+<div>
+<label set="advisors_id">CaltechTHESIS Advisor ID</label> <input type="text" id="advisors_id" name="advisors_id" value="{{people.advisors_id}}" >
+</div>
+</div>
+
+<div class="active-affiliation"><p>Active Affiliation:<br >
+<label>Caltech <input type="checkbox" id="caltech" name="caltech" {{#people.caltech}}checked{{/people.caltech}} ></label>
+<label>JPL <input type="checkbox" id="jpl" name="jpl" {{#people.jpl}}checked{{/people.jpl}} ></label>
+</div>
+
+<div class="affiliation-type"><p>Affiation type:<br >
+<label>Faculty <input type="checkbox" id="faculty" name="faculty" {{#people.faculty}}checked{{/people.faculty}} ></label>
+<label>Alumn <input type="checkbox" id="alumn" name="alumn" {{#people.alumn}}checked{{/people.alumn}} ></label>
+</div>
+
+<div class="feeds-status"><p>Feeds status:<br >
+<label set="include_in_feeds">Include in feeds <input type="checkbox" id="include_in_feeds" name="include_in_feeds" {{#people.include_in_feeds}}checked{{/people.include_in_feeds}}> </label>
+</div>
+
+<p>
+{{#if people.updated}}<label set="updated">updated</label> {{people.updated}}{{/if}}
+</p>
+
+<div>
+<input type="submit" id="submit" name="submit" value="submit"> <input type="reset" id="reset" name="reset" value="reset">
+</div>
+</form>
+
+<p>
+</section>
+{{>footer}}
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>COLD (Controlled Object List and Datum (Concept))</title>
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="https://caltechlibrary.github.io/css/site.css">
+</head>
+<body>
+<header>
+<a href="http://library.caltech.edu" title="link to Caltech Library Homepage"><img src="https://caltechlibrary.github.io/assets/liblogo.gif" alt="Caltech Library logo"></a>
+</header>
+<nav>
+<ul>
+    <li><a href="/">Home</a></li>
+    <li><a href="index.html">README</a></li>
+    <li><a href="LICENSE">LICENSE</a></li>
+    <li><a href="INSTALL.html">INSTALL</a></li>
+    <li><a href="user_manual.html">User Manual</a></li>
+    <li><a href="about.html">About</a></li>
+    <li><a href="https://github.com/caltechlibrary/cold">GitHub</a></li>
+</ul>
+</nav>
+
+<section>
+<h1 id="cold-admin">COLD Admin</h1>
+<blockquote>
+<p>COLD - controlled object lists and datum</p>
+</blockquote>
+<p>This project implements the administrative interface for <a
+href="https://github.com/caltechlibrary/cold">cold</a>. It is
+implemented in TypeScript, compiled into an executable via <a
+href="https://deno.land">Deno</a>. It is intended to run as a service
+via systemd in Linux or other POSIX system. Objects are stored in <a
+href="https://caltechlibrary.github.io/dataset">dataset</a> collection.
+The collections are accessed via JSON API provided by <a
+href="https://caltechlibrary.github.io/datatset/datasetd.1.html">datasetd</a>.
+Dataset collections are using <a href="https://sqlite.org">SQLite 3</a>
+for object storage.j</p>
+<h2 id="requirements">Requirements</h2>
+<ul>
+<li><a href="https://github.com/caltechlibrary/dataset">Dataset</a>
+&gt;= 2.1.3 (running COLD Admin)</li>
+<li><a href="https://deno.land">Deno</a> &gt;= 1.45.5 (used to build the
+app and compile services) (build COLD Admin)</li>
+<li><a href="https://pandoc.org">Pandoc</a> &gt;= 3 (render
+documentation and version.ts) (build COLD Admin)</li>
+<li>GNU Make (build COLD Admin)</li>
+<li>Zip (packaging build and installation)</li>
+<li>Bash+cURL or Powershell (installation only)</li>
+</ul>
+<h2 id="additional-resources">Additional Resources</h2>
+<ul>
+<li>COLD Admin <a href="user_manual.html">User Manual</a></li>
+</ul>
+<h2 id="report-problems-and-issues">Report problems and issues</h2>
+<p>See <a
+href="https://github.com/caltechlibrary/cold_admin/issues">Github
+Issues</a></p>
+</section>
+
+<footer>
+<span>&copy; 2024 <a href="https://www.library.caltech.edu/copyright">Caltech Library</a></span>
+<address>1200 E California Blvd, Mail Code 1-32, Pasadena, CA 91125-3200</address>
+<span><a href="mailto:library@caltech.edu">Email Us</a></span>
+<span>Phone: <a href="tel:+1-626-395-3405">(626)395-3405</a></span>
+</footer>
+</body>
+</html>

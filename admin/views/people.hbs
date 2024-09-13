@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en-US">
+{{>head}}
+<body>
+{{>header}}
+<nav>
+<ul>
+<li><a href="/" title="return home">Home</a></li>
+<li><a href="../" title="return to dashboard">Dashboard</a></li>
+<li><a href="./" title="return to group list">People</a></li>
+<li><a href="{{people.clpid}}?view=edit">Edit {{people.clpid}}</a></li>
+</ul>
+</nav>
+<section>
+
+{{#if people.display_name}}<h1>{{people.display_name}}</h1>{{else}}
+<h1>{{people.family_name}}{{#if people.given_name}}, {{people.given_name}}{{/if}}</h1>{{/if}}
+
+<div class="identifier">clpid: {{people.clpid}}</div>
+
+{{#if people.title}}<p><div class="title">Title: {{people.title}}</div>{{/if}}
+
+{{#if people.bio}}<p><div class="boi">BIO: {{people.bio}}</div>{{/if}}
+
+{{#if people.education}}<p><div class="education">Education: {{people.education}}<div>{{/if}}
+
+{{#if people.division}}<p><div class="division">Division: {{people.division}}<div>{{/if}}
+
+{{#if people.email}}<p><div class="email">EMail: {{people.email}}</div>{{/if}}
+
+<!--
+<div class="status">{{#people.status}}Status: {{.}}{{/people.status}}</div>
+-->
+
+{{#if people.directory_user_id}}<p><div class="directory_user_id">IMSS userid: {{people.directory_user_id}}</div>{{/if}}
+
+{{#if people.directory_person_type}}<p><div class="directory_person_type">Directory Person Type: {{people.directory_person_type}}</div>{{/if}}
+
+<div class="identifiers">
+  {{#if people.orcid}}<div class="orcid">ORCID: {{people.orcid}}</div>{{/if}}
+  {{#if people.isni}}<div class="isni">ISNO: {{people.isni}}</div>{{/if}}
+  {{#if people.archivesspace_id}}<div class="archivesspace_id">ArchivesSpace ID: {{people.archivesspace_id}}<div>{{/if}}
+  {{#if people.viaf}}<div class="viaf">VIAF: {{people.viaf}}</div>{{/if}}
+  {{#if people.lcnaf}}<div class="lcnaf">LCNAF: {{people.lcnaf}}</div>{{/if}}
+  {{#if people.wikidata}}<div class="wikidata">Wikidata: {{people.wikidata}}</div>{{/if}}
+  {{#if people.snac}}<div class="snac">SNAC: {{people.snac}}</div>{{/if}}
+  {{#if people.authors_id}}<div class="authors_id">CaltechAUTHORS ID: {{people.authors_id}}</div>{{/if}}
+  {{#if people.thesis_id}}<div class="thesis_id">CaltechTHESIS ID: {{people.thesis_id}}</div>{{/if}}
+  {{#if people.advisors_id}}<div class="advisors_id">CaltechTHESIS Advisor ID: {{people.advisors_id}}</div>{{/if}}
+</div>
+
+<!--
+<div class="image_url">{{#people.image_url}}Image URL: <a href="{{.}}">{{.}}</a>{{/people.image_url}}</div>
+-->
+
+
+<div class="active-affiliations"><p>Institute Affiliation(s):
+  <ul>
+  {{#people.caltech}}<li class="is_caltech">Active Caltech</li>{{/people.caltech}}
+  {{#people.jpl}}<li class="is_jpl">Active JPL</li>{{/people.jpl}}
+  </ul>
+</div>
+
+<div class="type-affiliation"><p>Type of affiliation(s):
+  <ul>
+  {{#people.faculty}}<li class="is_faculty">Faculty</li>{{/people.faculty}}
+  {{#people.alumn}}<li class="is_alumn">Alumn</li>{{/people.alumn}}
+  </ul>
+</div>
+
+<div class="included-in-feeds">
+{{#if people.include_in_feeds}}
+{{people.given_name}} {{people.family_name}} is included in feeds
+{{else}}
+{{people.given_name}} {{people.family_name}} is NOT included in feeds
+{{/if}}
+</div>
+
+{{#if people.updated}}<p><div class="updated">Record Updated: {{people.updated}}</div>{{/if}}
+
+<p>
+</section>
+{{>footer}}
+<!-- {{#if debug_src}}<code>{{debug_src}}</code>{{/if}}  -->
+</body>
+</html>

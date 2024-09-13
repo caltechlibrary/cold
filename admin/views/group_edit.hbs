@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en-US">
+{{>head}}
+<body>
+{{>header}}
+<nav>
+<ul>
+<li><a href="/" title="return home">Home</a></li>
+<li><a href="../" title="return to dashboard">Dashboard</a></li>
+<li><a href="./" title="return to group list">Groups</a></li>
+<li><a href="{{group.clgid}}">View {{group.clgid}}</a></li>
+</ul>
+</nav>
+<section>
+<h1>{{#isCreateObject}}Create:{{/isCreateObject}}{{^isCreateObject}}Edit:{{/isCreateObject}} {{group.name}}</h1>
+
+<form action="{{group.clgid}}" method="post">
+
+<div>
+<label set="clgid">clgid</label> <input type="text" id="clgid" name="clgid" value="{{group.clgid}}" {{^isCreateObject}}readonly{{/isCreateObject}} required="true" />
+</div>
+
+<div>
+<label set="name">Name</label> <input type="text" id="name" name="name" value="{{group.name}}" required="true" />
+</div>
+
+<div>
+<label set="alternative">Alternate Names (one per line)</label><br >
+<textarea id="alternative" name="alternative" rows="10" cols="60">
+{{#group.alternative}}
+{{ . }}
+{{/group.alternative}}
+</textarea>
+</div>
+
+<div>
+<label set="description">Description</label><br >
+<textarea id="description" name="description" rows="10" cols="60">{{group.description}}</textarea>
+</div>
+
+<div>
+<label set="website">Website</label> <input type="url" id="website" name="website" value="{{group.website}}" >
+</div>
+
+<div>
+<label set="include_in_feeds">Include in feeds <input type="checkbox" id="include_in_feeds" name="include_in_feeds" {{#group.include_in_feeds}}checked{{/group.include_in_feeds}}> </label>
+</div>
+
+<div>
+<label set="pi">Primary Investigator</label> <input type="text" id="pi" name="pi" value="{{group.pi}}">
+</div>
+
+<div>
+<label set="email">Contact Email</label> <input type="email" id="email" name="email" pattern=".+@.+\.edu" value="{{group.email}}">
+</div>
+
+<div>
+<label set="activity">Activity Status</label> <input type="text" id="activity" name="activity" value="{{group.activity}}">
+</div>
+
+<div>
+<label set="start_date">Start date</label> <input type="date" id="start_date" name="start_date" value="{{group.start_date}}">
+<label set="is_approx_start">Approx</label> <input type="checkbox" id="is_approx_start" name="is_approx_start" {{#group.is_approx_start}}checked{{/group.is_approx_start}}>
+</div>
+
+<div>
+<label set="end_date">End date</label> <input type="date" id="end_date" name="end_date" value="{{group.end_date}}">
+<label set="is_approx_end">Approx</label> <input type="checkbox" id="is_approx_end" name="is_approx_end" {{#group.is_approx_end}}checked{{/group.is_approx_end}}>
+</div>
+
+<div class="identifiers">
+<div>
+<label set="parent">Parent</label> <input type="text" id="parent" name="parent" value="{{group.parent}}">
+</div>
+
+<div>
+<label set="ror">ROR</label> <input type="text" id="ror" name="ror" value="{{group.ror}}" >
+</div>
+
+<div>
+<label set="isni">ISNI</label> <input type="text" id="isni" name="isni" value="{{group.isni}}">
+</div>
+
+<div>
+<label set="ringold">ringold</label> <input type="text" id="ringold" name="ringold" value="{{group.ringold}}">
+</div>
+
+<div>
+<label set="prefix">DOI Prefix</label> <input type="text" id="prefix" name="prefix" value="{{group.prefix}}" >
+</div>
+
+<div>
+<label set="viaf">viaf</label> <input type="text" id="viaf" name="viaf" value="{{group.viaf}}" >
+</div>
+</div>
+
+<div>
+<label set="created">record created</label> <input type="text" id="created" name="created" value="{{group.date}}" readonly>
+</div>
+
+<div>
+<input type="submit" id="submit" name="submit" value="submit"> <input type="reset" id="reset" name="reset" value="reset">
+</div>
+</form>
+
+<p>
+</section>
+{{>footer}}
+<code><pre>{{debug_src}}</pre></code>
+</body>
+</html>

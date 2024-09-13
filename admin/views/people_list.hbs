@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en-US">
+{{>head}}
+<body>
+{{>header}}
+<nav>
+<ul>
+<li><a href="/" title="return home">Home</a></li>
+<li><a href="../" title="return to dashboard">Dashboard</a></li>
+<li><a href="./?view=create">Add a Person</a></li>
+</ul>
+</nav>
+<section>
+<h1>CaltechPEOPLE</h1>
+<ul>
+{{#people_list}}
+  <li><a href="{{clpid}}" title="view people details">{{family_name}}, {{given_name}}</a></li>
+{{/people_list}}
+</ul>
+</section>
+{{>footer}}
+</body>
+</html>

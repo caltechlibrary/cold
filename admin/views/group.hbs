@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en-US">
+{{>head}}
+<body>
+{{>header}}
+<nav>
+<ul>
+<li><a href="/" title="return home">Home</a></li>
+<li><a href="../" title="return to dashboard">Dashboard</a></li>
+<li><a href="./" title="return to group list">Groups</a></li>
+<li><a href="{{group.clgid}}?view=edit">Edit {{group.clgid}}</a></li>
+</ul>
+</nav>
+<section>
+
+<h1>{{group.name}}</h1>
+<div class="identifier">{{clgid}}</div>
+
+{{#if group.alternative}}
+<ul>
+{{#each group.alternative}}
+<li>({{this}})</li>
+{{/each}}
+</ul>
+{{/if}}
+
+{{#if group.description}}<div class="description">{{group.description}}</div>{{/if}}
+
+{{#if group.website}}<div class="website">Group website: <a href="{{group.website}}" title="group website">{{group.website}}</a></div>{{/if}}
+
+{{#if group.include_in_feeds}}<div class="feeds_link">View in feeds: <a href="https://feeds.library.caltech.edu/groups/{{group.clgid}}" title="group in feeds" target="_blank">{{group.clgid}}</a></div>{{/if}}
+
+{{#if group.pi}}<div class="pi">P.I.: {{group.pi}}</div>{{/if}}
+
+<div class="labeled_dates">
+{{#if group.start_date}}<span class="dates">Started: {{group.start_date}} {{#if group.is_approx_start}}(approx){{/if}}</span>{{/if}}
+{{#if group.end_date}}<span class="dates">Ended: {{group.start_date}} {{#if group.is_approx_end}}(approx}){{/if}}</span>{{/if}}
+</div>
+
+{{#if group.activity}}<div class="activity">Activity: {{group.activity}}</div>{{/if}}
+
+{{#if group.email}}<div class="email">contact email: <a href="mailto:{{group.email}}">{{group.email}}</a></div>{{/if}}
+
+<div class="identifiers">
+  {{#if group.parent}}<div class="parent">parent: {{group.parent}}</div>{{/if}}
+  {{#if group.ror}}<div class="ror">ror: {{group.ror}}</div>{{/if}}
+  {{#if group.isni}}<div class="isni">isni: {{group.isni}}</div>{{/if}}
+  {{#if group.ringold}}<div class="ringold">ringold: {{group.ringold}}</div>{{/if}}
+  {{#if group.prefix}}<div class="prefix">doi prefix: {{group.prefix}}</div>{{/if}}
+  {{#if group.viaf}}<div class="viaf">viaf: {{group.viaf}}</div>{{/if}}
+</div>
+
+<div class="labeled_dates">
+{{#if group.date}}<span class="dates">created: {{group.date}}</span>{{/if}}
+</div>
+
+
+<p>
+</section>
+{{>footer}}
+<code><pre>{{debug_src}}</pre></code>
+</body>
+</html>

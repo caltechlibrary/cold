@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en-US">
+{{>head}}
+<body>
+{{>header}}
+<nav>
+<ul>
+<li><a href="/" title="return home">Home</a></li>
+<li><a href="../" title="return to dashboard">Dashboard</a></li>
+<li><a href="./" title="return to issn list">ISSNs</a></li>
+<li><a href="{{issn.issn}}">View {{issn.issn}}</a></li>
+</ul>
+</nav>
+<section>
+<h1>{{#isCreateObject}}Create:{{/isCreateObject}}{{^isCreateObject}}Edit:{{/isCreateObject}} {{issn.name}}</h1>
+
+<form action="{{issn.issn}}" method="post">
+
+<div>
+<label set="issn">issn</label> <input type="text" id="issn" name="issn" value="{{issn.issn}}" {{^isCreateObject}}readonly{{/isCreateObject}} required="true" />
+</div>
+
+<div>
+<label set="name">Serial Name</label> <input type="text" id="name" name="name" value="{{issn.name}}" required="true" />
+</div>
+
+<div>
+<label set="alternative_names">Other Names (one per line)</label><br>
+<textarea id="alternative_names" name="alternative_names" rows="10" cols="60">
+{{#issn.alternative_names}}
+{{ . }}
+{{/issn.alternative_names}}
+</textarea>
+</div>
+
+<div>
+<label set="publisher_name">Publisher Name</label> <input type="text" id="publisher_name" name="publisher_name" value="{{issn.publisher_name}}" required="true" />
+</div>
+
+<div>
+<label set="publisher_location">Publisher Location</label> <input type="text" id="publisher_location" name="publisher_location" value="{{issn.publisher_location}}" />
+</div>
+
+<div>
+<label set="publisher_address">Publisher Address</label> <input type="text" id="publisher_address" name="publisher_address" value="{{issn.publisher_address}}" />
+</div>
+
+
+<div>
+<label set="description">Description</label><br >
+<textarea id="description" name="description" rows="10" cols="60">{{issn.description}}</textarea>
+</div>
+
+<div>
+<label set="updated">record updated</label> <input type="text" id="updated" name="updated" value="{{issn.updated}}" readonly>
+</div>
+
+<div>
+<input type="submit" id="submit" name="submit" value="submit"> <input type="reset" id="reset" name="reset" value="reset">
+</div>
+</form>
+
+<p>
+</section>
+{{>footer}}
+<code><pre>{{debug_src}}</pre></code>
+</body>
+</html>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en-US">
+{{>head}}
+<body>
+{{>header}}
+<nav>
+<ul>
+<li><a href="/" title="return home">Home</a></li>
+<li><a href="../" title="return to dashboard">Dashboard</a></li>
+<li><a href="./" title="return to funder list">Funders</a></li>
+<li><a href="{{funder.clfid}}?view=edit">Edit {{funder.clfid}}</a></li>
+</ul>
+</nav>
+<section>
+
+<h1>{{funder.name}}</h1>
+<div class="identifier">{{clfid}}</div>
+
+{{#if funder.grant_numbers}}
+<ul>
+{{#each funder.grant_numbers}}
+<li>({{this}})</li>
+{{/each}}
+</ul>
+{{/if}}
+
+{{#if funder.description}}<div class="description">{{funder.description}}</div>{{/if}}
+
+{{#if funder.include_in_feeds}}<div class="feeds_link">View in feeds: <a href="https://feeds.library.caltech.edu/funders/{{funder.clfid}}" title="funder in feeds" target="_blank">{{funder.clfid}}</a></div>{{/if}}
+
+<div class="identifiers">
+  {{#if funder.ror}}<div class="ror">ror: {{funder.ror}}</div>{{/if}}
+  {{#if funder.ofr}}<div class="ofr">ofr: {{funder.ofr}}</div>{{/if}}
+  {{#if funder.doi}}<div class="doi">isni: {{funder.doi}}</div>{{/if}}
+</div>
+
+<div class="labeled_dates">
+{{#if funder.updated}}<span class="updated">updated: {{funder.updated}}</span>{{/if}}
+</div>
+
+
+<p>
+</section>
+{{>footer}}
+<code><pre>{{debug_src}}</pre></code>
+</body>
+</html>

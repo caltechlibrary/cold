@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en-US">
+{{>head}}
+<body>
+{{>header}}
+<nav>
+<ul>
+<li><a href="/" title="return home">Home</a></li>
+<li><a href="../" title="return to dashboard">Dashboard</a></li>
+<li><a href="./" title="return to doi_prefix list">DOI Prefixs</a></li>
+<li><a href="{{doi_prefix.doi_prefix}}">View {{doi_prefix.doi_prefix}}</a></li>
+</ul>
+</nav>
+<section>
+<h1>{{#isCreateObject}}Create:{{/isCreateObject}}{{^isCreateObject}}Edit:{{/isCreateObject}} {{doi_prefix.name}}</h1>
+
+<form action="{{base_path}}/doi_prefix/{{doi_prefix.doi_prefix}}" method="post">
+
+<div>
+<label set="doi_prefix">doi_prefix</label> <input type="text" id="doi_prefix" name="doi_prefix" value="{{doi_prefix.doi_prefix}}" {{^isCreateObject}}readonly{{/isCreateObject}} required="true" />
+</div>
+
+<div>
+<label set="name">Name</label> <input type="text" id="name" name="name" value="{{doi_prefix.name}}" required="true" />
+</div>
+
+<div>
+<label set="description">Description</label><br >
+<textarea id="description" name="description" rows="10" cols="60">{{doi_prefix.description}}</textarea>
+</div>
+
+<div>
+<label set="updated">updated</label> <span class="updated">{{doi_prefix.updated}}</span>
+</div>
+
+<div>
+<input type="submit" id="submit" name="submit" value="submit"> <input type="reset" id="reset" name="reset" value="reset">
+</div>
+</form>
+
+<p>
+</section>
+{{>footer}}
+<code><pre>{{debug_src}}</pre></code>
+</body>
+</html>

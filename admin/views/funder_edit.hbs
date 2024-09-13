@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en-US">
+{{>head}}
+<body>
+{{>header}}
+<nav>
+<ul>
+<li><a href="/" title="return home">Home</a></li>
+<li><a href="../" title="return to dashboard">Dashboard</a></li>
+<li><a href="./" title="return to funder list">Funders</a></li>
+<li><a href="{{funder.clfid}}">View {{funder.clfid}}</a></li>
+</ul>
+</nav>
+<section>
+<h1>{{#isCreateObject}}Create:{{/isCreateObject}}{{^isCreateObject}}Edit:{{/isCreateObject}} {{funder.name}}</h1>
+
+<form action="{{funder.clfid}}" method="post">
+
+<div>
+<label set="clfid">clfid</label> <input type="text" id="clfid" name="clfid" value="{{funder.clfid}}" {{^isCreateObject}}readonly{{/isCreateObject}} required="true" />
+</div>
+
+<div>
+<label set="name">Name</label> <input type="text" id="name" name="name" value="{{funder.name}}" required="true" />
+</div>
+
+<div>
+<label set="alternative">Grant Numbers (one per line)</label><br >
+<textarea id="grant_numbers" name="grant_numbers" rows="10" cols="60">
+{{#funder.grant_numbers}}
+{{ . }}
+{{/funder.grant_numbers}}
+</textarea>
+</div>
+
+<div>
+<label set="description">Description</label><br >
+<textarea id="description" name="description" rows="10" cols="60">{{funder.description}}</textarea>
+</div>
+
+<div>
+<label set="include_in_feeds">Include in feeds <input type="checkbox" id="include_in_feeds" name="include_in_feeds" {{#funder.include_in_feeds}}checked{{/funder.include_in_feeds}}> </label>
+</div>
+
+<div class="identifiers">
+<div>
+<label set="ror">ROR</label> <input type="ror" id="ror" name="ror" value="{{funder.ror}}" title="Research Organization Reference" >
+</div>
+
+<div>
+<label set="ofr">OFR</label> <input type="ofr" id="ofr" name="ofr" value="{{funder.ofr}}" title="Open Funders Reference">
+</div>
+
+<div>
+<label set="doi">doi</label> <input type="doi" id="doi" name="doi" value="{{funder.doi}}" title="Digital Object Identifier">
+</div>
+</div>
+
+<div>
+<label set="updated">record updated</label> <input type="text" id="updated" name="updated" value="{{funder.updated}}" readonly>
+</div>
+
+<div>
+<input type="submit" id="submit" name="submit" value="submit"> <input type="reset" id="reset" name="reset" value="reset">
+</div>
+</form>
+
+<p>
+</section>
+{{>footer}}
+<code><pre>{{debug_src}}</pre></code>
+</body>
+</html>

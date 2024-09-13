@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en-US">
+{{>head}}
+{{>header}}
+<nav>
+<ul>
+<li><a href="/" title="return home">Home</a></li>
+<li><a href="../" title="return to dashboard">Dashboard</a></li>
+<li><a href="./?view=create">Add DOI Prefix</a></li>
+</ul>
+</nav>
+<section>
+<h1>DOI Prefixes</h1>
+<ul>
+{{#doi_prefix_list}}
+  <li><a href="{{doi_prefix}}" title="view doi_prefix details">{{name}}</a></li>
+{{/doi_prefix_list}}
+</ul>
+</section>
+{{>footer}}
+</html>

@@ -1,0 +1,17 @@
+deno.lock
+bin/*
+man/*
+dist/*
+_codemeta.json
+*.ds/
+*.swp
+*~
+*.bak
+people.csv
+groups.csv
+issn_journal_publisher.*
+TODO.html
+*.env
+*.service
+cdh.yaml
+cold_directory_sync.yaml
