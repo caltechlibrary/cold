@@ -1,11 +1,11 @@
-Installation for development of **cold** and **cold_admin**
-===========================================================
+Installation for development of **cold**
+========================================
 
 **cold** is experimental software providing a read only view of managed controlled object lists and datum (e.g. controlled vocabularies). The **cold** repository provides the public facing JSON API for integration with other services.
 
-The management interface **cold_admin** is held in the [github.com/caltechlibrary/cold_admin](https://github.com/caltechlibrary/cold_admin) repository. **cold** implements **cold_admin** as Git submodule. When you clone **cold** you should do so recursively.
+The management interface is found in the **admin** directory. It contains the source to compile the curatorial services for cold.
 
-**cold** and **cold_admin** are intended to run behind a front facing web server (e.g. Apache 2) providing access control and authentication. In a development setting this can be as simple as configuring BasicAuth.  In a production setting you need something robust like Shibboleth.  An example apache2 configuration is included in the source repository for **cold**. It will require adaptation to your specific web server configuration.
+**cold** public and admin services are intended to run behind a front facing web server (e.g. Apache 2) providing access control and authentication. In a development setting this can be as simple as configuring BasicAuth.  In a production setting you need something robust like Shibboleth.  An example apache2 configuration is included in the source repository for **cold**. It will require adaptation to your specific web server configuration.
 
 **cold** requires the datasetd web service to provide access to people.ds and group.ds collections. For **cold** and **cold_admin** you should configure your collections to use sql storage, e.g. SQLite3 or PostgreSQL. This can be done form the cold_admin submodule using a Deno task or via the Makefile (which calls the deno task).
 
@@ -16,8 +16,8 @@ Required software
 -----------------
 
 1. Git (to clone the cold repository on GitHub)
-2. Deno >= 1.45.5 (to run the public and management web services)
-3. Dataset >= 2.1.15 (datasetd provides the JSON API for cold/cold_admin)
+2. Deno >= 1.46.3 (to run the public and management web services)
+3. Dataset >= 2.1.18 (datasetd provides the JSON API for cold public and admin services)
 4. Pandoc > 3.1 (to build or update documation)
 
 Setting up cold and cold_admin
@@ -28,12 +28,12 @@ if you are setting up for production.
 
 1. Retrieve cold and cold_admin repositories
     a. `cd`
-    b. `git clone https://github.com/caltechlibrary/cold --recursive`
+    b. `git clone https://github.com/caltechlibrary/cold`
     c. `cd cold`
-    d. `git pull origin --recursive-submodules`
-2. Setup cold
+    d. `git pull origin main`
+2. Setup cold public services
     a. `deno task build`
-3. Setup cold_admin
+3. Setup cold admin services
     a. `cd admin`
     b. `deno task setup`
     c. (optional) `deno task load_data` (initially populate COLD from CSV files)

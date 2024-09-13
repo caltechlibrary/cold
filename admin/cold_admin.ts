@@ -118,9 +118,11 @@ export function ColdReadWriteHandler(
   if (pathname.startsWith("/doi_prefix")) {
     return handleDOIPrefix(req, options);
   }
+  /*
   if (pathname.startsWith("/reports")) {
     return handleReports(req, options);
   }
+  */
   if (options.debug) {
     console.log(
       "DEBUG: Handle the request for a static files or assets -> " + pathname,

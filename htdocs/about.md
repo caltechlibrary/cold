@@ -3,15 +3,15 @@ cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
 type: software
 title: "cold"
-abstract: "cold is a localhost web service for managing controlled
-object lists."
+abstract: "cold is a collection of localhost web services for accessing
+and managing controlled object lists and datum."
 authors:
   - family-names: Doiel
     given-names: R. S.
     orcid: "https://orcid.org/0000-0003-0900-6903"
 
 repository-code: "https://github.com/caltechlibrary/cold"
-version: 0.0.5
+version: 0.0.6
 license-url: "https://caltechlibrary.github.io/cold/LICENSE"
 keywords: [ "metadata", "objects", "controlled vocabulary" ]
 
@@ -20,7 +20,7 @@ keywords: [ "metadata", "objects", "controlled vocabulary" ]
 About this software
 ===================
 
-## cold 0.0.5
+## cold 0.0.6
 
 ### Authors
 
@@ -35,7 +35,8 @@ About this software
 
 - R. S. Doiel
 
-cold is a localhost web service for managing controlled object lists.
+cold is a collection of localhost web services for accessing and
+managing controlled object lists and datum.
 
 - License: <https://caltechlibrary.github.io/cold/LICENSE>
 - GitHub: <https://github.com/caltechlibrary/cold>
@@ -44,15 +45,21 @@ cold is a localhost web service for managing controlled object lists.
 
 ### Programming languages
 
-- TypeScript
-- JavaScript
-- HTML
 - CSS
+- HTML
+- JavaScript
+- JSON
+- SQL
+- Typescript
 - YAML
 
+### Operating Systems
+
+- Linux
 
 ### Software Requiremets
 
-- Deno &gt;= 1.44
-- Dataset &gt;= 2.1.15
+- Deno &gt;= 1.46.3
+- GNU Make
 - Pandoc &gt;= 3.1
+- datasetd &gt;= 2.1.18

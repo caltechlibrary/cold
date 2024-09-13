@@ -22,22 +22,17 @@
 </nav>
 
 <section>
-<h1
-id="installation-for-development-of-cold-and-cold_admin">Installation
-for development of <strong>cold</strong> and
-<strong>cold_admin</strong></h1>
+<h1 id="installation-for-development-of-cold">Installation for
+development of <strong>cold</strong></h1>
 <p><strong>cold</strong> is experimental software providing a read only
 view of managed controlled object lists and datum (e.g. controlled
 vocabularies). The <strong>cold</strong> repository provides the public
 facing JSON API for integration with other services.</p>
-<p>The management interface <strong>cold_admin</strong> is held in the
-<a
-href="https://github.com/caltechlibrary/cold_admin">github.com/caltechlibrary/cold_admin</a>
-repository. <strong>cold</strong> implements <strong>cold_admin</strong>
-as Git submodule. When you clone <strong>cold</strong> you should do so
-recursively.</p>
-<p><strong>cold</strong> and <strong>cold_admin</strong> are intended to
-run behind a front facing web server (e.g. Apache 2) providing access
+<p>The management interface is found in the <strong>admin</strong>
+directory. It contains the source to compile the curatorial services for
+cold.</p>
+<p><strong>cold</strong> public and admin services are intended to run
+behind a front facing web server (e.g. Apache 2) providing access
 control and authentication. In a development setting this can be as
 simple as configuring BasicAuth. In a production setting you need
 something robust like Shibboleth. An example apache2 configuration is
@@ -55,10 +50,10 @@ manage the applications.</p>
 <h2 id="required-software">Required software</h2>
 <ol type="1">
 <li>Git (to clone the cold repository on GitHub)</li>
-<li>Deno &gt;= 1.45.5 (to run the public and management web
+<li>Deno &gt;= 1.46.3 (to run the public and management web
 services)</li>
-<li>Dataset &gt;= 2.1.15 (datasetd provides the JSON API for
-cold/cold_admin)</li>
+<li>Dataset &gt;= 2.1.18 (datasetd provides the JSON API for cold public
+and admin services)</li>
 <li>Pandoc &gt; 3.1 (to build or update documation)</li>
 </ol>
 <h2 id="setting-up-cold-and-cold_admin">Setting up cold and
@@ -69,15 +64,15 @@ changes if you are setting up for production.</p>
 <li>Retrieve cold and cold_admin repositories
 <ol type="a">
 <li><code>cd</code></li>
-<li><code>git clone https://github.com/caltechlibrary/cold --recursive</code></li>
+<li><code>git clone https://github.com/caltechlibrary/cold</code></li>
 <li><code>cd cold</code></li>
-<li><code>git pull origin --recursive-submodules</code></li>
+<li><code>git pull origin main</code></li>
 </ol></li>
-<li>Setup cold
+<li>Setup cold public services
 <ol type="a">
 <li><code>deno task build</code></li>
 </ol></li>
-<li>Setup cold_admin
+<li>Setup cold admin services
 <ol type="a">
 <li><code>cd admin</code></li>
 <li><code>deno task setup</code></li>

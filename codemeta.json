@@ -1,7 +1,7 @@
 {
   "@context": "https://doi.org/10.5063/schema/codemeta-2.0",
   "@type": "SoftwareSourceCode",
-  "description": "cold is a localhost web service for managing controlled object lists.",
+  "description": "cold is a collection of localhost web services for accessing and managing controlled object lists and datum.",
   "name": "cold",
   "codeRepository": "https://github.com/caltechlibrary/cold",
   "issueTracker": "https://github.com/caltechlibrary/cold/issues",
@@ -9,9 +9,10 @@
   "copyrightYear": 2024,
   "isAccessibleForFree": true,
   "dateCreated": "2023-12-12",
-  "dateModified": "2024-07-11",
-  "releaseNotes": "Cold is a proof of concept and subject to change and not suitable for production.",
-  "version": "0.0.5",
+  "dateModified": "2024-09-23",
+  "releaseNotes": "Cold is a proof of concept and subject to change and not recommended for production.",
+  "version": "0.0.6",
+  "developmentStatus": "concept",
   "author": [
     {
       "@type": "Person",
@@ -63,7 +64,6 @@
       "name": "California Institute of Technology"
     }
   ],
-  "developmentStatus": "concept",
   "downloadUrl": "https://github.com/caltechlibrary/cold/release/latest",
   "keywords": ["metadata", "objects", "controlled vocabulary"],
   "maintainer": [
@@ -83,6 +83,23 @@
     "https://github.com/caltechlibrary/cold_ui",
     "https://github.com/caltechlibrary/dataset"
   ],
-  "programmingLanguage": ["TypeScript", "JavaScript", "HTML", "CSS", "YAML"],
-  "softwareRequirements": ["Deno >= 1.44", "Dataset >= 2.1.15", "Pandoc >= 3.1"]
+  "operatingSystem": [
+        "Linux"
+  ],
+  "programmingLanguage": [
+        "CSS",
+        "HTML",
+        "JavaScript",
+        "JSON",
+        "SQL",
+        "Typescript",
+        "YAML"
+  ],
+  "releaseNotes": "Proof of concept",
+  "softwareRequirements": [
+        "Deno >= 1.46.3",
+        "GNU Make",
+        "Pandoc >= 3.1",
+        "datasetd >= 2.1.18"
+  ]
 }

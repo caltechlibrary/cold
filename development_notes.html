@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>COLD (Controlled Object List and Datum (Concept))</title>
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="https://caltechlibrary.github.io/css/site.css">
+</head>
+<body>
+<header>
+<a href="http://library.caltech.edu" title="link to Caltech Library Homepage"><img src="https://caltechlibrary.github.io/assets/liblogo.gif" alt="Caltech Library logo"></a>
+</header>
+<nav>
+<ul>
+    <li><a href="/">Home</a></li>
+    <li><a href="index.html">README</a></li>
+    <li><a href="LICENSE">LICENSE</a></li>
+    <li><a href="install.html">INSTALL</a></li>
+    <li><a href="user_manual.html">User Manual</a></li>
+    <li><a href="about.html">About</a></li>
+    <li><a href="https://github.com/caltechlibrary/cold">GitHub</a></li>
+</ul>
+</nav>
+
+<section>
+<h1 id="development-notes">Development Notes</h1>
+<h2 id="reports">Reports</h2>
+<p>Reports can be assumed to be CSV generated files. Dataset’s dsquery
+can produce csv as an output option. If datasetd integration of the
+dsquery functionality included a format option then it could produce the
+reports as CSV with minimal modification to existing API code. COLD
+Admin would just have to define a new route for each type of CSV report
+run from dsquery. The COLD Admin TypeScript code would only need to
+proxy to the datasetd end point and then properly hand back the CSV
+file. This should work for most cases where a simple SQL select
+statement can be constructed to produce the data needed.</p>
+<p>Regular complex SQL causing clow queries should be done through a
+cronjob (e.g. think Recent Grad Report, Creator’s report on
+CaltechAUTHORS) and could be provided as links in the UI if the file
+exists. This would require a predictable path and name. The TypeScript
+could have a handler that lists what reports are available at this
+time.</p>
+<ul>
+<li>Evaluate the effort in enhancing datasetd/dsquery to provide results
+in CSV and YAML, this would let me easily generate the vocabularies from
+dsquery results</li>
+</ul>
+<h2 id="data-enhancements-needed">Data enhancements needed</h2>
+<ul>
+<li>Various “counts” for people or groups
+<ul class="task-list">
+<li><label><input type="checkbox" />Need to identify an effecient mains
+of getting counts per field, per repository</label></li>
+<li><label><input type="checkbox" />Figure out the best approach to
+updating this either via cron or on demand</label></li>
+</ul></li>
+<li>Caltech Directory data enhancement, this should be done on a cronjob
+AND have an option of being initiated interactively from the edit
+screens
+<ul class="task-list">
+<li><label><input type="checkbox" />Figure out how to scrape the HTML to
+pull the fields without cause problems for the directory</label></li>
+<li><label><input type="checkbox" />See if I can can isolate the
+TypeScript and generate JavaScript to provide on demand refresh from the
+directory</label></li>
+</ul></li>
+<li>ORCID integration for people
+<ul class="task-list">
+<li><label><input type="checkbox" />Look at the current JSON API and see
+if it makes sense to do on demand or via a harvest process</label></li>
+</ul></li>
+</ul>
+</section>
+
+<footer>
+<span>&copy; 2022 <a href="https://www.library.caltech.edu/copyright">Caltech Library</a></span>
+<address>1200 E California Blvd, Mail Code 1-32, Pasadena, CA 91125-3200</address>
+<span><a href="mailto:library@caltech.edu">Email Us</a></span>
+<span>Phone: <a href="tel:+1-626-395-3405">(626)395-3405</a></span>
+</footer>
+</body>
+</html>

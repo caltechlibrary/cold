@@ -3,8 +3,8 @@
 
 Deploying cold and and cold admin on a remote system requires manual setup.  You will need the following software to successfully build and deploy.
 
-- Deno >= 1.45.5
-- Dataset >= 2.1.17
+- Deno >= 1.46.3
+- Dataset >= 2.1.18
 - Pandoc >= 3.1
 - GNU Make
 - Git
@@ -54,7 +54,7 @@ sudo mkdir -p /Sites/
 sudo chgrp www-data /Sites/
 sudo chmod 775 /Sites/
 cd /Sites
-git clone --recursive git@github.com:caltechlibrary/cold
+git clone git@github.com:caltechlibrary/cold
 cd cold
 make
 cp cold.service-example cold.service

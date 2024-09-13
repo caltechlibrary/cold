@@ -1,4 +1,4 @@
-%cold(1) user manual | 0.0.5 
+%cold(1) user manual | 0.0.6 
 % R. S.Doiel
 %  
 

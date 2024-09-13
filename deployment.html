@@ -28,8 +28,8 @@ and <strong>cold_admin</strong></h1>
 setup. You will need the following software to successfully build and
 deploy.</p>
 <ul>
-<li>Deno &gt;= 1.45.5</li>
-<li>Dataset &gt;= 2.1.17</li>
+<li>Deno &gt;= 1.46.3</li>
+<li>Dataset &gt;= 2.1.18</li>
 <li>Pandoc &gt;= 3.1</li>
 <li>GNU Make</li>
 <li>Git</li>
@@ -98,7 +98,7 @@ sudo mkdir -p /Sites/
 sudo chgrp www-data /Sites/
 sudo chmod 775 /Sites/
 cd /Sites
-git clone --recursive git@github.com:caltechlibrary/cold
+git clone git@github.com:caltechlibrary/cold
 cd cold
 make
 cp cold.service-example cold.service

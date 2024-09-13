@@ -11,6 +11,21 @@ import {
   ISSN,
   People,
 } from "./deps.ts";
+import { PeopleInterface } from "./people.ts";
+
+function normalize_to_string(val: string | undefined): string {
+  if (val !== undefined) {
+    return val;
+  }
+  return "";
+}
+
+function normalize_to_boolean(val: boolean | undefined): boolean {
+  if (val !== undefined) {
+    return val;
+  }
+  return false;
+}
 
 /**
  * setIncludeInFeeds takes a single column CSV file and for clpid it retrieves a record from
@@ -45,30 +60,33 @@ async function setIncludeInFeeds(
   let error_count = 0;
   let success_count = 0;
   for (const i in sheet) {
-	if (sheet[i].hasOwnProperty('clpid')) {
-		const clpid = sheet[i]['clpid'];
-		const obj = await ds.read(clpid);
-		if (obj == null) {
-			error_count++;
-		} else if (obj["include_in_feeds"] !== true) {
-			obj["include_in_feeds"] = true;
-			console.log(`ds.read(${clpid}) -> ${JSON.stringify(obj)}`);
-			const ok = await ds.update(clpid, obj);
-			if (!ok) {
-				console.log(`failed to update clpid ${clpid}`);
-				error_count++;
-			} else {
-				success_count++;
-			}
-		}
-	}
+    if (sheet[i].hasOwnProperty("clpid")) {
+      const clpid = normalize_to_string(sheet[i]["clpid"]);
+      if (clpid == "") {
+        continue;
+      }
+      const obj = await ds.read(clpid) as unknown as PeopleInterface;
+      if (obj === undefined) {
+        error_count++;
+      } else if (typeof obj === "object") {
+        obj["include_in_feeds"] = true;
+        console.log(`ds.read(${clpid}) -> ${JSON.stringify(obj)}`);
+        const ok = await ds.update(clpid, obj);
+        if (!ok) {
+          console.log(`failed to update clpid ${clpid}`);
+          error_count++;
+        } else {
+          success_count++;
+        }
+      }
+    }
   }
   if (success_count > 0) {
-	  console.log(`${success_count} updated successfully`);
+    console.log(`${success_count} updated successfully`);
   }
   if (error_count > 0) {
-	  console.log(`${error_count} failed to update`);
-	  return 1
+    console.log(`${error_count} failed to update`);
+    return 1;
   }
   return 0;
 }
@@ -78,7 +96,9 @@ async function setIncludeInFeeds(
  */
 const ds_port = apiPort;
 if (Deno.args.length != 2) {
-  console.log("USAGE: deno set_include_in_feeds.ts DATASET_C_NAME CSV_FILENAME");
+  console.log(
+    "USAGE: deno set_include_in_feeds.ts DATASET_C_NAME CSV_FILENAME",
+  );
   console.log("NOTE: datasetd must be running on port 8485");
   Deno.exit(1);
 }

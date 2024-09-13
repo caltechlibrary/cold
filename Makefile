@@ -7,6 +7,10 @@ GIT_GROUP = caltechlibrary
 
 PACKAGE =  $(shell ls -1 *.ts | grep -v 'version.ts')
 
+PUBLIC_PROGRAMS = cold
+
+ADMIN_PROGRAMS = cold_admin ds_importer
+
 VERSION = $(shell grep '"version":' codemeta.json | cut -d\"  -f 4)
 
 BRANCH = $(shell git branch | grep '* ' | cut -d\  -f 2)
@@ -43,9 +47,8 @@ ifeq ($(OS), Windows)
         EXT = .exe
 endif
 
-PROGRAMS = $(shell ls -1 cmd)
-
 build: version.ts CITATION.cff about.md $(HTML_PAGES) htdocs compile installer.sh installer.ps1
+	cd admin && make build
 
 compile: .FORCE
 compile: $(TS_MODS)
@@ -89,6 +92,7 @@ about.md: codemeta.json .FORCE
 	echo "" | pandoc --metadata-file=_codemeta.json --template codemeta-md.tmpl >about.md 2>/dev/null
 	if [ -f _codemeta.json ]; then rm _codemeta.json; fi
 	cp about.md htdocs/
+	deno task htdocs
 
 website: $(HTML_PAGES) .FORCE
 	make -f website.mak
@@ -123,17 +127,7 @@ clean:
 
 dist: .FORCE
 	@mkdir -p dist
-	@cd dist && zip -r $(PROJECT)-$(VERSION).zip LICENSE codemeta.json CITATION.cff cold.yaml *.md man/* htdocs/*
-
-distribute_docs: build
-	if [ -d dist ]; then rm -fR dist; fi
-	mkdir -p dist
-	cp -v codemeta.json dist/
-	cp -v CITATION.cff dist/
-	cp -v README.md dist/
-	cp -v LICENSE dist/
-	cp -v INSTALL.md dist/
-	cp -vR htdocs dist/
+	@cd dist && zip -r $(PROJECT)-$(VERSION).zip LICENSE codemeta.json CITATION.cff cold.yaml *.md man/* htdocs/* admin/htdocs/*
 
 distribute_tools:
 	@mkdir -p dist
@@ -154,8 +148,6 @@ installer.ps1: .FORCE
 	chmod 775 installer.ps1
 	git add -f installer.ps1
 
-release: clean version.sql $(HTML_PAGES) htdocs/index.html htdocs/widgets/config.js distribute_docs distribute_tools dist
-
 status:
 	git status
 
@@ -166,5 +158,60 @@ save:
 publish:
 	make -f website.mak
 	bash publish.bash
+
+release: clean about.md CITATION.cff version.ts $(HTML_PAGES) distribute_docs distribute_tools dist dist/Linux-x86_64 dist/Linux-aarch64 dist/macOS-x86_64 dist/macOS-arm64 dist/Windows-x86_64
+
+dist/Linux-x86_64: .FORCE
+	@mkdir -p dist/bin
+	@cd admin && make dist/Linux-x86_64
+	@for FNAME in $(PUBLIC_PROGRAMS); do deno compile --output dist/bin/$$FNAME --target x86_64-unknown-linux-gnu "$${FNAME}.ts"; done
+	@for FNAME in $(ADMIN_PROGRAMS); do cd admin && deno compile --output ../dist/bin/$$FNAME --target x86_64-unknown-linux-gnu "$${FNAME}.ts"; done
+	@cd dist && zip -r $(PROJECT)-v$(VERSION)-Linux-x86_64.zip LICENSE codemeta.json CITATION.cff *.md $(DIST_FOLDERS)
+	@rm -fR dist/bin
+
+dist/Linux-aarch64: .FORCE
+	@mkdir -p dist/bin
+	@cd admin && make dist/Linux-aarch64
+	@for FNAME in $(PUBLIC_PROGRAMS); do deno compile --output dist/bin/$$FNAME --target aarch64-unknown-linux-gnu "$${FNAME}.ts"; done
+	@for FNAME in $(ADMIN_PROGRAMS); do cd admin && deno compile --output ../dist/bin/$$FNAME --target aarch64-unknown-lunix-gnu "$${FNAME}.ts"; done
+	@cd dist && zip -r $(PROJECT)-v$(VERSION)-Linux-aarch64.zip LICENSE codemeta.json CITATION.cff *.md $(DIST_FOLDERS)
+	@rm -fR dist/bin
+
+dist/macOS-x86_64: .FORCE
+	@mkdir -p dist/bin
+	@cd admin && make dist/macOS-x86_64
+	@for FNAME in $(PUBLIC_PROGRAMS); do deno compile --output dist/bin/$$FNAME --target x86_64-apple-darwin "$${FNAME}.ts"; done
+	@for FNAME in $(ADMIN_PROGRAMS); do cd admin && deno compile --output ../dist/bin/$$FNAME --target x86_64-apple-darwin cold_admin.ts "$${FNAME}.ts"; done
+	@cd dist && zip -r $(PROJECT)-v$(VERSION)-macOS-x86_64.zip LICENSE codemeta.json CITATION.cff *.md $(DIST_FOLDERS)
+	@rm -fR dist/bin
+
+dist/macOS-arm64: .FORCE
+	@mkdir -p dist/bin
+	@cd admin && make dist/macOS-arm64
+	@for FNAME in $(PUBLIC_PROGRAMS); do deno compile --output dist/bin/$$FNAME --target aarch64-apple-darwin "$${FNAME}.ts"; done
+	@for FNAME in $(ADMIN_PROGRAMS); do cd admin && deno compile --output ../dist/bin/$$FNAME --target aarch64-apple-darwin "$${FNAME}.ts"; done
+	@cd dist && zip -r $(PROJECT)-v$(VERSION)-macOS-arm64.zip LICENSE codemeta.json CITATION.cff *.md $(DIST_FOLDERS)
+	@rm -fR dist/bin
+
+dist/Windows-x86_64: .FORCE
+	@mkdir -p dist/bin
+	@cd admin && make dist/Windows-x86_64
+	@for FNAME in $(PUBLIC_PROGRAMS); do deno compile --output "dist/bin/$${FNAME}.exe" --target x86_64-pc-windows-msvc cold_admin.ts "$${FNAME}.ts"; done
+	@for FNAME in $(ADMIN_PROGRAMS); do cd admin && deno compile --output "../dist/bin/$${FNAME}.exe" --target x86_64-pc-windows-msvc "$${FNAME}.ts"; done
+	@cd dist && zip -r $(PROJECT)-v$(VERSION)-Windows-x86_64.zip LICENSE codemeta.json CITATION.cff *.md $(DIST_FOLDERS)
+	@rm -fR dist/bin
+
+distribute_docs: man htdocs CITATION.cff about.md .FORCE
+	if [ -d dist ]; then rm -fR dist; fi
+	mkdir -p dist
+	cp -v codemeta.json dist/
+	cp -v CITATION.cff dist/
+	cp -v README.md dist/
+	cp -v LICENSE dist/
+	cp -v INSTALL.md dist/
+	cp -vR man dist/
+	cp -vR htdocs dist/
+	mkdir -p dist/admin
+	cp -vR admin/htdocs dist/admin/
 
 .FORCE:

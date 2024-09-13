@@ -7,19 +7,19 @@ ${if(author)}authors:
 ${for(author)}
   - family-names: ${it.familyName}
     given-names: ${it.givenName}
-    orcid: "${it.at__id}"
+    orcid: "${it.id}"
 ${endfor}${endif}
 ${if(contributor)}contributors:
 ${for(contributor)}
   - family-names: ${it.familyName}
     given-names: ${it.givenName}
-    orcid: "${it.at__id}"
+    orcid: "${it.id}"
 ${endfor}${endif}
 ${if(maintainer)}maintainers:
 ${for(maintainer)}
   - family-names: ${it.familyName}
     given-names: ${it.givenName}
-    orcid: "${it.at__id}"
+    orcid: "${it.id}"
 ${endfor}${endif}
 ${if(codeRepository)}repository-code: "${codeRepository}"${endif}
 ${if(version)}version: ${version}${endif}
