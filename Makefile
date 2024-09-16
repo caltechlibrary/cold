@@ -127,10 +127,7 @@ clean:
 
 dist: .FORCE
 	@mkdir -p dist
-	@cd dist && zip -r $(PROJECT)-$(VERSION).zip LICENSE codemeta.json CITATION.cff cold.yaml *.md man/* htdocs/* admin/htdocs/*
-
-distribute_tools:
-	@mkdir -p dist
+###	@cd dist && zip -r $(PROJECT)-$(VERSION).zip LICENSE codemeta.json CITATION.cff cold.yaml *.md man/* htdocs/* admin/htdocs/*
 
 update_version:
 	$(EDITOR) codemeta.json
@@ -159,7 +156,7 @@ publish:
 	make -f website.mak
 	bash publish.bash
 
-release: clean about.md CITATION.cff version.ts $(HTML_PAGES) distribute_docs distribute_tools dist dist/Linux-x86_64 dist/Linux-aarch64 dist/macOS-x86_64 dist/macOS-arm64 dist/Windows-x86_64
+release: clean about.md CITATION.cff version.ts $(HTML_PAGES) dist distribute_docs dist/Linux-x86_64 dist/Linux-aarch64 dist/macOS-x86_64 dist/macOS-arm64 dist/Windows-x86_64
 
 dist/Linux-x86_64: .FORCE
 	@mkdir -p dist/bin

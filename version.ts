@@ -6,7 +6,7 @@ export const appInfo: {[k: string]: string} = {
   appName: "cold",
 
   // Version number of release
-  version: "0.0.6",
+  version: "0.0.7",
 
   // ReleaseDate, the date version.ts was generated
   releaseDate: "",
