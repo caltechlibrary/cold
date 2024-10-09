@@ -2,6 +2,7 @@
   "version": "3",
   "packages": {
     "specifiers": {
+      "jsr:@b-fuze/deno-dom": "jsr:@b-fuze/deno-dom@0.1.47",
       "jsr:@std/assert@^1.0.0": "jsr:@std/assert@1.0.3",
       "jsr:@std/async@^1.0.0-rc.1": "jsr:@std/async@1.0.0-rc.4",
       "jsr:@std/bytes@^1.0.0-rc.3": "jsr:@std/bytes@1.0.2",
@@ -27,6 +28,9 @@
       "jsr:@std/yaml@^1.0.0-rc.1": "jsr:@std/yaml@1.0.4"
     },
     "jsr": {
+      "@b-fuze/deno-dom@0.1.47": {
+        "integrity": "270a888de91329f8ce3849211ece0ad97ce1e8b9a8a774f2bed2f43c8b0ffe8e"
+      },
       "@std/assert@1.0.3": {
         "integrity": "b0d03ce1ced880df67132eea140623010d415848df66f6aa5df76507ca7c26d8",
         "dependencies": [
@@ -125,7 +129,8 @@
     }
   },
   "redirects": {
-    "https://deno.land/x/rusty_markdown/mod.ts": "https://deno.land/x/rusty_markdown@v0.4.1/mod.ts"
+    "https://deno.land/x/rusty_markdown/mod.ts": "https://deno.land/x/rusty_markdown@v0.4.1/mod.ts",
+    "https://deno.land/x/sleep/mod.ts": "https://deno.land/x/sleep@v1.3.0/mod.ts"
   },
   "remote": {
     "https://caltechlibrary.github.io/ts_dataset/dataset.ts": "ae2d19209418c936f20d599436a7f16065bff799edbd327fe60d00cbc51e4c74",
@@ -218,12 +223,15 @@
     "https://deno.land/x/rusty_markdown@v0.4.1/event.ts": "d77c27dca6e70837f2adcffecdb032742dd6e79cf2d56d73227f2eaa910cb6c4",
     "https://deno.land/x/rusty_markdown@v0.4.1/mod.ts": "3ed2f7b57ef13b56e4f5b650e3696778bf3ea528f748fd3876d97ade189cdab6",
     "https://deno.land/x/rusty_markdown@v0.4.1/wasm/deno_rusty_markdown.js": "fcdbce8bd23a6c8237254f882e82fe89e04444f3abdd56bb8297ffb1f6dee6d6",
+    "https://deno.land/x/sleep@v1.3.0/mod.ts": "e9955ecd3228a000e29d46726cd6ab14b65cf83904e9b365f3a8d64ec61c1af3",
+    "https://deno.land/x/sleep@v1.3.0/sleep.ts": "b6abaca093b094b0c2bba94f287b19a60946a8d15764d168f83fcf555f5bb59e",
     "https://esm.sh/handlebars@4.7.8": "216fcab7c7eed350aff771ac741f7ded527bc1c5a88adf3e6970975cbd1f49e8",
     "https://esm.sh/v135/handlebars@4.7.8/denonext/handlebars.mjs": "f8a53ecdbb0a189a94479519d25f7a97b19220be7ddf53d94b2937cbb2f5dc0b",
     "https://esm.sh/v135/source-map@0.6.1/denonext/source-map.mjs": "ccff3bb06dea7c01a2c83cf12113697592e418fd06b55ae2bb4cb0a4e51a98b8"
   },
   "workspace": {
     "dependencies": [
+      "jsr:@b-fuze/deno-dom@^0.1.47",
       "jsr:@std/assert@^1.0.0",
       "jsr:@std/cli@^0.224.7",
       "jsr:@std/csv@^0.224.3",

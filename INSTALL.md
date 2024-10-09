@@ -41,7 +41,7 @@ if you are setting up for production.
       a. split the screen, e.g. `Ctl-%`
       c. `deno task start`
 
-You should now have two web services running on localhost at ports 8111 (admin service), 8112 (JSON API).
+You should now have two web services running on localhost at ports 8111 (web service), 8112 (JSON API).
 
 Port 8111
 : This is the management web service

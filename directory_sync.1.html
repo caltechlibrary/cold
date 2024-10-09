@@ -22,18 +22,51 @@
 </nav>
 
 <section>
-<h1 id="user-manual">User Manual</h1>
-<ul>
-<li><a href="search.html">Site search</a></li>
-</ul>
-<h2 id="public-interface">Public Interface</h2>
-<ul>
-<li><a href="INSTALL.html">Installation</a></li>
-<li><a href="deployment.html">deployments</a></li>
-<li><a href="cold_admin.1.html">cold_admin</a> (man page)</li>
-<li><a href="directory_sync.1.html">directory_sync</a> (man page)</li>
-<li><a href="development_notes.html">devemopment notes</a></li>
-</ul>
+<h1 id="name">NAME</h1>
+<p>cold</p>
+<h1 id="synopsis">SYNOPSIS</h1>
+<p>cold <a href="#options">OPTIONS</a></p>
+<h1 id="description">DESCRIPTION</h1>
+<p>cold synchronizes the content between Caltech Directory and
+CaltechPEOPLE. It uses the COLD Admin API as well as the Caltech
+Directory website content as a data source.</p>
+<p>Assuming COLD Admin is running on it’s standard ports no
+configuration is needed.</p>
+<p>cold is suitable to run from a cronjob on the same machine which
+hosts COLD.</p>
+<h1 id="options">OPTIONS</h1>
+<dl>
+<dt>help</dt>
+<dd>
+display help
+</dd>
+<dt>license</dt>
+<dd>
+display license
+</dd>
+<dt>version</dt>
+<dd>
+display version
+</dd>
+<dt>debug</dt>
+<dd>
+turn on debug logging
+</dd>
+<dt>port</dt>
+<dd>
+set the port number for the COLD Admin JSON API, default 8112
+</dd>
+<dt>directory</dt>
+<dd>
+set the Caltech Directory URL, default https://directory.caltech.edu
+</dd>
+</dl>
+<h1 id="example">EXAMPLE</h1>
+<p>cold is setup to contact <a href="http://localhost:8111"
+class="uri">http://localhost:8111</a> for COLD Admin’s JSON API and <a
+href="https://directory.caltech.edu"
+class="uri">https://directory.caltech.edu</a> for people content.</p>
+<pre class="shell"><code>cold </code></pre>
 </section>
 
 <footer>

@@ -48,11 +48,12 @@ compile: $(TS_MODS)
 	deno check *.ts
 	deno task build
 	bin/cold_admin$(EXT) --help >cold_admin.1.md
-	bin/ds_importer$(EXT) --help >ds_importer.1.md
+	bin/directory_sync$(EXT) --help >directory_sync.1.md
 
 check: $(TS_MODS)
 	deno check --all cold_admin.ts
 	deno check --all ds_importer.ts
+	deno check --all directory_sync.ts
 	deno check --all dataset.ts
 	deno check --all groups.ts
 	deno check --all people.ts
@@ -111,6 +112,10 @@ about.md: codemeta.json .FORCE
 	cp about.md htdocs/
 	deno task htdocs
 
+save: .FORCE
+	if [ "$(msg)" != "" ]; then git commit -am "$(msg)"; else git commit -am "Quick Save"; fi
+	git push origin $(BRANCH)	
+
 website: $(HTML_PAGES) .FORCE
 	make -f website.mak
 
@@ -124,7 +129,7 @@ test: .FORCE
 	deno task test
 
 docs: .FORCE
-	deno doc --html --name="COLD Admin"  --output=docs $(TS_MODS)
+	deno doc --html --name="COLD"  --output=docs $(TS_MODS)
 
 dist/Linux-x86_64: .FORCE
 	@mkdir -p dist/bin
