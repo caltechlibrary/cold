@@ -1,0 +1,132 @@
+id: people_model
+description: CaltechPEOPLE
+elements:
+  - type: text
+    id: clpid
+    attributes:
+      name: clpid
+      required: "true"
+    is_primary_id: true
+    label: CL Person Id
+  - type: text
+    id: display_name
+    attributes:
+      name: display_name
+    label: Display_name
+  - type: text
+    id: family_name
+    attributes:
+      name: family_name
+      required: "true"
+    label: Family_name
+  - type: text
+    id: given_name
+    attributes:
+      name: given_name
+    label: Given_name
+  - type: textarea
+    id: bio
+    attributes:
+      name: bio
+    label: Bio
+  - type: textarea
+    id: education
+    attributes:
+      name: education
+    label: Education
+  - type: email
+    id: email
+    attributes:
+      name: email
+    label: Email
+  - type: text
+    id: directory_person_type
+    attributes:
+      name: directory_person_type
+    label: Directory_person_type
+  - type: text
+    id: directory_user_id
+    attributes:
+      name: directory_user_id
+    label: Directory_user_id
+  - type: text
+    id: division
+    attributes:
+      name: division
+    label: Division
+  - type: orcid
+    id: orcid
+    attributes:
+      name: orcid
+    pattern: '[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{3}[0-9A-Z]'
+    label: ORCID
+  - type: text
+    id: ror
+    attributes:
+      name: ror
+    label: Ror
+  - type: isni
+    id: isni
+    attributes:
+      name: isni
+    label: ISNI
+  - type: text
+    id: lcnaf
+    attributes:
+      name: lcnaf
+    label: Lcnaf
+  - type: text
+    id: viaf
+    attributes:
+      name: viaf
+    label: Viaf
+  - type: text
+    id: wikidata
+    attributes:
+      name: wikidata
+    label: Wikidata
+  - type: text
+    id: snac
+    attributes:
+      name: snac
+    label: Snac
+  - type: text
+    id: archivesspace_id
+    attributes:
+      name: archivesspace_id
+    label: Archivesspace_id
+  - type: text
+    id: authors_id
+    attributes:
+      name: authors_id
+    label: Authors_id
+  - type: text
+    id: thesis_id
+    attributes:
+      name: thesis_id
+    label: Thesis_id
+  - type: text
+    id: advisors_id
+    attributes:
+      name: advisors_id
+    label: Advisors_id
+  - type: checkbox
+    id: caltech
+    attributes:
+      name: caltech
+    label: Caltech
+  - type: checkbox
+    id: jpl
+    attributes:
+      name: jpl
+    label: JPL
+  - type: checkbox
+    id: include_in_feeds
+    attributes:
+      name: include_in_feeds
+    label: Include in Feeds
+  - type: datetime-local
+    id: updated
+    attributes:
+      name: updated
+    label: Updated

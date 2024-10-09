@@ -1,18 +1,18 @@
 /**
- * cold information
+ * cold_admin information
  */
 export const appInfo: {[k: string]: string} = {
   // appName holds the application/package name
-  appName: "cold",
+  appName: "cold_admin",
 
   // Version number of release
-  version: "0.0.7",
+  version: "",
 
   // ReleaseDate, the date version.ts was generated
-  releaseDate: "",
+  releaseDate: "2024-10-08",
 
   // ReleaseHash, the Git hash when version.go was generated
-  releaseHash: "",
+  releaseHash: "6531990",
 
   // licenseText holds a copy of the application license text.
   licenseText: `

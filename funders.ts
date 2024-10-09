@@ -9,8 +9,93 @@ import {
   renderPage,
 } from "./deps.ts";
 
-const base_path = "";
 const ds = new Dataset(apiPort, "funders.ds");
+
+/**
+ * FunderInterface
+ */
+export interface FunderInterface {
+  clfid: string;
+  include_in_feeds: boolean;
+  name: string;
+  description: string;
+  ror: string;
+  ofr: string;
+  doi: string;
+  grant_numbers: string[];
+  updated: string;
+}
+
+/**
+ * Funder class defines the data shape of the funder object managed by cold.
+ */
+export class Funder implements FunderInterface {
+  clfid: string = "";
+  include_in_feeds: boolean = false;
+  name: string = "";
+  description: string = "";
+  ror: string = "";
+  ofr: string = "";
+  doi: string = "";
+  grant_numbers: string[] = [];
+  updated: string = "";
+
+  migrateCsv(row: any): boolean {
+    if (row.hasOwnProperty("key")) {
+      this.include_in_feeds = true;
+      this.clfid = row.key;
+    } else {
+      return false;
+    }
+    if (row.hasOwnProperty("name")) {
+      this.name = row.name;
+    }
+    if (row.hasOwnProperty("grant_numbers") && row.grant_numbers !== "") {
+      this.grant_numbers = row.grant_numbers.trim().split(/;/g);
+    }
+    if (row.hasOwnProperty("description")) {
+      this.description = row.description;
+    }
+    if (row.hasOwnProperty("ror")) {
+      this.ror = row.ror;
+    }
+    if (row.hasOwnProperty("ofr")) {
+      this.ofr = row.ofr;
+    }
+    if (row.hasOwnProperty("doi")) {
+      this.doi = row.doi;
+    }
+    if (row.hasOwnProperty("updated")) {
+      this.updated = row.updated;
+    } else {
+      this.updated = new Date().toLocaleDateString("en-US");
+    }
+    return true;
+  }
+
+  /**
+   * asObject() returns a simple object version of a instantiated funder object.
+   */
+  asObject(): Object {
+    return {
+      clfid: this.clfid,
+      include_in_feeds: this.include_in_feeds,
+      name: this.name,
+      grant_numbers: this.grant_numbers,
+      ror: this.ror,
+      ofr: this.ofr,
+      description: this.description,
+      updated: this.updated,
+    };
+  }
+
+  /**
+   * toJSON() returns a clean JSON representation of the funder object.
+   */
+  toJSON(): string {
+    return JSON.stringify(this.asObject());
+  }
+}
 
 /**
  * handleFunders provides the dataset collection UI for managing Funders.
@@ -40,6 +125,9 @@ export async function handleFunders(
 ): Promise<Response> {
   if (req.method === "GET") {
     return await handleGetFunders(req, options);
+  }
+  if (req.method === "POST") {
+    return await handlePostFunders(req, options);
   }
   const body = `<html>${req.method} not supported</html>`;
   return new Response(body, {
@@ -88,12 +176,12 @@ async function handleGetFunders(
     const funder_list = await ds.query("funder_names", [], {});
     if (funder_list !== undefined) {
       return renderPage(tmpl, {
-        base_path: base_path,
+        base_path: "",
         funder_list: funder_list,
       });
     } else {
       return renderPage(tmpl, {
-        base_path: base_path,
+        base_path: "",
         funder_list: [],
       });
     }
@@ -105,7 +193,7 @@ async function handleGetFunders(
     const obj = await ds.read(clfid);
     console.log(`We have a GET for funder object ${clfid}, view = ${view}`);
     return renderPage(tmpl, {
-      base_path: base_path,
+      base_path: "",
       isCreateObject: isCreateObject,
       funder: obj,
       debug_src: JSON.stringify(obj, null, 2),
@@ -113,3 +201,77 @@ async function handleGetFunders(
   }
 }
 
+/**
+ * handlePostFunder handle POST actions on funder object(s).
+ *
+ * @param {Request} req holds the request to the funder handler
+ * @param {debug: boolean, htdocs: string} options holds options passed from
+ * handleFunder.
+ * @returns {Response}
+ */
+async function handlePostFunders(
+  req: Request,
+  options: { debug: boolean; htdocs: string; apiUrl: string },
+): Promise<Response> {
+  let clfid = pathIdentifier(req.url);
+  const isCreateObject = clfid === "";
+
+  if (req.body !== null) {
+    const form = await req.formData();
+    let obj = formDataToObject(form);
+    console.log(
+      `DEBUG form data after converting to object -> ${JSON.stringify(obj)}`,
+    );
+    if (!("clfid" in obj)) {
+      console.log("clfid missing", obj);
+      return new Response(`missing funder identifier`, {
+        status: 400,
+        headers: { "content-type": "text/html" },
+      });
+    }
+    if (isCreateObject) {
+      console.log("DEBUG detected create request");
+      clfid = obj.clfid as unknown as string;
+    }
+    if (obj.clfid !== clfid) {
+      return new Response(
+        `mismatched funder identifier ${clfid} != ${obj.clfid}`,
+        {
+          status: 400,
+          headers: { "content-type": "text/html" },
+        },
+      );
+    }
+    if (isCreateObject) {
+      console.log(`send to dataset create object ${clfid}`);
+      if (!(await ds.create(clfid, obj))) {
+        return new Response(
+          `<html>problem creating object ${clfid}, try again later`,
+          {
+            status: 500,
+            headers: { "content-type": "text/html" },
+          },
+        );
+      }
+    } else {
+      console.log(`send to dataset update object ${clfid}`);
+      if (!(await ds.update(clfid, obj))) {
+        return new Response(
+          `<html>problem updating object ${clfid}, try again later`,
+          {
+            status: 500,
+            headers: { "content-type": "text/html" },
+          },
+        );
+      }
+    }
+    return new Response(`<html>Redirect to ${clfid}</html>`, {
+      status: 303,
+      headers: { Location: `${clfid}` },
+    });
+  }
+  return new Response(`<html>problem creating funder data</html>`, {
+    status: 400,
+    headers: { "content-type": "text/html" },
+  });
+}

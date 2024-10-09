@@ -1,15 +1,14 @@
 ---
-title: COLD User Manual
+title: Help with COLD
+pubDate: 2024-07-01
 ---
 
-COLD Public User Interface
-==========================
+# Help with COLD
 
-This is where documentation goes to document the public interface and API available for COLD.
+This is a place holder for help text and examples. It can also link to other help documents as they evolve.
 
-Reference
----------
+COLD
+: Controlled Object Lists and Datum
 
-- COLD [Source Code](https://github.com/caltechlibrary/cold)
-- COLD UI [Source Code](https://github.com/caltechlibrary/cold_ui)
+
 
