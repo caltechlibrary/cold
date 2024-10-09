@@ -5,9 +5,10 @@ Action items
 next
 ----
 
-0. [ ] Consolidate `/cold/`, `/cold/admin/` and `github.com/caltechlibrary/cold_directory_sync` into the main cold repository
+0. [X] Consolidate `/cold/`, `/cold/admin/` and `github.com/caltechlibrary/cold_directory_sync` into the main cold repository
   - Per 2024-10-08 project meeting, the public API of COLD is feeds
   - COLD is responsible for pushing changes to feeds, RDM can pull changes from feeds
+  - Run a report of clpid and related author_id, advisor_id, committee_member_id, etc.
 1. [ ] Do final load of data from the spreadsheet in GitHub
 2. [ ] Write report that generates the spreadsheet
 3. [ ] Write report that generates the YAML needed by RDM
