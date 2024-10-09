@@ -1,14 +1,14 @@
 #!/bin/bash
 #
 
-WORKING_BRANCH=$(git branch | grep -E "\* " | cut -d\  -f 2)
+WORKING_BRANCH=$(git branch | grep -E "\* " | cut -d \  -f 2)
 if [ "$WORKING_BRANCH" = "gh-pages" ]; then
 	git commit -am "publishing to gh-pages branch"
 	git push origin gh-pages
 else
 	echo "You're in $WORKING_BRANCH branch"
 	echo "You need to pull in changes to the gh-pages branch to publish"
-	read -p "Pull into gh-pages and publish? Y/N " YES_NO
+	read -p "process Y/n " YES_NO
 	if [ "$YES_NO" = "Y" ] || [ "$YES_NO" = "y" ]; then
 		echo "Committing and pushing to $WORKING_BRANCH"
 		git commit -am "commiting to $WORKING_BRANCH"
@@ -21,9 +21,6 @@ else
 		echo "Pulling changes from $WORKING_BRANCH info gh-pages"
 		git pull origin "$WORKING_BRANCH"
 		echo "Merging changes from $WORKING_BRANCH"
-		make version.go
-		make
-		make -f website.mak base_url=/newt
 		git commit -am "merging $WORKING_BRANCH with gh-pages"
 		echo "Pushing changes up and publishing"
 		git push origin gh-pages

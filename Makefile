@@ -15,13 +15,17 @@ BRANCH = $(shell git branch | grep '* ' | cut -d\  -f 2)
 
 PACKAGE = $(shell ls -1 *.ts | grep -v 'version.ts')
 
+MAN_PAGES_1 = $(shell ls -1 *.1.md | sed -E 's/\.1.md/.1/g')
+
+MAN_PAGES_3 = $(shell ls -1 *.3.md | sed -E 's/\.3.md/.3/g')
+
+MAN_PAGES_7 = $(shell ls -1 *.7.md | sed -E 's/\.7.md/.7/g')
+
 RELEASE_DATE=$(shell date +'%Y-%m-%d')
 
 RELEASE_HASH=$(shell git log --pretty=format:'%h' -n 1)
 
-MAN_PAGES = $(shell ls -1 *.1.md | sed -E 's/\.1.md/.1/g')
-
-HTML_PAGES = $(shell ls -1 *.html)
+HTML_PAGES = $(shell ls -1 *.html docs/*.html)
 
 OS = $(shell uname)
 
@@ -35,17 +39,16 @@ PREFIX = $(HOME)
 
 TS_MODS = $(shell ls -1 *.ts | grep -v _test.ts | grep -v deps.ts | grep -v version.ts)
 
-build: version.ts $(TS_MODS) docs htdocs bin compile
+build: version.ts $(TS_MODS) CITATION.cff about.md docs htdocs bin compile installer.sh installer.ps1 $(HTML_PAGES)
 
 bin: .FORCE
-	mkdir -p ../bin
+	mkdir -p bin
 
 compile: $(TS_MODS)
-	deno check *.ts #--all cold_admin.ts
-	#deno check --all cold_admin.ts
-	#deno check --all ds_importer.ts
+	deno check *.ts
 	deno task build
-	./bin/cold_admin$(EXT) --help >cold_admin.1.md
+	bin/cold_admin$(EXT) --help >cold_admin.1.md
+	bin/ds_importer$(EXT) --help >ds_importer.1.md
 
 check: $(TS_MODS)
 	deno check --all cold_admin.ts
@@ -63,7 +66,7 @@ version.ts: codemeta.json .FORCE
                 --metadata release_date=$(RELEASE_DATE) \
                 --metadata release_hash=$(RELEASE_HASH) \
                 --template codemeta-version-ts.tmpl \
-                ../LICENSE >version.ts
+                LICENSE >version.ts
 	
 
 format: $(shell ls -1 *.ts | grep -v version.ts | grep -v deps.ts)
@@ -90,6 +93,29 @@ import_groups_csv: .FORCE
 
 reload_dataset:
 	deno task reload_data
+
+man: $(MAN_PAGES_1) # $(MAN_PAGES_3) $(MAN_PAGES_7)
+
+$(MAN_PAGES_1): .FORCE
+	mkdir -p man/man1
+	pandoc $@.md --from markdown --to man -s >man/man1/$@
+
+CITATION.cff: codemeta.json .FORCE
+	cat codemeta.json | sed -E   's/"@context"/"at__context"/g;s/"@type"/"at__type"/g;s/"@id"/"at__id"/g' >_codemeta.json
+	echo "" | pandoc --metadata title="Cite $(PROJECT)" --metadata-file=_codemeta.json --template=codemeta-cff.tmpl >CITATION.cff
+
+about.md: codemeta.json .FORCE
+	cat codemeta.json | sed -E 's/"@context"/"at__context"/g;s/"@type"/"at__type"/g;s/"@id"/"at__id"/g' >_codemeta.json
+	echo "" | pandoc --metadata-file=_codemeta.json --template codemeta-md.tmpl >about.md 2>/dev/null
+	if [ -f _codemeta.json ]; then rm _codemeta.json; fi
+	cp about.md htdocs/
+	deno task htdocs
+
+website: $(HTML_PAGES) .FORCE
+	make -f website.mak
+
+publish: website .FORCE
+	./publish.bash
 
 htdocs: .FORCE
 	deno task htdocs

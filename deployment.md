@@ -1,10 +1,10 @@
 
-# Deploying **cold** and **cold_admin**
+# Deploying **cold**
 
-Deploying cold and and cold admin on a remote system requires manual setup.  You will need the following software to successfully build and deploy.
+Deploying cold on a remote system requires manual setup.  You will need the following software to successfully build and deploy.
 
 - Deno >= 1.46.3
-- Dataset >= 2.1.18
+- Dataset >= 2.1.21
 - Pandoc >= 3.1
 - GNU Make
 - Git
@@ -15,34 +15,22 @@ Deploying cold and and cold admin on a remote system requires manual setup.  You
 
 My current recommendation is the following.
 
-1. Setup the directory to old he web application if it doesn't exist.
-2. Clone the repository **recursively** to `/Sites/cold`
+1. Setup the directory to hold he web application if it doesn't exist.
+2. Clone the repository, e.g. clone to `/Sites/cold` and change into the repository directory
 3. Run `make` to build the binary for the cold service
 5. Copy `cold.service-example` to `cold.service`, edit it and move it appropirate place in your Systemd service directory
 6. Symbolicly link `cold.service` to `/etc/systemd/system/`
 7. Edit the service file and make the paths are correct.
-8. Change into the "admin" directory (i.e. the `cold_admin` repo)
-9. Run `make` to build the binaries for cold admin
-10. Use the Deno task setup to create your dataset collections
-11. Copy `cold_admin.service-example` to `cold_admin.service`
-12. Edit the service file and make the paths are correct.
-13. Symbolicly link `cold_admin.service` to `/etc/systemd/system/`
-14. Copy `cold_admin_api.service-example` to `cold_admin_api.service`
-15. Edit the service file and make the paths are correct.
-16. Symbolicly link `cold_admin_api.service` to `/etc/systemd/system/`
-17. Reload the systemd daemon, `sudo systemctl daemon-reload`
-18. Enable the services (only needed the first time, may return a warning about symbolic link)
+8. Reload the systemd daemon, `sudo systemctl daemon-reload`
+9. Enable the services (only needed the first time, may return a warning about symbolic link)
     a. `sudo systemctl enable cold.service`
-    b. `sudo systemctl enable cold_admin.service`
-    c. `sudo systemctl enable cold_admin_api.service`
-19. Start the services using `systemctl` in the usual way
+    b. `sudo systemctl enable cold_api.service`
+10. Start the services using `systemctl` in the usual way
     a. `sudo systemctl start cold.service`
-    b. `sudo systemctl start cold_admin.service`
-    c. `sudo systemctl start cold_admin_api.service`
-20. Test the public and admin services using elinks. If you get a gateway error it means datasetd isn't runining correctly in port 8112. Debug with curl, systemctl status, journalctl.
+    b. `sudo systemctl start cold_api.service`
+11. Test web services using elinks. If you get a gateway error it means datasetd isn't runining correctly in port 8111. Debug with curl, systemctl status, journalctl.
 
-You can configure Apache to reverse proxy to the cold service running on port 8110 allowing public access. Apache should
-be configured similar but with access restricted to staff for the cold_admin service running on port 8111.
+You can configure Apache to reverse proxy to the cold service running on port 8111 where it should enforce access control.
 
 For a good description of how to setup new systemd services the Debian (works with Ubuntu too) way see <https://wiki.debian.org/systemd/Services>.
 
@@ -57,26 +45,18 @@ cd /Sites
 git clone git@github.com:caltechlibrary/cold
 cd cold
 make
+deno task setup
 cp cold.service-example cold.service
 nano cold.service
 sudo ln cold.service /etc/systemd/system/
-cd admin
-make
-deno task setup
-cp cold_admin.service-example cold_admin.service
-naon cold_admin.service
-sudo ln cold_admin.service /etc/systemd/system/
-cp cold_admin_api.service-example cold_admin_api.service
-sudo ln cold_admin_api.service /etc/systemd/system/
+cp cold_api.service-example cold_api.service
+nano cold_api.service
+sudo ln cold_api.service /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable cold.service
-sudo systemctl enable cold_admin.service
-sudo systemctl enable cold_admin_api.service
+sudo systemctl enable cold_api.service
 sudo systemctl start cold.service
-sudo systemctl start cold_admin.service
-sudo systemctl start cold_admin_api.service
-deno task setup
-elinks http://localhost:8110
+sudo systemctl start cold_api.service
 elinks http://localhost:8111
 ~~~
 
@@ -84,28 +64,20 @@ NOTE: The TypeScript services need to be compile before running them with System
 
 ## Apache 2 and Shibboleth
 
-Both **cold** and **cold_admin** are designed to be reverse proxy targets. Using Apache you need to to include the following code in the main host definition.
+**COLD** is designed to be a reverse proxy target. Using Apache you need to to include the following code in the main host definition.
 
 ~~~
-#<!-- start cold admin -->
+#<!-- cold -->
 ProxyPreserveHost On
-ProxyPass "^/cold/admin" "http://localhost:8111/"
-ProxyPassMatch "^/cold/admin/(.*)" "http://localhost:8111/$1"
-#ProxyPassMatch "^/cold/admin/(.*)/(.*)" "http://localhost:8111/$1/$2"
-ProxyPassReverse "/cold/admin/" "http://localhost:8111/"
-<Location /cold/admin>
+Redirect "/cold" "/cold/"
+ProxyPassMatch "^/cold/(.*)" "http://localhost:8111/$1"
+ProxyPassReverse "/cold/" "http://localhost:8111/"
+#<!-- cold admin -->
+<Location /cold/>
   AuthType shibboleth
   ShibRequestSetting requireSession 1
-  require user rsdoiel@caltech.edu sdavison@caltech.edu tmorrell@caltech.edu tkeswick@caltech.edu kjohnson@caltech.edu melray@caltech.edu
+  require user rsdoiel@caltech.edu sdavison@caltech.edu tmorrell@caltech.edu tkeswick@caltech.edu kjohnson@caltech.edu melray@library.caltech.edu
   #require valid-user
 </Location>
-#<!-- end cold admin -->
-
-#<!-- start cold -->
-ProxyPass "^/cold" "http://localhost:8110/"
-ProxyPassMatch "^/cold/(.*)" "http://localhost:8110/$1"
-ProxyPassReverse "/cold/" "http://localhost:8110/"
-ProxyPassMatch "^/cold/(.*)/(.*)" "http://localhost:8110/$1/$2"
-#<!-- cold is publically accessible while cold admin should be restricted with Shib -->
 #<!-- end cold -->
 ~~~

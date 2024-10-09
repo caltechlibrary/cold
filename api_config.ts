@@ -1,3 +1,1 @@
-
-export { apiPort } from "./admin/deps.ts";
-
+export { apiPort } from "./deps.ts";

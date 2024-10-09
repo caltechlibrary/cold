@@ -1,20 +1,13 @@
 #<!-- cold -->
 ProxyPreserveHost On
 Redirect "/cold" "/cold/"
-ProxyPassMatch "^/cold/admin/(.*)" "http://localhost:8111/$1"
-ProxyPassReverse "/cold/admin/" "http://localhost:8111/"
+ProxyPassMatch "^/cold/(.*)" "http://localhost:8111/$1"
+ProxyPassReverse "/cold/" "http://localhost:8111/"
 #<!-- cold admin -->
-<Location /cold/admin>
+<Location /cold/>
   AuthType shibboleth
   ShibRequestSetting requireSession 1
   require user rsdoiel@caltech.edu sdavison@caltech.edu tmorrell@caltech.edu tkeswick@caltech.edu kjohnson@caltech.edu melray@library.caltech.edu
   #require valid-user
 </Location>
-
-#<!-- cold -->
-ProxyPassMatch "^/cold/(.*)" "http://localhost:8110/$1"
-ProxyPassMatch "^/cold/(.*)/(.*)" "http://localhost:8110/$1/$2"
-ProxyPassReverse "/cold/" "http://localhost:8110/"
-#<!-- cold is publically accessible while cold admin should be restricted with Shib -->
 #<!-- end cold -->
-
