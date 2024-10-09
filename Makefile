@@ -112,9 +112,12 @@ about.md: codemeta.json .FORCE
 	cp about.md htdocs/
 	deno task htdocs
 
-save: .FORCE
+status:
+	git status
+
+save:
 	if [ "$(msg)" != "" ]; then git commit -am "$(msg)"; else git commit -am "Quick Save"; fi
-	git push origin $(BRANCH)	
+	git push origin $(BRANCH)
 
 website: $(HTML_PAGES) .FORCE
 	make -f website.mak
