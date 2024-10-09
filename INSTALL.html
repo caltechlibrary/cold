@@ -24,26 +24,22 @@
 <section>
 <h1 id="installation-for-development-of-cold">Installation for
 development of <strong>cold</strong></h1>
-<p><strong>cold</strong> is experimental software providing a read only
-view of managed controlled object lists and datum (e.g. controlled
+<p><strong>cold</strong> is experimental software providing a curation
+of managed controlled object lists and datum (e.g. controlled
 vocabularies). The <strong>cold</strong> repository provides the public
 facing JSON API for integration with other services.</p>
-<p>The management interface is found in the <strong>admin</strong>
-directory. It contains the source to compile the curatorial services for
-cold.</p>
-<p><strong>cold</strong> public and admin services are intended to run
-behind a front facing web server (e.g. Apache 2) providing access
-control and authentication. In a development setting this can be as
-simple as configuring BasicAuth. In a production setting you need
-something robust like Shibboleth. An example apache2 configuration is
-included in the source repository for <strong>cold</strong>. It will
-require adaptation to your specific web server configuration.</p>
+<p><strong>cold</strong> web services are intended to run behind a front
+facing web server (e.g. Apache 2) providing access control and
+authentication. In a development setting this can be as simple as
+configuring BasicAuth. In a production setting you need something robust
+like Shibboleth. An example apache2 configuration is included in the
+source repository for <strong>cold</strong>. It will require adaptation
+to your specific web server configuration.</p>
 <p><strong>cold</strong> requires the datasetd web service to provide
-access to people.ds and group.ds collections. For <strong>cold</strong>
-and <strong>cold_admin</strong> you should configure your collections to
-use sql storage, e.g. SQLite3 or PostgreSQL. This can be done form the
-cold_admin submodule using a Deno task or via the Makefile (which calls
-the deno task).</p>
+access to people.ds, group.ds and other collections. For
+<strong>cold</strong> your collections to use sql storage, e.g. SQLite3
+or PostgreSQL. This can be done using a Deno task or via the Makefile
+(which calls the deno task).</p>
 <p>If you are setting up to run in production you should compile the
 services and install the systemd service scripts so that systemd can
 manage the applications.</p>
@@ -56,8 +52,7 @@ services)</li>
 and admin services)</li>
 <li>Pandoc &gt; 3.1 (to build or update documation)</li>
 </ol>
-<h2 id="setting-up-cold-and-cold_admin">Setting up cold and
-cold_admin</h2>
+<h2 id="setting-up-cold">Setting up cold</h2>
 <p>These are setup instructions for testing and development. Step four
 changes if you are setting up for production.</p>
 <ol type="1">
@@ -68,55 +63,37 @@ changes if you are setting up for production.</p>
 <li><code>cd cold</code></li>
 <li><code>git pull origin main</code></li>
 </ol></li>
-<li>Setup cold public services
+<li>Setup cold services
 <ol type="a">
-<li><code>deno task build</code></li>
-</ol></li>
-<li>Setup cold admin services
-<ol type="a">
-<li><code>cd admin</code></li>
 <li><code>deno task setup</code></li>
 <li>(optional) <code>deno task load_data</code> (initially populate COLD
 from CSV files)</li>
 </ol></li>
-<li>You need to start three web services, I recommend using tmux. You
-can then split the window to create each session and still see
-everything going on.
+<li>You need to start two web services, I recommend using tmux. You can
+then split the window to create each session and still see everything
+going on.
 <ol type="a">
-<li>from the cold admin directory start up tmux</li>
+<li>start up tmux</li>
 <li><code>tmux</code></li>
-<li>change to the admin directory, start the JSON API and setup your
-dataset collections</li>
-<li><code>cd admin</code></li>
+<li>start the JSON API and setup your dataset collections</li>
 <li><code>deno task setup</code></li>
 <li><code>deno task json_api</code></li>
 <li>open another tmux window, change to the admin directory, start the
 admin web service</li>
 <li>split the screen, e.g. <code>Ctl-%</code></li>
-<li><code>cd admin</code></li>
-<li><code>deno task start</code></li>
-<li>open a third tmux window, change to the cold repository location and
-start the public web service</li>
-<li>split the screen, e.g. <code>Ctl-"</code></li>
 <li><code>deno task start</code></li>
 </ol></li>
 </ol>
-<p>You should now have three web services running running on localhost
-at ports 8110 (public service), 8111 (admin service), 8112 (JSON
-API).</p>
+<p>You should now have two web services running on localhost at ports
+8111 (admin service), 8112 (JSON API).</p>
 <dl>
-<dt>Port 8110</dt>
-<dd>
-This is the public web service
-</dd>
 <dt>Port 8111</dt>
 <dd>
 This is the management web service
 </dd>
 <dt>Port 8112</dt>
 <dd>
-This is the management JSON API for <code>cold_admin</code> and
-<code>cold</code>
+This is the management JSON API for <code>cold</code>
 </dd>
 </dl>
 <p>In a remote deployment you’d setup up to run these services using
