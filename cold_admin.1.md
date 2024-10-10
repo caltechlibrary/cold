@@ -1,18 +1,18 @@
-%cold_admin(1) user manual |  2024-10-08
+%cold(1) user manual | 0.0.7 2024-10-09 485b5fb
 % R. S.Doiel
-% 2024-10-08 6531990
+% 2024-10-09 485b5fb
 
 # NAME
 
-cold_admin
+cold
 
 # SYNOPSIS
 
-cold_admin [OPTIONS]
+cold [OPTIONS]
 
 # DESCRIPTION
 
-cold_admin provides the admin interface for cold. Cold is implemented using dataset collections
+cold provides the admin interface for cold. Cold is implemented using dataset collections
 for object persistence and relies on datasetd for JSON API to each collection.
 
 # OPTIONS
@@ -42,13 +42,13 @@ apiUrl
 
 # EXAMPLE
 
-cold_admin is setup to run at <http://localhost:8111>. The static content hosted in
+cold is setup to run at <http://localhost:8111>. The static content hosted in
 the "/var/www/html/cold/app" directory.  The datasetd service is setup to run at
 <http://localhost:8112> supporting the people, groups and vocabularies dataset
 collections.
 
 ~~~shell
-cold_admin -port=8111 -htdocs=/var/www/html/cold/app            -apiUrl=http://localhost:8112
+cold -port=8111 -htdocs=/var/www/html/cold/app            -apiUrl=http://localhost:8112
 ~~~
 
 

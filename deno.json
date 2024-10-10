@@ -12,7 +12,7 @@
     "dev": "deno run --allow-read --allow-net --watch cold_admin.ts --htdocs=./htdocs",
     "reload_dev": "deno run --allow-read --allow-net --reload --write-lock --watch cold_admin.ts --htdocs=./htdocs",
     "start": "deno run --allow-read --allow-net cold_admin.ts",
-    "build": "deno compile --allow-read --allow-net --output ../bin/cold_admin cold_admin.ts ; deno compile --allow-read --allow-net --output ../bin/ds_importer ds_importer.ts ; deno compile --allow-read --allow-net --output bin/directory_sync directory_sync.ts",
+    "build": "deno compile --allow-read --allow-net --output bin/cold_admin cold_admin.ts ; deno compile --allow-read --allow-net --output bin/ds_importer ds_importer.ts ; deno compile --allow-read --allow-net --output bin/directory_sync directory_sync.ts",
     "htdocs": "deno run --allow-read --allow-write=htdocs build.ts",
     "docs": "mkdir -p docs ; deno doc --html --output=./docs build.ts cold_admin.ts config.ts doi_prefix.ts ds_importer.ts funders.ts groups.ts identifiers.ts issn.ts mod.ts options.ts people.ts render.ts subjects.ts version.ts",
     "test": "dsquery test.ds 'delete from test' ; deno test --allow-net dataset_test.ts ; deno test options_test.ts ; deno test config_test.ts ; deno test people_test.ts ; deno test groups_test.ts ; deno test cold_admin_test.ts ",

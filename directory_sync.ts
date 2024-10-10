@@ -6,14 +6,14 @@ import {
   apiPort,
   appInfo,
   Dataset,
-  DatasetApiClient,
+  //  DatasetApiClient,
   directoryLookup,
   DirectoryRecord,
   directoryUrl,
-  DOMParser,
-  Element,
-  fmtHelp,
-  matchType,
+  //  DOMParser,
+  //  Element,
+  //  fmtHelp,
+  //  matchType,
   OptionsProcessor,
   People,
   sleepRandomAmountOfSeconds,
@@ -25,30 +25,35 @@ import {
  * @param {[k: string]: string} helpOpt holds the help options defined for the app.
  */
 function helpText(helpOpt: { [k: string]: string }): string {
+  const app_name = "directory_sync";
+  const version = appInfo.version;
+  const release_date = appInfo.releaseDate;
+  const release_hash = appInfo.releaseHash;
+
   const txt: string[] = [
-    `%{app_name}(1) user manual | {version} {release_date}
-    % R. S.Doiel
-    % {release_date} {release_hash}
+    `%${app_name}(1) user manual | ${version} ${release_date} ${release_hash}
+% R. S.Doiel
+% ${release_date} ${release_hash}
     
-    # NAME
+# NAME
     
-    {app_name}
+${app_name}
     
-    # SYNOPSIS
+# SYNOPSIS
     
-    {app_name} [OPTIONS]
+${app_name} [OPTIONS]
     
-    # DESCRIPTION
+# DESCRIPTION
     
-    {app_name} synchronizes the content between Caltech Directory and CaltechPEOPLE.
-    It uses the COLD Admin API as well as the Caltech Directory website content as a
-    data source.
+${app_name} synchronizes the content between Caltech Directory and CaltechPEOPLE.
+It uses the COLD Admin API as well as the Caltech Directory website content as a
+data source.
     
-    Assuming COLD Admin is running on it's standard ports no configuration is needed.
+Assuming COLD Admin is running on it's standard ports no configuration is needed.
     
-    {app_name} is suitable to run from a cronjob on the same machine which hosts COLD.
+${app_name} is suitable to run from a cronjob on the same machine which hosts COLD.
     
-    # OPTIONS
+# OPTIONS
 `,
   ];
 
@@ -61,10 +66,10 @@ function helpText(helpOpt: { [k: string]: string }): string {
   txt.push(`
 # EXAMPLE
 
-{app_name} is setup to contact {directoryUrl} to harvest directory content.
+${app_name} is setup to contact ${directoryUrl} to harvest directory content.
 
 ~~~shell
-{app_name}
+${app_name}
 ~~~
 
 `);
@@ -250,7 +255,7 @@ async function main() {
   const args = op.args;
 
   if (options.help) {
-    console.log(fmtHelp(helpText(op.help), appInfo));
+    console.log(helpText(op.help));
     Deno.exit(0);
   }
   if (options.license) {

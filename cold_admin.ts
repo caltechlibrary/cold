@@ -1,19 +1,15 @@
 import {
   appInfo,
-  dotenv,
   existsSync,
-  fmtHelp,
   handleDOIPrefix,
   handleFunders,
   handleGroups,
   handleISSN,
   handlePeople,
   handleSubjects,
-  http,
   OptionsProcessor,
   path,
   serveDir,
-  yaml,
 } from "./deps.ts";
 
 /**
@@ -22,22 +18,26 @@ import {
  * @param {[k: string]: string} helpOpt holds the help options defined for the app.
  */
 function helpText(helpOpt: { [k: string]: string }): string {
+  const app_name = appInfo.appName;
+  const version = appInfo.version;
+  const release_date = appInfo.releaseDate;
+  const release_hash = appInfo.releaseHash;
   const txt: string[] = [
-    `%{app_name}(1) user manual | {version} {release_date}
+    `%${app_name}(1) user manual | ${version} ${release_date} ${release_hash}
 % R. S.Doiel
-% {release_date} {release_hash}
+% ${release_date} ${release_hash}
 
 # NAME
 
-{app_name}
+${app_name}
 
 # SYNOPSIS
 
-{app_name} [OPTIONS]
+${app_name} [OPTIONS]
 
 # DESCRIPTION
 
-{app_name} provides the admin interface for cold. Cold is implemented using dataset collections
+${app_name} provides the admin interface for cold. Cold is implemented using dataset collections
 for object persistence and relies on datasetd for JSON API to each collection.
 
 # OPTIONS
@@ -53,13 +53,13 @@ for object persistence and relies on datasetd for JSON API to each collection.
   txt.push(`
 # EXAMPLE
 
-{app_name} is setup to run at <http://localhost:8111>. The static content hosted in
+${app_name} is setup to run at <http://localhost:8111>. The static content hosted in
 the "/var/www/html/cold/app" directory.  The datasetd service is setup to run at
 <http://localhost:8112> supporting the people, groups and vocabularies dataset
 collections.
 
 ~~~shell
-{app_name} -port=8111 -htdocs=/var/www/html/cold/app \
+${app_name} -port=8111 -htdocs=/var/www/html/cold/app \
            -apiUrl=http://localhost:8112
 ~~~
 
@@ -170,7 +170,7 @@ function main() {
   const args = op.args;
 
   if (options.help) {
-    console.log(fmtHelp(helpText(op.help), appInfo));
+    console.log(helpText(op.help));
     Deno.exit(0);
   }
   if (options.license) {

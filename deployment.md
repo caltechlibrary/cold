@@ -3,7 +3,7 @@
 
 Deploying cold on a remote system requires manual setup.  You will need the following software to successfully build and deploy.
 
-- Deno >= 1.46.3
+- Deno >= 2.0
 - Dataset >= 2.1.21
 - Pandoc >= 3.1
 - GNU Make

@@ -1,26 +1,26 @@
-%cold(1) user manual | 0.0.7 2024-10-09
-    % R. S.Doiel
-    % 2024-10-09 472d71f
+%directory_sync(1) user manual | 0.0.7 2024-10-09 485b5fb
+% R. S.Doiel
+% 2024-10-09 485b5fb
     
-    # NAME
+# NAME
     
-    cold
+directory_sync
     
-    # SYNOPSIS
+# SYNOPSIS
     
-    cold [OPTIONS]
+directory_sync [OPTIONS]
     
-    # DESCRIPTION
+# DESCRIPTION
     
-    cold synchronizes the content between Caltech Directory and CaltechPEOPLE.
-    It uses the COLD Admin API as well as the Caltech Directory website content as a
-    data source.
+directory_sync synchronizes the content between Caltech Directory and CaltechPEOPLE.
+It uses the COLD Admin API as well as the Caltech Directory website content as a
+data source.
     
-    Assuming COLD Admin is running on it's standard ports no configuration is needed.
+Assuming COLD Admin is running on it's standard ports no configuration is needed.
     
-    cold is suitable to run from a cronjob on the same machine which hosts COLD.
+directory_sync is suitable to run from a cronjob on the same machine which hosts COLD.
     
-    # OPTIONS
+# OPTIONS
 
 help
 : display help
@@ -43,10 +43,10 @@ directory
 
 # EXAMPLE
 
-cold is setup to contact {directoryUrl} to harvest directory content.
+directory_sync is setup to contact https://directory.caltech.edu to harvest directory content.
 
 ~~~shell
-cold
+directory_sync
 ~~~
 
 

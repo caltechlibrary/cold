@@ -8,7 +8,7 @@ This directory implements the staff interface for [cold](https://github.com/calt
 ## Requirements
 
 - [Dataset](https://github.com/caltechlibrary/dataset) >= 2.1.18 (running COLD Admin)
-- [Deno](https://deno.land) >= 1.46.4 (used to build the app and compile services) (build COLD Admin)
+- [Deno](https://deno.land) >= 2.0 (used to build the app and compile services) (build COLD Admin)
 - [Pandoc](https://pandoc.org) >= 3.1 (render documentation and version.ts) (build COLD Admin)
 - GNU Make (build COLD Admin)
 - Zip (packaging build and installation)
