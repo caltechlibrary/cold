@@ -4,7 +4,7 @@
 Deploying cold on a remote system requires manual setup.  You will need the following software to successfully build and deploy.
 
 - Deno >= 2.0
-- Dataset >= 2.1.21
+- Dataset >= 2.1.22
 - Pandoc >= 3.1
 - GNU Make
 - Git
@@ -17,18 +17,17 @@ My current recommendation is the following.
 
 1. Setup the directory to hold he web application if it doesn't exist.
 2. Clone the repository, e.g. clone to `/Sites/cold` and change into the repository directory
-3. Run `make` to build the binary for the cold service
-5. Copy `cold.service-example` to `cold.service`, edit it and move it appropirate place in your Systemd service directory
-6. Symbolicly link `cold.service` to `/etc/systemd/system/`
-7. Edit the service file and make the paths are correct.
-8. Reload the systemd daemon, `sudo systemctl daemon-reload`
-9. Enable the services (only needed the first time, may return a warning about symbolic link)
+3. Run Deno tasks `setup` (if the collections don't exist) and `build` to build the binary for the cold service
+5. Copy `cold.service-example` to `cold.service`, edit it and move to `/etc/systemd/system/`
+6. Copy `cold_api.service-example` to `cold_api.service`, edit it and and move to `/etc/systemd/system/`
+7. Reload the systemd daemon, `sudo systemctl daemon-reload`
+8. Enable the services (only needed the first time, may return a warning about symbolic link)
     a. `sudo systemctl enable cold.service`
     b. `sudo systemctl enable cold_api.service`
-10. Start the services using `systemctl` in the usual way
+9. Start the services using `systemctl` in the usual way
     a. `sudo systemctl start cold.service`
     b. `sudo systemctl start cold_api.service`
-11. Test web services using elinks. If you get a gateway error it means datasetd isn't runining correctly in port 8111. Debug with curl, systemctl status, journalctl.
+10. Test web services using elinks. If you get a gateway error it means datasetd isn't runining correctly in port 8111. Debug with curl, systemctl status, journalctl.
 
 You can configure Apache to reverse proxy to the cold service running on port 8111 where it should enforce access control.
 
@@ -44,14 +43,14 @@ sudo chmod 775 /Sites/
 cd /Sites
 git clone git@github.com:caltechlibrary/cold
 cd cold
-make
 deno task setup
+deno task build
 cp cold.service-example cold.service
 nano cold.service
-sudo ln cold.service /etc/systemd/system/
+sudo mv cold.service /etc/systemd/system/
 cp cold_api.service-example cold_api.service
 nano cold_api.service
-sudo ln cold_api.service /etc/systemd/system/
+sudo mv cold_api.service /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable cold.service
 sudo systemctl enable cold_api.service

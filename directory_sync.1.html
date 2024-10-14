@@ -22,25 +22,19 @@
 </nav>
 
 <section>
-<pre><code># NAME
-
-cold
-
-# SYNOPSIS
-
-cold [OPTIONS]
-
-# DESCRIPTION
-
-cold synchronizes the content between Caltech Directory and CaltechPEOPLE.
-It uses the COLD Admin API as well as the Caltech Directory website content as a
-data source.
-
-Assuming COLD Admin is running on it&#39;s standard ports no configuration is needed.
-
-cold is suitable to run from a cronjob on the same machine which hosts COLD.
-
-# OPTIONS</code></pre>
+<h1 id="name">NAME</h1>
+<p>directory_sync</p>
+<h1 id="synopsis">SYNOPSIS</h1>
+<p>directory_sync <a href="#options">OPTIONS</a></p>
+<h1 id="description">DESCRIPTION</h1>
+<p>directory_sync synchronizes the content between Caltech Directory and
+CaltechPEOPLE. It uses the COLD Admin API as well as the Caltech
+Directory website content as a data source.</p>
+<p>Assuming COLD Admin is running on it’s standard ports no
+configuration is needed.</p>
+<p>directory_sync is suitable to run from a cronjob on the same machine
+which hosts COLD.</p>
+<h1 id="options">OPTIONS</h1>
 <dl>
 <dt>help</dt>
 <dd>
@@ -68,9 +62,9 @@ set the Caltech Directory URL, default https://directory.caltech.edu
 </dd>
 </dl>
 <h1 id="example">EXAMPLE</h1>
-<p>cold is setup to contact {directoryUrl} to harvest directory
-content.</p>
-<pre class="shell"><code>cold</code></pre>
+<p>directory_sync is setup to contact https://directory.caltech.edu to
+harvest directory content.</p>
+<pre class="shell"><code>directory_sync</code></pre>
 </section>
 
 <footer>

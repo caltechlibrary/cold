@@ -26,8 +26,8 @@
 <p>Deploying cold on a remote system requires manual setup. You will
 need the following software to successfully build and deploy.</p>
 <ul>
-<li>Deno &gt;= 1.46.3</li>
-<li>Dataset &gt;= 2.1.21</li>
+<li>Deno &gt;= 2.0</li>
+<li>Dataset &gt;= 2.1.22</li>
 <li>Pandoc &gt;= 3.1</li>
 <li>GNU Make</li>
 <li>Git</li>
@@ -41,13 +41,13 @@ need the following software to successfully build and deploy.</p>
 exist.</li>
 <li>Clone the repository, e.g. clone to <code>/Sites/cold</code> and
 change into the repository directory</li>
-<li>Run <code>make</code> to build the binary for the cold service</li>
+<li>Run Deno tasks <code>setup</code> (if the collections don’t exist)
+and <code>build</code> to build the binary for the cold service</li>
 <li>Copy <code>cold.service-example</code> to <code>cold.service</code>,
-edit it and move it appropirate place in your Systemd service
-directory</li>
-<li>Symbolicly link <code>cold.service</code> to
+edit it and move to <code>/etc/systemd/system/</code></li>
+<li>Copy <code>cold_api.service-example</code> to
+<code>cold_api.service</code>, edit it and and move to
 <code>/etc/systemd/system/</code></li>
-<li>Edit the service file and make the paths are correct.</li>
 <li>Reload the systemd daemon,
 <code>sudo systemctl daemon-reload</code></li>
 <li>Enable the services (only needed the first time, may return a
@@ -80,14 +80,14 @@ sudo chmod 775 /Sites/
 cd /Sites
 git clone git@github.com:caltechlibrary/cold
 cd cold
-make
 deno task setup
+deno task build
 cp cold.service-example cold.service
 nano cold.service
-sudo ln cold.service /etc/systemd/system/
+sudo mv cold.service /etc/systemd/system/
 cp cold_api.service-example cold_api.service
 nano cold_api.service
-sudo ln cold_api.service /etc/systemd/system/
+sudo mv cold_api.service /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable cold.service
 sudo systemctl enable cold_api.service

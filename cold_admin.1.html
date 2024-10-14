@@ -23,13 +23,13 @@
 
 <section>
 <h1 id="name">NAME</h1>
-<p>cold_admin</p>
+<p>cold</p>
 <h1 id="synopsis">SYNOPSIS</h1>
-<p>cold_admin <a href="#options">OPTIONS</a></p>
+<p>cold <a href="#options">OPTIONS</a></p>
 <h1 id="description">DESCRIPTION</h1>
-<p>cold_admin provides the admin interface for cold. Cold is implemented
-using dataset collections for object persistence and relies on datasetd
-for JSON API to each collection.</p>
+<p>cold provides the admin interface for cold. Cold is implemented using
+dataset collections for object persistence and relies on datasetd for
+JSON API to each collection.</p>
 <h1 id="options">OPTIONS</h1>
 <dl>
 <dt>help</dt>
@@ -62,12 +62,12 @@ set the url to the datasetd API provided for cold
 </dd>
 </dl>
 <h1 id="example">EXAMPLE</h1>
-<p>cold_admin is setup to run at <a href="http://localhost:8111"
+<p>cold is setup to run at <a href="http://localhost:8111"
 class="uri">http://localhost:8111</a>. The static content hosted in the
 “/var/www/html/cold/app” directory. The datasetd service is setup to run
 at <a href="http://localhost:8112" class="uri">http://localhost:8112</a>
 supporting the people, groups and vocabularies dataset collections.</p>
-<pre class="shell"><code>cold_admin -port=8111 -htdocs=/var/www/html/cold/app            -apiUrl=http://localhost:8112</code></pre>
+<pre class="shell"><code>cold -port=8111 -htdocs=/var/www/html/cold/app            -apiUrl=http://localhost:8112</code></pre>
 </section>
 
 <footer>
