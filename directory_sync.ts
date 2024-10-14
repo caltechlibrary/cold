@@ -135,9 +135,11 @@ function merge_changes(people_obj: People, data: DirectoryRecord): boolean {
     if (people_obj.division === "") {
       people_obj.division = division;
       isChanged = true;
+      /*
     } else if (people_obj.division.indexOf(division) < 0) {
       people_obj.division = `${division}; ${people_obj.division}`;
       isChanged = true;
+      */
     }
   }
   if (isChanged) {
