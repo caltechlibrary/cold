@@ -21,4 +21,5 @@
 # For more information see the manual pages of crontab(5) and cron(8)
 # 
 # m h  dom mon dow   command
-45 7 * * 1-5 /Sites/cold/sync_caltech_directory.bash
+15 7 * * 1-5 /Sites/cold/sync_caltech_directory.bash
+30 7 * * 1-5 /Sites/cold/rpt_people_csv.bash

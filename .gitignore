@@ -15,3 +15,4 @@ TODO.html
 *.service
 cdh.yaml
 cold_directory_sync.yaml
+logs/*
