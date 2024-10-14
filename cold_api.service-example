@@ -1,15 +1,15 @@
 [Unit]
-Description=COLD Admin JSON API service
-Documentation=man:cold_admin(1)
+Description=COLD JSON API service
+Documentation=man:cold(1)
 After=network.target
-ConditionPathExists=!/Sites/cold/admin/cold_admin_api_not_to_be_run
+ConditionPathExists=!/Sites/cold/cold_api_not_to_be_run
 
 [Service]
-WorkingDirectory=/Sites/cold/admin
-ExecStart=/usr/local/bin/datasetd /Sites/cold/cold_admin/cold_admin_api.yaml
+WorkingDirectory=/Sites/cold
+ExecStart=/usr/local/bin/datasetd /Sites/cold/cold_api.yaml
 Type=simple
 Restart=always
 
 [Install]
 WantedBy=multi-user.target
-Alias=cold_admin_api.service
+Alias=cold_api.service

@@ -1,12 +1,12 @@
 [Unit]
-Description=COLD Admin service
-Documentation=man:cold_admin(1)
+Description=COLD service
+Documentation=man:cold(1)
 After=network.target
-ConditionPathExists=!/Sites/cold/admin/cold_admin_not_to_be_run
+ConditionPathExists=!/Sites/cold/cold_not_to_be_run
 
 [Service]
-WorkingDirectory=/Sites/cold/admin
-ExecStart=/Sites/cold/admin/bin/cold_admin
+WorkingDirectory=/Sites/cold
+ExecStart=/Sites/cold/bin/cold_admin
 Type=simple
 Restart=always
 
