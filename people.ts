@@ -35,16 +35,19 @@ export interface PeopleInterface {
   wikidata: string;
   snac: string;
   orcid: string;
+  ror: string;
   image_url: string;
   education: string;
   caltech: boolean;
   jpl: boolean;
   faculty: boolean;
   alumn: boolean;
+  staff: boolean;
   updated: string;
   authors_id: string;
   thesis_id: string;
   advisors_id: string;
+  internal_notes: string;
 }
 
 /**
@@ -70,16 +73,19 @@ export class People implements PeopleInterface {
   wikidata: string = "";
   snac: string = "";
   orcid: string = "";
+  ror: string = "";
   image_url: string = "";
   education: string = "";
   caltech: boolean = false;
   jpl: boolean = false;
   faculty: boolean = false;
   alumn: boolean = false;
+  staff: boolean = false;
   updated: string = "";
   authors_id: string = "";
   thesis_id: string = "";
   advisors_id: string = "";
+  internal_notes: string = "";
 
   migrateCsv(row: any): boolean {
     // NOTE: Skipping the follow legacy columns: thesis_id,advisor_id,authors_id
@@ -136,6 +142,7 @@ export class People implements PeopleInterface {
     }
     if (row.hasOwnProperty("caltech")) {
       this.caltech = matchType(this.caltech, row.caltech);
+      this.ror = "https://ror.org/05dxps055";
     }
     if (row.hasOwnProperty("jpl")) {
       this.jpl = matchType(this.jpl, row.jpl);
@@ -145,6 +152,9 @@ export class People implements PeopleInterface {
     }
     if (row.hasOwnProperty("alumn")) {
       this.alumn = matchType(this.alumn, row.alumn);
+    }
+    if (row.hasOwnProperty("staff")) {
+      this.staff = matchType(this.staff, row.staff);
     }
     if (row.hasOwnProperty("status")) {
       this.status = matchType(this.status, row.status);
@@ -165,6 +175,9 @@ export class People implements PeopleInterface {
       this.updated = row.updated;
     } else {
       this.updated = new Date().toLocaleDateString("en-US");
+    }
+    if (row.hasOwnProperty("internal_notes")) {
+      this.internal_notes = row.internal_notes;
     }
     return true;
   }

@@ -27,7 +27,7 @@ RELEASE_DATE=$(shell date +'%Y-%m-%d')
 
 RELEASE_HASH=$(shell git log --pretty=format:'%h' -n 1)
 
-HTML_PAGES = $(shell ls -1 *.html docs/*.html)
+HTML_PAGES = $(shell ls -1 *.html)
 
 OS = $(shell uname)
 
@@ -41,13 +41,14 @@ PREFIX = $(HOME)
 
 TS_MODS = $(shell ls -1 *.ts | grep -v _test.ts | grep -v deps.ts | grep -v version.ts)
 
-build: version.ts $(TS_MODS) CITATION.cff about.md docs htdocs bin compile installer.sh installer.ps1 $(HTML_PAGES)
+build: version.ts $(TS_MODS) CITATION.cff about.md htdocs bin compile installer.sh installer.ps1 $(HTML_PAGES)
 
 bin: .FORCE
 	mkdir -p bin
 
 compile: $(TS_MODS)
-	deno check *.ts
+	deno check --allow-import cold_admin.ts
+	deno check --allow-import directory_sync.ts
 	deno task build
 	bin/cold_admin$(EXT) --help >cold_admin.1.md
 	bin/directory_sync$(EXT) --help >directory_sync.1.md
@@ -132,9 +133,6 @@ htdocs: .FORCE
 
 test: .FORCE
 	deno task test
-
-docs: .FORCE
-	deno doc --html --name="COLD"  --output=docs $(TS_MODS)
 
 dist/Linux-x86_64: .FORCE
 	@mkdir -p dist/bin

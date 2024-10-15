@@ -89,8 +89,6 @@ function formatDate(date: Date): string {
  */
 function merge_changes(people_obj: People, data: DirectoryRecord): boolean {
   // Create a copy of people_obj.
-  let bio = people_obj.bio;
-  let division = people_obj.division;
   let isChanged = false;
   if (people_obj.display_name !== data.display_name) {
     people_obj.display_name = data.display_name;
@@ -112,35 +110,18 @@ function merge_changes(people_obj: People, data: DirectoryRecord): boolean {
     people_obj.title = data.title;
     isChanged = true;
   }
-  if (people_obj.division !== data.division) {
+  // NOTE: Pickup division from directory if not set in cold
+  if ((people_obj.division === "") && (data.division !== "")) {
     people_obj.division = data.division;
     isChanged = true;
   }
   if (people_obj.bio !== data.bio) {
     people_obj.bio = data.bio;
+    isChanged = true;
   }
   if (people_obj.email !== data.email) {
     people_obj.email = data.email;
     isChanged = true;
-  }
-  // Undo overwrite of bio field if bio is not an empty string
-  if (bio !== "") {
-    // We're revert to prior bio, ignore possible change
-    people_obj.bio = bio;
-  } else {
-    isChanged = true;
-  }
-  // Undo dropping of division if division is not an empty string
-  if (division !== "") {
-    if (people_obj.division === "") {
-      people_obj.division = division;
-      isChanged = true;
-      /*
-    } else if (people_obj.division.indexOf(division) < 0) {
-      people_obj.division = `${division}; ${people_obj.division}`;
-      isChanged = true;
-      */
-    }
   }
   if (isChanged) {
     people_obj.updated = formatDate(new Date());
