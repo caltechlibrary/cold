@@ -1,5 +1,5 @@
 #!/bin/bash
-
+cd /Sites/cold
 # {
 #     "Scope": "",
 #     "activity": "active",
@@ -57,6 +57,4 @@ from groups
 order by src->'name'
 SQL
 
-dsquery -csv "key,name,alternative,email,date,description,start,approx_start,activity,end,approx_end,website,pi,parent,prefix,grid,isni,ringold,viaf,ror,updated,Scope" -sql groups_rpt.sql groups.ds
-
-#>groups.csv
+dsquery -csv "key,name,alternative,email,date,description,start,approx_start,activity,end,approx_end,website,pi,parent,prefix,grid,isni,ringold,viaf,ror,updated,Scope" -sql groups_rpt.sql groups.ds >groups.csv
