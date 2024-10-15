@@ -5,12 +5,13 @@ Action items
 bug
 ---
 
-- [ ] Make division field only update if it is empty, (will be curated by library staff, via a comparison report)
 
 next
 ----
 
-- [ ] Division should only populate in with directory sync if it is empty
+- [ ] Display name should always be taken from Caltech Directory
+- [ ] If the name fields family_name, given_name should be taken from the Caltech Directory if empty
+- [X] Division should only populate in with directory sync if it is empty
 - [ ] When Caltech is checked active the ROR should populate with https://ror.org/05dxps055
 - [ ] Add "internal_notes" property to people object
 - [ ] Add "staff" people object

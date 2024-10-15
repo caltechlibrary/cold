@@ -49,6 +49,7 @@ bin: .FORCE
 compile: $(TS_MODS)
 	deno check --allow-import cold_admin.ts
 	deno check --allow-import directory_sync.ts
+	deno check --allow-import set_include_in_feeds.ts
 	deno task build
 	bin/cold_admin$(EXT) --help >cold_admin.1.md
 	bin/directory_sync$(EXT) --help >directory_sync.1.md
@@ -57,6 +58,7 @@ check: $(TS_MODS)
 	deno check --all cold_admin.ts
 	deno check --all ds_importer.ts
 	deno check --all directory_sync.ts
+	deno check --all set_include_in_feeds.ts
 	deno check --all dataset.ts
 	deno check --all groups.ts
 	deno check --all people.ts

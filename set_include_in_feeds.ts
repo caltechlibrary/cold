@@ -69,7 +69,7 @@ async function setIncludeInFeeds(
       if (obj === undefined) {
         error_count++;
       } else if (typeof obj === "object") {
-        obj["include_in_feeds"] = true;
+        obj.include_in_feeds = true;
         console.log(`ds.read(${clpid}) -> ${JSON.stringify(obj)}`);
         const ok = await ds.update(clpid, obj);
         if (!ok) {

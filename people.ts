@@ -142,7 +142,6 @@ export class People implements PeopleInterface {
     }
     if (row.hasOwnProperty("caltech")) {
       this.caltech = matchType(this.caltech, row.caltech);
-      this.ror = "https://ror.org/05dxps055";
     }
     if (row.hasOwnProperty("jpl")) {
       this.jpl = matchType(this.jpl, row.jpl);
@@ -179,6 +178,19 @@ export class People implements PeopleInterface {
     if (row.hasOwnProperty("internal_notes")) {
       this.internal_notes = row.internal_notes;
     }
+    // console.log(
+    //   `DEBUG name: ${this.family_name}, ${this.given_name} this.clpid ${this.clpid} this.caltech (${typeof this
+    //     .caltech}): ${this.caltech}`,
+    // );
+    if (this.caltech) {
+      this.ror = "https://ror.org/05dxps055";
+    }
+    /* We will start out with the feeds we current have *
+    if (this.caltech && this.faculty) {
+      this.include_in_feeds = true;
+    }
+    */
+    // console.log(`DEBUG   -> this.ror (${typeof this.ror}): ${this.ror}`);
     return true;
   }
 
@@ -205,12 +217,15 @@ export class People implements PeopleInterface {
       wikidata: this.wikidata,
       snac: this.snac,
       orcid: this.orcid,
+      ror: this.ror,
       image_url: this.image_url,
       education: this.education,
       caltech: this.caltech,
       jpl: this.jpl,
       faculty: this.faculty,
+      staff: this.staff,
       alumn: this.alumn,
+      internal_notes: this.internal_notes,
       updated: this.updated,
     };
   }

@@ -23,11 +23,13 @@ Details
 
 - **cold_admin** is built as TypeScript middleware interacting with Dataset collections via `datasetd`. `datasetd` provides both static file services, access to dataset collections as well as the ability to query the collections. Dynamic pages use [handlerbars](https://handlerbarsjs.com) templates, each with their own "view" template hierarchies.
 
+- **datasetd** is part of the [Dataset](https://github.com/caltechlibrary/dataset) project. It provides the JSON API needed to curate the objects in a dataset collection.
+
 - **directory_sync** is build as TypeScript command line program suitable to be run from a cronjob. It is responsble for updating Caltech People data from the Caltech directory.
 
-- **ds_importer** is a once time import script used to bootstrap the data in cold from our legacy spreadsheets
+- **ds_importer** is a once time import script used to bootstrap the data in cold from our legacy CSV spreadsheets
 
-- **datasetd** is part of the [Dataset](https://github.com/caltechlibrary/dataset) project. It provides the JSON API needed to curate the objects in a dataset collection.
+- **set_include_in_feeds** is a one set of the `include_in_feeds` based on a clpid found in a single column CSV file. Maybe useful for doing back include in feeds set.
 
 Public content access is through files exported to our [Feeds](https://feeds.library.caltech.edu) system. Deno is used to managed tasks that export content to it.
 

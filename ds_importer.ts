@@ -2,15 +2,7 @@
  * ds_importer.ts this is a TypeScript program that imports data from a CSV file into a dataset
  * collection via datasetd JSON API.
  */
-import {
-  apiPort,
-  csv_parse,
-  Dataset,
-  DatasetApiClient,
-  Group,
-  ISSN,
-  People,
-} from "./deps.ts";
+import { apiPort, csv_parse, Dataset, Group, ISSN, People } from "./deps.ts";
 
 /**
  * dsImporter takes a CSV file and for each row turns it into an object and

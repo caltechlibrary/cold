@@ -16,21 +16,15 @@
 {{#if people.display_name}}<h1>{{people.display_name}}</h1>{{else}}
 <h1>{{people.family_name}}{{#if people.given_name}}, {{people.given_name}}{{/if}}</h1>{{/if}}
 
-<div class="identifier">clpid: {{people.clpid}}</div>
+<div class="identifier">Caltech Library ID: {{#if people.include_in_feeds}}<a href="https://feeds.library.caltech.edu/people/{{people.clpid}}" target="_blank">{{people.clpid}}</a>{{else}}{{people.clpid}}{{/if}}</div>
 
 {{#if people.title}}<p><div class="title">Title: {{people.title}}</div>{{/if}}
 
 {{#if people.bio}}<p><div class="boi">BIO: {{people.bio}}</div>{{/if}}
 
-{{#if people.education}}<p><div class="education">Education: {{people.education}}<div>{{/if}}
-
 {{#if people.division}}<p><div class="division">Division: {{people.division}}<div>{{/if}}
 
 {{#if people.email}}<p><div class="email">EMail: {{people.email}}</div>{{/if}}
-
-<!--
-<div class="status">{{#people.status}}Status: {{.}}{{/people.status}}</div>
--->
 
 {{#if people.directory_user_id}}<p><div class="directory_user_id">IMSS userid: <a href="https://directory.caltech.edu/personnel/{{people.directory_user_id}}" target="_blank">{{people.directory_user_id}}</a></div>{{/if}}
 
@@ -49,21 +43,18 @@
   {{#if people.advisors_id}}<div class="advisors_id">CaltechTHESIS Advisor ID: {{people.advisors_id}}</div>{{/if}}
 </div>
 
-<!--
-<div class="image_url">{{#people.image_url}}Image URL: <a href="{{.}}">{{.}}</a>{{/people.image_url}}</div>
--->
-
 
 <div class="active-affiliations"><p>Institute Affiliation(s):
   <ul>
-  {{#people.caltech}}<li class="is_caltech">Active Caltech</li>{{/people.caltech}}
-  {{#people.jpl}}<li class="is_jpl">Active JPL</li>{{/people.jpl}}
+  {{#if people.caltech}}<li class="is_caltech">Active Caltech {{#if people.ror}}<a href="{{people.ror}}" target="_blank">{{people.ror}}</a>{{/if}}</li>{{/if}}
+  {{#if people.jpl}}<li class="is_jpl">Active JPL <a href="https://ror.org/027k65916" target="_blank">https://ror.org/027k65916</a></li>{{/if}}
   </ul>
 </div>
 
-<div class="type-affiliation"><p>Type of affiliation(s):
+<div class="type-affiliation"><p>Affiliation Type(s):
   <ul>
   {{#people.faculty}}<li class="is_faculty">Faculty</li>{{/people.faculty}}
+  {{#people.staff}}<li class="is_staff">Staff</li>{{/people.staff}}
   {{#people.alumn}}<li class="is_alumn">Alumn</li>{{/people.alumn}}
   </ul>
 </div>
@@ -76,9 +67,17 @@
 {{/if}}
 </div>
 
+
 {{#if people.updated}}<p><div class="updated">Record Updated: {{people.updated}}</div>{{/if}}
 
 <p>
+{{#if people.internal_notes}}
+<div class="internal-notes">
+<hr>
+Internal Notes:<br>
+<blockquote>{{people.internal_notes}}</blockquote>
+</div>
+{{/if}}
 </section>
 {{>footer}}
 <!-- {{#if debug_src}}<code>{{debug_src}}</code>{{/if}}  -->

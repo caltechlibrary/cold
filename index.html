@@ -58,15 +58,15 @@ interacting with Dataset collections via <code>datasetd</code>.
 dataset collections as well as the ability to query the collections.
 Dynamic pages use <a href="https://handlerbarsjs.com">handlerbars</a>
 templates, each with their own “view” template hierarchies.</p></li>
-<li><p><strong>directory_sync</strong> is build as TypeScript command
-line program suitable to be run from a cronjob. It is responsble for
-updating Caltech People data from the Caltech directory.</p></li>
-<li><p><strong>ds_importer</strong> is a once time import script used to
-bootstrap the data in cold from our legacy spreadsheets</p></li>
 <li><p><strong>datasetd</strong> is part of the <a
 href="https://github.com/caltechlibrary/dataset">Dataset</a> project. It
 provides the JSON API needed to curate the objects in a dataset
 collection.</p></li>
+<li><p><strong>directory_sync</strong> is build as TypeScript command
+line program suitable to be run from a cronjob. It is responsble for
+updating Caltech People data from the Caltech directory.</p></li>
+<li><p><strong>ds_importer</strong> is a once time import script used to
+bootstrap the data in cold from our legacy CSV spreadsheets</p></li>
 </ul>
 <p>Public content access is through files exported to our <a
 href="https://feeds.library.caltech.edu">Feeds</a> system. Deno is used
