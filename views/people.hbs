@@ -32,13 +32,13 @@
 <div class="status">{{#people.status}}Status: {{.}}{{/people.status}}</div>
 -->
 
-{{#if people.directory_user_id}}<p><div class="directory_user_id">IMSS userid: {{people.directory_user_id}}</div>{{/if}}
+{{#if people.directory_user_id}}<p><div class="directory_user_id">IMSS userid: <a href="https://directory.caltech.edu/personnel/{{people.directory_user_id}}" target="_blank">{{people.directory_user_id}}</a></div>{{/if}}
 
 {{#if people.directory_person_type}}<p><div class="directory_person_type">Directory Person Type: {{people.directory_person_type}}</div>{{/if}}
 
 <div class="identifiers">
-  {{#if people.orcid}}<div class="orcid">ORCID: {{people.orcid}}</div>{{/if}}
-  {{#if people.isni}}<div class="isni">ISNO: {{people.isni}}</div>{{/if}}
+  {{#if people.orcid}}<div class="orcid">ORCID: <a href="https://orcid.org/{{people.orcid}}" target="_blank">{{people.orcid}}</a></div>{{/if}}
+  {{#if people.isni}}<div class="isni">ISNI: {{people.isni}}</div>{{/if}}
   {{#if people.archivesspace_id}}<div class="archivesspace_id">ArchivesSpace ID: {{people.archivesspace_id}}<div>{{/if}}
   {{#if people.viaf}}<div class="viaf">VIAF: {{people.viaf}}</div>{{/if}}
   {{#if people.lcnaf}}<div class="lcnaf">LCNAF: {{people.lcnaf}}</div>{{/if}}

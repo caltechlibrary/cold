@@ -33,24 +33,15 @@
 </div>
 
 <div>
-<label set="bio">Bio</label><br >
-<textarea id="bio" name="bio" rows="10" cols="60">{{people.bio}}</textarea>
-</div>
-
-<div>
-<label set="education">Education</label><br > <textarea id="education" name="education" rows="10" cols="60">{{people.education}}</textarea>
-</div>
-
-<div>
 <label set="email">Contact Email</label> <input type="email" id="email" name="email" pattern=".+@.+\.edu" value="{{people.email}}">
 </div>
 
 <div>
-<label set="directory_person_type">Directory Person Type</label> <input type="directory_person_type" id="directory_person_type" name="directory_person_type" value="{{people.directory_person_type}}">
+<label set="directory_user_id">Directory User ID</label> <input type="directory_user_id" id="directory_user_id" name="directory_user_id" value="{{people.directory_user_id}}">
 </div>
 
 <div>
-<label set="directory_user_id">Directory User ID</label> <input type="directory_user_id" id="directory_user_id" name="directory_user_id" value="{{people.directory_user_id}}">
+<label set="directory_person_type"><a class="#foot_note" href="#directory_note"><sup>◇</sup></a> Directory Person Type</label> <input type="directory_person_type" id="directory_person_type" name="directory_person_type" value="{{people.directory_person_type}}" readonly>
 </div>
 
 <!--
@@ -60,8 +51,17 @@
 -->
 
 <div>
-<label set="division">Division</label> <input type="text" id="division" name="division" value="{{people.division}}">
+<label set="division"><a class="foot_note" href="#directory_note"><sup>◇</sup></a> Division</label> <input type="text" id="division" name="division" value="{{people.division}}" readonly>
 </div>
+
+<div>
+<label set="bio"><a class="foot_note" href="#directory_note"><sup>◇</sup></a> Bio</label><br >
+<textarea id="bio" name="bio" rows="10" cols="60" readonly>{{people.bio}}</textarea>
+</div>
+
+<!-- <div>
+<label set="education">Education</label><br > <textarea id="education" name="education" rows="10" cols="60">{{people.education}}</textarea>
+</div> -->
 
 
 <!-- <div>
@@ -138,6 +138,7 @@
 </form>
 
 <p>
+<div class="foot_note" id="directory_note">◇ indicates data managed by <a href="https://directory.caltech.edu">Caltech Directory</a></div>
 </section>
 {{>footer}}
 </body>
