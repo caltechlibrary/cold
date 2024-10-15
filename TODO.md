@@ -5,12 +5,17 @@ Action items
 next
 ----
 
+- [ ] Division should only populate in with directory sync if it is empty
+- [ ] When Caltech is checked active the ROR should populate with https://ror.org/05dxps055
+- [ ] Add "internal_notes" property to people object
+- [ ] Add "staff" people object
 0. [X] Consolidate `/cold/`, `/cold/admin/` and `github.com/caltechlibrary/cold_directory_sync` into the main cold repository
   - Per 2024-10-08 project meeting, the public API of COLD is feeds
   - COLD is responsible for pushing changes to feeds, RDM can pull changes from feeds
   - Run a report of clpid and related author_id, advisor_id, committee_member_id, etc.
 1. [ ] Do final load of data from the spreadsheet in GitHub
 2. [ ] Write report that generates the spreadsheet
+  - [ ] need a report that finds Caltech People ID that do not math CaltechAUTHORS author_id
   - [X] People
   - [ ] Group
   - [ ] Funders

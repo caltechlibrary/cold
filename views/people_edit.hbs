@@ -17,8 +17,19 @@
 <form action="{{people.clpid}}" method="post">
 
 <div>
-<label set="clpid">clpid</label> <input type="text" id="clpid" name="clpid" value="{{people.clpid}}" {{^isCreateObject}}readonly{{/isCreateObject}} required="true" />
+<label set="directory_user_id">Directory User ID</label> <input type="directory_user_id" id="directory_user_id" name="directory_user_id" value="{{people.directory_user_id}}">
 </div>
+
+
+<div>
+<label set="clpid">Caltech Library People ID</label> <input type="text" id="clpid" name="clpid" value="{{people.clpid}}" {{^isCreateObject}}readonly{{/isCreateObject}} required="true" />
+</div>
+
+<div>
+<label set="orcid">ORCID</label> <input type="text" id="orcid" name="orcid" pattern="[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9X]" value="{{people.orcid}}">
+</div>
+
+<hr>
 
 <div>
 <label set="display_name">Display Name</label> <input type="text" id="display_name" name="display_name" value="{{people.display_name}}" /> 
@@ -37,28 +48,10 @@
 </div>
 
 <div>
-<label set="directory_user_id">Directory User ID</label> <input type="directory_user_id" id="directory_user_id" name="directory_user_id" value="{{people.directory_user_id}}">
+<label set="division">Division</label> <input type="text" id="division" name="division" value="{{people.division}}" placeholder="pulled from directory if empty">
 </div>
 
-<div>
-<label set="directory_person_type"><a class="#foot_note" href="#directory_note"><sup>◇</sup></a> Directory Person Type</label> <input type="directory_person_type" id="directory_person_type" name="directory_person_type" value="{{people.directory_person_type}}" readonly>
-</div>
-
-<!--
-<div>
-<label set="image_url">Image URL</label> <input type="url" id="image_url" name="image_url" value="{{people.image_url}}">
-</div>
--->
-
-<div>
-<label set="division"><a class="foot_note" href="#directory_note"><sup>◇</sup></a> Division</label> <input type="text" id="division" name="division" value="{{people.division}}" readonly>
-</div>
-
-<div>
-<label set="bio"><a class="foot_note" href="#directory_note"><sup>◇</sup></a> Bio</label><br >
-<textarea id="bio" name="bio" rows="10" cols="60" readonly>{{people.bio}}</textarea>
-</div>
-
+<hr>
 <!-- <div>
 <label set="education">Education</label><br > <textarea id="education" name="education" rows="10" cols="60">{{people.education}}</textarea>
 </div> -->
@@ -68,13 +61,11 @@
 <label set="status">Status</label> <input type="text" id="status" name="status" value="{{people.status}}">
 </div> -->
 
+
 <div class="identifiers">
-<div>
-<label set="orcid">ORCID</label> <input type="text" id="orcid" name="orcid" pattern="[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9X]" value="{{people.orcid}}">
-</div>
 
 <div>
-<label set="ror">Affiliation (ROR)</label> <input type="text" id="ror" name="ror" value="{{people.ror}}" >
+<label set="ror">Affiliation (ROR for CaltechAUTHORS)</label> <input type="text" id="ror" name="ror" placeholder="https://ror.org/05dxps055" value="{{people.ror}}" >
 </div>
 
 <div>
@@ -82,7 +73,7 @@
 </div>
 
 <div>
-<label set="lcnaf">ringold</label> <input type="text" id="lcnaf" name="lcnaf" value="{{people.lcnaf}}">
+<label set="lcnaf">LCNAF</label> <input type="text" id="lcnaf" name="lcnaf" value="{{people.lcnaf}}">
 </div>
 
 <div>
@@ -102,7 +93,7 @@
 </div>
 
 <div>
-<label set="authors_id">CaltechAUTHORS ID</label> <input type="text" id="authors_id" name="authors_id" value="{{people.authors_id}}" >
+<label set="authors_id">CaltechAUTHORS ID (historic data)</label> <input type="text" id="authors_id" name="authors_id" value="{{people.authors_id}}" >
 </div>
 
 <div>
@@ -114,6 +105,8 @@
 </div>
 </div>
 
+<hr>
+
 <div class="active-affiliation"><p>Active Affiliation:<br >
 <label>Caltech <input type="checkbox" id="caltech" name="caltech" {{#people.caltech}}checked{{/people.caltech}} ></label>
 <label>JPL <input type="checkbox" id="jpl" name="jpl" {{#people.jpl}}checked{{/people.jpl}} ></label>
@@ -121,12 +114,35 @@
 
 <div class="affiliation-type"><p>Affiation type:<br >
 <label>Faculty <input type="checkbox" id="faculty" name="faculty" {{#people.faculty}}checked{{/people.faculty}} ></label>
+<label>Staff <input type="checkbox" id="staff" name="staff" {{#people.staff}}checked{{/people.staff}} ></label>
 <label>Alumn <input type="checkbox" id="alumn" name="alumn" {{#people.alumn}}checked{{/people.alumn}} ></label>
 </div>
 
 <div class="feeds-status"><p>Feeds status:<br >
 <label set="include_in_feeds">Include in feeds <input type="checkbox" id="include_in_feeds" name="include_in_feeds" {{#people.include_in_feeds}}checked{{/people.include_in_feeds}}> </label>
 </div>
+
+<div class="internal-notes"><label>Internal Notes:</label><br>
+<textarea id="internal-notes" name="internal-notes" rows="10" cols="60" placeholder="Internal Notes for Caltech Library Staff" >{{people.internal_notes}}</textarea>
+</div>
+
+<hr>
+
+<div>
+<label set="directory_person_type"><a class="#foot_note" href="#directory_note"><sup>◇</sup></a> Directory Person Type</label> <input type="directory_person_type" id="directory_person_type" name="directory_person_type" value="{{people.directory_person_type}}" placeholder="pulled from directory" readonly>
+</div>
+
+<!--
+<div>
+<label set="image_url">Image URL</label> <input type="url" id="image_url" name="image_url" value="{{people.image_url}}">
+</div>
+-->
+
+<div>
+<label set="bio"><a class="foot_note" href="#directory_note"><sup>◇</sup></a> Bio</label><br >
+<textarea id="bio" name="bio" rows="10" cols="60" placeholder="pulled from directory" readonly>{{people.bio}}</textarea>
+</div>
+
 
 <p>
 {{#if people.updated}}<label set="updated">updated</label> {{people.updated}}{{/if}}
