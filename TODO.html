@@ -42,15 +42,24 @@ committee_member_id, etc.</li>
 spreadsheet in GitHub</label></li>
 <li><label><input type="checkbox" />Write report that generates the
 spreadsheet</label></li>
+</ol>
+<ul class="task-list">
+<li><label><input type="checkbox" checked="" />People</label></li>
+<li><label><input type="checkbox" />Group</label></li>
+<li><label><input type="checkbox" />Funders</label></li>
+</ul>
+<ol start="3" type="1">
+<li><label><input type="checkbox" />Write push of CSV files to datawork
+for inclusion in feeds</label></li>
 <li><label><input type="checkbox" />Write report that generates the YAML
 needed by RDM</label></li>
-<li><label><input type="checkbox" />Write a cronjob that updates COLD
-from directory using the old cdh harvester code or public
+<li><label><input type="checkbox" checked="" />Write a cronjob that
+updates COLD from directory using the old cdh harvester code or public
 vcard</label></li>
 </ol>
 <ul class="task-list">
-<li><label><input type="checkbox" />investigate how much of the vcard is
-useful, important use case is dual appointments</label>
+<li><label><input type="checkbox" checked="" />investigate how much of
+the vcard is useful, important use case is dual appointments</label>
 <ul>
 <li>Does not necessarily show division affiliation</li>
 <li>If “ORG” is shown it maybe a semi-colon delimited list</li>
@@ -62,19 +71,19 @@ data depending on our needs</li>
 username</li>
 <li>Only supports the vcf format of data (not XML or JSON)</li>
 </ul></li>
-<li><label><input type="checkbox" />investigate what we get from the
-current implementation LDAP API provided by IMSS</label></li>
-<li><label><input type="checkbox" />division associations for people
-should be additive but require manuall removals on
+<li><label><input type="checkbox" checked="" />investigate what we get
+from the current implementation LDAP API provided by IMSS</label></li>
+<li><label><input type="checkbox" checked="" />division associations for
+people should be additive but require manuall removals on
 autoupdates</label></li>
-<li><label><input type="checkbox" />Fields like bio and descriptions can
-be overwritten by directory data</label></li>
+<li><label><input type="checkbox" checked="" />Fields like bio and
+descriptions can be overwritten by directory data</label></li>
 </ul>
-<ol start="5" type="1">
+<ol start="6" type="1">
 <li><label><input type="checkbox" />Add button to pull in current
 directory data</label></li>
 </ol>
-<ul class="task-list">
+<ul>
 <li><label><input type="checkbox" />Figure out how to refactor Makefile
 to complete the a release process</label></li>
 <li><label><input type="checkbox" />Write data flow document for cold
@@ -83,8 +92,9 @@ directory as authorative and where publish the group and people data to
 in feeds</label></li>
 <li><label><input type="checkbox" />cold needs a ROADMAP document to
 guide development as cold’s needs seem ambigious</label></li>
-<li><label><input type="checkbox" />Add link to cold and cold admin on
-apps.library.caltech.edu</label></li>
+<li>[D] Add link to cold and cold admin on apps.library.caltech.edu
+(cold public API is feeds, cold admin is consolidated fully into the
+cold repo)</li>
 <li><label><input type="checkbox" checked="" />Remove mkpage dependency,
 replace with Pandoc 3 templates from
 github.com/caltechlibrary/codemeta-pandoc-examples</label></li>
@@ -135,6 +145,8 @@ configuration and database requirements</label></li>
 <li><label><input type="checkbox" checked="" />Add Makefile</label></li>
 <li><label><input type="checkbox" />Implement client/server validation
 for objects and attributes</label></li>
+<li><label><input type="checkbox" />Implement validation in datasetd
+based on models</label></li>
 <li><label><input type="checkbox" />People</label>
 <ul class="task-list">
 <li><label><input type="checkbox" />Need to implement validators for

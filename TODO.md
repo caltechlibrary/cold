@@ -2,6 +2,11 @@
 Action items
 ============
 
+bug
+---
+
+- [ ] Make division field only update if it is empty, (will be curated by library staff, via a comparison report)
+
 next
 ----
 
