@@ -85,3 +85,9 @@ A simplification in the runner would be to initaiate the report providing the re
 
 Completed reports would be needed after the UUID with an file extension based on the content type (e.g. CSV for text/csv, Markdown for text/markdown).
 
+Initial implementaition should focus on reports with content type of "text/csv" but eventually we should allow options like JSON, YAMl and even SQLite3 databases.
+
+The report name could include the output format similar to how we specify web things, e.g. "rpt_people_csv; text/csv" would be the value in the report request form.
+
+Options will be handled in a text area until we have a sense of what options we need.  The textarea holding the options value initially can be treated as a command line option or as an expression similar to how RDM's search queries work.  Eventually the UI can better pair the report choice with the options available updating the UI to fit the context.
+

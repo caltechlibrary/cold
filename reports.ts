@@ -23,7 +23,8 @@ export interface ReportInterface {
   output_type: string;
   email: string;
   requested: string;
-  updated: string = "";
+  updated: string;
+  expire: string;
   status: string;
   link: string;
 }
@@ -39,6 +40,7 @@ export class Report implements ReportInterface {
   email: string = "";
   requested: string = "";
   updated: string = "";
+  expire: string = "";
   status: string = "";
   link: string = "";
 
@@ -48,7 +50,13 @@ export class Report implements ReportInterface {
       return false;
     }
     this.id = (await v5.generate(NAMESPACE_URL, JSON.stringify(obj))).toString();
-    this.report_name = o['report_name'];
+	const parts = str.split(';', 2);
+	const report_name = parts[0].trim();
+	const content_type = parts.length > 1 ? parts[1].trim() : 'text/plain';
+
+	let parts = o['report_name'].split.(";", 2)
+    this.report_name = report_name;
+	this.output_type = content_type;
     if (o['options'] !== undefined) {
       this.options = o['options'];
     }
@@ -56,13 +64,10 @@ export class Report implements ReportInterface {
       this.email = o['email'];
     }
     let now = Date();
+	let expire_in_days = 7;
     this.requested = now.toString();
     this.updated = now.toString();
-	// NOTE: output type could be embedded along side the report name.
-	// e.g. "rpt_people_csv; text/csv" Need to think about this.
-	// When the report runner pick it up it could update this.output_type
-	// if there was an error it could leave it as text/plain and record the error message
-	this.output_type = "text/plain"; 
+	this.expire = now.setDate(now.getDate() + expire_in_days);
     this.status = 'requested';
     this.link = '';
     return true;
@@ -76,6 +81,7 @@ export class Report implements ReportInterface {
       email: this.email,
       requested: this.requested,
       updated: this.updated,
+	  expire: this.expire,
       status: this.status,
 	  output_type: this.output_type,
       link: this.link
