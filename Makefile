@@ -5,7 +5,7 @@ PROJECT = cold
 
 PACKAGE =  $(shell ls -1 *.ts | grep -v 'version.ts')
 
-PROGRAMS = ds_importer cold_admin directory_sync
+PROGRAMS = ds_importer cold_admin directory_sync set_include_in_feeds
 
 TS_MODS = cold_admin.ts ds_importer.ts directory_sync.ts
 
@@ -136,35 +136,52 @@ htdocs: .FORCE
 test: .FORCE
 	deno task test
 
+release: CITATION.cff version.ts distribute_docs dist/Linux-x86_64 dist/Linux-aarch64 dist/macOS-x86_64 dist/macOS-arm64 dist/Windows-x86_64
+
+setup_dist: .FORCE
+	@rm -fR dist
+	@mkdir -p dist
+
+distribute_docs: website man setup_dist
+	@cp README.md dist/
+	@cp LICENSE dist/
+	@cp codemeta.json dist/
+	@cp CITATION.cff dist/
+	@cp *.1.md dist/
+	@cp INSTALL.md dist/
+	@cp deployment.md dist/
+	@cp -vR man dist/
+
 dist/Linux-x86_64: .FORCE
 	@mkdir -p dist/bin
-	@for FNAME in $(PROGRAMS); do deno compile --output dist/bin/$$FNAME --target x86_64-unknown-linux-gnu "$${FNAME}.ts"; done
+	@for FNAME in $(PROGRAMS); do deno compile --allow-import --allow-read --allow-net --output dist/bin/$$FNAME --target x86_64-unknown-linux-gnu "$${FNAME}.ts"; done
 	@cd dist && zip -r $(PROJECT)-v$(VERSION)-Linux-x86_64.zip LICENSE codemeta.json CITATION.cff *.md $(DIST_FOLDERS)
 	@rm -fR dist/bin
 
 dist/Linux-aarch64: .FORCE
 	@mkdir -p dist/bin
-	@for FNAME in $(PROGRAMS); do deno compile --output dist/bin/$$FNAME --target aarch64-unknown-linux-gnu "$${FNAME}.ts"; done
+	@for FNAME in $(PROGRAMS); do deno compile --allow-import --allow-read --allow-net --output dist/bin/$$FNAME --target aarch64-unknown-linux-gnu "$${FNAME}.ts"; done
 	@cd dist && zip -r $(PROJECT)-v$(VERSION)-Linux-aarch64.zip LICENSE codemeta.json CITATION.cff *.md $(DIST_FOLDERS)
 	@rm -fR dist/bin
 
 dist/macOS-x86_64: .FORCE
 	@mkdir -p dist/bin
-	@for FNAME in $(PROGRAMS); do deno compile --output dist/bin/$$FNAME --target x86_64-apple-darwin cold_admin.ts "$${FNAME}.ts"; done
+	@for FNAME in $(PROGRAMS); do deno compile --allow-import --allow-read --allow-net  --output dist/bin/$$FNAME --target x86_64-apple-darwin cold_admin.ts "$${FNAME}.ts"; done
 	@cd dist && zip -r $(PROJECT)-v$(VERSION)-macOS-x86_64.zip LICENSE codemeta.json CITATION.cff *.md $(DIST_FOLDERS)
 	@rm -fR dist/bin
 
 dist/macOS-arm64: .FORCE
 	@mkdir -p dist/bin
-	@for FNAME in $(PROGRAMS); do deno compile --output dist/bin/$$FNAME --target aarch64-apple-darwin cold_admin.ts "$${FNAME}.ts"; done
+	@for FNAME in $(PROGRAMS); do deno compile --allow-import --allow-read --allow-net  --output dist/bin/$$FNAME --target aarch64-apple-darwin cold_admin.ts "$${FNAME}.ts"; done
 	@cd dist && zip -r $(PROJECT)-v$(VERSION)-macOS-arm64.zip LICENSE codemeta.json CITATION.cff *.md $(DIST_FOLDERS)
 	@rm -fR dist/bin
 
 dist/Windows-x86_64: .FORCE
 	@mkdir -p dist/bin
-	@for FNAME in $(PROGRAMS); do deno compile --output "dist/bin/$${FNAME}.exe" --target x86_64-pc-windows-msvc cold_admin.ts "$${FNAME}.ts"; done
+	@for FNAME in $(PROGRAMS); do deno compile --allow-import --allow-read --allow-net  --output "dist/bin/$${FNAME}.exe" --target x86_64-pc-windows-msvc cold_admin.ts "$${FNAME}.ts"; done
 	@cd dist && zip -r $(PROJECT)-v$(VERSION)-Windows-x86_64.zip LICENSE codemeta.json CITATION.cff *.md $(DIST_FOLDERS)
 	@rm -fR dist/bin
+
 
 
 .FORCE:
