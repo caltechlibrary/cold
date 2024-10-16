@@ -44,3 +44,5 @@ export { sleepRandomAmountOfSeconds } from "https://deno.land/x/sleep/mod.ts"
 export { directoryUrl } from "./directory_config.ts";
 export { directoryLookup, DirectoryRecord } from "./directory_api.ts";
 export type { DirectoryRecordInterface } from "./directory_api.ts";
+export { handleReports } from "./reports.ts";
+export type { ReportInterface, Report } from "./reports.ts";

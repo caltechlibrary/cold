@@ -7,6 +7,7 @@ import {
   handleISSN,
   handlePeople,
   handleSubjects,
+  handleReports,
   OptionsProcessor,
   path,
   serveDir,

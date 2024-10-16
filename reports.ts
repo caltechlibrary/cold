@@ -4,14 +4,9 @@
 import { NAMESPACE_URL } from "@std/uuid/constants";
 import { v5 } from "@std/uuid";
 
-import {
-  apiPort,
-  Dataset,
-  formDataToObject,
-  renderPage,
-} from "./deps.ts";
+import { apiPort, Dataset, formDataToObject, renderPage } from "./deps.ts";
 
-const ds = new Dataset(apiPort, "people.ds");
+const ds = new Dataset(apiPort, "reports.ds");
 
 /**
  * ReportInterface describes a report request obejct.
@@ -44,32 +39,31 @@ export class Report implements ReportInterface {
   status: string = "";
   link: string = "";
 
-
-  request_report(o : Object): boolean {
-    if (o['report_name'] === undefined || o['report_name'] === '') {
+  async request_report(o: Object): boolean {
+    if (o["report_name"] === undefined || o["report_name"] === "") {
       return false;
     }
-    this.id = (await v5.generate(NAMESPACE_URL, JSON.stringify(obj))).toString();
-	const parts = str.split(';', 2);
-	const report_name = parts[0].trim();
-	const content_type = parts.length > 1 ? parts[1].trim() : 'text/plain';
+    this.id = (await v5.generate(NAMESPACE_URL, JSON.stringify(obj)))
+      .toString();
+    const parts = o["report_name"].split(";", 2);
+    const report_name = parts[0].trim();
+    const content_type = parts.length > 1 ? parts[1].trim() : "text/plain";
 
-	let parts = o['report_name'].split.(";", 2)
     this.report_name = report_name;
-	this.output_type = content_type;
-    if (o['options'] !== undefined) {
-      this.options = o['options'];
+    this.output_type = content_type;
+    if (o["options"] !== undefined) {
+      this.options = o["options"];
     }
-    if (o['email'] !== undefined) {
-      this.email = o['email'];
+    if (o["email"] !== undefined) {
+      this.email = o["email"];
     }
     let now = Date();
-	let expire_in_days = 7;
+    let expire_in_days = 7;
     this.requested = now.toString();
     this.updated = now.toString();
-	this.expire = now.setDate(now.getDate() + expire_in_days);
-    this.status = 'requested';
-    this.link = '';
+    this.expire = now.setDate(now.getDate() + expire_in_days);
+    this.status = "requested";
+    this.link = "";
     return true;
   }
 
@@ -81,10 +75,10 @@ export class Report implements ReportInterface {
       email: this.email,
       requested: this.requested,
       updated: this.updated,
-	  expire: this.expire,
+      expire: this.expire,
       status: this.status,
-	  output_type: this.output_type,
-      link: this.link
+      output_type: this.output_type,
+      link: this.link,
     };
   }
 
@@ -127,7 +121,7 @@ export async function handleReports(
 
 /**
  * handleReportsList returns a list of report requests and their status.
- * 
+ *
  * @param {Request} req holds the request to the people handler
  * @param {debug: boolean, htdocs: string} options holds options passed from
  * handlePeople.
@@ -150,21 +144,21 @@ async function handleReportsList(
   /* display a list queued report requests */
   const report_list = await ds.query("report_queue", [], {});
   if (report_list !== undefined) {
-      return renderPage(tmpl, {
-        base_path: "",
-        report_list: report_list,
-      });
-    } else {
-      return renderPage(tmpl, {
-        base_path: "",
-        report_list: [],
-      });
-    }
+    return renderPage(tmpl, {
+      base_path: "",
+      report_list: report_list,
+    });
+  } else {
+    return renderPage(tmpl, {
+      base_path: "",
+      report_list: [],
+    });
+  }
 }
 
 /**
  * handleReportRequest implements report request.
- * 
+ *
  * @param {Request} req holds the request to a report to be run
  * @param {debug: boolean, htdocs: string} options holds options passed from
  * handleReport.
@@ -182,12 +176,15 @@ async function handleReportRequest(
       `DEBUG form data after converting to object -> ${JSON.stringify(obj)}`,
     );
     let rpt = new Report();
-    if (rpt.request_report(obj)) {
-      if ((await ds.update( rpt.id, rpt.toObject()))) {
-        return new Response(`<html>Report ${rpt.report_name} being processed, ${rpt.id}, an email will be sent to ${rpt.email} when the report is available.</html>`, {
-          status: 200,
-          headers: { 'content-type': 'text/html' },
-        }); 
+    if (await rpt.request_report(obj)) {
+      if ((await ds.update(rpt.id, rpt.asObject()))) {
+        return new Response(
+          `<html>Report ${rpt.report_name} being processed, ${rpt.id}, an email will be sent to ${rpt.email} when the report is available.</html>`,
+          {
+            status: 200,
+            headers: { "content-type": "text/html" },
+          },
+        );
       }
       return new Response(
         `<html>there was a problem generating report ${rpt.report_name}, ${rpt.id}, try again later`,
@@ -196,6 +193,7 @@ async function handleReportRequest(
           headers: { "content-type": "text/html" },
         },
       );
+    }
   }
   // Method not supported.
   console.log("Bad request", req.url.toString());
