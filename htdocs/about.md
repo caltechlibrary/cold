@@ -14,7 +14,7 @@ authors:
     orcid: "https://orcid.org/0000-0003-0900-6903"
 
 repository-code: "https://github.com/caltechlibrary/cold"
-version: 0.0.8
+version: 0.0.9
 license-url: "https://caltechlibrary.github.io/cold/LICENSE"
 keywords: [ "metadata", "objects", "controlled vocabulary" ]
 
@@ -23,7 +23,7 @@ keywords: [ "metadata", "objects", "controlled vocabulary" ]
 About this software
 ===================
 
-## cold 0.0.8
+## cold 0.0.9
 
 ### Authors
 

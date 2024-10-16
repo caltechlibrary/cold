@@ -67,6 +67,9 @@ line program suitable to be run from a cronjob. It is responsble for
 updating Caltech People data from the Caltech directory.</p></li>
 <li><p><strong>ds_importer</strong> is a once time import script used to
 bootstrap the data in cold from our legacy CSV spreadsheets</p></li>
+<li><p><strong>set_include_in_feeds</strong> will set
+<code>include_in_feeds</code> to true for records in single column CSV
+file where the row heading is <code>clpid</code>.</p></li>
 </ul>
 <p>Public content access is through files exported to our <a
 href="https://feeds.library.caltech.edu">Feeds</a> system. Deno is used

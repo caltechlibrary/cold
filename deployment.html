@@ -113,6 +113,34 @@ ProxyPassReverse &quot;/cold/&quot; &quot;http://localhost:8111/&quot;
   #require valid-user
 &lt;/Location&gt;
 #&lt;!-- end cold --&gt;</code></pre>
+<h2
+id="example-data-migration-from-spreadsheets-for-caltechpeople">Example
+data migration from spreadsheets for CaltechPEOPLE</h2>
+<p>This is a note for migrating data from our historic spreadsheet for
+CaltechPEOPLE. Once cold is installed and you’ve created the empty
+dataset collections (e.g. people.ds) you can use two tools to populate
+the collection and set the <code>include_in_feeds</code> property.</p>
+<p>Steps:</p>
+<ol type="1">
+<li>Set the environment variable FEEDS_BASE_DIR to point to where feeds
+staging is deployed.</li>
+<li>Copy people.csv and groups.csv from feeds.library.caltech.edu and
+save then as <code>people_final.csv</code> and
+<code>groups_final.csv</code>. Copy edit the files if neccessary
+(e.g. remove duplicate rows)</li>
+<li>Copy the directory names for people on feeds.library.caltech.edu and
+render this as a <a href="in_feeds.csv-example">single CSV column</a>
+with the heading <code>clpid</code>.</li>
+<li>Clear test data from <code>people.ds</code> with SQLite3 cli.</li>
+<li>Run <code>ds_importer</code></li>
+<li>Run <code>set_include_in_feeds</code></li>
+</ol>
+<pre class="shell"><code>FEEDS_BASE_DIR=&quot;/Sites/feeds&quot;
+scp &quot;library.example.edu:$FEEDS_BASE_DIR/people.csv&quot; people_final.csv
+echo &quot;clpid&quot; &gt;in_feeds.csv
+ssh library.example.edu &quot;ls -1 -d $FEEDS_BASE_DIR/htdocs/people/* | cut -d / -f 6&quot; &gt;&gt;in_feeds.csv
+./bin/ds_importer people.ds people_final.csv
+./bin/set_include_in_feeds people.ds in_fieds.csv</code></pre>
 </section>
 
 <footer>
