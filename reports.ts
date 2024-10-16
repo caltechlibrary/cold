@@ -20,6 +20,7 @@ export interface ReportInterface {
   id: string;
   report_name: string;
   options: string;
+  output_type: string;
   email: string;
   requested: string;
   updated: string = "";
@@ -34,6 +35,7 @@ export class Report implements ReportInterface {
   id: string = "";
   report_name: string = "";
   options: string = "";
+  output_type: string;
   email: string = "";
   requested: string = "";
   updated: string = "";
@@ -56,6 +58,11 @@ export class Report implements ReportInterface {
     let now = Date();
     this.requested = now.toString();
     this.updated = now.toString();
+	// NOTE: output type could be embedded along side the report name.
+	// e.g. "rpt_people_csv; text/csv" Need to think about this.
+	// When the report runner pick it up it could update this.output_type
+	// if there was an error it could leave it as text/plain and record the error message
+	this.output_type = "text/plain"; 
     this.status = 'requested';
     this.link = '';
     return true;
@@ -67,8 +74,10 @@ export class Report implements ReportInterface {
       report_name: this.report_name,
       options: this.options,
       email: this.email,
-      request_date: this.request_date,
+      requested: this.requested,
+      updated: this.updated,
       status: this.status,
+	  output_type: this.output_type,
       link: this.link
     };
   }

@@ -57,12 +57,13 @@ The management of report requests can be accomplished with a simple queue implem
 a report request and it's life cycle are as follows.
 
 - name of report
-- any options needed to process the report
+- any additional options needed by the report program
 - an email address to contact when the report is ready
-- a status of the report
+- current status of the report (e.g. requested, processing, completed)
 - a link to where the report can be "picked up"
+- output content type, (e.g. application/json, application/yaml, application/x-sqlite3, text/csv, text/plain, text/x-markdown)
 - the date the report was requested
-- the time it completed and became available
+- the updated (when the status last changed)
 
 A nice to have is a list of queued reports and their status. That way I report that has recently be run can be "picked up" again as needed avoiding a new request.
 
@@ -75,4 +76,12 @@ The report choices can be controlled to avoid unfettered access to the command l
 Notification of the requestor is done via email, the email would include a link back to where the report can be retrieved. Reports would be "cleaned" up after a fixed period of time (e.g. every few days).
 
 This reports model would use one page for UI. It would have a web form to request a report and show a list of available reports and their status.
+
+The report running can be implemented as a script or batch file. It needs to be able to retrieve the list of reports to run, run them and then update the report records with the new status. Each report request uses an UUID for uniquely identifying the request. 
+
+The report runner needs to be able to allow for both short and long running reports without blocking the queue.  It should restrict how many reports can process at once so as to minimize the impact on the system.  Since the report.
+
+A simplification in the runner would be to initaiate the report providing the report program with options, an email contact (if set) and the report's UUID.  The report program would be responsible for notifying the email address with the link based on what the runner had set.  
+
+Completed reports would be needed after the UUID with an file extension based on the content type (e.g. CSV for text/csv, Markdown for text/markdown).
 
