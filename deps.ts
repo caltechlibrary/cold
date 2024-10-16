@@ -3,6 +3,7 @@ export * as http from "@std/http";
 export * as path from "@std/path";
 export * as dotenv from "@std/dotenv";
 export * as yaml from "@std/yaml";
+export * as uuid from "jsr:@std/uuid";
 export { serveDir, serveFile } from "@std/http/file-server";
 export { existsSync } from "@std/fs";
 export { parse as csv_parse } from "@std/csv";

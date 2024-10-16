@@ -41,3 +41,38 @@ External data sources:
 - orcid.org
 - ror.org
 
+Reports
+-------
+
+Reports are often needed in metadata curation systems.  COLD is not exception. 
+
+Since many of the ports needed require aggrestion across data sources the report system for COLD has the following characteristics.
+
+- A way to make a request for a report
+- A means of processing report requests
+- A means of notifying the requestor when report is available
+- A means of purging old reports
+
+The management of report requests can be accomplished with a simple queue implemented as a dataset collection. The metadata needed to manage
+a report request and it's life cycle are as follows.
+
+- name of report
+- any options needed to process the report
+- an email address to contact when the report is ready
+- a status of the report
+- a link to where the report can be "picked up"
+- the date the report was requested
+- the time it completed and became available
+
+A nice to have is a list of queued reports and their status. That way I report that has recently be run can be "picked up" again as needed avoiding a new request.
+
+The reports themselves can be implemented as commmand line programs in a language of your choice. A report runner will be responsible for checking the request queue and initiating the program that runs the report and notifying the email address when it is available.
+
+The advantage of this approach is that it avoids the problems of slow running reports (e.g. feeds build process) and allows the reports to access other data sources (e.g. CaltechAUTHORS, feeds.library.caltech.edu).
+
+The report choices can be controlled to avoid unfettered access to the command line with any options needed vetted by the running before handing off to the report program.  The report programs themselves need to be able to write to a named filepath.  The file path can be the htdocs directory available to COLD and thus allow anyone with COLD access to view the report (reports typically need to be shared by the groups).
+
+Notification of the requestor is done via email, the email would include a link back to where the report can be retrieved. Reports would be "cleaned" up after a fixed period of time (e.g. every few days).
+
+This reports model would use one page for UI. It would have a web form to request a report and show a list of available reports and their status.
+
