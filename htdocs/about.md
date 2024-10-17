@@ -67,4 +67,4 @@ feeds.library.caltech.edu which hosts the public API of cold content.
 - Deno &gt;= 2.0
 - GNU Make
 - Pandoc &gt;= 3.1
-- datasetd &gt;= 2.1.22
+- datasetd &gt;= 2.1.23

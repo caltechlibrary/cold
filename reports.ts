@@ -31,7 +31,7 @@ export class Report implements ReportInterface {
   id: string = "";
   report_name: string = "";
   options: string = "";
-  output_type: string;
+  output_type: string = "";
   email: string = "";
   requested: string = "";
   updated: string = "";
@@ -39,29 +39,30 @@ export class Report implements ReportInterface {
   status: string = "";
   link: string = "";
 
-  async request_report(o: Object): boolean {
-    if (o["report_name"] === undefined || o["report_name"] === "") {
+  async request_report(o: object): Promise<boolean> {
+    const utf8Encoder = new TextEncoder();
+    const signature = utf8Encoder.encode(JSON.stringify(o));
+    if (!o.hasOwnProperty("report_name")) {
       return false;
     }
-    this.id = (await v5.generate(NAMESPACE_URL, JSON.stringify(obj)))
+    this.id = (await v5.generate(NAMESPACE_URL, signature))
       .toString();
-    const parts = o["report_name"].split(";", 2);
+    const parts = "report_name" in o ? `${o.report_name}`.split(";", 2) : "";
     const report_name = parts[0].trim();
     const content_type = parts.length > 1 ? parts[1].trim() : "text/plain";
+    const optionKey = "option";
+    const emailKey = "email";
 
     this.report_name = report_name;
     this.output_type = content_type;
-    if (o["options"] !== undefined) {
-      this.options = o["options"];
-    }
-    if (o["email"] !== undefined) {
-      this.email = o["email"];
-    }
-    let now = Date();
-    let expire_in_days = 7;
+    this.options = "options" in o ? `${o.options}` : ``;
+    this.email = "email" in o ? `${o.email}` : ``;
+    const now = new Date();
+    const expire_in_days = 7;
+    const expire = (new Date()).setDate(now.getDate() + expire_in_days);
     this.requested = now.toString();
     this.updated = now.toString();
-    this.expire = now.setDate(now.getDate() + expire_in_days);
+    this.expire = expire.toString();
     this.status = "requested";
     this.link = "";
     return true;
@@ -175,8 +176,9 @@ async function handleReportRequest(
     console.log(
       `DEBUG form data after converting to object -> ${JSON.stringify(obj)}`,
     );
-    let rpt = new Report();
-    if (await rpt.request_report(obj)) {
+    const rpt = new Report();
+    const ok = await rpt.request_report(obj);
+    if (ok) {
       if ((await ds.update(rpt.id, rpt.asObject()))) {
         return new Response(
           `<html>Report ${rpt.report_name} being processed, ${rpt.id}, an email will be sent to ${rpt.email} when the report is available.</html>`,

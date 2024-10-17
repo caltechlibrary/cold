@@ -18,3 +18,7 @@ It also lets you manage lists of subjects, issn mappings to cannonical names and
 - [Subjects](./subjects/)
 - [ISSN Mapping](./issn/)
 - [DOI Prefix](./doi_prefix/)
+
+## Tools
+
+- [Reports](./reports)

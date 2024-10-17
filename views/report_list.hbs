@@ -7,7 +7,6 @@
 <ul>
 <li><a href="/" title="return home">Home</a></li>
 <li><a href="../" title="return to dashboard">Dashboard</a></li>
-<li><a href="./?view=create" title="request a report">Request a report</a></li>
 </ul>
 </nav>
 <section>
@@ -18,8 +17,8 @@
 <div>
 <label set="report_name">Report Name</label>
 <select name="report_name" id="report_name">
-  <option value="rpt_people_csv">People (CSV)</option>
-  <option value="rpt_groups_csv">Groups (CSV)</option>
+  <option value="rpt_people_csv; text/csv">People (CSV)</option>
+  <option value="rpt_groups_csv; text/csv">Groups (CSV)</option>
 </select>
 </div>
 
@@ -29,13 +28,13 @@
 </div>
 
 <div>
-<label set="email">Email</label>
-<input type="email" id="email" required="true" placeholder="rsdoiel@caltech.edu" />
+<label set="email">Notification Email</label>
+<input type="email" id="email" name="email" required="true" placeholder="rsdoiel@caltech.edu" />
 </div>
 
-<div>
+<p>
 <input type="submit" id="submit" name="submit" value="submit"> <input type="reset" id="reset" name="reset" value="reset">
-</div>
+</p>
 </form>
 </section>
 <hr>
