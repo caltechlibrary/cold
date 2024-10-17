@@ -1,6 +1,6 @@
-%directory_sync(1) user manual | 0.0.9 2024-10-16 b970d79
+%directory_sync(1) user manual | 0.0.9 2024-10-17 9bf9a1c
 % R. S.Doiel
-% 2024-10-16 b970d79
+% 2024-10-17 9bf9a1c
     
 # NAME
     

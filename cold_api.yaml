@@ -22,15 +22,6 @@ collections:
     create: true
     read: true
     update: true
-    delete: true
-    # These are attachment related permissions
-    attachments: true
-    attach: true
-    retrieve: true
-    prune: true
-    # These are frame level permissions
-    frame_read: true
-    frame_write: true
     # This sets versioning behavior
     versions: true
   - dataset: groups.ds
@@ -41,15 +32,6 @@ collections:
     create: true
     read: true
     update: true
-    delete: true
-    # These are attachment related permissions
-    attachments: true
-    attach: true
-    retrieve: true
-    prune: true
-    # These are frame level permissions
-    frame_read: true
-    frame_write: true
     # This sets versioning behavior
     versions: true
   - dataset: funders.ds
@@ -60,15 +42,6 @@ collections:
     create: true
     read: true
     update: true
-    delete: true
-    # These are attachment related permissions
-    attachments: true
-    attach: true
-    retrieve: true
-    prune: true
-    # These are frame level permissions
-    frame_read: true
-    frame_write: true
     # This sets versioning behavior
     versions: true
   - dataset: subjects.ds
@@ -79,15 +52,6 @@ collections:
     create: true
     read: true
     update: true
-    delete: true
-    # These are attachment related permissions
-    attachments: true
-    attach: true
-    retrieve: true
-    prune: true
-    # These are frame level permissions
-    frame_read: true
-    frame_write: true
     # This sets versioning behavior
     versions: true
   - dataset: issn.ds
@@ -98,15 +62,6 @@ collections:
     create: true
     read: true
     update: true
-    delete: true
-    # These are attachment related permissions
-    attachments: true
-    attach: true
-    retrieve: true
-    prune: true
-    # These are frame level permissions
-    frame_read: true
-    frame_write: true
     # This sets versioning behavior
     versions: true
   - dataset: doi_prefix.ds
@@ -117,14 +72,13 @@ collections:
     create: true
     read: true
     update: true
-    delete: true
-    # These are attachment related permissions
-    attachments: true
-    attach: true
-    retrieve: true
-    prune: true
-    # These are frame level permissions
-    frame_read: true
-    frame_write: true
+    # This sets versioning behavior
+    versions: true
+  - dataset: reports.ds
+    query:
+      report_list: select json_object('id', src->'id', 'link', src->'link', 'content_type', src->'content_type', 'report_name', src->'report_name', 'emails', src->'emails', 'status', src->'status', 'requested', src->'requested', 'updated', src->'updated') as src from reports order by src->'status', src->'updated' desc;
+    keys: true
+    read: true
+    create: true
     # This sets versioning behavior
     versions: true

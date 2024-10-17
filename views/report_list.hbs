@@ -10,15 +10,17 @@
 </ul>
 </nav>
 <section>
-<h1>Request Report</h1>
+<h1>Request a Report</h1>
 
 <form action="{{report_queue.id}}" method="post">
 
 <div>
-<label set="report_name">Report Name</label>
+<label set="report_name">Report</label>
 <select name="report_name" id="report_name">
-  <option value="rpt_people_csv; text/csv">People (CSV)</option>
-  <option value="rpt_groups_csv; text/csv">Groups (CSV)</option>
+  <option value="rpt_people_csv; text/csv">People File (CSV)</option>
+  <option value="rpt_groups_csv; text/csv">Groups File (CSV)</option>
+  <option value="rpt_recent_grad_report_csv; text/csv">Recent Grads Report (CSV)</option>
+  <option value="rpt_creator_report_csv; text/csv">Creator Report (CSV)</option>
 </select>
 </div>
 
@@ -28,8 +30,8 @@
 </div>
 
 <div>
-<label set="email">Notification Email</label>
-<input type="email" id="email" name="email" required="true" placeholder="rsdoiel@caltech.edu" />
+<label set="emails">Email notification(s)</label>
+<input type="text" id="emails" name="emails" placeholder="rsdoiel@caltech.edu" />
 </div>
 
 <p>
@@ -39,11 +41,25 @@
 </section>
 <hr>
 <section>
-<h1>Available Reports</h1>
+<h1>Reports</h1>
 <table>
-<th><td>Report Name</td><td>Requested by</td><td>Status</td><td>updated</td></th>
+  <tr>
+    <th>Requested</th>
+    <th>Notify</th>
+    <th>Report Name</th>
+    <th>Status</th>
+    <th>Content Type</th>
+    <th>link</th>
+  </tr>
 {{#report_list}}
-  <tr><td>{{report_name}}</td><td>{{email}}</td><td>{{status}}</td><td>{{updated}}</td></tr>
+  <tr>
+    <td>{{requested}}</td>
+    <td>{{emails}}</td>
+    <td>{{report_name}}</td>
+    <td>{{status}}</td>
+    <td>{{content_type}}</td>
+    <td>{{#if link}}<a href="{{link}}" target="_blank">{{link}}</a>{{/if}}</td>
+  </tr>
 {{/report_list}}
 </table>
 </section>

@@ -8,6 +8,20 @@ import { apiPort, Dataset, formDataToObject, renderPage } from "./deps.ts";
 
 const ds = new Dataset(apiPort, "reports.ds");
 
+// getId: This function that returns a new UUID v5 on a payload holding the object and a timestamp.
+// If two payloads are equivallent then the UUID returned will be the same. When using
+// UUID in our report queue context it is import that the object differ from each other.
+// This can be accomplishled by adding a timestamp to the object. In this way similar
+// report requests can be distriguished from one anther.
+async function genId(o: object): Promise<string> {
+  const now = new Date();
+  const utf8Encoder = new TextEncoder();
+  const signature = utf8Encoder.encode(
+    JSON.stringify({ "payload": o, "generated": now }),
+  );
+  return (await v5.generate(NAMESPACE_URL, signature)).toString();
+}
+
 /**
  * ReportInterface describes a report request obejct.
  */
@@ -15,8 +29,8 @@ export interface ReportInterface {
   id: string;
   report_name: string;
   options: string;
-  output_type: string;
-  email: string;
+  content_type: string;
+  emails: string;
   requested: string;
   updated: string;
   expire: string;
@@ -31,8 +45,8 @@ export class Report implements ReportInterface {
   id: string = "";
   report_name: string = "";
   options: string = "";
-  output_type: string = "";
-  email: string = "";
+  content_type: string = "";
+  emails: string = "";
   requested: string = "";
   updated: string = "";
   expire: string = "";
@@ -40,29 +54,27 @@ export class Report implements ReportInterface {
   link: string = "";
 
   async request_report(o: object): Promise<boolean> {
-    const utf8Encoder = new TextEncoder();
-    const signature = utf8Encoder.encode(JSON.stringify(o));
     if (!o.hasOwnProperty("report_name")) {
       return false;
     }
-    this.id = (await v5.generate(NAMESPACE_URL, signature))
-      .toString();
+    const id = await genId(o);
+    this.id = id;
     const parts = "report_name" in o ? `${o.report_name}`.split(";", 2) : "";
     const report_name = parts[0].trim();
     const content_type = parts.length > 1 ? parts[1].trim() : "text/plain";
-    const optionKey = "option";
-    const emailKey = "email";
 
     this.report_name = report_name;
-    this.output_type = content_type;
+    this.content_type = content_type;
     this.options = "options" in o ? `${o.options}` : ``;
-    this.email = "email" in o ? `${o.email}` : ``;
+    this.emails = "emails" in o ? `${o.emails}` : ``;
     const now = new Date();
     const expire_in_days = 7;
-    const expire = (new Date()).setDate(now.getDate() + expire_in_days);
-    this.requested = now.toString();
-    this.updated = now.toString();
+    const expire = (new Date()).setDate(
+      now.getDate() + expire_in_days,
+    ) as unknown as Date;
     this.expire = expire.toString();
+    this.requested = now.toISOString();
+    this.updated = now.toISOString();
     this.status = "requested";
     this.link = "";
     return true;
@@ -73,12 +85,12 @@ export class Report implements ReportInterface {
       id: this.id,
       report_name: this.report_name,
       options: this.options,
-      email: this.email,
+      emails: this.emails,
       requested: this.requested,
       updated: this.updated,
       expire: this.expire,
       status: this.status,
-      output_type: this.output_type,
+      content_type: this.content_type,
       link: this.link,
     };
   }
@@ -140,10 +152,9 @@ async function handleReportsList(
   /* parse the URL */
   const url = new URL(req.url);
   const params = url.searchParams;
-  let view = params.get("list");
   let tmpl = "report_list";
   /* display a list queued report requests */
-  const report_list = await ds.query("report_queue", [], {});
+  const report_list = await ds.query("report_list", [], {});
   if (report_list !== undefined) {
     return renderPage(tmpl, {
       base_path: "",
@@ -176,12 +187,60 @@ async function handleReportRequest(
     console.log(
       `DEBUG form data after converting to object -> ${JSON.stringify(obj)}`,
     );
+    const wait_in_seconds = 5;
     const rpt = new Report();
     const ok = await rpt.request_report(obj);
     if (ok) {
-      if ((await ds.update(rpt.id, rpt.asObject()))) {
+      console.log(
+        `DEBUG report request object -> ${rpt.toJSON()}`,
+      );
+      // We want to create the record and return success. If the record
+      // has already been created then we should distriguish that error from
+      // other types of error.
+      if ((await ds.create(rpt.id, rpt.asObject()))) {
+        let msgs: string[] = [];
+        msgs.push(`Report request ${rpt.report_name}`);
+        if (rpt.report_name !== rpt.id) {
+          msgs.push(` (${rpt.id}) received.`);
+        } else {
+          msgs.push(" received.");
+        }
+        if (rpt.emails !== "") {
+          msgs.push(
+            `notification(s) will be sent to ${rpt.emails} when report is available.`,
+          );
+        }
+        msgs.push(' <a href="reports">back to reports list</a>');
         return new Response(
-          `<html>Report ${rpt.report_name} being processed, ${rpt.id}, an email will be sent to ${rpt.email} when the report is available.</html>`,
+          `<html><head><meta charset="UTF-8" />  <meta http-equiv="Refresh" content="${wait_in_seconds}; URL=reports" /></head><body>${
+            msgs.join(" ")
+          }. Redirecting to reports page in ${wait_in_seconds} seconds.</body></html>`,
+          {
+            status: 200,
+            headers: { "content-type": "text/html" },
+          },
+        );
+      }
+      // Handle the case of previously created record.
+      const readObject = await ds.read(rpt.id);
+      if (readObject !== undefined) {
+        let msgs: string[] = [];
+        msgs.push(`Report request ${rpt.report_name}`);
+        if (rpt.report_name !== rpt.id) {
+          msgs.push(` (${rpt.id}) previously received.`);
+        } else {
+          msgs.push(" previously received.");
+        }
+        if (rpt.emails !== "") {
+          msgs.push(
+            `notification(s) will be sent to ${rpt.emails} when report is available.`,
+          );
+        }
+        msgs.push(' <a href="reports">back to reports list</a>');
+        return new Response(
+          `<html><head><meta charset="UTF-8" />  <meta http-equiv="Refresh" content="${wait_in_seconds}; URL=reports" /></head><body>${
+            msgs.join(" ")
+          }. Redirecting to reports page in ${wait_in_seconds} seconds.</body></html>`,
           {
             status: 200,
             headers: { "content-type": "text/html" },
@@ -189,7 +248,7 @@ async function handleReportRequest(
         );
       }
       return new Response(
-        `<html>there was a problem generating report ${rpt.report_name}, ${rpt.id}, try again later`,
+        `<html>there was a problem generating report request for ${rpt.report_name}, ${rpt.id} -> ${rpt.toJSON()}, try again later.  <a href="reports">back to reports list</a>`,
         {
           status: 500,
           headers: { "content-type": "text/html" },
