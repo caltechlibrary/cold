@@ -8,9 +8,9 @@ Development Notes
 Application layout and structure
 --------------------------------
 
-The primary task of the COLD UI is to provide a means of curating our list of objects and vocabularies. Each list is held in a dataset collection. Datasetd is used to provide a JSON API to curate the individual objects for each of our collections. TypeScript running via Deno is providing the middleware to tie our JSON API with our static content. The front end web server (i.e. Apache 2) provides integration with Shibboleth provides single sign on and access control.
+The primary task of the COLD UI is to provide a means of curating our list of objects and vocabularies. Each list is held in a dataset collection. Datasetd is used to provide a JSON API to curate the collections. TypeScript compiled via Deno is providing the middleware to tie our JSON API with our static content. The front end web server (i.e. Apache 2) provides integration with Shibboleth provides single sign on and access control.
 
-I am relying on feeds.library.caltech.edu to provide the public facing API.  Data is transfered to feeds via scripts run on a schedule or "on demand" via a Deno task running.
+I am relying on feeds.library.caltech.edu to provide the public facing API.  Data is transfered to feeds via scripts run on a schedule or "on demand" via JavaScript contacting external systems.  Deno can compile the TypeScript code to JavaScript for browser consumption using the "@deno/emit" module.
 
 The Go dataset and models package
 ---------------------------------
@@ -26,14 +26,16 @@ The public API isn't part of COLD directly. COLD is for curating object lists bu
 Reports
 -------
 
-Reports are implemented either as dataset SQL queries or other scripts. Since reports can be slow to run and consume reports are implemented using a task queue. Reports are requests, the results rendered and then a link is created and available on the completed reports page. A link is also emailed to the requestor.
+Reports are implemented either as dataset SQL queries or other scripts. Reports can be slow to run. A request queue is implemented to solve that problem. Reports requests are qued via the COLD UI. A separate process reads the queue, renders the reports and then updates the queue upon completion or error.  When reports are available an optional email can be sent to the requestor based on the information included in the original request.
+
+The individual reports correspond to a program which can be written in your language of choice (e.g. Python, Bash, TypeScript). The report runner 
 
 Reports are implemented as a tasks. A task is defined in Deno's JSON file. A Deno task isn't limited to TypeScript or JavaScript. It can all out to run other programs which in turn can be written in Bash, Python or be a simple dsquery. Limitting external execution of defined tasks is important for the security of the system and host machine.  This is why the tasks are predefined. Adhoc reports are not implemented in COLD.
 
 Data enhancement
 ----------------
 
-The content curated in cold is enhanced from external source. This is done via scheduled tasks. An example is biographical and other information published in the Caltech Directory is harvested and merged into our Caltech People objects.
+The content curated in cold can be enhanced from external sources. This is done via scheduled tasks. Initially these tasks are going to be run from cron. An example is biographical and other information published in the Caltech Directory. For a subset of CaltechPEOPLE we know their IMSS userid. Using that we can contact the public directory website and return the biographical details such as their faculty role and title, division, and educational backgroup. We only harvest those records that have both a directory user id and are marked for inclusion in feeds.
 
 External data sources:
 

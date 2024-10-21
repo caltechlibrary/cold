@@ -19,7 +19,7 @@ import {
   sleepRandomAmountOfSeconds,
 } from "./deps.ts";
 
-const MAX_ERROR_COUNT = 10
+const MAX_ERROR_COUNT = 10;
 /**
  * helpText assembles the help information for COLD UI.
  *
@@ -155,46 +155,48 @@ async function caltechDirectorySync(
   let records_processed = 0;
   let imss_lookup_failures = [];
   for (let person of people) {
-    const data = await directoryLookup(person.imss_uid);
-    if (data !== undefined) {
-      const obj = await ds.read(person.clpid) as unknown as People;
-      if (obj !== undefined) {
-        const isChanged = merge_changes(obj, data);
-        if (isChanged) {
-          if (!await ds.update(person.clpid, obj)) {
-            console.log(
-              `WARNING: failed to update ${person.clpid} in ${c_name}`,
-            );
-            err_updates++;
-            if (err_updates >= MAX_ERROR_COUNT) {
+    if (person.include_in_feeds) {
+      const data = await directoryLookup(person.imss_uid);
+      if (data !== undefined) {
+        const obj = await ds.read(person.clpid) as unknown as People;
+        if (obj !== undefined) {
+          const isChanged = merge_changes(obj, data);
+          if (isChanged) {
+            if (!await ds.update(person.clpid, obj)) {
               console.log(
-                `aborting, ${err_updates} update errors, check datasetd JSON API`,
+                `WARNING: failed to update ${person.clpid} in ${c_name}`,
               );
-              return 1;
+              err_updates++;
+              if (err_updates >= MAX_ERROR_COUNT) {
+                console.log(
+                  `aborting, ${err_updates} update errors, check datasetd JSON API`,
+                );
+                return 1;
+              }
+            } else {
+              records_processed++;
             }
-          } else {
-            records_processed++;
           }
         }
-      }
-    } else {
-      console.log(
-        `WARNING: failed to get a response for ${person.clpid} -> ${person.imss_uid}`,
-      );
-      imss_lookup_failures.push(person);
-      err_retrieval++;
-      if (err_retrieval >= MAX_ERROR_COUNT) {
+      } else {
         console.log(
-          `aborting, ${err_retrieval} retrieval errors from ${directoryUrl}`,
+          `WARNING: failed to get a response for ${person.clpid} -> ${person.imss_uid}`,
         );
-        console.log(
-          `${imss_lookup_failures.length} record(s) had IMSS lookup failures`,
-        );
-        console.log(JSON.stringify(imss_lookup_failures));
-        return 1;
+        imss_lookup_failures.push(person);
+        err_retrieval++;
+        if (err_retrieval >= MAX_ERROR_COUNT) {
+          console.log(
+            `aborting, ${err_retrieval} retrieval errors from ${directoryUrl}`,
+          );
+          console.log(
+            `${imss_lookup_failures.length} record(s) had IMSS lookup failures`,
+          );
+          console.log(JSON.stringify(imss_lookup_failures));
+          return 1;
+        }
       }
+      sleepRandomAmountOfSeconds(3, 24);
     }
-    sleepRandomAmountOfSeconds(3, 24);
   }
   if (imss_lookup_failures.length > 0) {
     console.log(
