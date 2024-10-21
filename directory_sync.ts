@@ -19,6 +19,7 @@ import {
   sleepRandomAmountOfSeconds,
 } from "./deps.ts";
 
+const MAX_ERROR_COUNT = 10
 /**
  * helpText assembles the help information for COLD UI.
  *
@@ -165,7 +166,7 @@ async function caltechDirectorySync(
               `WARNING: failed to update ${person.clpid} in ${c_name}`,
             );
             err_updates++;
-            if (err_updates > 20) {
+            if (err_updates >= MAX_ERROR_COUNT) {
               console.log(
                 `aborting, ${err_updates} update errors, check datasetd JSON API`,
               );
@@ -182,16 +183,14 @@ async function caltechDirectorySync(
       );
       imss_lookup_failures.push(person);
       err_retrieval++;
-      if (err_retrieval > 250) {
+      if (err_retrieval >= MAX_ERROR_COUNT) {
         console.log(
           `aborting, ${err_retrieval} retrieval errors from ${directoryUrl}`,
         );
         console.log(
           `${imss_lookup_failures.length} record(s) had IMSS lookup failures`,
         );
-        for (let person of imss_lookup_failures) {
-          console.log(JSON.stringify(person));
-        }
+        console.log(JSON.stringify(imss_lookup_failures));
         return 1;
       }
     }

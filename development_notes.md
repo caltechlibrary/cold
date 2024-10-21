@@ -110,20 +110,23 @@ There are two basic report types. Those which are run on a schedule (e.g. recent
 
 Reports can be of different content types. Most reports we generate manually today are either CSV, tab demlimited or Excel files.  By allowing reports to have different content types we also allow for the report to be provided in a relavant type. E.g. a report could be generated as a PDF or even an SQLite3 database.
 
-### Exploring implementation ideas
+### Explorting the report runner
 
-I'm thinking about the report runner does not need to run on our apps server. The runner needs two know what reports are available and if they are scheduled or not. It needs to be able to interact with COLD's report queue. If COLD's reports dataset collection is implemented with Postgres storage then Postgres can provide the record management of a report's state. This could simplify implementation while requiring additional initial deployment setup (e.g. setting up Postgres on the apps server to be accessible from the data processing machine).
+COLD provides a collection called "reports.ds".  Assuming that collection is readable on your data processing machine a runner needs to be able to do several actions.
 
-Making the assumption that reports are run on our data processing machine then we remove the resource consumption to generate the report the apps server to the data processing server. E.g. the data processing server could be the some one we use to generate other static resources like feeds.
+1. Retrieve the next report to initiate
+2. Update the report status (e.g. request -> processing)
+3. The runner needs to execute the shell command that implements the report
+4. Update the report status (e.g. processing -> available or processing -> problem
 
-A runner could be implemented either as a daemon or cronjob. 
+The report runner repeats these four steps until there are no more requests available. At that time it can sleep for a designated period of time then start the loop again when requests are available.
 
-The cronjob approach is nice because it avoids implementing a scheduler in the report runner. 
+To control what is executed it is desirable to have a specific configurable task runner available. This will prevent arbetrary commends from running.
 
-If it was daemon we could poll the queue periodically by sleeping between poll requests. When a request is recieved it updates the request status then starts executing the report. A simple runner could take the requests sequentially based on requested timestamp with a status of requested. A transaction could be used to make the reading of the next request and setting it to processing atomic.  When no requested reports are available the daemon would sleep for a period of time before checking again otherwise it would fetch the next request and begin processing.
+Off the shelf task runners include 
 
-If the runner supports concurency then the queue can be managed more effectively and avoid long running reports from hogging the system.
+- Make, a build system dating back to the origin times of Unix
+- just, a new simpler command runner that is cross platform and language agnostic
 
-Scheduled reports can be implemented by injecting a request into the queue via a cronjob. This would allow the daemon remain single without a scheduler.
+The report runner would take the report request record, set statu to processing and then pass the report name and options to task runner.  When the task completed (either successfully or failing) the result would be captured and stored in a designated storage system (e.g. G-Drive) and the report request record would need to be updated with the final status and link to the report or error report.
 
-Advantages to defering report processing to another machine is that we can include databases that we don't want to host or be available directly apps server (e.g. student data on apps server should be minimized).  The apps server doesn't have to know what reports are available, it would only manage the requests and provide a UI to make a request. Regularly scheduled reports would be listed in the available reports list but wouldn't have to be included in the UI decluttering the list of reports available to request. Report distribution wouldn't necessarily have to be on apps either. Reports could be pushed into other storage (e.g. G-Drive, Box, etc) leaving only the link information on the apps server.
