@@ -68,7 +68,7 @@ export class Funder implements FunderInterface {
     if (row.hasOwnProperty("updated")) {
       this.updated = row.updated;
     } else {
-      this.updated = new Date().toLocaleDateString("en-US");
+      this.updated = new Date().toJSON().substring(0, 10);
     }
     return true;
   }

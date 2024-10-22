@@ -39,9 +39,9 @@ export function formDataToObject(form: FormData): object {
     const key: string = v[0];
     if (key !== "submit") {
       const val: any = v[1];
-      if (val === "true") {
+      if (val === "true" || val === "on") {
         obj[key] = true;
-      } else if (val === "false") {
+      } else if (val === "false" || val === "off") {
         obj[key] = false;
       } else {
         obj[key] = val;
@@ -49,6 +49,6 @@ export function formDataToObject(form: FormData): object {
     }
   }
   /*  NOTE: Make sure we update obj.updated */
-  obj["updated"] = new Date().toLocaleDateString("en-US") as string;
+  obj["updated"] = new Date().toJSON().substring(0, 10);
   return obj;
 }

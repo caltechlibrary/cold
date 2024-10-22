@@ -132,3 +132,13 @@ Off the shelf task runners include
 
 The report runner would take the report request record, set statu to processing and then pass the report name and options to task runner.  When the task completed (either successfully or failing) the result would be captured and stored in a designated storage system (e.g. G-Drive) and the report request record would need to be updated with the final status and link to the report or error report.
 
+Date Handling
+-------------
+
+The difference between date formats, languages and representation can be considerable.  The default way a the TypeScript/JavaScript Date object render a date is "MM/DD/YYYY" using the `toDateString()` instance method.  Our databases and most of our code base expects date to be formated in "YYYY-MM-DD" so I am using two TypeScript/JavaScript methods to achieve that.  First you use `.toJSON()` to render the date in JSON format then you trim the result to 11 characters usign `.substring(0,10)`.
+
+Booleans and webforms
+---------------------
+
+When the web form is transcribed checkboxes return a "on" if checked value.  We want these to be actual JSON booleans so in the middleware is a functions that checks for "true" or "on" before setting the value to the boolean `true`.  This will help normalize for changed and saved records.
+

@@ -173,7 +173,7 @@ export class People implements PeopleInterface {
     if (row.hasOwnProperty("updated")) {
       this.updated = row.updated;
     } else {
-      this.updated = new Date().toLocaleDateString("en-US");
+      this.updated = (new Date()).toJSON().substring(0, 10);
     }
     if (row.hasOwnProperty("internal_notes")) {
       this.internal_notes = row.internal_notes;

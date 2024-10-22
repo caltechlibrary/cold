@@ -19,7 +19,7 @@ import {
   sleepRandomAmountOfSeconds,
 } from "./deps.ts";
 
-const MAX_ERROR_COUNT = 10;
+const MAX_ERROR_COUNT = 25;
 /**
  * helpText assembles the help information for COLD UI.
  *
@@ -78,10 +78,7 @@ ${app_name}
 }
 
 function formatDate(date: Date): string {
-  const year = date.getFullYear();
-  const month = (date.getMonth() + 1).toString().padStart(2, "0");
-  const day = date.getDate().toString().padStart(2, "0");
-  return `${year}-${month}-${day}`;
+  return date.toJSON().substring(0, 10);
 }
 
 /**
@@ -155,7 +152,8 @@ async function caltechDirectorySync(
   let records_processed = 0;
   let imss_lookup_failures = [];
   for (let person of people) {
-    if (person.include_in_feeds) {
+    //console.log("DEBUG including person", person);
+    if (person.caltech === 1) {
       const data = await directoryLookup(person.imss_uid);
       if (data !== undefined) {
         const obj = await ds.read(person.clpid) as unknown as People;
@@ -180,8 +178,26 @@ async function caltechDirectorySync(
         }
       } else {
         console.log(
-          `WARNING: failed to get a response for ${person.clpid} -> ${person.imss_uid}`,
+          `WARNING: failed to get a directory response for ${person.clpid} -> <https://apps.library.caltech.edu/cold/people/${person.clpid}>`,
         );
+        const obj = await ds.read(person.clpid) as unknown as People;
+        obj.caltech = false;
+        obj.internal_notes = `${obj.internal_notes}\n${
+          (new Date()).toJSON().substring(0, 10)
+        }\t${person.clpid}, directory id "${person.imss_uid}" not found\n`;
+        if (!await ds.update(person.clpid, obj)) {
+          console.log(
+            `WARNING: failed to update caltech statatus ${person.clpid} in ${c_name}`,
+          );
+          err_updates++;
+          if (err_updates >= MAX_ERROR_COUNT) {
+            console.log(
+              `aborting, ${err_updates} update errors, check datasetd JSON API`,
+            );
+            return 1;
+          }
+        }
+
         imss_lookup_failures.push(person);
         err_retrieval++;
         if (err_retrieval >= MAX_ERROR_COUNT) {
@@ -191,19 +207,11 @@ async function caltechDirectorySync(
           console.log(
             `${imss_lookup_failures.length} record(s) had IMSS lookup failures`,
           );
-          console.log(JSON.stringify(imss_lookup_failures));
+          //console.log(JSON.stringify(imss_lookup_failures));
           return 1;
         }
       }
       sleepRandomAmountOfSeconds(3, 24);
-    }
-  }
-  if (imss_lookup_failures.length > 0) {
-    console.log(
-      `${imss_lookup_failures.length} record(s) had IMSS lookup failures`,
-    );
-    for (let person of imss_lookup_failures) {
-      console.log(JSON.stringify(person));
     }
   }
   return 0;
