@@ -80,5 +80,6 @@ collections:
     keys: true
     read: true
     create: true
+    update: true
     # This sets versioning behavior
     versions: true

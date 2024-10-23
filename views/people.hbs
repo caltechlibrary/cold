@@ -26,7 +26,12 @@
 
 {{#if people.email}}<p><div class="email">EMail: {{people.email}}</div>{{/if}}
 
-{{#if people.directory_user_id}}<p><div class="directory_user_id">IMSS userid: <a href="https://directory.caltech.edu/personnel/{{people.directory_user_id}}" target="_blank">{{people.directory_user_id}}</a></div>{{/if}}
+{{#if people.directory_user_id}}<p>{{#if people.caltech}}
+  <div class="directory_user_id">IMSS userid: <a href="https://directory.caltech.edu/personnel/{{people.directory_user_id}}" target="_blank">{{people.directory_user_id}}</a></div>
+  {{else}}
+  <div class="directory_user_id">IMSS userid: {{people.directory_user_id}} (not at Caltech)</div>
+  {{/if}}
+{{/if}}
 
 {{#if people.directory_person_type}}<p><div class="directory_person_type">Directory Person Type: {{people.directory_person_type}}</div>{{/if}}
 

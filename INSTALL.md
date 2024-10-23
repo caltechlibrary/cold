@@ -36,10 +36,10 @@ if you are setting up for production.
       a. `tmux`
     a. start the JSON API and setup your dataset collections
       a. `deno task setup`
-      b. `deno task json_api`
+      b. `deno task cold_api`
     b. open another tmux window, change to the admin directory, start the admin web service
       a. split the screen, e.g. `Ctl-%`
-      c. `deno task start`
+      b. `deno task cold`
 
 You should now have two web services running on localhost at ports 8111 (web service), 8112 (JSON API).
 

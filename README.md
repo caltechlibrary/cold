@@ -39,7 +39,7 @@ Requirements
 ------------
 
 - Deno >= 2.0
-- Dataset >= 2.1.22 (using SQL JSON storage)
+- Dataset >= 2.1.23 (using SQL JSON storage)
 - The following are required to build the UI and compile the assets needed by **COLD**
   - GNU Make
   - [Pandoc](https://pandoc.org) >= 3.1 (to build documentation and man page)
