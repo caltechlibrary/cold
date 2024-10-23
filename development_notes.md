@@ -119,7 +119,7 @@ COLD provides a collection called "reports.ds".  Assuming that collection is rea
 1. Retrieve the next report to initiate
 2. Update the report status (e.g. request -> processing)
 3. The runner needs to execute the shell command that implements the report
-4. Update the report status (e.g. processing -> available or processing -> problem
+4. Update the report status (e.g. processing -> available or processing -> problem)
 
 The report runner repeats these four steps until there are no more requests available. At that time it can sleep for a designated period of time then start the loop again when requests are available.
 
