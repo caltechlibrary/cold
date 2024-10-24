@@ -23,14 +23,6 @@ Data models are expressed in YAML and are shared between dataset and the model Y
 
 The public API isn't part of COLD directly. COLD is for curating object lists but it does export those objects to feeds.library.caltech.edu which then provides the public API.  Content is exported in JSON, YAML and CSV formats as needed by Caltech Library systems and services.
 
-Reports
--------
-
-Reports are implemented either as dataset SQL queries or other scripts. Reports can be slow to run. A request queue is implemented to solve that problem. Reports requests are qued via the COLD UI. A separate process reads the queue, renders the reports and then updates the queue upon completion or error.  When reports are available an optional email can be sent to the requestor based on the information included in the original request.
-
-The individual reports correspond to a program which can be written in your language of choice (e.g. Python, Bash, TypeScript). The report runner 
-
-Reports are implemented as a tasks. A task is defined in Deno's JSON file. A Deno task isn't limited to TypeScript or JavaScript. It can all out to run other programs which in turn can be written in Bash, Python or be a simple dsquery. Limitting external execution of defined tasks is important for the security of the system and host machine.  This is why the tasks are predefined. Adhoc reports are not implemented in COLD.
 
 Data enhancement
 ----------------
@@ -141,4 +133,19 @@ Booleans and webforms
 ---------------------
 
 When the web form is transcribed checkboxes return a "on" if checked value.  We want these to be actual JSON booleans so in the middleware is a functions that checks for "true" or "on" before setting the value to the boolean `true`.  This will help normalize for changed and saved records.
+
+Reports Implementation
+----------------------
+
+Reports are implemented scripts or programs that are defined in a YAML file (e.g. reports.yaml). Reports can be slow to run so COLD implements a naive queue system.  The reports.ds collection holds report requests.  Those marked as "requested" are pickup by a runner that then attempts to executes the report. Since reports are running as executables on the system outside the runner reports MUST be defined in the YAML configuration file. There are zero user controlled options. This removes the attack surface of using COLD's report system to compromise the application server.  Additionally the scripts/programs implementing the reports retrieved by a data processing service on a different service. It is on this machine that the reports are defined. This machine is not directly accessible by the web and should be configured to restrict non-campus network access as an additional step to minimize the attack surface.
+
+The report scripts/programs should return an error message or link where the reports can be picked up. This is be used by the runner to resolve the final report request status.
+
+The individual reports can be written in your language of choice (e.g. Python, Bash, TypeScript). The primary requirements are reports are responsible for storing their results and providing a link or error message to standard out when completed. Since they are just programs that write results to standard out they are able to interact with any necessary systems they are allowed to talk to (e.g. databases, external services, etc).  
+
+A garbage collections script should clear out old requests in a timely fashion (e.g. once a week or once a month).
+
+### Requests and Runner
+
+A request queue is implemented track report requests via the COLD UI. A separate process reads the queue, renders the reports and then updates the queue upon completion or error.  If email addresses are provided then they will be contact with the result of the report request. The message should include the report's request id, name, status and link or error message.
 

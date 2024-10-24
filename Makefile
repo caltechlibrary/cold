@@ -5,7 +5,7 @@ PROJECT = cold
 
 PACKAGE =  $(shell ls -1 *.ts | grep -v 'version.ts')
 
-PROGRAMS = ds_importer cold_admin directory_sync set_include_in_feeds
+PROGRAMS = ds_importer cold_admin directory_sync set_include_in_feeds reports
 
 TS_MODS = cold_admin.ts ds_importer.ts directory_sync.ts
 
@@ -46,13 +46,11 @@ build: version.ts $(TS_MODS) CITATION.cff about.md htdocs bin compile installer.
 bin: .FORCE
 	mkdir -p bin
 
-compile: $(TS_MODS)
-	deno check --allow-import cold_admin.ts
-	deno check --allow-import directory_sync.ts
-	deno check --allow-import set_include_in_feeds.ts
+compile: check $(TS_MODS)
 	deno task build
 	bin/cold_admin$(EXT) --help >cold_admin.1.md
 	bin/directory_sync$(EXT) --help >directory_sync.1.md
+	bin/reports$(EXT) --help >reports.1.md
 
 check: $(TS_MODS)
 	deno check --all cold_admin.ts
@@ -63,6 +61,7 @@ check: $(TS_MODS)
 	deno check --all groups.ts
 	deno check --all people.ts
 	deno check --all funders.ts
+	deno check --all reports.ts
 
 version.ts: codemeta.json .FORCE
 	echo '' | pandoc --from t2t --to plain \

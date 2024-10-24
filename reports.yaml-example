@@ -1,0 +1,3 @@
+reports:
+  run_people_csv: ./run_people_csv.bash
+  run_groups_csv: ./run_groups_csv.bash

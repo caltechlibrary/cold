@@ -76,7 +76,10 @@ collections:
     versions: true
   - dataset: reports.ds
     query:
-      report_list: select json_object('id', src->'id', 'link', src->'link', 'content_type', src->'content_type', 'report_name', src->'report_name', 'emails', src->'emails', 'status', src->'status', 'requested', src->'requested', 'updated', src->'updated') as src from reports order by src->'status', src->'updated' desc;
+      # report_list shows the report requests in a stack view, most recently changed at the time regardless of status
+      report_list: select json_object('id', src->'id', 'link', src->'link', 'content_type', src->'content_type', 'report_name', src->'report_name', 'emails', src->'emails', 'status', src->'status', 'requested', src->'requested', 'updated', src->'updated') as src from reports order by src->>'updated' desc;
+      # next request implements the FIFO, i.e. a queue
+      next_request: select json_object('id', src->'id', 'link', src->'link', 'content_type', src->'content_type', 'report_name', src->'report_name', 'emails', src->'emails', 'status', src->'status', 'requested', src->'requested', 'updated', src->'updated') as src from reports where src->>'status' = 'requested' order by src->>'updated' asc;
     keys: true
     read: true
     create: true

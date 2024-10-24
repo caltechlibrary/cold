@@ -3,10 +3,90 @@
  */
 import { NAMESPACE_URL } from "@std/uuid/constants";
 import { v5 } from "@std/uuid";
+import * as yaml from "@std/yaml";
 
-import { apiPort, Dataset, formDataToObject, renderPage } from "./deps.ts";
+import { 
+    appInfo,
+    OptionsProcessor,
+    apiPort,
+    Dataset, 
+    formDataToObject,
+    renderPage
+} from "./deps.ts";
 
 const ds = new Dataset(apiPort, "reports.ds");
+const wait_in_seconds = 0;
+
+/**
+ * helpText assembles the help information for COLD UI.
+ *
+ * @param {[k: string]: string} helpOpt holds the help options defined for the app.
+ */
+function helpText(helpOpt: { [k: string]: string }): string {
+  const app_name = "directory_sync";
+  const version = appInfo.version;
+  const release_date = appInfo.releaseDate;
+  const release_hash = appInfo.releaseHash;
+
+  const txt: string[] = [
+    `%${app_name}(1) user manual | ${version} ${release_date} ${release_hash}
+% R. S.Doiel
+% ${release_date} ${release_hash}
+    
+# NAME
+    
+${app_name}
+    
+# SYNOPSIS
+    
+${app_name} [OPTIONS] [REPORTS_YAML]
+
+# DESCRIPTION
+    
+${app_name} processes the report quest queue. The ${app_name} is expected to validate
+the report request, launch the report passing to it via standard input a JSON expression
+holding the request details.  In return ${app_name} monitors the execution of the request
+and listens in standard input for a JSON object describing the result then updates the
+report request queue accordingly.
+
+REPORTS_YAML is the filename to read for configuring which reports are allowed to run and
+what programs are executed as a result. If it is not provided then reports.yaml is looked
+for in the current working directory.
+
+${app_name} requires access to the COLD JSON API to manage report requests.
+
+Reports are simply scripts or programs that read a JSON object form standard input,
+render a report including storing it and determining the URL where the report can
+be retrieved. When the report is completed then it returns the JSON object it recieved
+updated with the eport status, link information.  It the responsible of the report to
+determine where it's results are stored (e.g. G-Drive, Box, etc).  When the reports
+results are recieved by the runner it will notify anyone in the email list of the 
+report results (e.g. report name, final status and link).
+    
+${app_name} is designed as daemon suitable to run under systemd or other service management
+system.  Logging is written to standard output.
+
+# OPTIONS
+`,
+  ];
+
+  for (let attr in helpOpt) {
+    const msg = helpOpt[attr];
+    txt.push(`${attr}
+: ${msg}
+`);
+  }
+  txt.push(`
+# EXAMPLE
+
+
+~~~shell
+${app_name} reports.yaml
+~~~
+
+`);
+  return txt.join("\n");
+}
 
 // getId: This function that returns a new UUID v5 on a payload holding the object and a timestamp.
 // If two payloads are equivallent then the UUID returned will be the same. When using
@@ -75,7 +155,7 @@ export class Report implements ReportInterface {
     this.expire = expire.toString();
     this.requested = now.toISOString();
     this.updated = now.toISOString();
-    this.status = "requested";
+    this.status = 'requested';
     this.link = "";
     return true;
   }
@@ -187,7 +267,6 @@ async function handleReportRequest(
     console.log(
       `DEBUG form data after converting to object -> ${JSON.stringify(obj)}`,
     );
-    const wait_in_seconds = 5;
     const rpt = new Report();
     const ok = await rpt.request_report(obj);
     if (ok) {
@@ -263,3 +342,155 @@ async function handleReportRequest(
     headers: { "content-type": "text/html" },
   });
 }
+
+interface RunnableInterface {
+  cmd: string;
+  options: string[];
+  final_status: string;
+  link: string;
+}
+
+class Runnable implements RunnableInterface {
+  readonly cmd: string;
+  options: string[];
+  final_status: string;
+  link: string;
+
+  constructor(cmd: string) {
+    this.cmd = cmd;
+    this.final_status = '';
+    this.link = '';
+  }
+
+  // Run executables the program implementing the report. It's calling out to the operating system to run it.
+  // The report program is expected to return a link written to standard out on success. Otherwise return an
+  // empty string or short error message using the protocol `error://`.
+  run(options: string[]) : string {
+    //FIXME: Need to execute command line program and capture result link or error message from standard out then hand it back.
+    return "error://Runnable not implemented yet!";
+  }
+}
+
+interface RunnerInterface {
+  report_map: {[key: string]: RunnableInterface};
+}
+
+class Runner implements RunnerInterface {
+  readonly report_map: {[key: string]: Runnable};
+
+  constructor(config_yaml: string) {
+    const src = Deno.readTextSync(config_yaml);
+    const cfg = yaml.parse(src);
+    for (let [k, v] of cfg.reports) {
+      this.report_map[k] = new Runnable(v);
+    }
+  }
+}
+
+// process_request is responsible updating report queue, assembling and making the request, and updating the report request object
+// when completed (or error condition returned).
+async function process_request(run: Runnable, id: string, request: Report) : Promise<boolean> {
+  // I want a copy of the object passed in so that response doesn't .
+  request.status = "processing";
+  request.updated = (new Date()).toJSON();
+  console.log("DEBUG updated request object to processing", request)
+  if (await ds.update(request.id,  request)) {
+    console.log("DEBUG launching request", request);
+  } else {
+    console.log(`ERROR: updated of request ${request} failed, aborting request runner`);
+    Deno.exit(1);
+  }
+  const link = await run(request.options);
+  if (link === undefined || link === "") {
+    request.link = "unknown error";
+    request.status = "error"; 
+    request.updated = (new Date()).toJSON();
+  } else if (link.startswith("error://")) {
+    request.link = link.replace("error://", "");
+    request.status = "error"; 
+    request.updated = (new Date()).toJSON();    
+  } else {
+    request.link = link;
+    request.status = "completed";
+    request.updated = (new Date()).toJSON();
+  }
+  return (await ds.update(id, request));
+}
+
+// servicing_requests checks the reports table, gets a list of pending requests, invokes process_request
+async function servicing_requests(runner: Runner) {
+  let requests = await ds.query('next_request', [], {});
+  if (requests.length > 0) {
+    for (let request of requests) {
+      let run = runner.report_map[request.name];
+      if (run !== undefined) {
+        if (! await process_request(run, request.id, request)) {
+          console.log(`ERROR: processing request ${request}, ${JSON.stringify(request)} failed, aborting request runner`);
+          Deno.exit(1);
+        }
+      } else {
+        request.status = "aborting, unknown report";
+        request.link = "";
+        request.updated = (new Date()).toJSON();
+        if (! await ds.update(request.id,request)) {
+          console.log(`ERROR: updated of request error ${request} failed, aborting request runner`);
+          Deno.exit(1);          
+        }
+        console.log(`WARNING unknown report name ${request.name}`);
+      }
+    }
+  }
+}
+
+
+// report_runner implements the report runner. It checks the reports collections for the "next" report to run, spawns the job then on to the next.
+// When the queue is empty will will sleep for a time then try the process again.
+async function report_runner(config_yaml: string) {
+  const runner = new Runner(config_yaml);
+  // NOTE: Report process will "wake up" every 5 miniutes (30,0000 millisconds)
+  setInterval(async function () {
+    await servicing_requests(runner); 
+  }, 10000); 
+}
+
+
+/*
+ * Main provides the main interface from the command line. One parameter is expected which
+ * is the path to the YAML configuration file.
+ */
+async function main() : Promise<void> {
+  const op: OptionsProcessor = new OptionsProcessor();
+
+  op.booleanVar("help", false, "display help");
+  op.booleanVar("license", false, "display license");
+  op.booleanVar("version", false, "display version");
+  op.booleanVar("debug", false, "turn on debug logging");
+
+  op.parse(Deno.args);
+
+  const options = op.options;
+  let args = op.args;
+
+  if (options.help) {
+    console.log(helpText(op.help));
+    Deno.exit(0);
+  }
+  if (options.license) {
+    console.log(appInfo.licenseText);
+    Deno.exit(0);
+  }
+  if (options.version) {
+    console.log(`${appInfo.appName} ${appInfo.version} ${appInfo.releaseHash}`);
+    Deno.exit(0);
+  }
+
+  let config_yaml : string = (args.length > 0 ? args.shift() as unknown as string : "");
+  if (config_yaml === "") {
+    config_yaml = "reports.yaml";
+  }
+  await report_runner(config_yaml)
+  Deno.exit(0);
+}
+
+// Run main()
+if (import.meta.main) await main();

@@ -20,6 +20,7 @@ import {
 } from "./deps.ts";
 
 const MAX_ERROR_COUNT = 25;
+
 /**
  * helpText assembles the help information for COLD UI.
  *
