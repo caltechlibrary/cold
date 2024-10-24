@@ -127,7 +127,21 @@ htdocs: .FORCE
 test: .FORCE
 	deno task test
 
-release: CITATION.cff version.ts distribute_docs dist/Linux-x86_64 dist/Linux-aarch64 dist/macOS-x86_64 dist/macOS-arm64 dist/Windows-x86_64
+installer.sh: .FORCE
+	@echo '' | pandoc --metadata title="Installer" --metadata git_org_or_person="$(GIT_GROUP)" --metadata-file codemeta.json --template codemeta-bash-installer.tmpl >installer.sh
+	chmod 775 installer.sh
+	git add -f installer.sh
+
+installer.ps1: .FORCE
+	@echo '' | pandoc --metadata title="Installer" --metadata git_org_or_person="$(GIT_GROUP)" --metadata-file codemeta.json --template codemeta-ps1-installer.tmpl >installer.ps1
+	chmod 775 installer.ps1
+	git add -f installer.ps1
+
+clean:
+	if [ -d bin ]; then rm -fR bin/*; fi
+	if [ -d dist ]; then rm -fR dist/*; fi
+
+release: clean build man website distribute_docs dist/Linux-x86_64 dist/Linux-aarch64 dist/macOS-x86_64 dist/macOS-arm64 dist/Windows-x86_64
 	./release.bash
 
 setup_dist: .FORCE
