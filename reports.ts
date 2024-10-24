@@ -5,13 +5,13 @@ import { NAMESPACE_URL } from "@std/uuid/constants";
 import { v5 } from "@std/uuid";
 import * as yaml from "@std/yaml";
 
-import { 
-    appInfo,
-    OptionsProcessor,
-    apiPort,
-    Dataset, 
-    formDataToObject,
-    renderPage
+import {
+  apiPort,
+  appInfo,
+  Dataset,
+  formDataToObject,
+  OptionsProcessor,
+  renderPage,
 } from "./deps.ts";
 
 const ds = new Dataset(apiPort, "reports.ds");
@@ -155,7 +155,7 @@ export class Report implements ReportInterface {
     this.expire = expire.toString();
     this.requested = now.toISOString();
     this.updated = now.toISOString();
-    this.status = 'requested';
+    this.status = "requested";
     this.link = "";
     return true;
   }
@@ -358,25 +358,25 @@ class Runnable implements RunnableInterface {
 
   constructor(cmd: string) {
     this.cmd = cmd;
-    this.final_status = '';
-    this.link = '';
+    this.final_status = "";
+    this.link = "";
   }
 
   // Run executables the program implementing the report. It's calling out to the operating system to run it.
   // The report program is expected to return a link written to standard out on success. Otherwise return an
   // empty string or short error message using the protocol `error://`.
-  run(options: string[]) : string {
+  run(options: string[]): string {
     //FIXME: Need to execute command line program and capture result link or error message from standard out then hand it back.
     return "error://Runnable not implemented yet!";
   }
 }
 
 interface RunnerInterface {
-  report_map: {[key: string]: RunnableInterface};
+  report_map: { [key: string]: RunnableInterface };
 }
 
 class Runner implements RunnerInterface {
-  readonly report_map: {[key: string]: Runnable};
+  readonly report_map: { [key: string]: Runnable };
 
   constructor(config_yaml: string) {
     const src = Deno.readTextSync(config_yaml);
@@ -389,26 +389,32 @@ class Runner implements RunnerInterface {
 
 // process_request is responsible updating report queue, assembling and making the request, and updating the report request object
 // when completed (or error condition returned).
-async function process_request(run: Runnable, id: string, request: Report) : Promise<boolean> {
+async function process_request(
+  run: Runnable,
+  id: string,
+  request: Report,
+): Promise<boolean> {
   // I want a copy of the object passed in so that response doesn't .
   request.status = "processing";
   request.updated = (new Date()).toJSON();
-  console.log("DEBUG updated request object to processing", request)
-  if (await ds.update(request.id,  request)) {
+  console.log("DEBUG updated request object to processing", request);
+  if (await ds.update(request.id, request)) {
     console.log("DEBUG launching request", request);
   } else {
-    console.log(`ERROR: updated of request ${request} failed, aborting request runner`);
+    console.log(
+      `ERROR: updated of request ${request} failed, aborting request runner`,
+    );
     Deno.exit(1);
   }
   const link = await run(request.options);
   if (link === undefined || link === "") {
     request.link = "unknown error";
-    request.status = "error"; 
+    request.status = "error";
     request.updated = (new Date()).toJSON();
   } else if (link.startswith("error://")) {
     request.link = link.replace("error://", "");
-    request.status = "error"; 
-    request.updated = (new Date()).toJSON();    
+    request.status = "error";
+    request.updated = (new Date()).toJSON();
   } else {
     request.link = link;
     request.status = "completed";
@@ -419,22 +425,28 @@ async function process_request(run: Runnable, id: string, request: Report) : Pro
 
 // servicing_requests checks the reports table, gets a list of pending requests, invokes process_request
 async function servicing_requests(runner: Runner) {
-  let requests = await ds.query('next_request', [], {});
+  let requests = await ds.query("next_request", [], {});
   if (requests.length > 0) {
     for (let request of requests) {
       let run = runner.report_map[request.name];
       if (run !== undefined) {
-        if (! await process_request(run, request.id, request)) {
-          console.log(`ERROR: processing request ${request}, ${JSON.stringify(request)} failed, aborting request runner`);
+        if (!await process_request(run, request.id, request)) {
+          console.log(
+            `ERROR: processing request ${request}, ${
+              JSON.stringify(request)
+            } failed, aborting request runner`,
+          );
           Deno.exit(1);
         }
       } else {
         request.status = "aborting, unknown report";
         request.link = "";
         request.updated = (new Date()).toJSON();
-        if (! await ds.update(request.id,request)) {
-          console.log(`ERROR: updated of request error ${request} failed, aborting request runner`);
-          Deno.exit(1);          
+        if (!await ds.update(request.id, request)) {
+          console.log(
+            `ERROR: updated of request error ${request} failed, aborting request runner`,
+          );
+          Deno.exit(1);
         }
         console.log(`WARNING unknown report name ${request.name}`);
       }
@@ -442,23 +454,21 @@ async function servicing_requests(runner: Runner) {
   }
 }
 
-
 // report_runner implements the report runner. It checks the reports collections for the "next" report to run, spawns the job then on to the next.
 // When the queue is empty will will sleep for a time then try the process again.
 async function report_runner(config_yaml: string) {
   const runner = new Runner(config_yaml);
   // NOTE: Report process will "wake up" every 5 miniutes (30,0000 millisconds)
   setInterval(async function () {
-    await servicing_requests(runner); 
-  }, 10000); 
+    await servicing_requests(runner);
+  }, 10000);
 }
-
 
 /*
  * Main provides the main interface from the command line. One parameter is expected which
  * is the path to the YAML configuration file.
  */
-async function main() : Promise<void> {
+async function main(): Promise<void> {
   const op: OptionsProcessor = new OptionsProcessor();
 
   op.booleanVar("help", false, "display help");
@@ -484,11 +494,13 @@ async function main() : Promise<void> {
     Deno.exit(0);
   }
 
-  let config_yaml : string = (args.length > 0 ? args.shift() as unknown as string : "");
+  let config_yaml: string = args.length > 0
+    ? args.shift() as unknown as string
+    : "";
   if (config_yaml === "") {
     config_yaml = "reports.yaml";
   }
-  await report_runner(config_yaml)
+  await report_runner(config_yaml);
   Deno.exit(0);
 }
 

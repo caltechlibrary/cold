@@ -53,15 +53,7 @@ compile: check $(TS_MODS)
 	bin/reports$(EXT) --help >reports.1.md
 
 check: $(TS_MODS)
-	deno check --all cold_admin.ts
-	deno check --all ds_importer.ts
-	deno check --all directory_sync.ts
-	deno check --all set_include_in_feeds.ts
-	deno check --all dataset.ts
-	deno check --all groups.ts
-	deno check --all people.ts
-	deno check --all funders.ts
-	deno check --all reports.ts
+	deno task check-all
 
 version.ts: codemeta.json .FORCE
 	echo '' | pandoc --from t2t --to plain \
@@ -136,6 +128,7 @@ test: .FORCE
 	deno task test
 
 release: CITATION.cff version.ts distribute_docs dist/Linux-x86_64 dist/Linux-aarch64 dist/macOS-x86_64 dist/macOS-arm64 dist/Windows-x86_64
+	./release.bash
 
 setup_dist: .FORCE
 	@rm -fR dist
