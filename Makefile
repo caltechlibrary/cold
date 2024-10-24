@@ -53,7 +53,7 @@ compile: check $(TS_MODS)
 	bin/reports$(EXT) --help >reports.1.md
 
 check: $(TS_MODS)
-	deno task check-all
+	deno task check
 
 version.ts: codemeta.json .FORCE
 	echo '' | pandoc --from t2t --to plain \

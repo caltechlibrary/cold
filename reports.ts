@@ -4,6 +4,7 @@
 import { NAMESPACE_URL } from "@std/uuid/constants";
 import { v5 } from "@std/uuid";
 import * as yaml from "@std/yaml";
+import { $ } from "@david/dax";
 
 import {
   apiPort,
@@ -108,7 +109,7 @@ async function genId(o: object): Promise<string> {
 export interface ReportInterface {
   id: string;
   report_name: string;
-  options: string;
+  options: string[];
   content_type: string;
   emails: string;
   requested: string;
@@ -124,7 +125,7 @@ export interface ReportInterface {
 export class Report implements ReportInterface {
   id: string = "";
   report_name: string = "";
-  options: string = "";
+  options: string[] = [];
   content_type: string = "";
   emails: string = "";
   requested: string = "";
@@ -145,7 +146,7 @@ export class Report implements ReportInterface {
 
     this.report_name = report_name;
     this.content_type = content_type;
-    this.options = "options" in o ? `${o.options}` : ``;
+    this.options = "options" in o ? o.options as unknown[] as string[] : [];
     this.emails = "emails" in o ? `${o.emails}` : ``;
     const now = new Date();
     const expire_in_days = 7;
@@ -358,6 +359,7 @@ class Runnable implements RunnableInterface {
 
   constructor(cmd: string) {
     this.cmd = cmd;
+    this.options = [];
     this.final_status = "";
     this.link = "";
   }
@@ -365,9 +367,16 @@ class Runnable implements RunnableInterface {
   // Run executables the program implementing the report. It's calling out to the operating system to run it.
   // The report program is expected to return a link written to standard out on success. Otherwise return an
   // empty string or short error message using the protocol `error://`.
-  run(options: string[]): string {
+  async run(options: string[]): Promise<string> {
     //FIXME: Need to execute command line program and capture result link or error message from standard out then hand it back.
-    return "error://Runnable not implemented yet!";
+    console.log(`Running: ${this.cmd}`);
+    let txt: string;
+    try {
+      txt = await $`${this.cmd}`.lines();
+    } catch(err) {
+      txt = "error://" + err;
+    }
+    return txt;
   }
 }
 
@@ -376,13 +385,23 @@ interface RunnerInterface {
 }
 
 class Runner implements RunnerInterface {
-  readonly report_map: { [key: string]: Runnable };
+  readonly report_map: { [key: string]: Runnable } = {};
 
   constructor(config_yaml: string) {
-    const src = Deno.readTextSync(config_yaml);
-    const cfg = yaml.parse(src);
-    for (let [k, v] of cfg.reports) {
-      this.report_map[k] = new Runnable(v);
+    const src = Deno.readTextFileSync(config_yaml);
+    const cfg = yaml.parse(src) as { [key: string]: { [key: string]: string } };
+    console.log(`DEBUG cfg.reports ${typeof cfg.reports}:\n\t`, cfg.reports);
+    if (cfg.reports !== undefined) {
+      for (const [k, v] of Object.entries(cfg.reports)) {
+        console.log(
+          `DEBUG cfg.reports ${typeof cfg.reports[k]}:\n\t`,
+          cfg.reports[k],
+        );
+        if (v === "") {
+          continue;
+        }
+        this.report_map[k] = new Runnable(v);
+      }
     }
   }
 }
@@ -390,7 +409,7 @@ class Runner implements RunnerInterface {
 // process_request is responsible updating report queue, assembling and making the request, and updating the report request object
 // when completed (or error condition returned).
 async function process_request(
-  run: Runnable,
+  cmd: Runnable,
   id: string,
   request: Report,
 ): Promise<boolean> {
@@ -406,31 +425,38 @@ async function process_request(
     );
     Deno.exit(1);
   }
-  const link = await run(request.options);
+  const link = await cmd.run([]);
   if (link === undefined || link === "") {
-    request.link = "unknown error";
+    request.link = "not link returned from report";
     request.status = "error";
     request.updated = (new Date()).toJSON();
-  } else if (link.startswith("error://")) {
-    request.link = link.replace("error://", "");
+  } else if (link.indexOf("error://") > -1) {
+    request.link = link; /*link.replace("error://", "");*/
     request.status = "error";
     request.updated = (new Date()).toJSON();
-  } else {
+  } else if (link.indexOf("://") > -1 ) {
     request.link = link;
     request.status = "completed";
+    request.updated = (new Date()).toJSON();
+  } else {
+    request.link = "unknown error";
+    request.status = "error";
     request.updated = (new Date()).toJSON();
   }
   return (await ds.update(id, request));
 }
 
 // servicing_requests checks the reports table, gets a list of pending requests, invokes process_request
-async function servicing_requests(runner: Runner) {
-  let requests = await ds.query("next_request", [], {});
+async function servicing_requests(runner: Runner): Promise<void> {
+  console.log("DEBUG entered servicing_requests with Runner", runner);
+  let requests = await ds.query("next_request", [], {}) as Report[];
   if (requests.length > 0) {
+    console.log(`DEBUG we have ${requests.length} requests ...`);
     for (let request of requests) {
-      let run = runner.report_map[request.name];
-      if (run !== undefined) {
-        if (!await process_request(run, request.id, request)) {
+      let report_name = request.report_name;
+      let cmd = runner.report_map[report_name];
+      if (cmd !== undefined) {
+        if (!await process_request(cmd, request.id, request)) {
           console.log(
             `ERROR: processing request ${request}, ${
               JSON.stringify(request)
@@ -448,7 +474,7 @@ async function servicing_requests(runner: Runner) {
           );
           Deno.exit(1);
         }
-        console.log(`WARNING unknown report name ${request.name}`);
+        console.log(`WARNING unknown report name ${request.report_name}`);
       }
     }
   }
@@ -456,12 +482,21 @@ async function servicing_requests(runner: Runner) {
 
 // report_runner implements the report runner. It checks the reports collections for the "next" report to run, spawns the job then on to the next.
 // When the queue is empty will will sleep for a time then try the process again.
-async function report_runner(config_yaml: string) {
+async function report_runner(config_yaml: string): Promise<number> {
+  try {
+    await Deno.lstat(config_yaml);
+  } catch(err) {
+    console.log(err);
+    return 1;
+  }
   const runner = new Runner(config_yaml);
-  // NOTE: Report process will "wake up" every 5 miniutes (30,0000 millisconds)
-  setInterval(async function () {
-    await servicing_requests(runner);
-  }, 10000);
+  if (runner === undefined) {
+    return 1;
+  }
+  console.log("DEBUG runner to should exist now", runner);
+  await servicing_requests(runner);
+  console.log("DEBUG caught up on requests");
+  return 0;
 }
 
 /*
@@ -500,8 +535,10 @@ async function main(): Promise<void> {
   if (config_yaml === "") {
     config_yaml = "reports.yaml";
   }
-  await report_runner(config_yaml);
-  Deno.exit(0);
+  // Start up the service.
+  setInterval(await (async function() {
+    await report_runner(config_yaml);
+  }), 10000);
 }
 
 // Run main()
