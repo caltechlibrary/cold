@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>COLD (Controlled Object List and Datum (Concept))</title>
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="https://caltechlibrary.github.io/css/site.css">
+</head>
+<body>
+<header>
+<a href="http://library.caltech.edu" title="link to Caltech Library Homepage"><img src="https://caltechlibrary.github.io/assets/liblogo.gif" alt="Caltech Library logo"></a>
+</header>
+<nav>
+<ul>
+    <li><a href="/">Home</a></li>
+    <li><a href="index.html">README</a></li>
+    <li><a href="LICENSE">LICENSE</a></li>
+    <li><a href="INSTALL.html">INSTALL</a></li>
+    <li><a href="user_manual.html">User Manual</a></li>
+    <li><a href="about.html">About</a></li>
+    <li><a href="https://github.com/caltechlibrary/cold">GitHub</a></li>
+</ul>
+</nav>
+
+<section>
+<h1 id="name">NAME</h1>
+<p>directory_sync</p>
+<h1 id="synopsis">SYNOPSIS</h1>
+<p>directory_sync <a href="#options">OPTIONS</a> [REPORTS_YAML]</p>
+<h1 id="description">DESCRIPTION</h1>
+<p>directory_sync processes the report quest queue. The directory_sync
+is expected to validate the report request, launch the report passing to
+it via standard input a JSON expression holding the request details. In
+return directory_sync monitors the execution of the request and listens
+in standard input for a JSON object describing the result then updates
+the report request queue accordingly.</p>
+<p>REPORTS_YAML is the filename to read for configuring which reports
+are allowed to run and what programs are executed as a result. If it is
+not provided then reports.yaml is looked for in the current working
+directory.</p>
+<p>directory_sync requires access to the COLD JSON API to manage report
+requests.</p>
+<p>Reports are simply scripts or programs that read a JSON object form
+standard input, render a report including storing it and determining the
+URL where the report can be retrieved. When the report is completed then
+it returns the JSON object it recieved updated with the eport status,
+link information. It the responsible of the report to determine where
+it’s results are stored (e.g. G-Drive, Box, etc). When the reports
+results are recieved by the runner it will notify anyone in the email
+list of the report results (e.g. report name, final status and
+link).</p>
+<p>directory_sync is designed as daemon suitable to run under systemd or
+other service management system. Logging is written to standard
+output.</p>
+<h1 id="options">OPTIONS</h1>
+<dl>
+<dt>help</dt>
+<dd>
+display help
+</dd>
+<dt>license</dt>
+<dd>
+display license
+</dd>
+<dt>version</dt>
+<dd>
+display version
+</dd>
+<dt>debug</dt>
+<dd>
+turn on debug logging
+</dd>
+</dl>
+<h1 id="example">EXAMPLE</h1>
+<pre class="shell"><code>directory_sync reports.yaml</code></pre>
+</section>
+
+<footer>
+<span>&copy; 2022 <a href="https://www.library.caltech.edu/copyright">Caltech Library</a></span>
+<address>1200 E California Blvd, Mail Code 1-32, Pasadena, CA 91125-3200</address>
+<span><a href="mailto:library@caltech.edu">Email Us</a></span>
+<span>Phone: <a href="tel:+1-626-395-3405">(626)395-3405</a></span>
+</footer>
+</body>
+</html>

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>COLD (Controlled Object List and Datum (Concept))</title>
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="https://caltechlibrary.github.io/css/site.css">
+</head>
+<body>
+<header>
+<a href="http://library.caltech.edu" title="link to Caltech Library Homepage"><img src="https://caltechlibrary.github.io/assets/liblogo.gif" alt="Caltech Library logo"></a>
+</header>
+<nav>
+<ul>
+    <li><a href="/">Home</a></li>
+    <li><a href="index.html">README</a></li>
+    <li><a href="LICENSE">LICENSE</a></li>
+    <li><a href="INSTALL.html">INSTALL</a></li>
+    <li><a href="user_manual.html">User Manual</a></li>
+    <li><a href="about.html">About</a></li>
+    <li><a href="https://github.com/caltechlibrary/cold">GitHub</a></li>
+</ul>
+</nav>
+
+<section>
+<p>COLD has a report request service with a web user interface. To
+generate a report a report runner service is needed.</p>
+<p>Once the report request is made a record is created in the reports.ds
+collection. The report runner is expected to check that collection and
+run requested reports keeping the records updated as the reporting
+running processes proceeds. The final step is to either turn an error
+message of why the request failed or return the status of “available”
+with a link to where the report can be viewed or downloaded.</p>
+<p>The system is deliberately simple. This is to keep it maintainable,
+easy for everyone to understand (developers and the people who request
+reports) and importantly easy to maintain. Report systems tend towards
+complexity so it is vital that the initial system be as simple as
+possible but still accomodate bith quick reports and those which may
+take hours to complete.</p>
+<p>The report request process is integrated into the COLD admin UI. That
+UI lists the requests and includes a form to making a new request. When
+the report runner picks up a request several things need to happen.</p>
+<ul>
+<li>report status should show that the report request is being
+processed</li>
+<li>the report request needs to be validated and if their is s problem
+an error returned the request processed close</li>
+</ul>
+<p>If the request is valid then several things need to happen.</p>
+<ul>
+<li>the report definition needs to be retrieved (probably from
+memory)</li>
+<li>the designated script/program needs to be run</li>
+<li>the output of the script/program (stdout) needs to be read and
+streamed into a report document at the location specified by the report
+definition</li>
+<li>as the report executes output should be written to storage and a
+link generated</li>
+<li>if their is a problem the report process should terminal and the
+request updated with the status of error and message</li>
+<li>if the report executes successfully the request record should be
+updated wiht the status of “available” and the link</li>
+<li>if there are email(s) associated with the request a message needs to
+be sent out with the report name, final status and link if available or
+error message if not</li>
+</ul>
+<p>I’ve prototyped the report runner in TypeScript but am not happy with
+it. I am deciding if I should write this in Go or give Python a try.</p>
+<p>I’m thinking reports could be simple script written in any langauge
+that write their output to standard out. The runner should be
+responsible for taking that output and writing it to an appropriate
+place (e.g. Google Drive).</p>
+<p>Originally I was thinking that this should be the responsibility of
+the report script/program but given the level of complexity dealing with
+G-Drive I think the runner should be responsible for the final place the
+report resides.</p>
+<p>My current view is a report request would look something like
+this.</p>
+<pre><code>{
+    &quot;id&quot;: &quot;6fec5fbf-5368-5d11-95c7-e2534752e3a5&quot;,
+    &quot;report_name&quot;: &quot;generate_people_csv&quot;,
+    &quot;email&quot;: &quot;rsdoiel@caltech.edu,tmorrell@caltech.edu&quot;,
+    &quot;requested&quot;: &quot;2024-10-25T19:37:44.169Z&quot;,
+    &quot;status&quot;: &quot;requested&quot;,
+    &quot;link&quot;: &quot;&quot;,
+    &quot;updated&quot;: &quot;2024-10-25T19:37:44.169Z&quot;
+}</code></pre>
+<p>The report definition should look more like this.</p>
+<pre><code>{
+    &quot;report_name&quot;: &quot;generate_people_csv&quot;,
+    &quot;cmd&quot;: &quot;./rpt_people_csv.bash&quot;,
+    &quot;write_url&quot;: &quot;s3://feeds.library.caltech.edu/people&quot;,
+    &quot;link_url&quot;: &quot;https://feeds.library.caltech.edu/people&quot;,
+    &quot;basename&quot;: &quot;people.csv&quot;,
+    &quot;content_type&quot;: &quot;text/csv&quot;,
+    &quot;append_timestamp&quot;: false,
+    &quot;options&quot;: []
+}</code></pre>
+<p>The runner would check the report requests, take the requested
+information and validated it against the predefined reports. It would
+run the report capturing the output then write it to “write_base”
+appending the basename, optional timestamp and an file extension
+associated with the mime type (e.g “.csv” for a “text/csv”). I’m
+thinking aboutsupporting two storage protocols. They would be “file://”,
+“s3://”.</p>
+<p>I considered writing directory to G-Drive since their is a practice
+of doing that manually. Google Drive API is problematic. Google changes
+API pretty frequently. Any time they make a change I will likely need to
+update or modify my code. Given my experience with the Google Sheet’s
+API I feel this is an unnecessary burden. In princple it maybe possible
+to mount Google Drive as a FUSE file system but even that looks pretty
+tedious to maintain over the long run.</p>
+<p>The NAS can be mounted easily to our data processing system. The
+staff requesting reports has access to that. For static websites like
+feeds, the S3 protocol is sufficient to easily distributed public
+oriented reports (e.g. people.csv, gorups.csv).</p>
+<p>The problem is the NAS might be mounted in different ways on each
+person’s computer. So a “file:///” link isn’t viable. While writing to
+“file//datawork.library.caltech.edu/Sites/feeds_v1.6/htdocs/people/people.csv”
+makes sense to the software it doen’t result in a clickable link for our
+end user. While writing to an S3 bucket can have a direct mapping to a
+URLs the NAS doesn’t fit that situation.</p>
+<p>Example
+“file://datawork.library.caltech.edu/Sites/feeds_v1.6/htdocs/people/people.csv”
+while eventually it’ll get to
+“https://feeds.library.caltech.edu/people/people.csv” that isn’t helpful
+when an end user wants a current, clickable link to see the report right
+at the point of creation.</p>
+<p>I’ve written a prototype in TypeScript compiled with Deno. Creating
+webservices that take advantage of concurrency is more convoluted in
+TypeScript (e.g. need to use service workers) than Go. The report runner
+server should run as a systemd service. It is easy to implement a
+sequencial report runner in TypeScript but since reports can sometimes
+take hours to complete this isn’t ideal. Taking advantage of concurrency
+in TypeScript means using service works. Given that case it makes more
+sense in writing the report runner in Go and taking advantage of Go’s
+maturity in concurrency and as a service platform.</p>
+</section>
+
+<footer>
+<span>&copy; 2022 <a href="https://www.library.caltech.edu/copyright">Caltech Library</a></span>
+<address>1200 E California Blvd, Mail Code 1-32, Pasadena, CA 91125-3200</address>
+<span><a href="mailto:library@caltech.edu">Email Us</a></span>
+<span>Phone: <a href="tel:+1-626-395-3405">(626)395-3405</a></span>
+</footer>
+</body>
+</html>
