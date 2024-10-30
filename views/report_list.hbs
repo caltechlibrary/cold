@@ -6,11 +6,16 @@
 <nav>
 <ul>
 <li><a href="/" title="return home">Home</a></li>
-<li><a href="../" title="return to dashboard">Dashboard</a></li>
+<li><a href="./" title="return to dashboard">Dashboard</a></li>
+<li><a href="reports" title="Refresh reports list">Reports</a></li>
 </ul>
 </nav>
 <section>
 <h1>Request a Report</h1>
+
+<blockquote>
+This is a demo of running reports. Not fully implemented yet.
+</blockquote>
 
 <form action="{{report_queue.id}}" method="post">
 
@@ -19,31 +24,25 @@
 <select name="report_name" id="report_name">
   <option value="run_people_csv">Generate People CSV File</option>
   <option value="run_groups_csv">Generate Groups CSV File</option>
-<!--  <option value="rpt_recent_grad_report_csv; text/csv">Recent Grads Report (CSV)</option> -->
-<!--  <option value="rpt_creator_report_csv; text/csv">Creator Report (CSV)</option> -->
 </select>
 </div>
 
 <!--
 <div>
-<label set="report_options">Report Options</label>
-<input id="report_options" name="report_options" placeholder="Include any options here.">
+<label set="emails">Email notification(s)</label>
+<input type="text" id="emails" name="emails" placeholder="rsdoiel@caltech.edu" />
 </div>
 -->
 
 <div>
-<label set="emails">Email notification(s)</label>
-<input type="text" id="emails" name="emails" placeholder="rsdoiel@caltech.edu" />
+<input type="submit" id="submit" name="submit" value="Request Report">
 </div>
-
-<p>
-<input type="submit" id="submit" name="submit" value="submit"> <input type="reset" id="reset" name="reset" value="reset">
-</p>
 </form>
 </section>
 <hr>
 <section>
 <h1>Reports</h1>
+<a href="./reports"><button>Refresh List</button></a>
 <table>
   <tr>
     <th>Requested</th>
