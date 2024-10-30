@@ -264,16 +264,14 @@ async function handleReportRequest(
     // Request a report to be run
     const form = await req.formData();
     let obj = formDataToObject(form);
-    //console.log(
-    //  `DEBUG form data after converting to object -> ${JSON.stringify(obj)}`,
-    //);
     const rpt = new Report();
     const ok = await rpt.request_report(obj);
     if (ok) {
-      //console.log(
-      //  `DEBUG report request object -> ${rpt.toJSON()}`,
-      //);
-
+      /*
+      console.log(
+        `DEBUG report request object -> ${rpt.toJSON()}`,
+      );
+      */
       // We want to create the record and return success. If the record
       // has already been created then we should distriguish that error from
       // other types of error.
@@ -449,13 +447,9 @@ class Runner implements RunnerInterface {
     const cfg = yaml.parse(src) as {
       [key: string]: { [key: string]: Runnable };
     };
-    console.log(`DEBUG cfg.reports ${typeof cfg.reports}:\n\t`, cfg.reports);
+    //console.log(`DEBUG cfg.reports ${typeof cfg.reports}:\n\t`, cfg.reports);
     if (cfg.reports !== undefined) {
       for (const [k, v] of Object.entries(cfg.reports)) {
-        //console.log(
-        //  `DEBUG cfg.reports ${typeof cfg.reports[k]}:\n\t`,
-        //  cfg.reports[k],
-        //);
         if (v === undefined) {
           continue;
         }
