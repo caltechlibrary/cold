@@ -1,16 +1,14 @@
 #!/bin/bash
 
 #
-# Generate a new draft release using Make and gh
+# Generate a new draft release jq and gh
 #
-make
-make website
-make release
 RELEASE_TAG="v$(jq -r .version codemeta.json)"
-RELEASE_NOTES="$(jq .releaseNotes codemeta.json)"
+RELEASE_NOTES="$(jq -r .releaseNotes codemeta.json)"
+make save msg="prep for ${RELEASE_TAG}, ${RELEASE_NOTES}"
 # Now generate a draft releas
 gh release create "${RELEASE_TAG}" \
-  --verify-tag --draft \
+  --draft \
   --notes="${RELEASE_NOTES}" \
   dist/*.zip 
 echo "Now goto repo release and finalize draft"

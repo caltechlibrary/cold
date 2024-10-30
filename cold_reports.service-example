@@ -1,0 +1,15 @@
+[Unit]
+Description=COLD reports service
+Documentation=man:cold_reports(1)
+After=network.target
+ConditionPathExists=!/Sites/cold/cold_not_to_be_run
+
+[Service]
+WorkingDirectory=/Sites/cold
+ExecStart=/Sites/cold/bin/cold_reports
+Type=simple
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+Alias=cold_reports.service

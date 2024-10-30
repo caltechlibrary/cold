@@ -1,6 +1,6 @@
-%cold(1) user manual | 0.0.10 2024-10-30 702a881
+%cold(1) user manual | 0.0.10 2024-10-30 13f5a6c
 % R. S.Doiel
-% 2024-10-30 702a881
+% 2024-10-30 13f5a6c
 
 # NAME
 

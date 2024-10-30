@@ -24,7 +24,7 @@ const wait_in_seconds = 0;
  * @param {[k: string]: string} helpOpt holds the help options defined for the app.
  */
 function helpText(helpOpt: { [k: string]: string }): string {
-  const app_name = "directory_sync";
+  const app_name = "cold_reports";
   const version = appInfo.version;
   const release_date = appInfo.releaseDate;
   const release_hash = appInfo.releaseHash;
@@ -44,28 +44,28 @@ ${app_name} [OPTIONS] [REPORTS_YAML]
 
 # DESCRIPTION
     
-${app_name} processes the report quest queue. The ${app_name} is expected to validate
-the report request, launch the report passing to it via standard input a JSON expression
-holding the request details.  In return ${app_name} monitors the execution of the request
-and listens in standard input for a JSON object describing the result then updates the
-report request queue accordingly.
+${app_name} processes the report request queue. ${app_name} is expected to validate
+the report request, launch the report. The report is responsible to writing it's output
+to standard out which is read by the ${app_name}. ${app_name} then renders the report
+to a known location and updates the link data in the report request record.
 
 REPORTS_YAML is the filename to read for configuring which reports are allowed to run and
-what programs are executed as a result. If it is not provided then reports.yaml is looked
+what programs are executed as a result. If it is not provided then "cold_reports.yaml" is looked
 for in the current working directory.
 
 ${app_name} requires access to the COLD JSON API to manage report requests.
 
-Reports are simply scripts or programs that read a JSON object form standard input,
-render a report including storing it and determining the URL where the report can
-be retrieved. When the report is completed then it returns the JSON object it recieved
-updated with the eport status, link information.  It the responsible of the report to
-determine where it's results are stored (e.g. G-Drive, Box, etc).  When the reports
-results are recieved by the runner it will notify anyone in the email list of the 
-report results (e.g. report name, final status and link).
+Two example reports are provided in the COLD repository. Both are written in Bash and
+require that dataset's dsquery program are available.  The provided report examples
+are "run_people_csv.bash" and "run_groups_csv.bash".
+
+Reports can be written in any langauge supported by the host system or can be 
+compiled programs. The primary requirement is that they write their results to standard
+out so that the report runner can manage making the reports available via the COLD web app.
     
 ${app_name} is designed as daemon suitable to run under systemd or other service management
-system.  Logging is written to standard output.
+system.  Logging is written to standard output. Included in the COLD repository is an example
+service file to use when deploying ${app_name}.
 
 # OPTIONS
 `,
@@ -80,9 +80,12 @@ system.  Logging is written to standard output.
   txt.push(`
 # EXAMPLE
 
+Shown is starting ${app_name} with an explicit configuration file, "my_cold_reports.yaml" file, then
+run with the default configuration file, "cold_reports.yaml" in the same working directory.
 
 ~~~shell
-${app_name} reports.yaml
+${app_name} my_cold_reports.yaml
+${app_name}
 ~~~
 
 `);
@@ -589,7 +592,7 @@ async function main(): Promise<void> {
     ? args.shift() as unknown as string
     : "";
   if (config_yaml === "") {
-    config_yaml = "reports.yaml";
+    config_yaml = "cold_reports.yaml";
   }
   // Start up the service.
   setInterval(

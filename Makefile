@@ -5,9 +5,9 @@ PROJECT = cold
 
 PACKAGE =  $(shell ls -1 *.ts | grep -v 'version.ts')
 
-PROGRAMS = ds_importer cold_admin directory_sync set_include_in_feeds reports
+PROGRAMS = cold_admin cold_reports directory_sync
 
-TS_MODS = cold_admin.ts ds_importer.ts directory_sync.ts
+TS_MODS = cold_admin.ts cold_reports.ts directory_sync.ts
 
 GIT_GROUP = caltechlibrary
 
@@ -50,7 +50,7 @@ compile: check $(TS_MODS)
 	deno task build
 	bin/cold_admin$(EXT) --help >cold_admin.1.md
 	bin/directory_sync$(EXT) --help >directory_sync.1.md
-	bin/reports$(EXT) --help >reports.1.md
+	bin/cold_reports$(EXT) --help >cold_reports.1.md
 
 check: $(TS_MODS)
 	deno task check
