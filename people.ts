@@ -88,7 +88,7 @@ export class People implements PeopleInterface {
   internal_notes: string = "";
 
   migrateCsv(row: any): boolean {
-    // NOTE: Skipping the follow legacy columns: thesis_id,advisor_id,authors_id
+    // NOTE: Skipping the follow legacy columns: thesis_id,advisors_id,authors_id
     // authors_count,thesis_count,data_count,advisor_count,editor_count
     if (row.hasOwnProperty("cl_people_id")) {
       this.clpid = row.cl_people_id;
@@ -101,8 +101,8 @@ export class People implements PeopleInterface {
     if (row.hasOwnProperty("authors_id")) {
       this.authors_id = row.authors_id;
     }
-    if (row.hasOwnProperty("advisors_id")) {
-      this.advisors_id = row.advisors_id;
+    if (row.hasOwnProperty("advisor_id")) {
+      this.advisors_id = row.advisor_id;
     }
     if (row.hasOwnProperty("family_name")) {
       this.family_name = row.family_name;

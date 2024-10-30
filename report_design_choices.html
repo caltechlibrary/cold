@@ -63,6 +63,9 @@ updated wiht the status of “available” and the link</li>
 be sent out with the report name, final status and link if available or
 error message if not</li>
 </ul>
+<p>Reports are programs or scripts (e.g. Bash, Python) that write their
+results to standard output, the runner reads that and takes care of
+saving the results and contacting the email addresses.</p>
 <p>I’ve prototyped the report runner in TypeScript but am not happy with
 it. I am deciding if I should write this in Go or give Python a try.</p>
 <p>I’m thinking reports could be simple script written in any langauge

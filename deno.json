@@ -3,7 +3,8 @@
     "setup": "dataset init people.ds 'sqlite://collection.db' ; dataset init groups.ds 'sqlite://collection.db' ; dataset init funders.ds 'sqlite://collection.db' ; dataset init issn.ds 'sqlite://collection.db'; dataset init doi_prefix.ds 'sqlite://collection.db' ; dataset init subjects.ds 'sqlite://collection.db' ; dataset init test.ds 'sqlite://collection.db' ; dataset init reports.ds 'sqlite://collection.db'",
     "cold_api": "datasetd cold_api.yaml",
     "cold_api_debug": "datasetd --debug cold_api.yaml",
-    "cold": "deno run --allow-import --allow-read --allow-net --watch cold_admin.ts --htdocs=./htdocs",
+    "cold": "deno run --watch --allow-import --allow-read --allow-net --watch cold_admin.ts --htdocs=./htdocs",
+    "cold_reports": "deno run --watch --allow-all reports.ts",
     "reset_data": "dsquery groups.ds 'delete from groups' ; dsquery people.ds 'delete from people' ; dsquery funders.ds 'delete from funders' ; dsquery issn.ds 'delete from issn'",
     "load_data": "deno task import_groups_csv ; deno task import_people_csv ; deno task import_issn_journal_publisher_csv",
     "reload_data": "deno task reset_data ; deno task load_data",
@@ -18,7 +19,7 @@
     "import_people_csv": "deno run --allow-import --allow-read --allow-net ds_importer.ts people.ds people.csv",
     "import_groups_csv": "deno run --allow-import --allow-read --allow-net ds_importer.ts groups.ds groups.csv",
     "set_include_in_feeds": "deno run --allow-read --allow-net set_include_in_feeds.ts people.ds people_in_feeds.csv",
-    "import_issn_journal_publisher_csv": "deno run --allow-read --allow-net ds_importer.ts issn.ds issn_journal_publisher.csv",
+    "import_issn_journal_publisher_csv": "deno run --allow-import --allow-read --allow-net ds_importer.ts issn.ds issn_journal_publisher.csv",
     "esm:add": "deno run -A https://esm.sh/v135 add",
     "esm:update": "deno run -A https://esm.sh/v135 update",
     "esm:remove": "deno run -A https://esm.sh/v135 remove"
