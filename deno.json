@@ -20,6 +20,7 @@
     "import_groups_csv": "deno run --allow-import --allow-read --allow-net ds_importer.ts groups.ds groups.csv",
     "set_include_in_feeds": "deno run --allow-read --allow-net set_include_in_feeds.ts people.ds people_in_feeds.csv",
     "import_issn_journal_publisher_csv": "deno run --allow-import --allow-read --allow-net ds_importer.ts issn.ds issn_journal_publisher.csv",
+    "fix_advisor_id": "deno run --allow-import --allow-read  --allow-net fix_advisor_id.ts people.ds people_final.csv",
     "esm:add": "deno run -A https://esm.sh/v135 add",
     "esm:update": "deno run -A https://esm.sh/v135 update",
     "esm:remove": "deno run -A https://esm.sh/v135 remove"

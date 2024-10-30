@@ -264,15 +264,16 @@ async function handleReportRequest(
     // Request a report to be run
     const form = await req.formData();
     let obj = formDataToObject(form);
-    console.log(
-      `DEBUG form data after converting to object -> ${JSON.stringify(obj)}`,
-    );
+    //console.log(
+    //  `DEBUG form data after converting to object -> ${JSON.stringify(obj)}`,
+    //);
     const rpt = new Report();
     const ok = await rpt.request_report(obj);
     if (ok) {
-      console.log(
-        `DEBUG report request object -> ${rpt.toJSON()}`,
-      );
+      //console.log(
+      //  `DEBUG report request object -> ${rpt.toJSON()}`,
+      //);
+
       // We want to create the record and return success. If the record
       // has already been created then we should distriguish that error from
       // other types of error.
@@ -451,10 +452,10 @@ class Runner implements RunnerInterface {
     console.log(`DEBUG cfg.reports ${typeof cfg.reports}:\n\t`, cfg.reports);
     if (cfg.reports !== undefined) {
       for (const [k, v] of Object.entries(cfg.reports)) {
-        console.log(
-          `DEBUG cfg.reports ${typeof cfg.reports[k]}:\n\t`,
-          cfg.reports[k],
-        );
+        //console.log(
+        //  `DEBUG cfg.reports ${typeof cfg.reports[k]}:\n\t`,
+        //  cfg.reports[k],
+        //);
         if (v === undefined) {
           continue;
         }
@@ -509,6 +510,7 @@ async function process_request(
 async function servicing_requests(runner: Runner): Promise<void> {
   console.log("DEBUG entered servicing_requests with Runner", runner);
   let requests = await ds.query("next_request", [], {}) as Report[];
+  console.log("DEBUG requests -> ??", typeof requests, requests);
   if (requests.length > 0) {
     console.log(`DEBUG we have ${requests.length} requests ...`);
     for (let request of requests) {
