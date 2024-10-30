@@ -1,11 +1,11 @@
 reports:
   run_people_csv:
     cmd: ./run_people_csv.bash
-    name: people.csv
+    basename: people
     append_datestamp: false
     content_type: text/csv
   run_groups_csv:
     cmd: ./run_groups_csv.bash
-    name: groups.csv
+    basename: groups
     append_datestamp: false
     content_type: text/csv

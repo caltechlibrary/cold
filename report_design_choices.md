@@ -21,7 +21,9 @@ If the request is valid then several things need to happen.
 - if the report executes successfully the request record should be updated wiht the status of "available" and the link
 - if there are email(s) associated with the request a message needs to be sent out with the report name, final status and link if available or error message if not
 
+Reports are programs or scripts (e.g. Bash, Python) that write their results to standard output, the runner reads that and takes care of saving the results and contacting the email addresses.
 
+I've prototyped the report runner in TypeScript but am not happy with it. I am deciding if I should write this in Go or give Python a try.
 
 I'm thinking reports could be simple script written in any langauge that write their output to standard out. The runner should be responsible for taking that output and writing it to an appropriate place (e.g. Google Drive).
 
@@ -66,9 +68,5 @@ The problem is the NAS might be mounted in different ways on each person's compu
 
 Example "file://datawork.library.caltech.edu/Sites/feeds_v1.6/htdocs/people/people.csv" while eventually it'll get to "https://feeds.library.caltech.edu/people/people.csv" that isn't helpful when an end user wants a current, clickable link to see the report right at the point of creation.
 
-I will need to decide where to write the intial report data before I proceed.
 
-The report runner server should run as a systemd service.
-
-I've prototyped the report runner in TypeScript but am not happy with it. 
-
+I've written a prototype in TypeScript compiled with Deno.   Creating webservices that take advantage of concurrency is more convoluted in TypeScript (e.g. need to use service workers) than Go.  The report runner server should run as a systemd service. It is easy to implement a sequencial report runner in TypeScript but since reports can sometimes take hours to complete this isn't ideal. Taking advantage of concurrency in TypeScript means using service works. Given that case it makes more sense in writing the report runner in Go and taking advantage of Go's maturity in concurrency and as a service platform.

@@ -110,7 +110,6 @@ export interface ReportInterface {
   id: string;
   report_name: string;
   options: string[];
-  content_type: string;
   emails: string;
   requested: string;
   updated: string;
@@ -126,7 +125,6 @@ export class Report implements ReportInterface {
   id: string = "";
   report_name: string = "";
   options: string[] = [];
-  content_type: string = "";
   emails: string = "";
   requested: string = "";
   updated: string = "";
@@ -145,7 +143,6 @@ export class Report implements ReportInterface {
     const content_type = parts.length > 1 ? parts[1].trim() : "text/plain";
 
     this.report_name = report_name;
-    this.content_type = content_type;
     this.options = "options" in o ? o.options as unknown[] as string[] : [];
     this.emails = "emails" in o ? `${o.emails}` : ``;
     const now = new Date();
@@ -171,7 +168,6 @@ export class Report implements ReportInterface {
       updated: this.updated,
       expire: this.expire,
       status: this.status,
-      content_type: this.content_type,
       link: this.link,
     };
   }
@@ -347,21 +343,35 @@ async function handleReportRequest(
 interface RunnableInterface {
   cmd: string;
   options: string[];
+  basename: string;
+  content_type: string;
+  append_datestamp: boolean;
   final_status: string;
   link: string;
 }
 
 class Runnable implements RunnableInterface {
-  readonly cmd: string;
+  cmd: string;
   options: string[];
+  basename: string;
+  content_type: string;
+  append_datestamp: boolean;
   final_status: string;
   link: string;
 
-  constructor(cmd: string) {
+  constructor(
+    cmd: string,
+    basename: string,
+    append_datestamp: boolean,
+    content_type: string,
+  ) {
     this.cmd = cmd;
     this.options = [];
     this.final_status = "";
     this.link = "";
+    this.basename = basename;
+    this.append_datestamp = append_datestamp;
+    this.content_type = content_type;
   }
 
   // Run executables the program implementing the report. It's calling out to the operating system to run it.
@@ -369,14 +379,57 @@ class Runnable implements RunnableInterface {
   // empty string or short error message using the protocol `error://`.
   async run(options: string[]): Promise<string> {
     //FIXME: Need to execute command line program and capture result link or error message from standard out then hand it back.
-    console.log(`Running: ${this.cmd}`);
+    //console.log(`Running: ${this.cmd}`);
     let txt: string;
     try {
-      txt = await $`${this.cmd}`.lines();
-    } catch(err) {
+      txt = await $`${this.cmd}`.text();
+    } catch (err) {
       txt = "error://" + err;
     }
-    return txt;
+
+    // the URL would be returned by the runner when final desitantion is available.
+    let filename: string = this.basename;
+    let ext: string = ".txt";
+    switch (this.content_type) {
+      case "text/plain":
+        ext = ".txt";
+        break;
+      case "text/csv":
+        ext = ".csv";
+        break;
+      case "application/json":
+        ext = ".json";
+        break;
+      case "text/markdown":
+        ext = ".md";
+        break;
+      case "application/yaml":
+        ext = ".yaml";
+        break;
+      default:
+        ext = "";
+        break;
+    }
+    console.log("DEBUG file extension set to ", ext, this.content_type);
+    if (this.append_datestamp) {
+      let datestamp = (new Date()).toJSON().substring(0, 10);
+      filename = `${this.basename}_${datestamp}${ext}`;
+    } else {
+      filename = `${this.basename}${ext}`;
+    }
+    console.log("DEBUG filename should be", filename);
+
+    // FIXME: output of  should be read in by the runner so that the report can be rendering to a URL location, then write out the file.
+    const basedir: string = "./htdocs/rpt";
+    const base_url: string = "rpt";
+    const utf8Encoder = new TextEncoder();
+    const data = utf8Encoder.encode(txt);
+    try {
+      await Deno.writeFile(`${basedir}/${filename}`, data, { create: true });
+    } catch (err) {
+      return "error://" + err;
+    }
+    return `${base_url}/${filename}`;
   }
 }
 
@@ -389,7 +442,9 @@ class Runner implements RunnerInterface {
 
   constructor(config_yaml: string) {
     const src = Deno.readTextFileSync(config_yaml);
-    const cfg = yaml.parse(src) as { [key: string]: { [key: string]: string } };
+    const cfg = yaml.parse(src) as {
+      [key: string]: { [key: string]: Runnable };
+    };
     console.log(`DEBUG cfg.reports ${typeof cfg.reports}:\n\t`, cfg.reports);
     if (cfg.reports !== undefined) {
       for (const [k, v] of Object.entries(cfg.reports)) {
@@ -397,10 +452,15 @@ class Runner implements RunnerInterface {
           `DEBUG cfg.reports ${typeof cfg.reports[k]}:\n\t`,
           cfg.reports[k],
         );
-        if (v === "") {
+        if (v === undefined) {
           continue;
         }
-        this.report_map[k] = new Runnable(v);
+        this.report_map[k] = new Runnable(
+          v.cmd,
+          v.basename,
+          v.append_datestamp,
+          v.content_type,
+        );
       }
     }
   }
@@ -434,13 +494,9 @@ async function process_request(
     request.link = link; /*link.replace("error://", "");*/
     request.status = "error";
     request.updated = (new Date()).toJSON();
-  } else if (link.indexOf("://") > -1 ) {
+  } else {
     request.link = link;
     request.status = "completed";
-    request.updated = (new Date()).toJSON();
-  } else {
-    request.link = "unknown error";
-    request.status = "error";
     request.updated = (new Date()).toJSON();
   }
   return (await ds.update(id, request));
@@ -485,7 +541,7 @@ async function servicing_requests(runner: Runner): Promise<void> {
 async function report_runner(config_yaml: string): Promise<number> {
   try {
     await Deno.lstat(config_yaml);
-  } catch(err) {
+  } catch (err) {
     console.log(err);
     return 1;
   }
@@ -536,9 +592,12 @@ async function main(): Promise<void> {
     config_yaml = "reports.yaml";
   }
   // Start up the service.
-  setInterval(await (async function() {
-    await report_runner(config_yaml);
-  }), 10000);
+  setInterval(
+    await (async function () {
+      await report_runner(config_yaml);
+    }),
+    10000,
+  );
 }
 
 // Run main()
