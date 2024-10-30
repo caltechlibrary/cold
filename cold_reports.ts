@@ -267,11 +267,6 @@ async function handleReportRequest(
     const rpt = new Report();
     const ok = await rpt.request_report(obj);
     if (ok) {
-      /*
-      console.log(
-        `DEBUG report request object -> ${rpt.toJSON()}`,
-      );
-      */
       // We want to create the record and return success. If the record
       // has already been created then we should distriguish that error from
       // other types of error.
@@ -412,14 +407,14 @@ class Runnable implements RunnableInterface {
         ext = "";
         break;
     }
-    console.log("DEBUG file extension set to ", ext, this.content_type);
+    console.log("INFO: file extension set to ", ext, this.content_type);
     if (this.append_datestamp) {
       let datestamp = (new Date()).toJSON().substring(0, 10);
       filename = `${this.basename}_${datestamp}${ext}`;
     } else {
       filename = `${this.basename}${ext}`;
     }
-    console.log("DEBUG filename should be", filename);
+    console.log("INFO: filename should be", filename);
 
     // FIXME: output of  should be read in by the runner so that the report can be rendering to a URL location, then write out the file.
     const basedir: string = "./htdocs/rpt";
@@ -447,7 +442,6 @@ class Runner implements RunnerInterface {
     const cfg = yaml.parse(src) as {
       [key: string]: { [key: string]: Runnable };
     };
-    //console.log(`DEBUG cfg.reports ${typeof cfg.reports}:\n\t`, cfg.reports);
     if (cfg.reports !== undefined) {
       for (const [k, v] of Object.entries(cfg.reports)) {
         if (v === undefined) {
@@ -474,9 +468,9 @@ async function process_request(
   // I want a copy of the object passed in so that response doesn't .
   request.status = "processing";
   request.updated = (new Date()).toJSON();
-  console.log("DEBUG updated request object to processing", request);
+  console.log("INFO: updated request object to processing", request);
   if (await ds.update(request.id, request)) {
-    console.log("DEBUG launching request", request);
+    console.log("INFO: launching request", request);
   } else {
     console.log(
       `ERROR: updated of request ${request} failed, aborting request runner`,
@@ -502,11 +496,9 @@ async function process_request(
 
 // servicing_requests checks the reports table, gets a list of pending requests, invokes process_request
 async function servicing_requests(runner: Runner): Promise<void> {
-  console.log("DEBUG entered servicing_requests with Runner", runner);
+  console.log("INFO: entered servicing_requests with Runner", runner);
   let requests = await ds.query("next_request", [], {}) as Report[];
-  console.log("DEBUG requests -> ??", typeof requests, requests);
   if (requests.length > 0) {
-    console.log(`DEBUG we have ${requests.length} requests ...`);
     for (let request of requests) {
       let report_name = request.report_name;
       let cmd = runner.report_map[report_name];
@@ -548,9 +540,8 @@ async function report_runner(config_yaml: string): Promise<number> {
   if (runner === undefined) {
     return 1;
   }
-  console.log("DEBUG runner to should exist now", runner);
   await servicing_requests(runner);
-  console.log("DEBUG caught up on requests");
+  console.log("INFO: caught up on requests");
   return 0;
 }
 

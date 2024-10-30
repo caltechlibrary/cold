@@ -6,8 +6,8 @@ import {
   apiPort,
   csv_parse,
   Dataset,
-//  DatasetApiClient,
-//  People,
+  //  DatasetApiClient,
+  //  People,
 } from "./deps.ts";
 import { PeopleInterface } from "./people.ts";
 
@@ -27,7 +27,7 @@ function normalize_to_boolean(val: boolean | undefined): boolean {
 
 /**
  * setAdvisorIds takes a corrected people.csv and adds the advisors_id appropriately.
- * 
+ *
  * @param {number} port is the port number where datasetd is running, e.g. 8485
  * @param {string} c_name is the name of the dataset collection
  * @param {string} csv_file is the name of the CSV file to import
@@ -66,15 +66,17 @@ async function setAdvisorIds(
       if (obj === undefined) {
         error_count++;
       } else if (typeof obj === "object") {
-        let advisors_id: string = ""; 
+        let advisors_id: string = "";
         if (sheet[i].hasOwnProperty("advisor_id")) {
-          advisors_id = sheet[i].advisor_id; 
+          advisors_id = sheet[i].advisor_id;
           console.log(`DEBUG found advisors_id ${advisors_id} for ${clpid}`);
-          if (advisors_id !== undefined && advisors_id !== "" ) {
+          if (advisors_id !== undefined && advisors_id !== "") {
             obj.advisors_id = advisors_id;
             const ok = await ds.update(clpid, obj);
             if (!ok) {
-              console.log(`failed to update advisor_id ${advisors_id} for ${clpid}`);
+              console.log(
+                `failed to update advisor_id ${advisors_id} for ${clpid}`,
+              );
               error_count++;
             } else {
               success_count++;
