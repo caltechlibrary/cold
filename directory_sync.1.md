@@ -1,6 +1,6 @@
-%directory_sync(1) user manual | 0.0.11 2024-10-30 44588af
+%directory_sync(1) user manual | 0.0.11 2024-10-30 105775a
 % R. S.Doiel
-% 2024-10-30 44588af
+% 2024-10-30 105775a
     
 # NAME
     
