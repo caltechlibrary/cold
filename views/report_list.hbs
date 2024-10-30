@@ -25,18 +25,16 @@ This is a demo of running reports. Not fully implemented yet.
   <option value="run_people_csv">Generate People CSV File</option>
   <option value="run_groups_csv">Generate Groups CSV File</option>
 </select>
+<!-- <label set="emails">Email notification(s)</label>
+<input type="text" id="emails" name="emails" placeholder="rsdoiel@caltech.edu" /> -->
+<input type="submit" id="submit" name="submit" value="Request Report">
 </div>
 
 <!--
 <div>
-<label set="emails">Email notification(s)</label>
-<input type="text" id="emails" name="emails" placeholder="rsdoiel@caltech.edu" />
 </div>
 -->
 
-<div>
-<input type="submit" id="submit" name="submit" value="Request Report">
-</div>
 </form>
 </section>
 <hr>
@@ -46,7 +44,7 @@ This is a demo of running reports. Not fully implemented yet.
 <table>
   <tr>
     <th>Requested</th>
-    <th>Notify</th>
+<!--    <th>Notify</th> -->
     <th>Report Name</th>
     <th>Status</th>
     <th>Link</th>
@@ -54,7 +52,7 @@ This is a demo of running reports. Not fully implemented yet.
 {{#report_list}}
   <tr>
     <td>{{requested}}</td>
-    <td>{{emails}}</td>
+<!--    <td>{{emails}}</td> -->
     <td>{{report_name}}</td>
     <td>{{status}}</td>
     <td>{{#if link}}<a href="{{link}}" target="_blank">{{link}}</a>{{/if}}</td>
