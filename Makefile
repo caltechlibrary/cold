@@ -142,7 +142,7 @@ clean:
 	if [ -d dist ]; then rm -fR dist/*; fi
 
 release: clean build man website distribute_docs dist/Linux-x86_64 dist/Linux-aarch64 dist/macOS-x86_64 dist/macOS-arm64 dist/Windows-x86_64
-	./release.bash
+	echo "Ready to do ./release.bash"
 
 setup_dist: .FORCE
 	@rm -fR dist
@@ -161,31 +161,31 @@ distribute_docs: website man setup_dist
 dist/Linux-x86_64: .FORCE
 	@mkdir -p dist/bin
 	deno task release_linux_x86_64
-	@cd dist && zip -r $(PROJECT)-v$(VERSION)-Linux-x86_64.zip LICENSE codemeta.json CITATION.cff *.md $(DIST_FOLDERS)
+	@cd dist && zip -r $(PROJECT)-v$(VERSION)-Linux-x86_64.zip LICENSE codemeta.json CITATION.cff *.md bin/*
 	@rm -fR dist/bin
 
 dist/Linux-aarch64: .FORCE
 	@mkdir -p dist/bin
 	deno task release_linux_aarch64
-	@cd dist && zip -r $(PROJECT)-v$(VERSION)-Linux-aarch64.zip LICENSE codemeta.json CITATION.cff *.md $(DIST_FOLDERS)
+	@cd dist && zip -r $(PROJECT)-v$(VERSION)-Linux-aarch64.zip LICENSE codemeta.json CITATION.cff *.md bin/*
 	@rm -fR dist/bin
 
 dist/macOS-x86_64: .FORCE
 	@mkdir -p dist/bin
 	deno task release_macos_x86_64
-	@cd dist && zip -r $(PROJECT)-v$(VERSION)-macOS-x86_64.zip LICENSE codemeta.json CITATION.cff *.md $(DIST_FOLDERS)
+	@cd dist && zip -r $(PROJECT)-v$(VERSION)-macOS-x86_64.zip LICENSE codemeta.json CITATION.cff *.md bin/*
 	@rm -fR dist/bin
 
 dist/macOS-arm64: .FORCE
 	@mkdir -p dist/bin
 	deno task release_macos_aarch64
-	@cd dist && zip -r $(PROJECT)-v$(VERSION)-macOS-arm64.zip LICENSE codemeta.json CITATION.cff *.md $(DIST_FOLDERS)
+	@cd dist && zip -r $(PROJECT)-v$(VERSION)-macOS-arm64.zip LICENSE codemeta.json CITATION.cff *.md bin/*
 	@rm -fR dist/bin
 
 dist/Windows-x86_64: .FORCE
 	@mkdir -p dist/bin
 	@for FNAME in $(PROGRAMS); do deno compile --allow-import --allow-read --allow-net  --output "dist/bin/$${FNAME}.exe" --target x86_64-pc-windows-msvc cold_admin.ts "$${FNAME}.ts"; done
-	@cd dist && zip -r $(PROJECT)-v$(VERSION)-Windows-x86_64.zip LICENSE codemeta.json CITATION.cff *.md $(DIST_FOLDERS)
+	@cd dist && zip -r $(PROJECT)-v$(VERSION)-Windows-x86_64.zip LICENSE codemeta.json CITATION.cff *.md bin/*
 	@rm -fR dist/bin
 
 
