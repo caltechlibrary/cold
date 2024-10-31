@@ -4,8 +4,8 @@
 # Cleanup Reports will looks for stale reports and removed them from reports.ds and from htdocs/rpt path.
 #
 
-# Remove all but the latest run_people_csv reports.
-function prune_updated_reports () {
+# Remove all but the latest run_people_csv and run_groups_csv reports.
+function prune_standard_reports () {
     REPORT_NAME="$1"
     LINK="$2"
     echo "REPORT_NAME -> ${REPORT_NAME}"
@@ -19,12 +19,9 @@ delete from reports
     order by updated desc
     limit 1000 offset 1);
 SQL
-
-        #cat "prune_${REPORT_NAME}.sql"
-
         sqlite3 reports.ds/collection.db ".read prune_${REPORT_NAME}.sql"
     fi
 }
 
-prune_updated_reports "run_people_csv" "rpt/people.csv"
-prune_updated_reports "run_groups_csv" "rpt/groups.csv"
+prune_standard_reports "run_people_csv" "rpt/people.csv"
+prune_standard_reports "run_groups_csv" "rpt/groups.csv"
