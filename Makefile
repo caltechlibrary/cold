@@ -184,7 +184,7 @@ dist/macOS-arm64: .FORCE
 
 dist/Windows-x86_64: .FORCE
 	@mkdir -p dist/bin
-	@for FNAME in $(PROGRAMS); do deno compile --allow-import --allow-read --allow-net  --output "dist/bin/$${FNAME}.exe" --target x86_64-pc-windows-msvc cold_admin.ts "$${FNAME}.ts"; done
+	deno task release_windows_x86_64
 	@cd dist && zip -r $(PROJECT)-v$(VERSION)-Windows-x86_64.zip LICENSE codemeta.json CITATION.cff *.md bin/*
 	@rm -fR dist/bin
 
