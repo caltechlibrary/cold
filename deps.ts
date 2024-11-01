@@ -11,7 +11,6 @@ export { assert, assertStrictEquals } from "@std/assert";
 export { walk } from "@std/fs";
 
 /* Deno stuff that isn't jsr */
-export { SmtpClient } from "https://deno.land/x/smtp/mod.ts";
 export * as common_mark from "https://deno.land/x/rusty_markdown/mod.ts";
 export { extractYaml } from "@std/front-matter";
 

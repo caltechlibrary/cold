@@ -5,6 +5,7 @@ import { NAMESPACE_URL } from "@std/uuid/constants";
 import { v5 } from "@std/uuid";
 import * as yaml from "@std/yaml";
 import { $ } from "@david/dax";
+import { send_email } from "./send_mail.ts";
 
 import {
   apiPort,
@@ -416,8 +417,9 @@ class Runnable implements RunnableInterface {
     }
     console.log("INFO: filename should be", filename);
 
-    // FIXME: output of  should be read in by the runner so that the report can be rendering to a URL location, then write out the file.
+    // FIXME: output location for report should not be hardcoded.
     const basedir: string = "./htdocs/rpt";
+    // FIXME: base URL of report should not be hardcoded
     const base_url: string = "rpt";
     const utf8Encoder = new TextEncoder();
     const data = utf8Encoder.encode(txt);
@@ -490,6 +492,10 @@ async function process_request(
     request.link = link;
     request.status = "completed";
     request.updated = (new Date()).toJSON();
+  }
+  if (request.emails !== undefined && request.emails !== "") {
+    //FIXME: the URL should not be hard coded
+    await send_email(request.emails, request.report_name, `report request: ${request.status} <https://apps.library.caltehc.edu/${request.link}> ${request.updated}`);
   }
   return (await ds.update(id, request));
 }

@@ -26,5 +26,16 @@ SQL
     fi
 }
 
+# Remove all tail processing reports.
+function prune_stale_processing_reports() {
+    cat <<SQL >"prune_stale_processing_reports.sql"
+update reports set src = json_patch(src, json_object('status', 'error', 'updated', strftime('%FT%R:%fZ'))),
+                   updated = strftime('%F %T')
+  where src->>'status' = 'processing' and updated <= date('now', '-24 hours');
+SQL
+    sqlite3 reports.ds/collection.db ".read prune_stale_processing_reports.sql"
+}
+
 prune_standard_reports "run_people_csv" "rpt/people.csv"
 prune_standard_reports "run_groups_csv" "rpt/groups.csv"
+prune_stale_processing_reports 
