@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <meta name="author" content="R. S. Doiel, rsdoiel@caltech.edu" />
+  <meta name="date" content="2024-11-15" />
+  <meta name="keywords" content="code4lib, microservice, SQLite3, Deno, TypeScript, Dataset" />
+  <title>COLD - curating objects with SQLite3, Deno and Dataset</title>
+  <style type="text/css">
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" type="text/css" media="screen, projection, print"
+    href="https://www.w3.org/Talks/Tools/Slidy2/styles/slidy.css" />
+  <script src="https://www.w3.org/Talks/Tools/Slidy2/scripts/slidy.js"
+    charset="utf-8" type="text/javascript"></script>
+</head>
+<body>
+<div class="slide titlepage">
+  <h1 class="title">COLD - curating objects with SQLite3, Deno and
+Dataset</h1>
+  <p class="author">
+R. S. Doiel, <a href="mailto:rsdoiel@caltech.edu"
+class="email">rsdoiel@caltech.edu</a>
+  </p>
+  <p class="institute">
+<p>Caltech Library, Digital Library Development</p>
+  </p>
+  <p class="date">November 15, 2024</p>
+</div>
+<div class="slide" id="TOC">
+
+</div>
+<div id="cold---curating-objects-with-sqlite3-deno-and-dataset"
+class="slide section level1">
+<h1>COLD - curating objects with SQLite3, Deno and Dataset</h1>
+<p>COLD is an application for curating collections of objects at Caltech
+Library</p>
+<p>Object facilitate cross walking data between systems</p>
+</div>
+<div id="we-out-grew-our-spreadsheets" class="slide section level1">
+<h1>We out grew our spreadsheets</h1>
+<ul>
+<li>We used to manage lists of Caltech People and Groups in CSV
+files</li>
+<li>CSV files are easy to process with scripts</li>
+<li>Our people list had grown to over 32 columns and 8900 rows</li>
+<li>It was time for an app to manage that many rows</li>
+</ul>
+</div>
+<div id="a-quick-tour-of-cold" class="slide section level1">
+<h1>A quick tour of COLD</h1>
+<p>Our COLD pilot deployment, https://apps.library.caltech.edu/cold/</p>
+</div>
+<div id="an-off-the-shelf-stack" class="slide section level1">
+<h1>An “Off the shelf” stack</h1>
+<ul>
+<li><a href="https://deno.org">Deno</a> compiles TypeScript to
+middleware executables</li>
+<li><a href="https://caltechlibrary.github.io/dataset">Dataset</a>
+provides a JSON API to manage objects</li>
+<li><a href="https://sqlite.org">SQLite3</a> is our storage engine</li>
+</ul>
+</div>
+<div id="cold-is-built-from-three-services"
+class="slide section level1">
+<h1>COLD is built from three services</h1>
+<ol style="list-style-type: decimal">
+<li>cold (typescript, web UI)</li>
+<li>cold_api (datasetd, back end JSON API)</li>
+<li>cold_reports (typescript, back end report runner)</li>
+</ol>
+</div>
+<div id="our-app-layout" class="slide section level1">
+<h1>Our app layout</h1>
+<ul>
+<li>Dataset manages collections of objects via JSON API</li>
+<li>Middle ware, written in TypeScript, provides web UI and report
+runner</li>
+<li>A Front end web server integrates with Campus single sign on and
+controls access</li>
+</ul>
+</div>
+<div id="tooling-to-build" class="slide section level1">
+<h1>Tooling to build</h1>
+<ul>
+<li>Text editor</li>
+<li>Deno as REPL, compiler and task runner</li>
+<li>Dataset to manage JSON documents</li>
+<li>SQLite3 REPL to inspectored stored objects</li>
+<li>Web browser for reference documentation and testing app</li>
+</ul>
+</div>
+<div id="what-is-deno" class="slide section level1">
+<h1>What is Deno?</h1>
+<ul>
+<li>Deno is a runtime for TypeScript and JavaScript</li>
+<li>Deno runs secure by default</li>
+<li>Deno supports ES6 modules</li>
+<li>TypeScript runs natively in Deno</li>
+</ul>
+</div>
+<div id="why-deno" class="slide section level1">
+<h1>Why Deno?</h1>
+<ul>
+<li>Deno provides
+<ul>
+<li>REPL</li>
+<li>A rich standard library</li>
+<li>task manager</li>
+<li>linter</li>
+<li>formatter</li>
+<li>compiler</li>
+<li>package management</li>
+</ul></li>
+<li>ES6 Modules can be hosted anywhere</li>
+</ul>
+</div>
+<div id="why-compile-typescript-applications"
+class="slide section level1">
+<h1>Why compile TypeScript applications?</h1>
+<ul>
+<li>Deno doesn’t need to be installed on app server</li>
+<li>Executables are trivial to install</li>
+<li>Executables avoid library version problems</li>
+<li>Simplifies (systemd) service configuration</li>
+<li>Improves performance over interpreted TypeScript</li>
+</ul>
+</div>
+<div id="what-is-dataset" class="slide section level1">
+<h1>What is Dataset?</h1>
+<ul>
+<li>Dataset is a JSON object manager</li>
+<li>Implemented at Caltech Library, available via GitHub
+<ul>
+<li><a href="https://github.com/caltechlibrary/dataset"
+class="uri">https://github.com/caltechlibrary/dataset</a></li>
+</ul></li>
+<li>Runs on Linux, macOS and Windows</li>
+<li>Supports ARM64 and x86_64 architectures</li>
+<li>Open Source under a BSD like license</li>
+</ul>
+</div>
+<div id="why-dataset" class="slide section level1">
+<h1>Why Dataset?</h1>
+<ul>
+<li>Dataset supports managing JSON documents as collections</li>
+<li>Supports multiple storage engines (SQLite3, MySQL and Postgres)</li>
+<li>Provides a localhost JSON API managing collections</li>
+</ul>
+</div>
+<div id="developing-with-deno-and-dataset" class="slide section level1">
+<h1>Developing with Deno and Dataset</h1>
+<ul>
+<li>Deno supports an interactive development approach</li>
+<li>Deno tasks can “watch” and restart</li>
+<li>Deno tasks can “build” your executables</li>
+<li>Dataset provides a turn key micro service for managing JSON
+objects</li>
+</ul>
+</div>
+<div id="developing-workflow" class="slide section level1">
+<h1>Developing workflow</h1>
+<ul>
+<li>tmux to split the terminal window four ways</li>
+<li>in three windows launch deno tasks to start the service</li>
+<li>in fourth window interact and edit code</li>
+<li>Use SQLite3 to get a low level SQL view of your storaged
+objects</li>
+</ul>
+</div>
+<div id="producing-an-release-workflow" class="slide section level1">
+<h1>Producing an release workflow</h1>
+<ul>
+<li>Compile cold_admin and cold_reports</li>
+<li>Copy binaries to remote system</li>
+<li>Make sure dataset is available, if not install appropriate
+versison</li>
+<li>Configure and launch cold, cold_api and cold_reports via
+systemd</li>
+</ul>
+</div>
+<div id="configuration-files" class="slide section level1">
+<h1>Configuration files</h1>
+<ul>
+<li>YAML, configuration datasetd</li>
+<li>YAML, configuration cold_reports</li>
+<li>TOML, systemd service files</li>
+</ul>
+</div>
+<div id="take-away" class="slide section level1">
+<h1>Take away</h1>
+<ul>
+<li>Deno with TypeScript has many of the advantages Go based
+projects</li>
+<li>Developing with Deno provides the fluidity of interpreted
+languages</li>
+<li>TypeScript to JavaScript story faciliates code reuse on server and
+in browser</li>
+<li>Deno avoids many of the problems of developing with NodeJS</li>
+<li>SQLite3 may remove the need to run a database management system</li>
+<li>Having a common microservice API</li>
+</ul>
+</div>
+<div id="plans-for-the-future" class="slide section level1">
+<h1>Plans for the future</h1>
+<ul>
+<li>Support managing RDM vocabularies</li>
+<li>Support reporting beyond COLD collections</li>
+<li>Integrate with GitHub actions</li>
+</ul>
+</div>
+<div id="reference-urls" class="slide section level1">
+<h1>Reference URLs</h1>
+<ul>
+<li>COLD, <a href="https://github.com/caltechlibrary/cold"
+class="uri">https://github.com/caltechlibrary/cold</a></li>
+<li>Deno, <a href="https://deno.com" class="uri">https://deno.com</a>
+and <a href="https://github.com/denoland/deno"
+class="uri">https://github.com/denoland/deno</a></li>
+<li>Deno’s standard modules, <a href="https://jsr.io/@std"
+class="uri">https://jsr.io/@std</a></li>
+<li>JavaScript, <a
+href="https://developer.mozilla.org/en-US/docs/Web/JavaScript"
+class="uri">https://developer.mozilla.org/en-US/docs/Web/JavaScript</a></li>
+<li>TypeScript, <a href="https://www.typescriptlang.org/"
+class="uri">https://www.typescriptlang.org/</a></li>
+<li>Dataset, <a href="https://caltechlibrary.github.io/dataset"
+class="uri">https://caltechlibrary.github.io/dataset</a> and <a
+href="https://github.com/caltechlibrary/dataset"
+class="uri">https://github.com/caltechlibrary/dataset</a></li>
+</ul>
+</div>
+</body>
+</html>
