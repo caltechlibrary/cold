@@ -1,3 +1,4 @@
+report_directory: ./htdocs/rpt
 reports:
   run_people_csv:
     cmd: ./run_people_csv.bash
