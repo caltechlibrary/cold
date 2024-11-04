@@ -495,7 +495,11 @@ async function process_request(
   }
   if (request.emails !== undefined && request.emails !== "") {
     //FIXME: the URL should not be hard coded
-    await send_email(request.emails, request.report_name, `report request: ${request.status} <https://apps.library.caltehc.edu/${request.link}> ${request.updated}`);
+    await send_email(
+      request.emails,
+      request.report_name,
+      `report request: ${request.status} <https://apps.library.caltech.edu/cold/${request.link}> ${request.updated}`,
+    );
   }
   return (await ds.update(id, request));
 }
