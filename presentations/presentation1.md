@@ -28,7 +28,7 @@ COLD is an application for curating collections of metadata objects at Caltech L
 - managing vocabularies
 - aggregate reporting
 
-# Before CODL we used spreadsheets
+# Before COLD we used spreadsheets
 
 - Advantages
   - Staff understand spreadsheets
@@ -77,8 +77,8 @@ Our COLD pilot deployment, https://apps.library.caltech.edu/cold/
 # COLD is built as three services
 
 1. cold_api (datasetd, back end JSON API)
-2. cold (typescript middleware, web UI)
-3. cold_reports (typescript report runner service)
+2. cold (TypeScript middleware, web UI)
+3. cold_reports (TypeScript report runner service)
 
 # Roles for the services
 
@@ -101,7 +101,7 @@ Our COLD pilot deployment, https://apps.library.caltech.edu/cold/
 
 - Deno is
   - a runtime for TypeScript and JavaScript
-  - a toolbox for developing in TypeScript applications
+  - a toolbox for developing TypeScript applications
   - a compiler
 
 # Why Deno? (Why not NodeJS?)
@@ -114,12 +114,12 @@ Our COLD pilot deployment, https://apps.library.caltech.edu/cold/
 
 # Why TypeScript?
 
-- TypeScript is a supperset of JavaScript
+- TypeScript is a superset of JavaScript
   - Less to learn, essentially an "upskill" of your JavaScript knowledge
 - Typed langauges have advantages when developing more complex applications
 - Typed langauges tend to do better when compiled
 
-# Why compiled Typescript?
+# Why compiled TypeScript?
 
 - Deno doesn't need to be installed on app server
 - Executables are trivial to install
@@ -197,5 +197,5 @@ Our COLD pilot deployment, https://apps.library.caltech.edu/cold/
 - Deno's standard modules, <https://jsr.io/@std>
 - [Why did Ryan Dahl, creator of NodeJS, create Deno?](https://stackoverflow.blog/2024/03/19/why-the-creator-of-node-js-r-created-a-new-javascript-runtime/)
 - JavaScript, <https://developer.mozilla.org/en-US/docs/Web/JavaScript>
-- TypeScript, <https://www.typescriptlang.org/>
+- TypeScript, <https://www.TypeScriptlang.org/>
 - Dataset, <https://caltechlibrary.github.io/dataset> and <https://github.com/caltechlibrary/dataset>
