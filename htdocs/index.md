@@ -11,6 +11,8 @@ COLD lets you manage Caltech People, Groups and Funders used in Caltech Library'
 
 - [People](./people/)
 - [Groups](./groups/)
+
+<!-- TO BE IMPLEMENTED 
 - [Funders](./funders/)
 
 It also lets you manage lists of subjects, issn mappings to cannonical names and doi prefixes.
@@ -18,6 +20,7 @@ It also lets you manage lists of subjects, issn mappings to cannonical names and
 - [Subjects](./subjects/)
 - [ISSN Mapping](./issn/)
 - [DOI Prefix](./doi_prefix/)
+-->
 
 ## Tools
 
