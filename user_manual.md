@@ -11,4 +11,5 @@
 - [cold_reports](cold_reports.1.md) (man page)
 - [directory_sync](directory_sync.1.md) (man page)
 - [devemopment notes](development_notes.md)
+- [presentations](presentations/)
 
