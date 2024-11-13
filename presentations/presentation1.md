@@ -52,7 +52,7 @@ COLD is an application for curating collections of metadata objects at Caltech L
 
 # A quick tour of COLD
 
-Our COLD pilot deployment, https://apps.library.caltech.edu/cold/
+Our COLD pilot deployment, <https://apps.library.caltech.edu/cold/>
 
 # Development approach
 

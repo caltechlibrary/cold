@@ -117,6 +117,7 @@ save:
 
 website: $(HTML_PAGES) .FORCE
 	make -f website.mak
+	cd presentations && make || exit 1
 
 publish: website .FORCE
 	./publish.bash
@@ -187,7 +188,5 @@ dist/Windows-x86_64: .FORCE
 	deno task release_windows_x86_64
 	@cd dist && zip -r $(PROJECT)-v$(VERSION)-Windows-x86_64.zip LICENSE codemeta.json CITATION.cff *.md bin/*
 	@rm -fR dist/bin
-
-
 
 .FORCE:
