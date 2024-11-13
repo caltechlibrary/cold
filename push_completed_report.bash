@@ -4,7 +4,9 @@
 # Push compelted report takes a report name and link path and creates/replaces the
 # record in the reports.ds collection.
 #
-
+if [ -d /Sites/cold ]; then
+    cd /Sites/cold
+fi
 
 
 #{
