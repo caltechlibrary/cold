@@ -1,5 +1,5 @@
 ---
-title: COLD - curating objects with SQLite3, Deno and Dataset
+title: COLD - curating objects with Deno, Dataset and SQLite3
 author: "R. S. Doiel, <rsdoiel@caltech.edu>"
 institute: |
   Caltech Library,
@@ -20,30 +20,42 @@ keywords: [ "code4lib", "microservice", "SQLite3", "Deno", "TypeScript", "Datase
 url: "https://caltechlibrary.github.io/cold/presentation"
 ---
 
-# COLD - curating objects with SQLite3, Deno and Dataset
+# COLD - curating objects with Deno, Dataset and SQLite3
 
 COLD is an application for curating collections of metadata objects at Caltech Library
 
-- crosswalk data
-- managing vocabularies
-- aggregate reporting
+These are used for...
+
+- crosswalking data
+- aggregated reporting
+- generated RDM vocabularies
+
+# COLD - curating objects with Deno, Dataset and SQLite3
+
+COLD
+: Controlled Object Lists and Datum
 
 # Before COLD we used spreadsheets
 
 - Advantages
   - Staff understand spreadsheets
   - CSV files are easy to process and version control
-- Big Problem
+- Disadvantages
   - Our people list had grown to over 32 columns and 8900 rows
-  - Developers wound up maintaining the spreadsheet
+  - It required developers to manage and maintain the spreadsheet
 
-# Desired features
+# Requirements
 
-- Simple curation of metadata object lists
-- Act as a data source for <https://feeds.library.caltech.edu> (feeds is our public API)
-- Provide an ability to easily manage vocabularies (work in progress)
-- Be easy for other developers to maintain and enhance
-- Must integrate with campus Single Sign On for access control
+- Provide a **simple way** to curate metadata object collections
+- Provide a data source for <https://feeds.library.caltech.edu>
+- Provide a means of generating RDM vocabularies
+- Integrate with campus Single Sign On for access control
+
+# Deliverables
+
+- A web UI for curating objects
+- A reports system
+- Integration points for RDM and Feeds
 
 # Project status
 
@@ -54,18 +66,19 @@ COLD is an application for curating collections of metadata objects at Caltech L
 
 Our COLD pilot deployment, <https://apps.library.caltech.edu/cold/>
 
-# Development approach
+# Development history
 
 - Multiple prototypes with differing implementation choices
-  - Python and PostgreSQL via Flask/ORM
+  - Python and PostgreSQL via Flask/ORM (abandoned)
   - Go plus SQLite3 and browser side JavaScript
   - Go, PostgreSQL+PostgREST and browser side JavaScript (abandoned)
   - Dataset, SQLite3 and TypeScript middleware (three microservices)
+- Currently running a pilot version based on Dataset, SQLite3 and TypeScript and middleware
 
 # Role of prototyping
 
 - I used the prototypes as a sounding board for requirements and features
-- Incrementally worked towards a "production pilot" (current stage)
+- I incrementally worked towards a "production pilot" (current stage)
 
 # My "Off the shelf" stack
 

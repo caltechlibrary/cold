@@ -9,7 +9,7 @@
   <meta name="author" content="R. S. Doiel, rsdoiel@caltech.edu" />
   <meta name="date" content="2024-11-15" />
   <meta name="keywords" content="code4lib, microservice, SQLite3, Deno, TypeScript, Dataset" />
-  <title>COLD - curating objects with SQLite3, Deno and Dataset</title>
+  <title>COLD - curating objects with Deno, Dataset and SQLite3</title>
   <style type="text/css">
     code{white-space: pre-wrap;}
     span.smallcaps{font-variant: small-caps;}
@@ -34,8 +34,8 @@
 </head>
 <body>
 <div class="slide titlepage">
-  <h1 class="title">COLD - curating objects with SQLite3, Deno and
-Dataset</h1>
+  <h1 class="title">COLD - curating objects with Deno, Dataset and
+SQLite3</h1>
   <p class="author">
 R. S. Doiel, <a href="mailto:rsdoiel@caltech.edu"
 class="email">rsdoiel@caltech.edu</a>
@@ -48,16 +48,27 @@ class="email">rsdoiel@caltech.edu</a>
 <div class="slide" id="TOC">
 
 </div>
-<div id="cold---curating-objects-with-sqlite3-deno-and-dataset"
+<div id="cold---curating-objects-with-deno-dataset-and-sqlite3"
 class="slide section level1">
-<h1>COLD - curating objects with SQLite3, Deno and Dataset</h1>
+<h1>COLD - curating objects with Deno, Dataset and SQLite3</h1>
 <p>COLD is an application for curating collections of metadata objects
 at Caltech Library</p>
+<p>These are used for…</p>
 <ul>
-<li>crosswalk data</li>
-<li>managing vocabularies</li>
-<li>aggregate reporting</li>
+<li>crosswalking data</li>
+<li>aggregated reporting</li>
+<li>generated RDM vocabularies</li>
 </ul>
+</div>
+<div id="cold---curating-objects-with-deno-dataset-and-sqlite3-1"
+class="slide section level1">
+<h1>COLD - curating objects with Deno, Dataset and SQLite3</h1>
+<dl>
+<dt>COLD</dt>
+<dd>
+Controlled Object Lists and Datum
+</dd>
+</dl>
 </div>
 <div id="before-cold-we-used-spreadsheets" class="slide section level1">
 <h1>Before COLD we used spreadsheets</h1>
@@ -67,24 +78,31 @@ at Caltech Library</p>
 <li>Staff understand spreadsheets</li>
 <li>CSV files are easy to process and version control</li>
 </ul></li>
-<li>Big Problem
+<li>Disadvantages
 <ul>
 <li>Our people list had grown to over 32 columns and 8900 rows</li>
-<li>Developers wound up maintaining the spreadsheet</li>
+<li>It required developers to manage and maintain the spreadsheet</li>
 </ul></li>
 </ul>
 </div>
-<div id="desired-features" class="slide section level1">
-<h1>Desired features</h1>
+<div id="requirements" class="slide section level1">
+<h1>Requirements</h1>
 <ul>
-<li>Simple curation of metadata object lists</li>
-<li>Act as a data source for <a href="https://feeds.library.caltech.edu"
-class="uri">https://feeds.library.caltech.edu</a> (feeds is our public
-API)</li>
-<li>Provide an ability to easily manage vocabularies (work in
-progress)</li>
-<li>Be easy for other developers to maintain and enhance</li>
-<li>Must integrate with campus Single Sign On for access control</li>
+<li>Provide a <strong>simple way</strong> to curate metadata object
+collections</li>
+<li>Provide a data source for <a
+href="https://feeds.library.caltech.edu"
+class="uri">https://feeds.library.caltech.edu</a></li>
+<li>Provide a means of generating RDM vocabularies</li>
+<li>Integrate with campus Single Sign On for access control</li>
+</ul>
+</div>
+<div id="deliverables" class="slide section level1">
+<h1>Deliverables</h1>
+<ul>
+<li>A web UI for curating objects</li>
+<li>A reports system</li>
+<li>Integration points for RDM and Feeds</li>
 </ul>
 </div>
 <div id="project-status" class="slide section level1">
@@ -100,18 +118,20 @@ progress)</li>
 href="https://apps.library.caltech.edu/cold/"
 class="uri">https://apps.library.caltech.edu/cold/</a></p>
 </div>
-<div id="development-approach" class="slide section level1">
-<h1>Development approach</h1>
+<div id="development-history" class="slide section level1">
+<h1>Development history</h1>
 <ul>
 <li>Multiple prototypes with differing implementation choices
 <ul>
-<li>Python and PostgreSQL via Flask/ORM</li>
+<li>Python and PostgreSQL via Flask/ORM (abandoned)</li>
 <li>Go plus SQLite3 and browser side JavaScript</li>
 <li>Go, PostgreSQL+PostgREST and browser side JavaScript
 (abandoned)</li>
 <li>Dataset, SQLite3 and TypeScript middleware (three
 microservices)</li>
 </ul></li>
+<li>Currently running a pilot version based on Dataset, SQLite3 and
+TypeScript and middleware</li>
 </ul>
 </div>
 <div id="role-of-prototyping" class="slide section level1">
@@ -119,7 +139,7 @@ microservices)</li>
 <ul>
 <li>I used the prototypes as a sounding board for requirements and
 features</li>
-<li>Incrementally worked towards a “production pilot” (current
+<li>I incrementally worked towards a “production pilot” (current
 stage)</li>
 </ul>
 </div>
