@@ -24,7 +24,7 @@ url: "https://caltechlibrary.github.io/cold/presentation"
 
 COLD is an application for curating collections of metadata objects at Caltech Library
 
-- crosswalking data
+- crosswalk data
 - managing vocabularies
 - aggregate reporting
 
@@ -42,7 +42,7 @@ COLD is an application for curating collections of metadata objects at Caltech L
 - Simple curation of metadata object lists
 - Act as a data source for <https://feeds.library.caltech.edu> (feeds is our public API)
 - Provide an ability to easily manage vocabularies (work in progress)
-- Be easy for other developers to maintian and enhance
+- Be easy for other developers to maintain and enhance
 - Must integrate with campus Single Sign On for access control
 
 # Project status
@@ -57,9 +57,9 @@ Our COLD pilot deployment, <https://apps.library.caltech.edu/cold/>
 # Development approach
 
 - Multiple prototypes with differing implementation choices
-  - Python and Postgres via Flask/ORM
+  - Python and PostgreSQL via Flask/ORM
   - Go plus SQLite3 and browser side JavaScript
-  - Go, Postgres+PostgREST and browser side JavaScript (abandoned)
+  - Go, PostgreSQL+PostgREST and browser side JavaScript (abandoned)
   - Dataset, SQLite3 and TypeScript middleware (three microservices)
 
 # Role of prototyping
@@ -93,7 +93,7 @@ Our COLD pilot deployment, <https://apps.library.caltech.edu/cold/>
 - Text editor
 - Deno  (REPL, compiler and task runner)
 - Dataset to manage JSON documents
-- SQLite3 REPL to inspectored stored objects
+- SQLite3 REPL to inspect stored objects
 - Web browser for reference documentation and testing app
 -->
 
@@ -109,15 +109,15 @@ Our COLD pilot deployment, <https://apps.library.caltech.edu/cold/>
 - Deno supports ES6 modules (same as web browser)
 - Deno has native support for TypeScript
 - Deno provides a rich standard library
-- Deno can crosscompile TypeScript and JavaScript for macOS, Linux and Windows
+- Deno can cross compile TypeScript and JavaScript for macOS, Linux and Windows
 
 
 # Why TypeScript?
 
 - TypeScript is a superset of JavaScript
-  - Less to learn, essentially an "upskill" of your JavaScript knowledge
-- Typed langauges have advantages when developing more complex applications
-- Typed langauges tend to do better when compiled
+  - Less to learn, essentially an "up skill" of your JavaScript knowledge
+- Typed languages have advantages when developing more complex applications
+- Typed languages tend to do better when compiled
 
 # Why compiled TypeScript?
 
@@ -145,7 +145,7 @@ Our COLD pilot deployment, <https://apps.library.caltech.edu/cold/>
 # Why Dataset?
 
 - Dataset provides a turn key JSON API for managing JSON object collections
-- Dataset supports multiple storage engines (SQLite3, MySQL and Postgres)
+- Dataset supports multiple storage engines (SQLite3, MySQL and PostgreSQL)
 - It is mature for our purposes
 - It was trivial to write a TypeScript package for working with Dataset's JSON API
 
@@ -164,7 +164,7 @@ Our COLD pilot deployment, <https://apps.library.caltech.edu/cold/>
 
 # Release workflow
 
-- Compile cold_admin and cold_reports
+- Compile cold, cold_api and cold_reports
 - Copy binaries to remote system
 - Make sure dataset is installed and correct version
 - Configure and launch cold, cold_api and cold_reports via systemd
@@ -179,7 +179,7 @@ Our COLD pilot deployment, <https://apps.library.caltech.edu/cold/>
 
 - Deno with TypeScript shares many advantages of my Go based projects
 - Developing with Deno provides the fluidity of interpreted languages
-- TypeScript to JavaScript story faciliates code reuse on server and in browser
+- TypeScript to JavaScript story facilitates code reuse on server and in browser
 - Deno avoids most of the problems I've had with NodeJS projects
 - SQLite3 removes the need to run a database management system
 - A common microservice JSON API is nice for knowledge reuse

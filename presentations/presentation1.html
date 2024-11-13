@@ -54,7 +54,7 @@ class="slide section level1">
 <p>COLD is an application for curating collections of metadata objects
 at Caltech Library</p>
 <ul>
-<li>crosswalking data</li>
+<li>crosswalk data</li>
 <li>managing vocabularies</li>
 <li>aggregate reporting</li>
 </ul>
@@ -83,7 +83,7 @@ class="uri">https://feeds.library.caltech.edu</a> (feeds is our public
 API)</li>
 <li>Provide an ability to easily manage vocabularies (work in
 progress)</li>
-<li>Be easy for other developers to maintian and enhance</li>
+<li>Be easy for other developers to maintain and enhance</li>
 <li>Must integrate with campus Single Sign On for access control</li>
 </ul>
 </div>
@@ -105,9 +105,10 @@ class="uri">https://apps.library.caltech.edu/cold/</a></p>
 <ul>
 <li>Multiple prototypes with differing implementation choices
 <ul>
-<li>Python and Postgres via Flask/ORM</li>
+<li>Python and PostgreSQL via Flask/ORM</li>
 <li>Go plus SQLite3 and browser side JavaScript</li>
-<li>Go, Postgres+PostgREST and browser side JavaScript (abandoned)</li>
+<li>Go, PostgreSQL+PostgREST and browser side JavaScript
+(abandoned)</li>
 <li>Dataset, SQLite3 and TypeScript middleware (three
 microservices)</li>
 </ul></li>
@@ -157,7 +158,7 @@ controls access</li>
 - Text editor
 - Deno  (REPL, compiler and task runner)
 - Dataset to manage JSON documents
-- SQLite3 REPL to inspectored stored objects
+- SQLite3 REPL to inspect stored objects
 - Web browser for reference documentation and testing app
 -->
 </div>
@@ -178,8 +179,8 @@ controls access</li>
 <li>Deno supports ES6 modules (same as web browser)</li>
 <li>Deno has native support for TypeScript</li>
 <li>Deno provides a rich standard library</li>
-<li>Deno can crosscompile TypeScript and JavaScript for macOS, Linux and
-Windows</li>
+<li>Deno can cross compile TypeScript and JavaScript for macOS, Linux
+and Windows</li>
 </ul>
 </div>
 <div id="why-typescript" class="slide section level1">
@@ -187,12 +188,12 @@ Windows</li>
 <ul>
 <li>TypeScript is a superset of JavaScript
 <ul>
-<li>Less to learn, essentially an “upskill” of your JavaScript
+<li>Less to learn, essentially an “up skill” of your JavaScript
 knowledge</li>
 </ul></li>
-<li>Typed langauges have advantages when developing more complex
+<li>Typed languages have advantages when developing more complex
 applications</li>
-<li>Typed langauges tend to do better when compiled</li>
+<li>Typed languages tend to do better when compiled</li>
 </ul>
 </div>
 <div id="why-compiled-typescript" class="slide section level1">
@@ -233,7 +234,7 @@ class="uri">https://github.com/caltechlibrary/dataset</a></li>
 <li>Dataset provides a turn key JSON API for managing JSON object
 collections</li>
 <li>Dataset supports multiple storage engines (SQLite3, MySQL and
-Postgres)</li>
+PostgreSQL)</li>
 <li>It is mature for our purposes</li>
 <li>It was trivial to write a TypeScript package for working with
 Dataset’s JSON API</li>
@@ -260,7 +261,7 @@ objects</li>
 <div id="release-workflow" class="slide section level1">
 <h1>Release workflow</h1>
 <ul>
-<li>Compile cold_admin and cold_reports</li>
+<li>Compile cold, cold_api and cold_reports</li>
 <li>Copy binaries to remote system</li>
 <li>Make sure dataset is installed and correct version</li>
 <li>Configure and launch cold, cold_api and cold_reports via
@@ -283,7 +284,7 @@ cold_reports.service)</li>
 projects</li>
 <li>Developing with Deno provides the fluidity of interpreted
 languages</li>
-<li>TypeScript to JavaScript story faciliates code reuse on server and
+<li>TypeScript to JavaScript story facilitates code reuse on server and
 in browser</li>
 <li>Deno avoids most of the problems I’ve had with NodeJS projects</li>
 <li>SQLite3 removes the need to run a database management system</li>
