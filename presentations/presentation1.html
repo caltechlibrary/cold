@@ -85,8 +85,8 @@ Controlled Object Lists and Datum
 </ul></li>
 </ul>
 </div>
-<div id="requirements" class="slide section level1">
-<h1>Requirements</h1>
+<div id="project-requirements" class="slide section level1">
+<h1>Project Requirements</h1>
 <ul>
 <li>Provide a <strong>simple way</strong> to curate metadata object
 collections</li>
@@ -108,8 +108,8 @@ class="uri">https://feeds.library.caltech.edu</a></li>
 <div id="project-status" class="slide section level1">
 <h1>Project status</h1>
 <ul>
-<li>production pilot</li>
-<li>active development (WIP)</li>
+<li>Production pilot</li>
+<li>Active development (WIP)</li>
 </ul>
 </div>
 <div id="a-quick-tour-of-cold" class="slide section level1">
@@ -121,17 +121,26 @@ class="uri">https://apps.library.caltech.edu/cold/</a></p>
 <div id="development-history" class="slide section level1">
 <h1>Development history</h1>
 <ul>
-<li>Multiple prototypes with differing implementation choices
+<li>Multiple prototyping, many differing implementations</li>
+<li>Python and PostgreSQL via Flask/ORM (way too complicated)</li>
+<li>Go plus SQLite3 and browser side JavaScript (better but required JS
+browser side)</li>
+<li>Go, PostgreSQL+PostgREST and browser side JavaScript (seemed
+excessive for a “small” app)</li>
+</ul>
+</div>
+<div id="current-pilot" class="slide section level1">
+<h1>Current Pilot</h1>
 <ul>
-<li>Python and PostgreSQL via Flask/ORM (abandoned)</li>
-<li>Go plus SQLite3 and browser side JavaScript</li>
-<li>Go, PostgreSQL+PostgREST and browser side JavaScript
-(abandoned)</li>
-<li>Dataset, SQLite3 and TypeScript middleware (three
-microservices)</li>
+<li>Pilot based on Dataset, SQLite3 and (compiled) TypeScript
+<ul>
+<li>JSON API microservice, defined by 88 lines of YAML</li>
 </ul></li>
-<li>Currently running a pilot version based on Dataset, SQLite3 and
-TypeScript and middleware</li>
+<li>COLD UI and reports system
+<ul>
+<li>approx. 4400 lines of TypeScript</li>
+<li>approx. 1000 lines of HTML/Handlebars markup</li>
+</ul></li>
 </ul>
 </div>
 <div id="role-of-prototyping" class="slide section level1">
@@ -139,20 +148,7 @@ TypeScript and middleware</li>
 <ul>
 <li>I used the prototypes as a sounding board for requirements and
 features</li>
-<li>I incrementally worked towards a “production pilot” (current
-stage)</li>
-</ul>
-</div>
-<div id="my-off-the-shelf-stack" class="slide section level1">
-<h1>My “Off the shelf” stack</h1>
-<ul>
-<li><a href="https://deno.org">Deno</a> compiles TypeScript to
-middleware executables</li>
-<li><a href="https://caltechlibrary.github.io/dataset">Dataset</a> JSON
-API for managing objects</li>
-<li><a href="https://sqlite.org">SQLite3</a> used as Dataset’s storage
-engine</li>
-<li>Shibboleth for campus single sign on</li>
+<li>I worked incrementally towards a “production pilot”</li>
 </ul>
 </div>
 <div id="cold-is-built-as-three-services" class="slide section level1">
@@ -163,6 +159,19 @@ engine</li>
 <li>cold_reports (TypeScript report runner service)</li>
 </ol>
 </div>
+<div id="off-the-shelf-does-the-heavy-lifting"
+class="slide section level1">
+<h1>“Off the shelf” does the heavy lifting</h1>
+<ul>
+<li><a href="https://deno.org">Deno</a> compiles TypeScript to
+executables</li>
+<li><a href="https://caltechlibrary.github.io/dataset">Dataset</a> JSON
+API for managing objects</li>
+<li><a href="https://sqlite.org">SQLite3</a> used as Dataset’s storage
+engine</li>
+<li>Shibboleth for campus single sign on</li>
+</ul>
+</div>
 <div id="roles-for-the-services" class="slide section level1">
 <h1>Roles for the services</h1>
 <ul>
@@ -172,15 +181,6 @@ engine</li>
 <li>Our front end web server integrates with Campus single sign on and
 controls access</li>
 </ul>
-<!--
-# Tools for development
-
-- Text editor
-- Deno  (REPL, compiler and task runner)
-- Dataset to manage JSON documents
-- SQLite3 REPL to inspect stored objects
-- Web browser for reference documentation and testing app
--->
 </div>
 <div id="what-is-deno" class="slide section level1">
 <h1>What is Deno?</h1>
@@ -194,11 +194,11 @@ controls access</li>
 </ul>
 </div>
 <div id="why-deno-why-not-nodejs" class="slide section level1">
-<h1>Why Deno? (Why not NodeJS?)</h1>
+<h1>Why Deno? Why not NodeJS?</h1>
 <ul>
-<li>Deno supports ES6 modules (same as web browser)</li>
-<li>Deno has native support for TypeScript</li>
-<li>Deno provides a rich standard library</li>
+<li>ES6 modules (same as web browser)</li>
+<li>Native support for TypeScript</li>
+<li>Deno’s rich standard library</li>
 <li>Deno can cross compile TypeScript and JavaScript for macOS, Linux
 and Windows</li>
 </ul>
@@ -216,19 +216,19 @@ applications</li>
 <li>Typed languages tend to do better when compiled</li>
 </ul>
 </div>
-<div id="why-compiled-typescript" class="slide section level1">
-<h1>Why compiled TypeScript?</h1>
+<div id="why-compiled" class="slide section level1">
+<h1>Why <strong>compiled</strong>?</h1>
 <ul>
-<li>Deno doesn’t need to be installed on app server</li>
 <li>Executables are trivial to install</li>
 <li>Executables avoid library version problems</li>
 <li>Simplifies (systemd) service configuration</li>
 <li>Improves performance over interpreted code</li>
 </ul>
 </div>
-<div id="denos-toolbox-highlights" class="slide section level1">
-<h1>Deno’s toolbox highlights</h1>
+<div id="deno-as-toolbox" class="slide section level1">
+<h1>Deno as toolbox</h1>
 <ul>
+<li>REPL</li>
 <li>task manager</li>
 <li>linter and formatter</li>
 <li>package management</li>
@@ -266,7 +266,7 @@ Dataset’s JSON API</li>
 <li>Deno supports an interactive development approach</li>
 <li>Deno tasks can “watch” and restart</li>
 <li>Deno tasks can “build” your executables</li>
-<li>Dataset provides a turn key micro service for managing JSON
+<li>Dataset provides a turn key service for managing collections of JSON
 objects</li>
 </ul>
 </div>

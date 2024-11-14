@@ -44,7 +44,7 @@ COLD
   - Our people list had grown to over 32 columns and 8900 rows
   - It required developers to manage and maintain the spreadsheet
 
-# Requirements
+# Project Requirements
 
 - Provide a **simple way** to curate metadata object collections
 - Provide a data source for <https://feeds.library.caltech.edu>
@@ -59,8 +59,8 @@ COLD
 
 # Project status
 
-- production pilot
-- active development (WIP)
+- Production pilot
+- Active development (WIP)
 
 # A quick tour of COLD
 
@@ -68,30 +68,36 @@ Our COLD pilot deployment, <https://apps.library.caltech.edu/cold/>
 
 # Development history
 
-- Multiple prototypes with differing implementation choices
-  - Python and PostgreSQL via Flask/ORM (abandoned)
-  - Go plus SQLite3 and browser side JavaScript
-  - Go, PostgreSQL+PostgREST and browser side JavaScript (abandoned)
-  - Dataset, SQLite3 and TypeScript middleware (three microservices)
-- Currently running a pilot version based on Dataset, SQLite3 and TypeScript and middleware
+- Multiple prototyping, many differing implementations
+- Python and PostgreSQL via Flask/ORM (way too complicated)
+- Go plus SQLite3 and browser side JavaScript (better but required JS browser side)
+- Go, PostgreSQL+PostgREST and browser side JavaScript (seemed excessive for a "small" app)
 
+# Current Pilot
+
+- Pilot based on Dataset, SQLite3 and (compiled) TypeScript
+  - JSON API microservice, defined by 88 lines of YAML
+- COLD UI and reports system
+  - approx. 4400 lines of TypeScript
+  - approx. 1000 lines of HTML/Handlebars markup
+    
 # Role of prototyping
 
 - I used the prototypes as a sounding board for requirements and features
-- I incrementally worked towards a "production pilot" (current stage)
-
-# My "Off the shelf" stack
-
-- [Deno](https://deno.org) compiles TypeScript to middleware executables
-- [Dataset](https://caltechlibrary.github.io/dataset) JSON API for managing objects
-- [SQLite3](https://sqlite.org) used as Dataset's storage engine
-- Shibboleth for campus single sign on
+- I worked incrementally towards a "production pilot"
 
 # COLD is built as three services
 
 1. cold_api (datasetd, back end JSON API)
 2. cold (TypeScript middleware, web UI)
 3. cold_reports (TypeScript report runner service)
+
+# "Off the shelf" does the heavy lifting
+
+- [Deno](https://deno.org) compiles TypeScript to executables
+- [Dataset](https://caltechlibrary.github.io/dataset) JSON API for managing objects
+- [SQLite3](https://sqlite.org) used as Dataset's storage engine
+- Shibboleth for campus single sign on
 
 # Roles for the services
 
@@ -100,16 +106,6 @@ Our COLD pilot deployment, <https://apps.library.caltech.edu/cold/>
 - COLD reports provides the report runner
 - Our front end web server integrates with Campus single sign on and controls access
 
-<!--
-# Tools for development
-
-- Text editor
-- Deno  (REPL, compiler and task runner)
-- Dataset to manage JSON documents
-- SQLite3 REPL to inspect stored objects
-- Web browser for reference documentation and testing app
--->
-
 # What is Deno?
 
 - Deno is
@@ -117,11 +113,11 @@ Our COLD pilot deployment, <https://apps.library.caltech.edu/cold/>
   - a toolbox for developing TypeScript applications
   - a compiler
 
-# Why Deno? (Why not NodeJS?)
+# Why Deno? Why not NodeJS?
 
-- Deno supports ES6 modules (same as web browser)
-- Deno has native support for TypeScript
-- Deno provides a rich standard library
+- ES6 modules (same as web browser)
+- Native support for TypeScript
+- Deno's rich standard library
 - Deno can cross compile TypeScript and JavaScript for macOS, Linux and Windows
 
 
@@ -132,16 +128,16 @@ Our COLD pilot deployment, <https://apps.library.caltech.edu/cold/>
 - Typed languages have advantages when developing more complex applications
 - Typed languages tend to do better when compiled
 
-# Why compiled TypeScript?
+# Why **compiled**?
 
-- Deno doesn't need to be installed on app server
-- Executables are trivial to install
+- Executables are trivial to install 
 - Executables avoid library version problems
 - Simplifies (systemd) service configuration
 - Improves performance over interpreted code
 
-# Deno's toolbox highlights
+# Deno as toolbox
 
+- REPL
 - task manager
 - linter and formatter
 - package management
@@ -167,7 +163,7 @@ Our COLD pilot deployment, <https://apps.library.caltech.edu/cold/>
 - Deno supports an interactive development approach
 - Deno tasks can "watch" and restart
 - Deno tasks can "build" your executables
-- Dataset provides a turn key micro service for managing JSON objects
+- Dataset provides a turn key service for managing collections of JSON objects
 
 # Development environment & workflow
 
