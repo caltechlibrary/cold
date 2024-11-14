@@ -9,7 +9,7 @@ urlcolor: blue
 linkstyle: bold
 aspectratio: 169
 createDate: 2024-10-31
-updateDate: 2024-11-04
+updateDate: 2024-11-13
 draft: true
 pubDate: 2024-11-15
 place: Caltech
@@ -68,7 +68,8 @@ Our COLD pilot deployment, <https://apps.library.caltech.edu/cold/>
 
 # Development history
 
-- Multiple prototyping, many differing implementations
+Multiple prototypes with differing implementations
+
 - Python and PostgreSQL via Flask/ORM (way too complicated)
 - Go plus SQLite3 and browser side JavaScript (better but required JS browser side)
 - Go, PostgreSQL+PostgREST and browser side JavaScript (seemed excessive for a "small" app)
@@ -80,31 +81,19 @@ Our COLD pilot deployment, <https://apps.library.caltech.edu/cold/>
 - COLD UI and reports system
   - approx. 4400 lines of TypeScript
   - approx. 1000 lines of HTML/Handlebars markup
-    
-# Role of prototyping
-
-- I used the prototypes as a sounding board for requirements and features
-- I worked incrementally towards a "production pilot"
 
 # COLD is built as three services
 
-1. cold_api (datasetd, back end JSON API)
-2. cold (TypeScript middleware, web UI)
+1. cold_api (datasetd, back end JSON API, only required configuration)
+2. cold (web UI)
 3. cold_reports (TypeScript report runner service)
 
-# "Off the shelf" does the heavy lifting
+# "Off the shelf" did the heavy lifting
 
-- [Deno](https://deno.org) compiles TypeScript to executables
+- [Deno](https://deno.org) compiled TypeScript to executables
 - [Dataset](https://caltechlibrary.github.io/dataset) JSON API for managing objects
 - [SQLite3](https://sqlite.org) used as Dataset's storage engine
 - Shibboleth for campus single sign on
-
-# Roles for the services
-
-- Dataset provides a turnkey JSON API for managing objects
-- COLD middleware provides web UI
-- COLD reports provides the report runner
-- Our front end web server integrates with Campus single sign on and controls access
 
 # What is Deno?
 
@@ -113,40 +102,31 @@ Our COLD pilot deployment, <https://apps.library.caltech.edu/cold/>
   - a toolbox for developing TypeScript applications
   - a compiler
 
-# Why Deno? Why not NodeJS?
+# Why Deno and not NodeJS?
 
 - ES6 modules (same as web browser)
 - Native support for TypeScript
 - Deno's rich standard library
-- Deno can cross compile TypeScript and JavaScript for macOS, Linux and Windows
-
+- Deno provides a cross compiler for macOS, Linux and Windows
 
 # Why TypeScript?
 
 - TypeScript is a superset of JavaScript
   - Less to learn, essentially an "up skill" of your JavaScript knowledge
-- Typed languages have advantages when developing more complex applications
+- Typed languages have advantages when working with structured data
 - Typed languages tend to do better when compiled
 
 # Why **compiled**?
 
 - Executables are trivial to install 
-- Executables avoid library version problems
-- Simplifies (systemd) service configuration
+- Static executables avoid library version problems
 - Improves performance over interpreted code
-
-# Deno as toolbox
-
-- REPL
-- task manager
-- linter and formatter
-- package management
-- compiler
+- Simplifies (systemd) service configuration
 
 # What is Dataset?
 
 - Dataset is a JSON object manager
-- Implemented at Caltech Library, available via GitHub
+- Implemented at Caltech Library, available on GitHub
   - <https://github.com/caltechlibrary/dataset>
 - Runs on Linux, macOS and Windows
 - Open Source under a BSD like license
@@ -161,28 +141,7 @@ Our COLD pilot deployment, <https://apps.library.caltech.edu/cold/>
 # Developing with Deno and Dataset
 
 - Deno supports an interactive development approach
-- Deno tasks can "watch" and restart
-- Deno tasks can "build" your executables
 - Dataset provides a turn key service for managing collections of JSON objects
-
-# Development environment & workflow
-
-- tmux to split the terminal window four ways
-- in three windows launch deno tasks to start the services
-- I use the fourth window edit code and inspect data
-
-# Release workflow
-
-- Compile cold, cold_api and cold_reports
-- Copy binaries to remote system
-- Make sure dataset is installed and correct version
-- Configure and launch cold, cold_api and cold_reports via systemd
-
-# Configuration files
-
-- YAML, configuration datasetd (cold_api.yaml)
-- YAML, configuration cold_reports (cold_reports.yaml)
-- TOML, systemd service files (cold.service, cold_api.service, cold_reports.service)
 
 # Take away
 
@@ -195,9 +154,8 @@ Our COLD pilot deployment, <https://apps.library.caltech.edu/cold/>
 
 # Plans for the future
 
-- Managing RDM vocabularies
-- Managing various normalization maps
-- Improve reports, improve report runner
+- Add additional object collections (e.g. Funders)
+- Evole into a production system
 
 # Reference URLs
 

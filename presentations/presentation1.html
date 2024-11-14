@@ -120,8 +120,8 @@ class="uri">https://apps.library.caltech.edu/cold/</a></p>
 </div>
 <div id="development-history" class="slide section level1">
 <h1>Development history</h1>
+<p>Multiple prototypes with differing implementations</p>
 <ul>
-<li>Multiple prototyping, many differing implementations</li>
 <li>Python and PostgreSQL via Flask/ORM (way too complicated)</li>
 <li>Go plus SQLite3 and browser side JavaScript (better but required JS
 browser side)</li>
@@ -143,43 +143,26 @@ excessive for a “small” app)</li>
 </ul></li>
 </ul>
 </div>
-<div id="role-of-prototyping" class="slide section level1">
-<h1>Role of prototyping</h1>
-<ul>
-<li>I used the prototypes as a sounding board for requirements and
-features</li>
-<li>I worked incrementally towards a “production pilot”</li>
-</ul>
-</div>
 <div id="cold-is-built-as-three-services" class="slide section level1">
 <h1>COLD is built as three services</h1>
 <ol style="list-style-type: decimal">
-<li>cold_api (datasetd, back end JSON API)</li>
-<li>cold (TypeScript middleware, web UI)</li>
+<li>cold_api (datasetd, back end JSON API, only required
+configuration)</li>
+<li>cold (web UI)</li>
 <li>cold_reports (TypeScript report runner service)</li>
 </ol>
 </div>
-<div id="off-the-shelf-does-the-heavy-lifting"
+<div id="off-the-shelf-did-the-heavy-lifting"
 class="slide section level1">
-<h1>“Off the shelf” does the heavy lifting</h1>
+<h1>“Off the shelf” did the heavy lifting</h1>
 <ul>
-<li><a href="https://deno.org">Deno</a> compiles TypeScript to
+<li><a href="https://deno.org">Deno</a> compiled TypeScript to
 executables</li>
 <li><a href="https://caltechlibrary.github.io/dataset">Dataset</a> JSON
 API for managing objects</li>
 <li><a href="https://sqlite.org">SQLite3</a> used as Dataset’s storage
 engine</li>
 <li>Shibboleth for campus single sign on</li>
-</ul>
-</div>
-<div id="roles-for-the-services" class="slide section level1">
-<h1>Roles for the services</h1>
-<ul>
-<li>Dataset provides a turnkey JSON API for managing objects</li>
-<li>COLD middleware provides web UI</li>
-<li>COLD reports provides the report runner</li>
-<li>Our front end web server integrates with Campus single sign on and
-controls access</li>
 </ul>
 </div>
 <div id="what-is-deno" class="slide section level1">
@@ -193,14 +176,13 @@ controls access</li>
 </ul></li>
 </ul>
 </div>
-<div id="why-deno-why-not-nodejs" class="slide section level1">
-<h1>Why Deno? Why not NodeJS?</h1>
+<div id="why-deno-and-not-nodejs" class="slide section level1">
+<h1>Why Deno and not NodeJS?</h1>
 <ul>
 <li>ES6 modules (same as web browser)</li>
 <li>Native support for TypeScript</li>
 <li>Deno’s rich standard library</li>
-<li>Deno can cross compile TypeScript and JavaScript for macOS, Linux
-and Windows</li>
+<li>Deno provides a cross compiler for macOS, Linux and Windows</li>
 </ul>
 </div>
 <div id="why-typescript" class="slide section level1">
@@ -211,8 +193,8 @@ and Windows</li>
 <li>Less to learn, essentially an “up skill” of your JavaScript
 knowledge</li>
 </ul></li>
-<li>Typed languages have advantages when developing more complex
-applications</li>
+<li>Typed languages have advantages when working with structured
+data</li>
 <li>Typed languages tend to do better when compiled</li>
 </ul>
 </div>
@@ -220,26 +202,16 @@ applications</li>
 <h1>Why <strong>compiled</strong>?</h1>
 <ul>
 <li>Executables are trivial to install</li>
-<li>Executables avoid library version problems</li>
-<li>Simplifies (systemd) service configuration</li>
+<li>Static executables avoid library version problems</li>
 <li>Improves performance over interpreted code</li>
-</ul>
-</div>
-<div id="deno-as-toolbox" class="slide section level1">
-<h1>Deno as toolbox</h1>
-<ul>
-<li>REPL</li>
-<li>task manager</li>
-<li>linter and formatter</li>
-<li>package management</li>
-<li>compiler</li>
+<li>Simplifies (systemd) service configuration</li>
 </ul>
 </div>
 <div id="what-is-dataset" class="slide section level1">
 <h1>What is Dataset?</h1>
 <ul>
 <li>Dataset is a JSON object manager</li>
-<li>Implemented at Caltech Library, available via GitHub
+<li>Implemented at Caltech Library, available on GitHub
 <ul>
 <li><a href="https://github.com/caltechlibrary/dataset"
 class="uri">https://github.com/caltechlibrary/dataset</a></li>
@@ -264,37 +236,8 @@ Dataset’s JSON API</li>
 <h1>Developing with Deno and Dataset</h1>
 <ul>
 <li>Deno supports an interactive development approach</li>
-<li>Deno tasks can “watch” and restart</li>
-<li>Deno tasks can “build” your executables</li>
 <li>Dataset provides a turn key service for managing collections of JSON
 objects</li>
-</ul>
-</div>
-<div id="development-environment-workflow" class="slide section level1">
-<h1>Development environment &amp; workflow</h1>
-<ul>
-<li>tmux to split the terminal window four ways</li>
-<li>in three windows launch deno tasks to start the services</li>
-<li>I use the fourth window edit code and inspect data</li>
-</ul>
-</div>
-<div id="release-workflow" class="slide section level1">
-<h1>Release workflow</h1>
-<ul>
-<li>Compile cold, cold_api and cold_reports</li>
-<li>Copy binaries to remote system</li>
-<li>Make sure dataset is installed and correct version</li>
-<li>Configure and launch cold, cold_api and cold_reports via
-systemd</li>
-</ul>
-</div>
-<div id="configuration-files" class="slide section level1">
-<h1>Configuration files</h1>
-<ul>
-<li>YAML, configuration datasetd (cold_api.yaml)</li>
-<li>YAML, configuration cold_reports (cold_reports.yaml)</li>
-<li>TOML, systemd service files (cold.service, cold_api.service,
-cold_reports.service)</li>
 </ul>
 </div>
 <div id="take-away" class="slide section level1">
@@ -314,9 +257,8 @@ in browser</li>
 <div id="plans-for-the-future" class="slide section level1">
 <h1>Plans for the future</h1>
 <ul>
-<li>Managing RDM vocabularies</li>
-<li>Managing various normalization maps</li>
-<li>Improve reports, improve report runner</li>
+<li>Add additional object collections (e.g. Funders)</li>
+<li>Evole into a production system</li>
 </ul>
 </div>
 <div id="reference-urls" class="slide section level1">
