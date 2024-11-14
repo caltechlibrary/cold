@@ -48,53 +48,69 @@ class="email">rsdoiel@caltech.edu</a>
 <div class="slide" id="TOC">
 
 </div>
-<div id="cold---curating-objects-with-deno-dataset-and-sqlite3"
+<div
+id="how-do-manage-metadata-about-people-groups-and-controlled-vocabularies"
 class="slide section level1">
-<h1>COLD - curating objects with Deno, Dataset and SQLite3</h1>
-<p>COLD is an application for curating collections of metadata objects
-at Caltech Library</p>
-<p>These are used for…</p>
+<h1>How do manage metadata about People, Groups and controlled
+vocabularies?</h1>
 <ul>
-<li>crosswalking data</li>
-<li>aggregated reporting</li>
-<li>generated RDM vocabularies</li>
+<li>Do we build or do we use something off the shelf?</li>
 </ul>
 </div>
-<div id="cold---curating-objects-with-deno-dataset-and-sqlite3-1"
-class="slide section level1">
-<h1>COLD - curating objects with Deno, Dataset and SQLite3</h1>
-<dl>
-<dt>COLD</dt>
-<dd>
-Controlled Object Lists and Datum
-</dd>
-</dl>
-</div>
-<div id="before-cold-we-used-spreadsheets" class="slide section level1">
-<h1>Before COLD we used spreadsheets</h1>
+<div id="spreadsheets" class="slide section level1">
+<h1>Spreadsheets!</h1>
 <ul>
 <li>Advantages
 <ul>
-<li>Staff understand spreadsheets</li>
-<li>CSV files are easy to process and version control</li>
+<li>Library staff understand spreadsheets</li>
+<li>Spreadsheets are easy to process and version control</li>
+<li>widely support (e.g. LibreOffice, Googlesheets, Excel)</li>
+<li>zero code to write</li>
 </ul></li>
 <li>Disadvantages
 <ul>
-<li>Our people list had grown to over 32 columns and 8900 rows</li>
-<li>It required developers to manage and maintain the spreadsheet</li>
+<li>individual trees in a forest of data</li>
 </ul></li>
 </ul>
 </div>
-<div id="project-requirements" class="slide section level1">
-<h1>Project Requirements</h1>
+<div id="a-spreadsheet-sprouted-a-problem" class="slide section level1">
+<h1>A spreadsheet sprouted a problem</h1>
 <ul>
-<li>Provide a <strong>simple way</strong> to curate metadata object
-collections</li>
-<li>Provide a data source for <a
-href="https://feeds.library.caltech.edu"
+<li>Our people list grew to 32 columns and over 8900 rows</li>
+<li>Hard to keep all those columns consistent and aligned</li>
+<li>Easy for duplicates to sneak in</li>
+<li>Developers wound up managing the spreadsheets</li>
+</ul>
+</div>
+<div id="what-does-a-solution-look-like" class="slide section level1">
+<h1>What does a solution look like?</h1>
+<ol style="list-style-type: decimal">
+<li>A <strong>simple way</strong> to curate collections of metadata
+objects</li>
+<li>A data source for <a href="https://feeds.library.caltech.edu"
 class="uri">https://feeds.library.caltech.edu</a></li>
-<li>Provide a means of generating RDM vocabularies</li>
-<li>Integrate with campus Single Sign On for access control</li>
+<li>A means of generating RDM vocabularies</li>
+</ol>
+</div>
+<div id="our-answer-cold" class="slide section level1">
+<h1>Our answer, COLD</h1>
+<dl>
+<dt>COLD</dt>
+<dd>
+Controlled Object Lists with <a
+href="https://caltechlibrary.github.io/dataset">Dataset</a>
+</dd>
+</dl>
+</div>
+<div id="what-does-cold-do" class="slide section level1">
+<h1>What does COLD do?</h1>
+<p>COLD is an application for curating collections of metadata
+objects</p>
+<p>Used for…</p>
+<ul>
+<li>crosswalking data</li>
+<li>aggregated reporting</li>
+<li>generating RDM vocabularies</li>
 </ul>
 </div>
 <div id="deliverables" class="slide section level1">
@@ -102,67 +118,67 @@ class="uri">https://feeds.library.caltech.edu</a></li>
 <ul>
 <li>A web UI for curating objects</li>
 <li>A reports system</li>
-<li>Integration points for RDM and Feeds</li>
+<li>Integration with RDM and Feeds</li>
 </ul>
 </div>
 <div id="project-status" class="slide section level1">
 <h1>Project status</h1>
 <ul>
-<li>Production pilot</li>
 <li>Active development (WIP)</li>
+<li>Production pilot</li>
 </ul>
 </div>
 <div id="a-quick-tour-of-cold" class="slide section level1">
 <h1>A quick tour of COLD</h1>
-<p>Our COLD pilot deployment, <a
-href="https://apps.library.caltech.edu/cold/"
-class="uri">https://apps.library.caltech.edu/cold/</a></p>
+<blockquote>
+<p>Demo of Pilot deployment</p>
+</blockquote>
 </div>
 <div id="development-history" class="slide section level1">
 <h1>Development history</h1>
-<p>Multiple prototypes with differing implementations</p>
-<ul>
-<li>Python and PostgreSQL via Flask/ORM (way too complicated)</li>
+<p>Four prototypes</p>
+<ol style="list-style-type: decimal">
+<li>Python and PostgreSQL via Flask/ORM (way too much code to
+maintain)</li>
 <li>Go plus SQLite3 and browser side JavaScript (better but required JS
 browser side)</li>
-<li>Go, PostgreSQL+PostgREST and browser side JavaScript (seemed
-excessive for a “small” app)</li>
-</ul>
+<li>Go, PostgreSQL+PostgREST (cumbersome, too heavy weight)</li>
+<li>Deno &amp; Dataset using SQLite3 storage (final version)</li>
+</ol>
 </div>
 <div id="current-pilot" class="slide section level1">
 <h1>Current Pilot</h1>
+<p>Built in three parts</p>
+<ol style="list-style-type: decimal">
+<li>cold (TypeScript &amp; Handlebars templates: web UI)</li>
+<li>cold_reports (TypeScript: report runner service)</li>
+<li>cold_api (YAML configuration: back end JSON API)</li>
+</ol>
+</div>
+<div id="current-pilot-the-gory-details" class="slide section level1">
+<h1>Current Pilot (the gory details)</h1>
 <ul>
-<li>Pilot based on Dataset, SQLite3 and (compiled) TypeScript
+<li>Dataset provides a JSON API microservice, <a
+href="https://github.com/caltechlibrary/cold/blob/main/cold_api.yaml">88
+lines of YAML</a></li>
+<li>UI and reports system
 <ul>
-<li>JSON API microservice, defined by 88 lines of YAML</li>
-</ul></li>
-<li>COLD UI and reports system
-<ul>
-<li>approx. 4400 lines of TypeScript</li>
-<li>approx. 1000 lines of HTML/Handlebars markup</li>
+<li>approx. 4400 lines TypeScript</li>
+<li>approx. 1000 lines Handlebars templates</li>
 </ul></li>
 </ul>
 </div>
-<div id="cold-is-built-as-three-services" class="slide section level1">
-<h1>COLD is built as three services</h1>
-<ol style="list-style-type: decimal">
-<li>cold_api (datasetd, back end JSON API, only required
-configuration)</li>
-<li>cold (web UI)</li>
-<li>cold_reports (TypeScript report runner service)</li>
-</ol>
-</div>
-<div id="off-the-shelf-did-the-heavy-lifting"
-class="slide section level1">
-<h1>“Off the shelf” did the heavy lifting</h1>
+<div id="what-i-used-off-the-shelf" class="slide section level1">
+<h1>What I used “off the shelf”</h1>
 <ul>
 <li><a href="https://deno.org">Deno</a> compiled TypeScript to
 executables</li>
 <li><a href="https://caltechlibrary.github.io/dataset">Dataset</a> JSON
-API for managing objects</li>
-<li><a href="https://sqlite.org">SQLite3</a> used as Dataset’s storage
-engine</li>
-<li>Shibboleth for campus single sign on</li>
+API for managing objects
+<ul>
+<li>Using <a href="https://sqlite.org">SQLite3</a> storage engine</li>
+</ul></li>
+<li>Apache+Shibboleth for access control via campus single sign on</li>
 </ul>
 </div>
 <div id="what-is-deno" class="slide section level1">
@@ -170,95 +186,103 @@ engine</li>
 <ul>
 <li>Deno is
 <ul>
-<li>a runtime for TypeScript and JavaScript</li>
-<li>a toolbox for developing TypeScript applications</li>
-<li>a compiler</li>
+<li>a runtime for TypeScript &amp; JavaScript</li>
+<li>a toolbox for developing with TypeScript &amp; JavaScript</li>
+<li><strong>a compiler</strong></li>
 </ul></li>
 </ul>
 </div>
 <div id="why-deno-and-not-nodejs" class="slide section level1">
 <h1>Why Deno and not NodeJS?</h1>
 <ul>
-<li>ES6 modules (same as web browser)</li>
+<li>ESM modules instead of Common JS</li>
 <li>Native support for TypeScript</li>
-<li>Deno’s rich standard library</li>
+<li>Deno is secure by default</li>
+<li>Deno provides rich standard library</li>
 <li>Deno provides a cross compiler for macOS, Linux and Windows</li>
 </ul>
 </div>
-<div id="why-typescript" class="slide section level1">
-<h1>Why TypeScript?</h1>
+<div id="why-typescript-why-not-go-or-python"
+class="slide section level1">
+<h1>Why TypeScript? Why not Go or Python?</h1>
 <ul>
+<li>I wanted to develop with a single language</li>
+<li>I wanted a language that would be accessible to my colleagues</li>
+</ul>
+</div>
+<div id="why-typescript-why-not-javascript"
+class="slide section level1">
+<h1>Why TypeScript? Why not JavaScript?</h1>
+<ul>
+<li>Typed languages have advantages for working with structured
+data</li>
 <li>TypeScript is a superset of JavaScript
 <ul>
-<li>Less to learn, essentially an “up skill” of your JavaScript
-knowledge</li>
+<li>Less to learn, it’s an extended JavaScript</li>
 </ul></li>
-<li>Typed languages have advantages when working with structured
-data</li>
-<li>Typed languages tend to do better when compiled</li>
 </ul>
 </div>
 <div id="why-compiled" class="slide section level1">
 <h1>Why <strong>compiled</strong>?</h1>
 <ul>
-<li>Executables are trivial to install</li>
 <li>Static executables avoid library version problems</li>
-<li>Improves performance over interpreted code</li>
-<li>Simplifies (systemd) service configuration</li>
+<li>Static executables are trivial to install</li>
+<li>Simpler service configuration (systemd, init or launchd)</li>
+<li>Improved performance</li>
 </ul>
 </div>
 <div id="what-is-dataset" class="slide section level1">
 <h1>What is Dataset?</h1>
 <ul>
 <li>Dataset is a JSON object manager</li>
-<li>Implemented at Caltech Library, available on GitHub
-<ul>
+<li>Open Source under a BSD like license</li>
+<li>Runs on Linux, macOS and Windows</li>
 <li><a href="https://github.com/caltechlibrary/dataset"
 class="uri">https://github.com/caltechlibrary/dataset</a></li>
-</ul></li>
-<li>Runs on Linux, macOS and Windows</li>
-<li>Open Source under a BSD like license</li>
 </ul>
 </div>
 <div id="why-dataset" class="slide section level1">
 <h1>Why Dataset?</h1>
 <ul>
-<li>Dataset provides a turn key JSON API for managing JSON object
-collections</li>
-<li>Dataset supports multiple storage engines (SQLite3, MySQL and
-PostgreSQL)</li>
-<li>It is mature for our purposes</li>
-<li>It was trivial to write a TypeScript package for working with
-Dataset’s JSON API</li>
+<li>Dataset provides a turn key JSON API for managing
+<strong>collections of JSON objects</strong></li>
+<li>Dataset supports multiple storage engines (<strong>SQLite3</strong>,
+PostgreSQL and MySQL)</li>
+<li>Mature for our purposes (already used to build Feeds)</li>
+<li>Very little code to write (I fixed a couple bugs)</li>
 </ul>
 </div>
 <div id="developing-with-deno-and-dataset" class="slide section level1">
 <h1>Developing with Deno and Dataset</h1>
 <ul>
-<li>Deno supports an interactive development approach</li>
+<li>Deno supports an interactive development
+<ul>
+<li>easy test pieces of code (like with Python), nice for iterative
+development</li>
+</ul></li>
 <li>Dataset provides a turn key service for managing collections of JSON
-objects</li>
+objects
+<ul>
+<li>Writing the “back end” boiled down to configuration</li>
+</ul></li>
 </ul>
 </div>
 <div id="take-away" class="slide section level1">
 <h1>Take away</h1>
 <ul>
-<li>Deno with TypeScript shares many advantages of my Go based
+<li>Deno with TypeScript shares many advantages of Go based
 projects</li>
 <li>Developing with Deno provides the fluidity of interpreted
 languages</li>
-<li>TypeScript to JavaScript story facilitates code reuse on server and
-in browser</li>
-<li>Deno avoids most of the problems I’ve had with NodeJS projects</li>
+<li>Deno avoids the challenges of NodeJS projects</li>
 <li>SQLite3 removes the need to run a database management system</li>
-<li>A common microservice JSON API is nice for knowledge reuse</li>
 </ul>
 </div>
 <div id="plans-for-the-future" class="slide section level1">
 <h1>Plans for the future</h1>
 <ul>
 <li>Add additional object collections (e.g. Funders)</li>
-<li>Evole into a production system</li>
+<li>Evolve from production pilot to production system</li>
 </ul>
 </div>
 <div id="reference-urls" class="slide section level1">

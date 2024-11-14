@@ -1,6 +1,5 @@
 #
-# cold_api.yaml defines the controlled object list and datum application
-# from the perspective of a JSON API running via datasetd.
+# cold_api.yaml defines the controlled object list with Dataset JSON API.
 #
 # @author: R. S. Doiel <rsdoiel@caltech.edu>
 #
