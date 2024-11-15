@@ -136,8 +136,8 @@ Built in three parts
 
 # Why **compiled**?
 
-- Static executables avoid library version problems
-- Static executables are trivial to install 
+- Standalone executables avoid library version problems
+- Standalone executables are trivial to install 
 - Simpler service configuration (systemd, init or launchd)
 - Improved performance
 
