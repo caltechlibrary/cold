@@ -136,8 +136,8 @@ Built in three parts
 
 # Why **compiled**?
 
-- Standalone executables avoid library version problems
-- Standalone executables are trivial to install 
+- Self-contained executables avoid library version problems
+- Self-contained executables are trivial to install 
 - Simpler service configuration (systemd, init or launchd)
 - Improved performance
 
