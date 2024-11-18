@@ -7,15 +7,15 @@
 <ul>
 <li><a href="/" title="return home">Home</a></li>
 <li><a href="../" title="return to dashboard">Dashboard</a></li>
-<li><a href="./" title="return to issn list">ISSNs</a></li>
-<li><a href="{{issn.issn}}?view=edit">Edit {{issn.issn}}</a></li>
+<li><a href="./" title="return to issn list">Journals</a></li>
+<li><a href="{{issn.issn}}?view=edit">Edit {{issn.name}}</a></li>
 </ul>
 </nav>
 <section>
 
-<div class="identifier">ISSN: {{issn.issn}}</div>
+<h1>Journal Name: {{issn.name}}</h1>
 
-<h1>Serial Name: {{issn.name}}</h1>
+<div class="identifier">ISSN: {{issn.issn}}</div>
 
 {{#if issn.alternative_names}}
 Other names:
@@ -42,6 +42,6 @@ Other names:
 <p>
 </section>
 {{>footer}}
-<code><pre>{{debug_src}}</pre></code>
+<!-- <code><pre>{{debug_src}}</pre></code> -->  
 </body>
 </html>

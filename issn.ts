@@ -1,13 +1,7 @@
 /**
  * issn.ts implements the issn object handler for listing, creating, retrieving, updating and delete issn objects.
  */
-import {
-  apiPort,
-  Dataset,
-  //formDataToObject,
-  pathIdentifier,
-  renderPage,
-} from "./deps.ts";
+import { apiPort, Dataset, pathIdentifier, renderPage } from "./deps.ts";
 
 import { timeStamp } from "./utils.ts";
 
@@ -114,18 +108,6 @@ export class ISSN implements ISSNInterface {
    */
   toJSON(): string {
     return JSON.stringify(this.asObject());
-  }
-
-  /**
-   * toRDMObject() returns an abbreviated object that maps to RDM's vocabularies
-   */
-  toRDMObject(): Object {
-    return {
-      id: this.issn,
-      title: {
-        en: this.name,
-      },
-    };
   }
 }
 

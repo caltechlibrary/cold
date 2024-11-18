@@ -10,3 +10,8 @@ reports:
     basename: groups
     append_datestamp: false
     content_type: text/csv
+  journal_vocabulary:
+    cmd: ./bin/journal_vocabulary
+    basename: journal_vocabulary
+    append_datestamp: false
+    content_type: application/yaml
