@@ -1,5 +1,5 @@
-cold - (c)ontrolled (o)bject (l)ists and (d)atum
-================================================
+cold - (c)ontrolled (o)bject (l)ists with (D)ataset
+===================================================
 
 
 Overview
@@ -12,7 +12,7 @@ COLD is no longer limited to rows and columns so data models can evolve as neede
 Implementation
 --------------
 
-This repository implements COLD, a web application for curating object lists and other datum. It is built using TypeScript and Deno.  It requires the JSON API provided by [datasetd](https://github.com/caltechlibrary/dataset).
+This repository implements COLD, a web application for curating object lists. It is built using TypeScript and Deno.  It requires the JSON API provided by [datasetd](https://github.com/caltechlibrary/dataset).
 
 Your front end web server (e.g. Apache 2 + Shibboleth) must to be configure to reverse proxy the cold services. **The front end web server is responsible for access control.** Ideally your front end web server software (e.g. Apache2, NginX , Lighttpd) is configured with a a single sign-on implementation like Shibboleth. For development services you can just use basic auth for access control testing.
 
@@ -27,10 +27,6 @@ Details
 
 - **directory_sync** is build as TypeScript command line program suitable to be run from a cronjob. It is responsble for updating Caltech People data from the Caltech directory.
 
-- **ds_importer** is a once time import script used to bootstrap the data in cold from our legacy CSV spreadsheets
-
-- **set_include_in_feeds** will set `include_in_feeds` to true for records in single column CSV file where the row heading is `clpid`.
-
 Public content access is through files exported to our [Feeds](https://feeds.library.caltech.edu) system. Deno is used to managed tasks that export content to it.
 
 __An important point COLD's access control is deferred to the front end web server (e.g. Apache2+Shibboleth).__
@@ -38,7 +34,7 @@ __An important point COLD's access control is deferred to the front end web serv
 Requirements
 ------------
 
-- Deno >= 2.0
+- Deno >= 2.0.5
 - Dataset >= 2.1.23 (using SQL JSON storage)
 - The following are required to build the UI and compile the assets needed by **COLD**
   - GNU Make

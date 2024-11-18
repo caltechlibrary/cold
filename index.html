@@ -22,8 +22,8 @@
 </nav>
 
 <section>
-<h1 id="cold---controlled-object-lists-and-datum">cold - (c)ontrolled
-(o)bject (l)ists and (d)atum</h1>
+<h1 id="cold---controlled-object-lists-with-dataset">cold - (c)ontrolled
+(o)bject (l)ists with (D)ataset</h1>
 <h2 id="overview">Overview</h2>
 <p>Caltech Library maintains a list of people, groups and funders and
 their related identifiers. For many years these were managed using a
@@ -37,8 +37,8 @@ provides access control (e.g. via Shibboleth).</p>
 evolve as needed.</p>
 <h2 id="implementation">Implementation</h2>
 <p>This repository implements COLD, a web application for curating
-object lists and other datum. It is built using TypeScript and Deno. It
-requires the JSON API provided by <a
+object lists. It is built using TypeScript and Deno. It requires the
+JSON API provided by <a
 href="https://github.com/caltechlibrary/dataset">datasetd</a>.</p>
 <p>Your front end web server (e.g. Apache 2 + Shibboleth) must to be
 configure to reverse proxy the cold services. <strong>The front end web
@@ -65,11 +65,6 @@ collection.</p></li>
 <li><p><strong>directory_sync</strong> is build as TypeScript command
 line program suitable to be run from a cronjob. It is responsble for
 updating Caltech People data from the Caltech directory.</p></li>
-<li><p><strong>ds_importer</strong> is a once time import script used to
-bootstrap the data in cold from our legacy CSV spreadsheets</p></li>
-<li><p><strong>set_include_in_feeds</strong> will set
-<code>include_in_feeds</code> to true for records in single column CSV
-file where the row heading is <code>clpid</code>.</p></li>
 </ul>
 <p>Public content access is through files exported to our <a
 href="https://feeds.library.caltech.edu">Feeds</a> system. Deno is used
@@ -78,7 +73,7 @@ to managed tasks that export content to it.</p>
 front end web server (e.g. Apache2+Shibboleth).</strong></p>
 <h2 id="requirements">Requirements</h2>
 <ul>
-<li>Deno &gt;= 2.0</li>
+<li>Deno &gt;= 2.0.5</li>
 <li>Dataset &gt;= 2.1.23 (using SQL JSON storage)</li>
 <li>The following are required to build the UI and compile the assets
 needed by <strong>COLD</strong>
