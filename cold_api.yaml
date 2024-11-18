@@ -55,7 +55,7 @@ collections:
     versions: true
   - dataset: issn.ds
     query:
-      issn_names: select json_object('issn', srfc->'issn', 'name', src->'name') as src from issn order by src->'name';
+      issn_names: select json_object('issn', src->'issn', 'name', src->'name') as src from issn order by src->'name';
     # What follows are object level permissions
     keys: true
     create: true

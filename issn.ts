@@ -4,10 +4,12 @@
 import {
   apiPort,
   Dataset,
-  formDataToObject,
+  //formDataToObject,
   pathIdentifier,
   renderPage,
 } from "./deps.ts";
+
+import { timeStamp } from "./utils.ts";
 
 const ds = new Dataset(apiPort, "issn.ds");
 
@@ -15,13 +17,23 @@ const ds = new Dataset(apiPort, "issn.ds");
  * ISSNInterface
  */
 export interface ISSNInterface {
+  /* ISSN is the primary identifier for record */
   issn: string;
+  /* Name of Journal */
   name: string;
+  /* Other Journal names */
   alternate_names: string[];
+  /* Publisher Name */
   publisher_name: string;
+  /* Publisher Address */
   publisher_address: string;
+  /* Publisher Country, State/Province/Region of Journal */
   publisher_location: string;
+  /* Decription of Journal */
   description: string;
+  /* Internal Notes */
+  internal_notes: string;
+  /* Date record was updated */
   updated: string;
 }
 
@@ -36,6 +48,7 @@ export class ISSN implements ISSNInterface {
   publisher_location: string = "";
   publisher_address: string = "";
   description: string = "";
+  internal_notes: string = "";
   updated: string = "";
 
   migrateCsv(row: any): boolean {
@@ -52,6 +65,9 @@ export class ISSN implements ISSNInterface {
     }
     if (row.hasOwnProperty("Publisher")) {
       this.publisher_name = row.Publisher;
+    }
+    if (row.hasOwnProperty("Internal Notes")) {
+      this.internal_notes = row.internal_notes;
     }
     if (row.hasOwnProperty("alternate_names")) {
       this.alternate_names = row.alernate_name.split(/;/g);
@@ -88,6 +104,7 @@ export class ISSN implements ISSNInterface {
       publisher_location: this.publisher_location,
       publisher_address: this.publisher_address,
       description: this.description,
+      internal_notes: this.internal_notes,
       updated: this.updated,
     };
   }
@@ -98,6 +115,54 @@ export class ISSN implements ISSNInterface {
   toJSON(): string {
     return JSON.stringify(this.asObject());
   }
+
+  /**
+   * toRDMObject() returns an abbreviated object that maps to RDM's vocabularies
+   */
+  toRDMObject(): Object {
+    return {
+      id: this.issn,
+      title: {
+        en: this.name,
+      },
+    };
+  }
+}
+
+/**
+ * formDataToJournal turn the form data into a ISSN object.
+ * The difference from the utils.ts forDataToObject is that the
+ * alternative names fields needs to be converted from form text to an
+ * array of string, one per line of form text.
+ *
+ * @param {FormData} form data the form object to process
+ * @returns {Object}
+ */
+export function formDataToJournal(form: FormData): object {
+  const obj: { [k: string]: string | string[] | boolean } = {};
+  for (const v of form.entries()) {
+    const key: string = v[0];
+    if (key !== "submit") {
+      const val: any = v[1];
+      if (key === "alternative_names") {
+        const alt_names: string = (v[1] as any as string).trim();
+        if (alt_names != "") {
+          obj[key] = alt_names.split(/\n/g) as string[];
+        } else {
+          obj[key] = [];
+        }
+      } else if (val === "true" || val === "on") {
+        obj[key] = true;
+      } else if (val === "false" || val === "off") {
+        obj[key] = false;
+      } else {
+        obj[key] = val;
+      }
+    }
+  }
+  /*  NOTE: Make sure we update obj.updated */
+  obj["updated"] = timeStamp(new Date());
+  return obj;
 }
 
 /**
@@ -221,7 +286,7 @@ async function handlePostISSN(
 
   if (req.body !== null) {
     const form = await req.formData();
-    let obj = formDataToObject(form);
+    let obj = formDataToJournal(form);
     console.log(
       `DEBUG form data after converting to object -> ${JSON.stringify(obj)}`,
     );

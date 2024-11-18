@@ -10,6 +10,8 @@ import {
   renderPage,
 } from "./deps.ts";
 
+import { timeStamp } from "./utils.ts";
+
 const ds = new Dataset(apiPort, "groups.ds");
 
 /**
@@ -159,7 +161,7 @@ export class Group implements GroupInterface {
     if (row.hasOwnProperty("updated")) {
       this.updated = row.updated;
     } else {
-      this.updated = new Date().toJSON().substring(0, 10);
+      this.updated = timeStamp(new Date());
     }
 
     if (row.hasOwnProperty("Scope")) {

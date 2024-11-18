@@ -34,7 +34,7 @@
 </div>
 
 <div>
-<label set="publisher_name">Publisher Name</label> <input type="text" id="publisher_name" name="publisher_name" value="{{issn.publisher_name}}" required="true" />
+<label set="publisher_name">Publisher Name</label> <input type="text" id="publisher_name" name="publisher_name" value="{{issn.publisher_name}}" />
 </div>
 
 <div>
@@ -51,9 +51,16 @@
 <textarea id="description" name="description" rows="10" cols="60">{{issn.description}}</textarea>
 </div>
 
+<hr>
+
 <div>
-<label set="updated">record updated</label> <input type="text" id="updated" name="updated" value="{{issn.updated}}" readonly>
+<label set="internal_notes">Internal Notes</label><br >
+<textarea id="internal_notes" name="internal_notes" rows="10" cols="60">{{issn.internal_notes}}</textarea>
 </div>
+
+<p>
+{{#if issn.updated}}<label set="updated">updated</label> {{issn.updated}}{{/if}}
+</p>
 
 <div>
 <input type="submit" id="submit" name="submit" value="submit"> <input type="reset" id="reset" name="reset" value="reset">
