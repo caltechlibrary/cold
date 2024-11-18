@@ -38,4 +38,5 @@ SQL
 
 prune_standard_reports "run_people_csv" "rpt/people.csv"
 prune_standard_reports "run_groups_csv" "rpt/groups.csv"
+prune_standard_reports "run_journal_vocabulary" "rpt/journal_vocabulary.yaml"
 prune_stale_processing_reports 
