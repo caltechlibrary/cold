@@ -28,6 +28,15 @@ export function pathIdentifier(u: string): string {
 }
 
 /**
+ * timeStamp takes a Date object and returns a simople timestamp as a string.
+ * @param dt: Date
+ * @returns string
+ */
+export function timeStamp(dt: Date): string {
+  return dt.toISOString().replace("T", " ").substring(0, 19);
+}
+
+/**
  * formDataToObject turn the form data into a simple object.
  *
  * @param {FormData} form data the form object to process
@@ -49,6 +58,6 @@ export function formDataToObject(form: FormData): object {
     }
   }
   /*  NOTE: Make sure we update obj.updated */
-  obj["updated"] = new Date().toJSON().substring(0, 10);
+  obj["updated"] = timeStamp(new Date());
   return obj;
 }

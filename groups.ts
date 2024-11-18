@@ -45,6 +45,8 @@ export interface GroupInterface {
   authors_id: string;
   /* thesis_id */
   thesis_id: string;
+  /* internal notes */
+  internal_notes: string;
 }
 
 /**
@@ -80,6 +82,8 @@ export class Group implements GroupInterface {
   authors_id: string = "";
   /* thesis_id */
   thesis_id: string = "";
+  /* internal_notes */
+  internal_notes: string = "";
 
   migrateCsv(row: any): boolean {
     if (row.hasOwnProperty("key")) {
@@ -149,11 +153,15 @@ export class Group implements GroupInterface {
     if (row.hasOwnProperty("ror")) {
       this.ror = row.ror;
     }
+    if (row.hasOwnProperty("internal_notes")) {
+      this.internal_notes = row.internal_notes;
+    }
     if (row.hasOwnProperty("updated")) {
       this.updated = row.updated;
     } else {
       this.updated = new Date().toJSON().substring(0, 10);
     }
+
     if (row.hasOwnProperty("Scope")) {
       this.Scope = row.Scope;
     }
@@ -188,6 +196,7 @@ export class Group implements GroupInterface {
       ror: this.ror,
       updated: this.updated,
       Scope: this.Scope,
+      internal_notes: this.internal_notes,
     };
   }
 
