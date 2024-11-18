@@ -1,6 +1,6 @@
-%cold(1) user manual | 0.0.11 2024-11-18 e26c375
+%cold(1) user manual | 0.0.11 2024-11-18 352b9cd
 % R. S.Doiel
-% 2024-11-18 e26c375
+% 2024-11-18 352b9cd
 
 # NAME
 
