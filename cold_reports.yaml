@@ -11,7 +11,7 @@ reports:
     append_datestamp: false
     content_type: text/csv
   journal_vocabulary:
-    cmd: ./bin/journal_vocabulary
+    cmd: ./run_journal_vocabulary.bash
     basename: journal_vocabulary
     append_datestamp: false
     content_type: application/yaml
