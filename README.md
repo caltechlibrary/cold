@@ -25,7 +25,7 @@ Details
 
 - **datasetd** is part of the [Dataset](https://github.com/caltechlibrary/dataset) project. It provides the JSON API needed to curate the objects in a dataset collection.
 
-- **directory_sync** is build as TypeScript command line program suitable to be run from a cronjob. It is responsble for updating Caltech People data from the Caltech directory.
+- **directory_sync** is build as TypeScript command line program suitable to be run from a cronjob. It is responsible for updating Caltech People data from the Caltech directory.
 
 Public content access is through files exported to our [Feeds](https://feeds.library.caltech.edu) system. Deno is used to managed tasks that export content to it.
 

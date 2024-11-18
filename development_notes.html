@@ -23,6 +23,9 @@
 
 <section>
 <h1 id="development-notes">Development Notes</h1>
+<p>NOTE: this document describes my thinking during the development
+process. It is not a description of how things actually got
+implemented.</p>
 <h2 id="application-layout-and-structure">Application layout and
 structure</h2>
 <p>The primary task of the COLD UI is to provide a means of curating our
@@ -33,10 +36,10 @@ tie our JSON API with our static content. The front end web server
 (i.e. Apache 2) provides integration with Shibboleth provides single
 sign on and access control.</p>
 <p>I am relying on feeds.library.caltech.edu to provide the public
-facing API. Data is transfered to feeds via scripts run on a schedule or
-“on demand” via JavaScript contacting external systems. Deno can compile
-the TypeScript code to JavaScript for browser consumption using the
-“<span class="citation" data-cites="deno/emit">@deno/emit</span>”
+facing API. Data is transferred to feeds via scripts run on a schedule
+or “on demand” via JavaScript contacting external systems. Deno can
+compile the TypeScript code to JavaScript for browser consumption using
+the “<span class="citation" data-cites="deno/emit">@deno/emit</span>”
 module.</p>
 <h2 id="the-go-dataset-and-models-package">The Go dataset and models
 package</h2>
@@ -44,16 +47,13 @@ package</h2>
 collections to specific data models. A model is base on data types that
 easily map from HTML 5 form elements to SQL data types. Additionally
 there are types associated with library and archives such as support for
-ISNI, ORCID and ROR. Dataset still supports adhoc JSON object storage if
-that is needed.</p>
-<p>The data models ar enforced only via the datasetd service. Eventually
-model support will be unforced for the dataset cli.</p>
-<p>Data models are expressed in YAML and are shared between dataset and
-the model YAML used by Newt. Both use the same models package written in
-Go. The models package procides a means of define more types as well as
-adding renders. It is being developed in parallel with Newt, Dataset and
-the COLD where the latter is providing a real world use case to test the
-approach.</p>
+ISNI, ORCID and ROR. Dataset still supports ad hoc JSON object storage
+if that is needed.</p>
+<!--
+The data models are enforced only via the datasetd service.  Eventually model support will be unforced for the dataset cli.
+
+Data models are expressed in YAML and are shared between dataset and the model YAML used by Newt. Both use the same models package written in Go. The models package provides a means of define more types as well as adding renders. It is being developed in parallel with Newt, Dataset and the COLD where the latter is providing a real world use case to test the approach.
+-->
 <p>The public API isn’t part of COLD directly. COLD is for curating
 object lists but it does export those objects to
 feeds.library.caltech.edu which then provides the public API. Content is
@@ -62,11 +62,11 @@ systems and services.</p>
 <h2 id="data-enhancement">Data enhancement</h2>
 <p>The content curated in cold can be enhanced from external sources.
 This is done via scheduled tasks. Initially these tasks are going to be
-run from cron. An example is biographical and other information
+run from cron. An example is importing biographical information
 published in the Caltech Directory. For a subset of CaltechPEOPLE we
 know their IMSS userid. Using that we can contact the public directory
 website and return the biographical details such as their faculty role
-and title, division, and educational backgroup. We only harvest those
+and title, division, and educational background. We only harvest those
 records that have both a directory user id and are marked for inclusion
 in feeds.</p>
 <p>External data sources:</p>
@@ -79,16 +79,16 @@ in feeds.</p>
 <p>Reports are often needed for managing library data and systems.
 COLD’s focus is on managing lists and data but can also serve as a
 reports request hub.</p>
-<p>Many of the reports require aggrestion across data sources and often
+<p>Many of the reports require aggregation across data sources and often
 these will take too long or require too many resources to be run
-directly on our applicaiton server. That suggests what should run on the
+directly on our application server. That suggests what should run on the
 applications server is a simple reports request management interface.
 The suggestions the following requirements.</p>
 <ul>
 <li>A way to make a request for a report</li>
 <li>A means of indicating a report status (e.g. requested or scheduled,
 processing, available or problem indicator)</li>
-<li>A means of notifying the requestor(s) when report is available</li>
+<li>A means of notifying the requester(s) when report is available</li>
 <li>A means of purging old reports for the reports status list</li>
 </ul>
 <p>These features can be implemented as a simple queue. The metadata
@@ -109,13 +109,13 @@ application/x-sqlite3, text/csv, text/plain, text/x-markdown)</li>
 <p>The user interface would consist of a simple web form to request a
 predefined set up reports and a list of reports available, processing,
 requested or scheduled.</p>
-<p>The reports themselves can be implemented as commmand line programs
-in a language of your choice. The report runner will be responsible for
+<p>The reports themselves can be implemented as command line programs in
+a language of your choice. The report runner will be responsible for
 checking the queue and updating the queue. The report would be
 responsible for notification (e.g. is there is an email list then send
-out an email with the report link). In princle since our GitHub actions
-are accessible via the GitHub APIs a report could be implemented as a
-GitHub action.</p>
+out an email with the report link). In principle since our GitHub
+actions are accessible via the GitHub APIs a report could be implemented
+as a GitHub action.</p>
 <p>The advantage of this approach is that it avoids the problems of slow
 running or resource intensive reports running directly on the
 application server. COLD just manages the report queue.</p>
@@ -139,12 +139,14 @@ needs access to the queue.</p>
 runner?</p>
 <p>The individual reports can be implemented as a script (e.g. Bash), a
 program (e.g. something in Python) or even externally (e.g. GitHub
-action). The interface for the report would be to recieve a JSON
-expression from standard input and return a JSON expression via standard
-output to the runner along with an error code (i.e. zero no problem,
-non-zero there was a problem). The report script or program would use a
-link to indicate where the report could be picked up and be responsible
-to placing content in a storage location accessbile via the link.</p>
+action). The interface for the report system takes advantage of standard
+input and standard output. This simplifies writing the report programs.
+An example would be to process a JSON expression from standard input and
+return a JSON expression via standard output to the runner along with an
+error code (i.e. zero no problem, non-zero there was a problem). The
+report script or program would use a link to indicate where the report
+could be picked up and be responsible to placing content in a storage
+location accessible via the link.</p>
 <p>Report status:</p>
 <dl>
 <dt>requested</dt>
@@ -153,7 +155,7 @@ An entry that a request has been made and is waiting to be serviced
 </dd>
 <dt>processing</dt>
 <dd>
-The report reqest is being serviced but is not yet available
+The report request is being serviced but is not yet available
 </dd>
 <dt>available</dt>
 <dd>
@@ -170,19 +172,19 @@ the details can be found about what when wrong.
 <p>There are two basic report types. Those which are run on a schedule
 (e.g. recent grant report from thesis or creators report from authors)
 and those which are requested then run. For the scheduled reports the
-identifier would be in the reports’ unqiue name. For requested reports
-another mechanism maybe required. A good canidate for the identifier
+identifier would be in the reports’ unique name. For requested reports
+another mechanism maybe required. A good candidate for the identifier
 would be UUID v5. Since the report script or program is responsible for
-storing the results it would also be responsble for versioning the
+storing the results it would also be responsible for versioning the
 stored results if needed. By separating the ID from the report instance
 it is left to the report what the name of the stored result is while
 still being able to map a request to that link’s instance.</p>
 <p>Reports can be of different content types. Most reports we generate
-manually today are either CSV, tab demlimited or Excel files. By
-allowing reports to have different content types we also allow for the
-report to be provided in a relavant type. E.g. a report could be
-generated as a PDF or even an SQLite3 database.</p>
-<h3 id="explorting-the-report-runner">Explorting the report runner</h3>
+manually today are either CSV, tab delimited or Excel files. By allowing
+reports to have different content types we also allow for the report to
+be provided in a relevant type. E.g. a report could be generated as a
+PDF or even an SQLite3 database.</p>
+<h3 id="exploring-the-report-runner">Exploring the report runner</h3>
 <p>COLD provides a collection called “reports.ds”. Assuming that
 collection is readable on your data processing machine a runner needs to
 be able to do several actions.</p>
@@ -198,7 +200,7 @@ processing -&gt; problem)</li>
 requests available. At that time it can sleep for a designated period of
 time then start the loop again when requests are available.</p>
 <p>To control what is executed it is desirable to have a specific
-configurable task runner available. This will prevent arbetrary commends
+configurable task runner available. This will prevent arbitrary commends
 from running.</p>
 <p>Off the shelf task runners include</p>
 <ul>
@@ -206,7 +208,7 @@ from running.</p>
 <li>just, a new simpler command runner that is cross platform and
 language agnostic</li>
 </ul>
-<p>The report runner would take the report request record, set statu to
+<p>The report runner would take the report request record, set status to
 processing and then pass the report name and options to task runner.
 When the task completed (either successfully or failing) the result
 would be captured and stored in a designated storage system
@@ -217,9 +219,9 @@ with the final status and link to the report or error report.</p>
 be considerable. The default way a the TypeScript/JavaScript Date object
 render a date is “MM/DD/YYYY” using the <code>toDateString()</code>
 instance method. Our databases and most of our code base expects date to
-be formated in “YYYY-MM-DD” so I am using two TypeScript/JavaScript
+be formatted in “YYYY-MM-DD” so I am using two TypeScript/JavaScript
 methods to achieve that. First you use <code>.toJSON()</code> to render
-the date in JSON format then you trim the result to 11 characters usign
+the date in JSON format then you trim the result to 11 characters using
 <code>.substring(0,10)</code>.</p>
 <h2 id="booleans-and-webforms">Booleans and webforms</h2>
 <p>When the web form is transcribed checkboxes return a “on” if checked

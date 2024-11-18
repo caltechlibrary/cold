@@ -24,10 +24,9 @@
 <section>
 <h1 id="installation-for-development-of-cold">Installation for
 development of <strong>cold</strong></h1>
-<p><strong>cold</strong> is experimental software providing a curation
-of managed controlled object lists and datum (e.g. controlled
-vocabularies). The <strong>cold</strong> repository provides the public
-facing JSON API for integration with other services.</p>
+<p><strong>cold</strong> is experimental software for curation of
+managed controlled object lists (e.g. people, groups and controlled
+vocabularies) through several services.</p>
 <p><strong>cold</strong> web services are intended to run behind a front
 facing web server (e.g. Apache 2) providing access control and
 authentication. In a development setting this can be as simple as
@@ -37,19 +36,21 @@ source repository for <strong>cold</strong>. It will require adaptation
 to your specific web server configuration.</p>
 <p><strong>cold</strong> requires the datasetd web service to provide
 access to people.ds, group.ds and other collections. For
-<strong>cold</strong> your collections to use sql storage, e.g. SQLite3
-or PostgreSQL. This can be done using a Deno task or via the Makefile
-(which calls the deno task).</p>
+<strong>cold</strong> your collections should use SQL storage,
+e.g. SQLite3 or PostgreSQL. Setting up SQLite3 dataset collections can
+be done using a Deno task or via the Makefile (which calls the deno
+task).</p>
 <p>If you are setting up to run in production you should compile the
 services and install the systemd service scripts so that systemd can
 manage the applications.</p>
 <h2 id="required-software">Required software</h2>
 <ol type="1">
 <li>Git (to clone the cold repository on GitHub)</li>
-<li>Deno &gt;= 2.0 (to run the public and management web services)</li>
-<li>Dataset &gt;= 2.1.22 (datasetd provides the JSON API for cold public
+<li>Deno &gt;= 2.0.5 (to run the public and management web
+services)</li>
+<li>Dataset &gt;= 2.1.23 (datasetd provides the JSON API for cold public
 and admin services)</li>
-<li>Pandoc &gt; 3.1 (to build or update documation)</li>
+<li>Pandoc &gt; 3.1 (to build or update documentation)</li>
 </ol>
 <h2 id="setting-up-cold">Setting up cold</h2>
 <p>These are setup instructions for testing and development. Step four

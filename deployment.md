@@ -3,7 +3,7 @@
 
 Deploying cold on a remote system requires manual setup.  You will need the following software to successfully build and deploy.
 
-- Deno >= 2.0
+- Deno >= 2.0.5 (for compiling COLD)
 - Dataset >= 2.1.23
 - Pandoc >= 3.1
 - GNU Make
@@ -27,7 +27,7 @@ My current recommendation is the following.
 9. Start the services using `systemctl` in the usual way
     a. `sudo systemctl start cold.service`
     b. `sudo systemctl start cold_api.service`
-10. Test web services using elinks. If you get a gateway error it means datasetd isn't runining correctly in port 8111. Debug with curl, systemctl status, journalctl.
+10. Test web services using eLinks. If you get a gateway error it means datasetd isn't running correctly in port 8111. Debug with curl, systemctl status, journalctl.
 
 You can configure Apache to reverse proxy to the cold service running on port 8111 where it should enforce access control.
 
@@ -90,7 +90,7 @@ dataset collections (e.g. people.ds) you can use two tools to populate the colle
 Steps:
 
 1. Set the environment variable FEEDS_BASE_DIR to point to where feeds staging is deployed.
-2. Copy people.csv and groups.csv from feeds.library.caltech.edu and save then as `people_final.csv` and `groups_final.csv`.  Copy edit the files if neccessary (e.g. remove duplicate rows)
+2. Copy people.csv and groups.csv from feeds.library.caltech.edu and save then as `people_final.csv` and `groups_final.csv`.  Copy edit the files if necessary (e.g. remove duplicate rows)
 3. Copy the directory names for people on feeds.library.caltech.edu and render this as a [single CSV column](in_feeds.csv-example) with the heading `clpid`.
 4. Clear test data from `people.ds` with SQLite3 cli.
 5. Run `ds_importer`
@@ -102,5 +102,5 @@ scp "library.example.edu:$FEEDS_BASE_DIR/people.csv" people_final.csv
 echo "clpid" >in_feeds.csv
 ssh library.example.edu "ls -1 -d $FEEDS_BASE_DIR/htdocs/people/* | cut -d / -f 6" >>in_feeds.csv
 ./bin/ds_importer people.ds people_final.csv
-./bin/set_include_in_feeds people.ds in_fieds.csv
+./bin/set_include_in_feeds people.ds in_feeds.csv
 ~~~

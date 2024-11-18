@@ -26,7 +26,7 @@
 <p>Deploying cold on a remote system requires manual setup. You will
 need the following software to successfully build and deploy.</p>
 <ul>
-<li>Deno &gt;= 2.0</li>
+<li>Deno &gt;= 2.0.5 (for compiling COLD)</li>
 <li>Dataset &gt;= 2.1.23</li>
 <li>Pandoc &gt;= 3.1</li>
 <li>GNU Make</li>
@@ -61,8 +61,8 @@ warning about symbolic link)
 <li><code>sudo systemctl start cold.service</code></li>
 <li><code>sudo systemctl start cold_api.service</code></li>
 </ol></li>
-<li>Test web services using elinks. If you get a gateway error it means
-datasetd isn’t runining correctly in port 8111. Debug with curl,
+<li>Test web services using eLinks. If you get a gateway error it means
+datasetd isn’t running correctly in port 8111. Debug with curl,
 systemctl status, journalctl.</li>
 </ol>
 <p>You can configure Apache to reverse proxy to the cold service running
@@ -126,7 +126,7 @@ the collection and set the <code>include_in_feeds</code> property.</p>
 staging is deployed.</li>
 <li>Copy people.csv and groups.csv from feeds.library.caltech.edu and
 save then as <code>people_final.csv</code> and
-<code>groups_final.csv</code>. Copy edit the files if neccessary
+<code>groups_final.csv</code>. Copy edit the files if necessary
 (e.g. remove duplicate rows)</li>
 <li>Copy the directory names for people on feeds.library.caltech.edu and
 render this as a <a href="in_feeds.csv-example">single CSV column</a>
@@ -140,7 +140,7 @@ scp &quot;library.example.edu:$FEEDS_BASE_DIR/people.csv&quot; people_final.csv
 echo &quot;clpid&quot; &gt;in_feeds.csv
 ssh library.example.edu &quot;ls -1 -d $FEEDS_BASE_DIR/htdocs/people/* | cut -d / -f 6&quot; &gt;&gt;in_feeds.csv
 ./bin/ds_importer people.ds people_final.csv
-./bin/set_include_in_feeds people.ds in_fieds.csv</code></pre>
+./bin/set_include_in_feeds people.ds in_feeds.csv</code></pre>
 </section>
 
 <footer>

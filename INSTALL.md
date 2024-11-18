@@ -1,11 +1,11 @@
 Installation for development of **cold**
 ========================================
 
-**cold** is experimental software providing a curation of managed controlled object lists and datum (e.g. controlled vocabularies). The **cold** repository provides the public facing JSON API for integration with other services.
+**cold** is experimental software for curation of managed controlled object lists (e.g. people, groups and controlled vocabularies) through several services.
 
 **cold** web services are intended to run behind a front facing web server (e.g. Apache 2) providing access control and authentication. In a development setting this can be as simple as configuring BasicAuth.  In a production setting you need something robust like Shibboleth.  An example apache2 configuration is included in the source repository for **cold**. It will require adaptation to your specific web server configuration.
 
-**cold** requires the datasetd web service to provide access to people.ds, group.ds and other collections. For **cold** your collections to use sql storage, e.g. SQLite3 or PostgreSQL. This can be done using a Deno task or via the Makefile (which calls the deno task).
+**cold** requires the datasetd web service to provide access to people.ds, group.ds and other collections. For **cold** your collections should use SQL storage, e.g. SQLite3 or PostgreSQL. Setting up SQLite3 dataset collections can be done using a Deno task or via the Makefile (which calls the deno task).
 
 If you are setting up to run in production you should compile the services and install the systemd service scripts so that systemd can manage the applications.
 
@@ -13,9 +13,9 @@ Required software
 -----------------
 
 1. Git (to clone the cold repository on GitHub)
-2. Deno >= 2.0 (to run the public and management web services)
-3. Dataset >= 2.1.22 (datasetd provides the JSON API for cold public and admin services)
-4. Pandoc > 3.1 (to build or update documation)
+2. Deno >= 2.0.5 (to run the public and management web services)
+3. Dataset >= 2.1.23 (datasetd provides the JSON API for cold public and admin services)
+4. Pandoc > 3.1 (to build or update documentation)
 
 Setting up cold
 ---------------
