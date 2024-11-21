@@ -82,6 +82,7 @@ ${app_name} -port=8111 -htdocs=/var/www/html/cold/app \
  *   const options = {
  *      debug: true,
  *      htdocs: "./htdocs"
+ *      baseUrl: "https://localhost:8000/cold"
  *   };
  *
  *   const server = Deno.serve({
@@ -100,7 +101,7 @@ export function ColdReadWriteHandler(
   const htdocs: string = path.normalize(options.htdocs);
 
   if (options.debug) console.log("DEBUG request", req);
-
+  console.log("DEBUG baseUrl", options.baseUrl);
   // Handle the various dataset collections management pages.
   if (pathname.startsWith("/people")) {
     return handlePeople(req, options);

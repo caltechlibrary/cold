@@ -260,6 +260,7 @@ export async function handlePeople(
   req: Request,
   options: { debug: boolean; htdocs: string; baseUrl: string },
 ): Promise<Response> {
+  console.log("DEBUG handlePeople() baseUrl", options.baseUrl);
   if (req.method === "GET") {
     return await handleGetPeople(req, options);
   }
@@ -291,6 +292,8 @@ async function handleGetPeople(
   req: Request,
   options: { debug: boolean; htdocs: string; baseUrl: string },
 ): Promise<Response> {
+  console.log("DEBUG handleGetPeople() baseUrl", options.baseUrl);
+
   /* parse the URL */
   const url = new URL(req.url);
   const clpid = pathIdentifier(req.url);
