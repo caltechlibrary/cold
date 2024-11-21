@@ -1,6 +1,6 @@
-%directory_sync(1) user manual | 0.0.11 2024-11-20 282ca5a
+%directory_sync(1) user manual | 0.0.11 2024-11-21 74b4ec8
 % R. S.Doiel
-% 2024-11-20 282ca5a
+% 2024-11-21 74b4ec8
     
 # NAME
     

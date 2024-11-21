@@ -26,7 +26,7 @@
 </div>
 
 <div>
-<label set="orcid">ORCID</label> <input type="text" id="orcid" name="orcid" pattern="[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9X]" value="{{people.orcid}}">
+<label set="orcid">ORCID</label> <input type="text" id="orcid" name="orcid" pattern="[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9X]" value="{{people.orcid}}" size="15">
 </div>
 
 <hr>
@@ -114,7 +114,7 @@
 </div>
 
 <div class="feeds-status"><p>Feeds status:<br >
-<label set="include_in_feeds">Include in feeds <input type="checkbox" id="include_in_feeds" name="include_in_feeds" {{#people.include_in_feeds}}checked{{/people.include_in_feeds}}> </label>
+<label set="include_in_feeds">Include in feeds <input type="checkbox" id="include_in_feeds" name="include_in_feeds" {{#people.include_in_feeds}}checked{{/people.include_in_feeds}}></label>
 </div>
 
 <div class="internal-notes"><label set="internal_notes">Internal Notes:</label><br>
@@ -146,5 +146,5 @@
 <div class="foot_note" id="directory_note">◇ indicates data managed by <a href="https://directory.caltech.edu">Caltech Directory</a></div>
 </section>
 {{>footer}}
-<script src="../../js/directory_client.js"></script>
+<script src="{{base_path}}/js/directory_client.js"></script>
 </html>

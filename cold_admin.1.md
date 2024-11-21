@@ -1,6 +1,6 @@
-%cold(1) user manual | 0.0.11 2024-11-20 282ca5a
+%cold(1) user manual | 0.0.11 2024-11-21 74b4ec8
 % R. S.Doiel
-% 2024-11-20 282ca5a
+% 2024-11-21 74b4ec8
 
 # NAME
 
@@ -35,6 +35,9 @@ port
 
 htdocs
 : set the static content directory, default ./htdocs
+
+baseUrl
+: set the browser's base path reference, default /
 
 apiUrl
 : set the url to the datasetd API provided for cold

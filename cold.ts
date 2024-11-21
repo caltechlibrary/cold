@@ -94,10 +94,10 @@ ${app_name} -port=8111 -htdocs=/var/www/html/cold/app \
  */
 export function ColdReadWriteHandler(
   req: Request,
-  options: { debug: boolean; htdocs: string; apiUrl: string },
+  options: { debug: boolean; htdocs: string; baseUrl: string; apiUrl: string },
 ): Response | Promise<Response> {
   const pathname = new URL(req.url).pathname;
-  const basePath: string = path.normalize(options.htdocs);
+  const htdocs: string = path.normalize(options.htdocs);
 
   if (options.debug) console.log("DEBUG request", req);
 
@@ -134,7 +134,7 @@ export function ColdReadWriteHandler(
   // NOTE: If there isn't a specific handler implemented then assume you're
   // requesting a static asset.
   return serveDir(req, {
-    fsRoot: basePath,
+    fsRoot: htdocs,
   });
 }
 
@@ -145,6 +145,7 @@ function main() {
   const op: OptionsProcessor = new OptionsProcessor();
   const defaultPort: number = 8111;
   const defaultHtdocs: string = "./htdocs";
+  const defaultbaseUrl: string = "/";
   const defaultApiUrl: string = "http://localhost:8112";
 
   op.booleanVar("help", false, "display help");
@@ -160,6 +161,11 @@ function main() {
     "htdocs",
     defaultHtdocs,
     `set the static content directory, default ${defaultHtdocs}`,
+  );
+  op.stringVar(
+    "baseUrl",
+    defaultbaseUrl,
+    `set the browser's base path reference, default ${defaultbaseUrl}`,
   );
   op.stringVar(
     "apiUrl",
@@ -191,10 +197,14 @@ function main() {
     Deno.exit(1);
   }
 
-  const basePath = path.normalize(options.htdocs);
-
   console.log(`Starting COLD UI HTTP service at http://localhost:${options.port}
-Static content directory is ${basePath}
+
+Relies on JSON API at ${options.apiUrl}
+
+Static content directory is ${options.htdocs}
+
+Browser base path set to ${options.baseUrl}
+
 `);
   const server = Deno.serve(
     {
@@ -205,6 +215,7 @@ Static content directory is ${basePath}
       return ColdReadWriteHandler(req, {
         debug: options.debug,
         htdocs: options.htdocs,
+        baseUrl: options.baseUrl,
         apiUrl: options.apiUrl,
       });
     },

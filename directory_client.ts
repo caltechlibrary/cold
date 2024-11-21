@@ -36,7 +36,9 @@ function updateRecord(obj: object) {
       email_elem.value = obj.email;
     }
     if (obj.division !== undefined && obj.division !== "") {
-      division_elem.value = obj.division;
+      if (division_elem.value === "") {
+        division_elem.value = obj.division;
+      }
     }
     if (obj.bio !== undefined && obj.bio !== "") {
       bio_elem.innerText = obj.bio;
@@ -66,8 +68,10 @@ async function directoryUpdateRecord(evt: Event) {
     if (resp.ok) {
       // Since we're fetching from the proxied API we will get JSON back.
       const src = await resp.text();
+      //console.log("DEBUG src", src);
       if (src !== undefined && src !== "") {
         const obj = JSON.parse(src);
+        //console.log(`DEBUG directory data -> ${obj}`);
         updateRecord(obj);
       }
     } else {

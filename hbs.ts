@@ -10,8 +10,8 @@ const { readFile } = Deno;
 export { HandlebarsJS };
 
 export interface HandlebarsConfig {
-  baseDir: string;
   extname: string;
+  viewsDir: string;
   layoutsDir: string;
   partialsDir: string;
   cachePartials?: boolean;
@@ -22,13 +22,16 @@ export interface HandlebarsConfig {
   compilerOptions: any;
 }
 
-const DEFAULT_HANDLEBARS_CONFIG: HandlebarsConfig = {
-  baseDir: "views",
+/**
+ * Default uses this config:
+ */
+export const DEFAULT_HANDLEBARS_CONFIG: HandlebarsConfig = {
+  viewsDir: "views",
   extname: ".hbs",
   layoutsDir: "layouts/",
   partialsDir: "partials/",
   cachePartials: true,
-  defaultLayout: "main",
+  defaultLayout: "",
   helpers: undefined,
   compilerOptions: undefined,
 };
@@ -80,14 +83,14 @@ export class Handlebars {
       await this.registerPartials();
     }
 
-    const path = join(config.baseDir, view + config.extname);
+    const path = join(config.viewsDir, view + config.extname);
     const body: string = await this.render(path, context);
 
     layout = (layout as string) || config.defaultLayout;
 
     if (layout) {
       const layoutPath: string = join(
-        config.baseDir,
+        config.viewsDir,
         config.layoutsDir,
         layout + config.extname,
       );
@@ -121,13 +124,13 @@ export class Handlebars {
    */
   private async registerPartials() {
     const paths = await this.getTemplatesPath(
-      join(this.config.baseDir, this.config.partialsDir),
+      join(this.config.viewsDir, this.config.partialsDir),
     );
     if (paths) {
       for (const path of paths) {
         const templateName: string = path
           .replace(
-            getNormalizePath(this.config.baseDir) +
+            getNormalizePath(this.config.viewsDir) +
               "/" +
               this.config!.partialsDir,
             "",
@@ -139,7 +142,6 @@ export class Handlebars {
         (HandlebarsJS as any).registerPartial(templateName, source);
       }
     }
-
     this.#havePartialsBeenRegistered = true;
   }
 
@@ -158,7 +160,6 @@ export class Handlebars {
         arr.push(getNormalizePath(w.path));
       }
     }
-
     return arr;
   }
 }

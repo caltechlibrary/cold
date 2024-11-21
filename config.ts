@@ -6,6 +6,8 @@ export const httpPort: number = 8111;
 export interface ConfigInterface {
   debug: boolean;
   htdocs: string;
+  /* baseUrl is the URL base path seen by the browser */
+  baseUrl: string;
   httpPort: number;
   apiPort: number;
   apiUrl: string;
@@ -17,6 +19,7 @@ export interface ConfigInterface {
 export class ConfigureHandler {
   debug: boolean = false;
   htdocs: string = "htdocs";
+  baseUrl: string = "";
   httpPort: number = httpPort;
   apiPort: number = apiPort;
   apiUrl: string = `http://localhost:${this.apiPort}`;
@@ -33,6 +36,9 @@ export class ConfigureHandler {
     if (key === "debug") {
       this.debug = matchType(this.debug, value);
       return this.debug !== undefined;
+    }
+    if (key === "baseUrl") {
+      this.baseUrl = matchType(this.baseUrl, value);
     }
     if (key === "htdocs") {
       this.htdocs = matchType(this.htdocs, value);
@@ -61,6 +67,7 @@ export class ConfigureHandler {
   cfg(): ConfigInterface {
     return {
       debug: this.debug,
+      baseUrl: this.baseUrl,
       htdocs: this.htdocs,
       httpPort: this.httpPort,
       apiUrl: this.apiUrl,

@@ -1,21 +1,7 @@
 /**
  * render.ts holds the page rendering functions for cold_ui.
  */
-import { Handlebars, HandlebarsConfig } from "./hbs.ts";
-
-/**
- * Default uses this config:
- */
-const DEFAULT_HANDLEBARS_CONFIG: HandlebarsConfig = {
-  baseDir: "views",
-  extname: ".hbs",
-  partialsDir: "partials/",
-  layoutsDir: "layouts/",
-  cachePartials: false,
-  defaultLayout: "",
-  helpers: undefined,
-  compilerOptions: undefined,
-};
+import { DEFAULT_HANDLEBARS_CONFIG, Handlebars } from "./hbs.ts";
 
 const handle = new Handlebars(DEFAULT_HANDLEBARS_CONFIG);
 

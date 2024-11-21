@@ -258,7 +258,7 @@ export class People implements PeopleInterface {
  */
 export async function handlePeople(
   req: Request,
-  options: { debug: boolean; htdocs: string },
+  options: { debug: boolean; htdocs: string; baseUrl: string },
 ): Promise<Response> {
   if (req.method === "GET") {
     return await handleGetPeople(req, options);
@@ -289,12 +289,13 @@ export async function handlePeople(
  */
 async function handleGetPeople(
   req: Request,
-  options: { debug: boolean; htdocs: string },
+  options: { debug: boolean; htdocs: string; baseUrl: string },
 ): Promise<Response> {
   /* parse the URL */
   const url = new URL(req.url);
   const clpid = pathIdentifier(req.url);
   const params = url.searchParams;
+  const baseUrl = options.baseUrl;
   let view = params.get("view");
   let tmpl = "people_list";
   /* decide if we are in display view or edit view and pick the right template */
@@ -314,12 +315,12 @@ async function handleGetPeople(
     const people_list = await ds.query("people_names", [], {});
     if (people_list !== undefined) {
       return renderPage(tmpl, {
-        base_path: "",
+        base_url: baseUrl,
         people_list: people_list,
       });
     } else {
       return renderPage(tmpl, {
-        base_path: "",
+        base_url: baseUrl,
         people_list: [],
       });
     }
@@ -330,7 +331,7 @@ async function handleGetPeople(
     const obj = await ds.read(clpid);
     console.log(`We have a GET for people object ${clpid}, view = ${view}`);
     return renderPage(tmpl, {
-      base_path: "",
+      base_url: baseUrl,
       isCreateObject: isCreateObject,
       people: obj,
       debug_src: JSON.stringify(obj, null, 2),
