@@ -34,7 +34,7 @@ __An important point COLD's access control is deferred to the front end web serv
 Requirements
 ------------
 
-- Deno >= 2.0.5
+- Deno >= 2.0.6
 - Dataset >= 2.1.23 (using SQL JSON storage)
 - The following are required to build the UI and compile the assets needed by **COLD**
   - GNU Make
