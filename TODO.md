@@ -9,11 +9,12 @@ bug
 next
 ----
 
-- [ ] Make sure `author_id` and `thesis_id` continue to be mapped on reloading data from CSV file, if a person has an "clpid" and only are alumni then that should go into the `thesis_id` field.
-- [ ] Display name should always be taken from Caltech Directory
-- [ ] If the name fields family_name, given_name should be taken from the Caltech Directory if empty
-- [ ] When Caltech is checked active the ROR should populate with https://ror.org/05dxps055
-- [ ] Add "internal_notes" property to people object
+- [ ] Add directoryLookup() call on submit of people_edit
+- [X] Make sure `author_id` and `thesis_id` continue to be mapped on reloading data from CSV file, if a person has an "clpid" and only are alumni then that should go into the `thesis_id` field.
+- [X] Display name should always be taken from Caltech Directory
+- [X] If the name fields family_name, given_name should be taken from the Caltech Directory if empty
+- [ ] When Caltech is checked active the ROR should populate with https://ror.org/05dxps055 (client side code)
+- [X] Add "internal_notes" property to people object, group object and issn (journals) object
 - [ ] Write reports
   - [ ] Prototype a reports request system in COLD
     - [ ] Report request and availability UI

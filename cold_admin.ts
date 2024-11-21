@@ -1,6 +1,7 @@
 import {
   appInfo,
   existsSync,
+  handleDirectoryLookup,
   handleDOIPrefix,
   handleFunders,
   handleGroups,
@@ -121,6 +122,9 @@ export function ColdReadWriteHandler(
   }
   if (pathname.startsWith("/reports")) {
     return handleReports(req, options);
+  }
+  if (pathname.startsWith("/directory_api")) {
+    return handleDirectoryLookup(req, options);
   }
   if (options.debug) {
     console.log(

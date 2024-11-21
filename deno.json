@@ -28,11 +28,13 @@
     "release_linux_aarch64": "deno compile --allow-import --allow-read --allow-net --output dist/bin/cold_admin --target aarch64-unknown-linux-gnu cold_admin.ts ; deno compile --allow-import --allow-read --allow-net --output dist/bin/directory_sync --target aarch64-unknown-linux-gnu directory_sync.ts ; deno compile --allow-all --output dist/bin/cold_reports --target aarch64-unknown-linux-gnu cold_reports.ts",
     "release_macos_x86_64": "deno compile --allow-import --allow-read --allow-net --output dist/bin/cold_admin --target x86_64-apple-darwin cold_admin.ts ; deno compile --allow-import --allow-read --allow-net --output dist/bin/directory_sync --target x86_64-apple-darwin directory_sync.ts ; deno compile --allow-all --output dist/bin/cold_reports --target x86_64-apple-darwin cold_reports.ts",
     "release_macos_aarch64": "deno compile --allow-import --allow-read --allow-net --output dist/bin/cold_admin --target aarch64-apple-darwin cold_admin.ts ; deno compile --allow-import --allow-read --allow-net --output dist/bin/directory_sync --target aarch64-apple-darwin directory_sync.ts ; deno compile --allow-all --output dist/bin/cold_reports --target aarch64-apple-darwin cold_reports.ts",
-    "release_windows_x86_64": "deno compile --allow-import --allow-read --allow-net --output dist/bin/cold_admin.exe --target x86_64-pc-windows-msvc cold_admin.ts ; deno compile --allow-import --allow-read --allow-net --output dist/bin/directory_sync.exe --target x86_64-pc-windows-msvc directory_sync.ts ; deno compile --allow-all --output dist/bin/cold_reports.exe --target x86_64-pc-windows-msvc cold_reports.ts"
+    "release_windows_x86_64": "deno compile --allow-import --allow-read --allow-net --output dist/bin/cold_admin.exe --target x86_64-pc-windows-msvc cold_admin.ts ; deno compile --allow-import --allow-read --allow-net --output dist/bin/directory_sync.exe --target x86_64-pc-windows-msvc directory_sync.ts ; deno compile --allow-all --output dist/bin/cold_reports.exe --target x86_64-pc-windows-msvc cold_reports.ts",
+    "transpile": "deno run --allow-import --allow-env --allow-read --allow-write --allow-net transpile.ts ; deno fmt htdocs/js/directory_client.js"
   },
   "imports": {
     "@b-fuze/deno-dom": "jsr:@b-fuze/deno-dom@^0.1.47",
     "@david/dax": "jsr:@david/dax@^0.42.0",
+    "@deno/emit": "jsr:@deno/emit@^0.46.0",
     "@std/assert": "jsr:@std/assert@^1.0.0",
     "@std/cli": "jsr:@std/cli@^0.224.7",
     "@std/csv": "jsr:@std/csv@^0.224.3",

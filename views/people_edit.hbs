@@ -17,7 +17,7 @@
 <form action="{{people.clpid}}" method="post">
 
 <div>
-<label set="directory_user_id">Directory User ID</label> <input type="directory_user_id" id="directory_user_id" name="directory_user_id" value="{{people.directory_user_id}}">
+<label set="directory_user_id">Directory User ID</label> <input type="text" id="directory_user_id" name="directory_user_id" value="{{people.directory_user_id}}">
 </div>
 
 
@@ -32,35 +32,30 @@
 <hr>
 
 <div>
-<label set="display_name">Display Name</label> <input type="text" id="display_name" name="display_name" value="{{people.display_name}}" /> 
+<label set="display_name">Display Name</label> <input type="text" id="display_name" name="display_name" value="{{people.display_name}}" size="60" /> 
 </div>
 
 <div>
-<label set="family_name">Family Name</label> <input type="text" id="family_name" name="family_name" value="{{people.family_name}}" required="true" />
+<label set="family_name">Family Name</label> <input type="text" id="family_name" name="family_name" value="{{people.family_name}}" required="true" size="60" />
 </div>
 
 <div>
-<label set="given_name">Given/Lived Name</label> <input type="text" id="given_name" name="given_name" value="{{people.given_name}}" required="true" />
+<label set="given_name">Given/Lived Name</label> <input type="text" id="given_name" name="given_name" value="{{people.given_name}}" required="true" size="60" />
 </div>
 
 <div>
-<label set="email">Contact Email</label> <input type="email" id="email" name="email" pattern=".+@.+\.edu" value="{{people.email}}">
+<label set="email">Contact Email</label> <input type="email" id="email" name="email" pattern=".+@.+\.edu" value="{{people.email}}" size="60" />
 </div>
 
 <div>
-<label set="division">Division</label> <input type="text" id="division" name="division" value="{{people.division}}" placeholder="pulled from directory if empty">
+  <label set="title">Title</label> <input type="text" id="title" name="title" value="{{people.title}}" placeholder="job title" size="80" />
+</div>
+
+<div>
+<label set="division">Division</label> <input type="text" id="division" name="division" value="{{people.division}}" placeholder="pulled from directory if empty" size="80" />
 </div>
 
 <hr>
-<!-- <div>
-<label set="education">Education</label><br > <textarea id="education" name="education" rows="10" cols="60">{{people.education}}</textarea>
-</div> -->
-
-
-<!-- <div>
-<label set="status">Status</label> <input type="text" id="status" name="status" value="{{people.status}}">
-</div> -->
-
 
 <div class="identifiers">
 
@@ -129,14 +124,8 @@
 <hr>
 
 <div>
-<label set="directory_person_type"><a class="#foot_note" href="#directory_note"><sup>◇</sup></a> Directory Person Type</label> <input type="directory_person_type" id="directory_person_type" name="directory_person_type" value="{{people.directory_person_type}}" placeholder="pulled from directory" readonly>
+<label set="directory_person_type"><a class="#foot_note" href="#directory_note"><sup>◇</sup></a> Directory Person Type</label> <input type="text" id="directory_person_type" name="directory_person_type" value="{{people.directory_person_type}}" placeholder="pulled from directory" readonly>
 </div>
-
-<!--
-<div>
-<label set="image_url">Image URL</label> <input type="url" id="image_url" name="image_url" value="{{people.image_url}}">
-</div>
--->
 
 <div>
 <label set="bio"><a class="foot_note" href="#directory_note"><sup>◇</sup></a> Bio</label><br >
@@ -149,7 +138,7 @@
 </p>
 
 <div>
-<input type="submit" id="submit" name="submit" value="submit"> <input type="reset" id="reset" name="reset" value="reset">
+<input type="submit" id="submit" name="submit" value="save"> <input type="reset" id="reset" name="reset" value="cancel">
 </div>
 </form>
 
@@ -157,5 +146,5 @@
 <div class="foot_note" id="directory_note">◇ indicates data managed by <a href="https://directory.caltech.edu">Caltech Directory</a></div>
 </section>
 {{>footer}}
-</body>
+<script src="../../js/directory_client.js"></script>
 </html>

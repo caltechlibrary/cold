@@ -1,5 +1,6 @@
 #!/usr/bin/env deno
 
+import { transpile } from "jsr:@deno/emit";
 import { common_mark, extractYaml, makePage, path } from "./deps.ts";
 
 export async function renderHtdocs(startDir: string) {

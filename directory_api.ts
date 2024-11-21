@@ -1,4 +1,4 @@
-import { directoryUrl, Document, DOMParser, Element } from "./deps.ts";
+import { directoryUrl, Document, DOMParser, pathIdentifier } from "./deps.ts";
 
 export interface DirectoryRecordInterface {
   display_name: string;
@@ -62,4 +62,25 @@ export async function directoryLookup(
     resp.body.cancel();
   }
   return undefined;
+}
+
+// handleDirectoryLookup proxies to the Caltech Library public directory.
+// This resolves the CORS issues around accessing content there.
+export async function handleDirectoryLookup(
+  req: Request,
+  options: { debug: boolean; htdocs: string },
+): Promise<Response> {
+  const url = new URL(req.url);
+  const directory_id = pathIdentifier(req.url);
+  const record = await directoryLookup(directory_id);
+  if (record === undefined) {
+    return new Response(`{"error": "${directory_id} not found"}`, {
+      status: 404,
+      headers: { "content-type": "application/json" },
+    });
+  }
+  return new Response(JSON.stringify(record), {
+    status: 200,
+    headers: { "content-type": "application/json" },
+  });
 }

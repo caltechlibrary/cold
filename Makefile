@@ -126,6 +126,7 @@ publish: website .FORCE
 
 htdocs: .FORCE
 	deno task htdocs
+	deno task transpile
 
 test: .FORCE
 	deno task test
