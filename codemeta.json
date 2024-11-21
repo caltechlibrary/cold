@@ -97,7 +97,7 @@
   ],
   "releaseNotes": "Proof of concept",
   "softwareRequirements": [
-        "Deno >= 2.0.4",
+        "Deno >= 2.0.6",
         "GNU Make",
         "Pandoc >= 3.1",
         "datasetd >= 2.1.23"
