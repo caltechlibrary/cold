@@ -46,7 +46,7 @@ manage the applications.</p>
 <h2 id="required-software">Required software</h2>
 <ol type="1">
 <li>Git (to clone the cold repository on GitHub)</li>
-<li>Deno &gt;= 2.0.5 (to run the public and management web
+<li>Deno &gt;= 2.0.6 (to run the public and management web
 services)</li>
 <li>Dataset &gt;= 2.1.23 (datasetd provides the JSON API for cold public
 and admin services)</li>
@@ -76,12 +76,13 @@ going on.
 <li>start up tmux</li>
 <li><code>tmux</code></li>
 <li>start the JSON API and setup your dataset collections</li>
-<li><code>deno task setup</code></li>
 <li><code>deno task cold_api</code></li>
-<li>open another tmux window, change to the admin directory, start the
-admin web service</li>
+<li>open another tmux window, start the cold middle ware service</li>
 <li>split the screen, e.g. <code>Ctl-%</code></li>
 <li><code>deno task cold</code></li>
+<li>in yet anthe tmux window, start the cold reports service</li>
+<li>split the screen, e.g. <code>Ctl-%</code></li>
+<li><code>deno task cold_reports</code></li>
 </ol></li>
 </ol>
 <p>You should now have two web services running on localhost at ports

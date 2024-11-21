@@ -13,7 +13,7 @@ Required software
 -----------------
 
 1. Git (to clone the cold repository on GitHub)
-2. Deno >= 2.0.5 (to run the public and management web services)
+2. Deno >= 2.0.6 (to run the public and management web services)
 3. Dataset >= 2.1.23 (datasetd provides the JSON API for cold public and admin services)
 4. Pandoc > 3.1 (to build or update documentation)
 
@@ -35,11 +35,13 @@ if you are setting up for production.
     a. start up tmux
       a. `tmux`
     a. start the JSON API and setup your dataset collections
-      a. `deno task setup`
-      b. `deno task cold_api`
-    b. open another tmux window, change to the admin directory, start the admin web service
+      a. `deno task cold_api`
+    b. open another tmux window, start the cold middle ware service
       a. split the screen, e.g. `Ctl-%`
       b. `deno task cold`
+    c. in yet anthe tmux window, start the cold reports service
+      a. split the screen, e.g. `Ctl-%`
+      b. `deno task cold_reports`
 
 You should now have two web services running on localhost at ports 8111 (web service), 8112 (JSON API).
 
