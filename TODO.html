@@ -26,19 +26,24 @@
 <h2 id="bug">bug</h2>
 <h2 id="next">next</h2>
 <ul class="task-list">
-<li><label><input type="checkbox" />Make sure <code>author_id</code> and
-<code>thesis_id</code> continue to be mapped on reloading data from CSV
-file, if a person has an “clpid” and only are alumni then that should go
-into the <code>thesis_id</code> field.</label></li>
-<li><label><input type="checkbox" />Display name should always be taken
-from Caltech Directory</label></li>
-<li><label><input type="checkbox" />If the name fields family_name,
-given_name should be taken from the Caltech Directory if
+<li><label><input type="checkbox" />Add directoryLookup() call on submit
+of people_edit</label></li>
+<li><label><input type="checkbox" checked="" />Make sure
+<code>author_id</code> and <code>thesis_id</code> continue to be mapped
+on reloading data from CSV file, if a person has an “clpid” and only are
+alumni then that should go into the <code>thesis_id</code>
+field.</label></li>
+<li><label><input type="checkbox" checked="" />Display name should
+always be taken from Caltech Directory</label></li>
+<li><label><input type="checkbox" checked="" />If the name fields
+family_name, given_name should be taken from the Caltech Directory if
 empty</label></li>
 <li><label><input type="checkbox" />When Caltech is checked active the
-ROR should populate with https://ror.org/05dxps055</label></li>
-<li><label><input type="checkbox" />Add “internal_notes” property to
-people object</label></li>
+ROR should populate with https://ror.org/05dxps055 (client side
+code)</label></li>
+<li><label><input type="checkbox" checked="" />Add “internal_notes”
+property to people object, group object and issn (journals)
+object</label></li>
 <li><label><input type="checkbox" />Write reports</label>
 <ul class="task-list">
 <li><label><input type="checkbox" />Prototype a reports request system

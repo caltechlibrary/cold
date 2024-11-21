@@ -6,10 +6,10 @@ ConditionPathExists=!/Sites/cold/cold_not_to_be_run
 
 [Service]
 WorkingDirectory=/Sites/cold
-ExecStart=/Sites/cold/bin/cold_admin
+ExecStart=/Sites/cold/bin/cold
 Type=simple
 Restart=always
 
 [Install]
 WantedBy=multi-user.target
-Alias=cold_admin.service
+Alias=cold.service

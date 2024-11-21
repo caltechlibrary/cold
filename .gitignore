@@ -20,3 +20,4 @@ groups_rpt.sql
 *_final.csv
 in_feeds.csv
 htdocs/rpt/*
+*.zip

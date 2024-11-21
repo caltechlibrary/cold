@@ -145,7 +145,7 @@ function main() {
   const op: OptionsProcessor = new OptionsProcessor();
   const defaultPort: number = 8111;
   const defaultHtdocs: string = "./htdocs";
-  const defaultbaseUrl: string = "/";
+  const defaultbaseUrl: string = "://";
   const defaultApiUrl: string = "http://localhost:8112";
 
   op.booleanVar("help", false, "display help");
@@ -203,7 +203,7 @@ Relies on JSON API at ${options.apiUrl}
 
 Static content directory is ${options.htdocs}
 
-Browser base path set to ${options.baseUrl}
+Browser base url set to ${options.baseUrl}
 
 `);
   const server = Deno.serve(

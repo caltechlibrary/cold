@@ -5,9 +5,9 @@ PROJECT = cold
 
 PACKAGE =  $(shell ls -1 *.ts | grep -v 'version.ts')
 
-PROGRAMS = cold_admin cold_reports directory_sync journal_vocabulary
+PROGRAMS = cold cold_reports directory_sync journal_vocabulary
 
-TS_MODS = cold_admin.ts cold_reports.ts directory_sync.ts journal_vocabulary.ts
+TS_MODS = cold.ts cold_reports.ts directory_sync.ts journal_vocabulary.ts
 
 GIT_GROUP = caltechlibrary
 
@@ -48,7 +48,7 @@ bin: .FORCE
 
 compile: check $(TS_MODS)
 	deno task build
-	bin/cold_admin$(EXT) --help >cold_admin.1.md
+	bin/cold$(EXT) --help >cold.1.md
 	bin/directory_sync$(EXT) --help >directory_sync.1.md
 	bin/cold_reports$(EXT) --help >cold_reports.1.md
 
