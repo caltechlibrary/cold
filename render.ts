@@ -16,7 +16,6 @@ export async function renderPage(
   template: string,
   page_object: { [k: string]: string | object | boolean | undefined },
 ): Promise<Response> {
-  console.log("DEBUG renderPage() baseUrl -->? ", page_object);
   let body: string = await handle.renderView(template, page_object);
   if (body !== undefined) {
     return new Response(body, {

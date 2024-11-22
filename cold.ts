@@ -101,7 +101,7 @@ export function ColdReadWriteHandler(
   const htdocs: string = path.normalize(options.htdocs);
 
   if (options.debug) console.log("DEBUG request", req);
-  console.log("DEBUG baseUrl", options.baseUrl);
+  if (options.debug) console.log("DEBUG options", options);
   // Handle the various dataset collections management pages.
   if (pathname.startsWith("/people")) {
     return handlePeople(req, options);

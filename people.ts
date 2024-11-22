@@ -260,7 +260,6 @@ export async function handlePeople(
   req: Request,
   options: { debug: boolean; htdocs: string; baseUrl: string },
 ): Promise<Response> {
-  console.log("DEBUG handlePeople() baseUrl", options.baseUrl);
   if (req.method === "GET") {
     return await handleGetPeople(req, options);
   }
@@ -292,8 +291,6 @@ async function handleGetPeople(
   req: Request,
   options: { debug: boolean; htdocs: string; baseUrl: string },
 ): Promise<Response> {
-  console.log("DEBUG handleGetPeople() baseUrl", options.baseUrl);
-
   /* parse the URL */
   const url = new URL(req.url);
   const clpid = pathIdentifier(req.url);
@@ -361,9 +358,11 @@ async function handlePostPeople(
   if (req.body !== null) {
     const form = await req.formData();
     let obj = formDataToObject(form);
+    /*
     console.log(
       `DEBUG form data after converting to object -> ${JSON.stringify(obj)}`,
     );
+    */
     if (!("clpid" in obj)) {
       console.log("clpid missing", obj);
       return new Response(`missing people identifier`, {
@@ -372,7 +371,7 @@ async function handlePostPeople(
       });
     }
     if (isCreateObject) {
-      console.log("DEBUG detected create request");
+      //console.log("DEBUG detected create request");
       clpid = obj.clpid as unknown as string;
     }
     if (obj.clpid !== clpid) {
