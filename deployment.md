@@ -28,6 +28,7 @@ My current recommendation is the following.
     a. `sudo systemctl start cold.service`
     b. `sudo systemctl start cold_api.service`
 10. Test web services using eLinks. If you get a gateway error it means datasetd isn't running correctly in port 8111. Debug with curl, systemctl status, journalctl.
+11. Make sure the `htdocs/rpt` directory has the correct ownership and sticky bit set so that reports can be run from a cronjob and from the reports UI and not get "stuck".
 
 You can configure Apache to reverse proxy to the cold service running on port 8111 where it should enforce access control.
 
@@ -57,6 +58,8 @@ sudo systemctl enable cold_api.service
 sudo systemctl start cold.service
 sudo systemctl start cold_api.service
 elinks http://localhost:8111
+sudo chown -R $USER:$USER htdocs/rpt
+chmod +t htdocs/rpt
 ~~~
 
 NOTE: The TypeScript services need to be compile before running them with Systemd.

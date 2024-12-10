@@ -46,3 +46,6 @@ export { directoryLookup, DirectoryRecord, handleDirectoryLookup } from "./direc
 export type { DirectoryRecordInterface } from "./directory_api.ts";
 export { handleReports } from "./cold_reports.ts";
 export type { ReportInterface, Report } from "./cold_reports.ts";
+
+/* Metadata Tools package hosted at caltechlibrary.github.io/metadatatools/mod.ts */
+export * as mdt from 'https://caltechlibrary.github.io/metadatatools/mod.ts';

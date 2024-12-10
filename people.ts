@@ -8,6 +8,7 @@ import {
   matchType,
   pathIdentifier,
   renderPage,
+  mdt,
 } from "./deps.ts";
 
 const ds = new Dataset(apiPort, "people.ds");
@@ -117,22 +118,42 @@ export class People implements PeopleInterface {
       this.directory_user_id = row.directory_id;
     }
     if (row.hasOwnProperty("viaf_id")) {
-      this.viaf = row.viaf_id;
+      if (mdt.validateVIAF(row.viaf_id)) {
+        this.viaf = row.viaf_id;
+      } else {
+        console.warn(`${row.viaf_id} is not a valid VIAF ID, skipped`);
+      }
     }
     if (row.hasOwnProperty("lcnaf")) {
-      this.lcnaf = row.lcnaf;
+      if (mdt.validateLCNAF(row.lcnaf)) {
+        this.lcnaf = row.lcnaf;
+      } else {
+        console.warn(`${row.lcnaf} is not a valid LCNAF ID, skipped`);
+      }
     }
     if (row.hasOwnProperty("isni")) {
-      this.isni = row.isni;
+      if (mdt.valdiateISNI(row.isni)) {
+        this.isni = row.isni;
+      } else {
+        console.warn(`${row.isni} is not a valid ISNI, skipped`);
+      }
     }
     if (row.hasOwnProperty("wikidata")) {
       this.wikidata = row.wikidata;
     }
     if (row.hasOwnProperty("snac")) {
-      this.snac = row.snac;
+      if (mdt.validateSNAC(row.snac)) {
+        this.snac = row.snac;
+      } else {
+        console.warn(`${row.snac} is not a valid SNAC, skipped`);
+      }
     }
     if (row.hasOwnProperty("orcid")) {
-      this.orcid = row.orcid;
+      if (mdt.validateORCID(row.orcid)) {
+        this.orcid = row.orcid;
+      } else {
+        console.warn(`${row.orcid} is not a valid ORCID, skipped`);
+      }
     }
     if (row.hasOwnProperty("image")) {
       this.image_url = row.image;
@@ -211,13 +232,13 @@ export class People implements PeopleInterface {
       bio: this.bio,
       division: this.division,
       status: this.status,
-      viaf: this.viaf,
-      lcnaf: this.lcnaf,
-      isni: this.isni,
+      viaf: mdt.normalizeVIAF(this.viaf),
+      lcnaf: mdt.normalizeLCNAF(this.lcnaf),
+      isni: mdt.normalizeISNI(this.isni),
       wikidata: this.wikidata,
-      snac: this.snac,
-      orcid: this.orcid,
-      ror: this.ror,
+      snac: mdt.normalizeSNAC(this.snac),
+      orcid: mdt.normalizeORCID(this.orcid),
+      ror:  mdt.normalizeROR(this.ror),
       image_url: this.image_url,
       education: this.education,
       caltech: this.caltech,
