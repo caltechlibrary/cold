@@ -9,20 +9,16 @@ let orcidElem = document.getElementById("orcid"),
 
 orcidElem.addEventListener('change', function (evt) {
     let val = orcidElem.value;
-    console.log(`DEBUG changed val ${val}`);
     if (mdt.validateORCID(val)) {
         orcidElem.value = mdt.normalizeORCID(val);
     }
-    console.log(`DEBUG updated val ${orcidElem.value}`);
 });
 
 rorElem.addEventListener('change', function (evt) {
     let val = rorElem.value;
-    console.log(`DEBUG changed val ${val}`);
     if (mdt.validateROR(val)) {
         rorElem.value = mdt.normalizeROR(val);
     }
-    console.log(`DEBUG updated val ${rorElem.value}`);
 });
 
 isniElem.addEventListener('change', function (evt) {
