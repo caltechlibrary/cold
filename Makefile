@@ -192,4 +192,10 @@ dist/Windows-x86_64: .FORCE
 	@cd dist && zip -r $(PROJECT)-v$(VERSION)-Windows-x86_64.zip LICENSE codemeta.json CITATION.cff *.md bin/*
 	@rm -fR dist/bin
 
+dist/Windows-aarch64: .FORCE
+	@mkdir -p dist/bin
+	deno task release_windows_aarch64
+	@cd dist && zip -r $(PROJECT)-v$(VERSION)-Windows-aarch64.zip LICENSE codemeta.json CITATION.cff *.md bin/*
+	@rm -fR dist/bin
+
 .FORCE:
