@@ -9,6 +9,7 @@ bug
 next
 ----
 
+- [ ] Need to produce the Groups YAML vocabulary for CaltechAUTHORS
 - [ ] Add directoryLookup() call on submit of people_edit
 - [X] Make sure `author_id` and `thesis_id` continue to be mapped on reloading data from CSV file, if a person has an "clpid" and only are alumni then that should go into the `thesis_id` field.
 - [X] Display name should always be taken from Caltech Directory
