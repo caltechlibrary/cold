@@ -1,14 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-US">
 <head>
     <title>COLD (Controlled Object List and Datum (Concept))</title>
-    <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" href="https://caltechlibrary.github.io/css/site.css">
+    <link rel="stylesheet" href="/css/site.css">
 </head>
 <body>
-<header>
-<a href="http://library.caltech.edu" title="link to Caltech Library Homepage"><img src="https://caltechlibrary.github.io/assets/liblogo.gif" alt="Caltech Library logo"></a>
-</header>
 <nav>
 <ul>
     <li><a href="/">Home</a></li>
@@ -17,10 +13,10 @@
     <li><a href="INSTALL.html">INSTALL</a></li>
     <li><a href="user_manual.html">User Manual</a></li>
     <li><a href="about.html">About</a></li>
+    <li><a href="search.html">Search</a></li>
     <li><a href="https://github.com/caltechlibrary/cold">GitHub</a></li>
 </ul>
 </nav>
-
 <section>
 <h1 id="cold---controlled-object-lists-with-dataset">cold - (c)ontrolled
 (o)bject (l)ists with (D)ataset</h1>
@@ -73,12 +69,13 @@ to managed tasks that export content to it.</p>
 front end web server (e.g. Apache2+Shibboleth).</strong></p>
 <h2 id="requirements">Requirements</h2>
 <ul>
-<li>Deno &gt;= 2.0.6</li>
 <li>Dataset &gt;= 2.1.23 (using SQL JSON storage)</li>
 <li>The following are required to build the UI and compile the assets
 needed by <strong>COLD</strong>
 <ul>
+<li>Deno &gt;= 2.1.7</li>
 <li>GNU Make</li>
+<li>CMTools</li>
 <li><a href="https://pandoc.org">Pandoc</a> &gt;= 3.1 (to build
 documentation and man page)</li>
 <li>A text editor (e.g. Zed, VSCode, micro, nano, vi, emacs …)</li>
@@ -92,9 +89,8 @@ deployed to the public internet you <strong>MUST</strong> use a front
 end web server to enforce access controls.</p>
 <p>See <a href="user_manual.html">user manual</a> for more details.</p>
 </section>
-
 <footer>
-<span>&copy; 2022 <a href="https://www.library.caltech.edu/copyright">Caltech Library</a></span>
+<span>&copy; 2025 <a href="https://www.library.caltech.edu/copyright">Caltech Library</a></span>
 <address>1200 E California Blvd, Mail Code 1-32, Pasadena, CA 91125-3200</address>
 <span><a href="mailto:library@caltech.edu">Email Us</a></span>
 <span>Phone: <a href="tel:+1-626-395-3405">(626)395-3405</a></span>

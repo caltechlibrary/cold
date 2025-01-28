@@ -51,6 +51,7 @@ compile: check $(TS_MODS)
 	bin/cold$(EXT) --help >cold.1.md
 	bin/directory_sync$(EXT) --help >directory_sync.1.md
 	bin/cold_reports$(EXT) --help >cold_reports.1.md
+	bin/journal_vocabulary$(EXT) --help >journal_vocabulary.1.md
 
 check: $(TS_MODS)
 	deno task check

@@ -1,4 +1,4 @@
-%cold_reports(1) user manual | 0.0.13 {releese_hash}
+%cold_reports(1) user manual | 0.0.13 3904253
 % R. S.Doiel
 % 2025-01-29
     
@@ -27,7 +27,7 @@ Two example reports are provided in the COLD repository. Both are written in Bas
 require that dataset's dsquery program are available.  The provided report examples
 are "run_people_csv.bash" and "run_groups_csv.bash".
 
-Reports can be written in any langauge supported by the host system or can be 
+Reports can be written in any language supported by the host system or can be 
 compiled programs. The primary requirement is that they write their results to standard
 out so that the report runner can manage making the reports available via the COLD web app.
     

@@ -1,14 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-US">
 <head>
     <title>COLD (Controlled Object List and Datum (Concept))</title>
-    <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" href="https://caltechlibrary.github.io/css/site.css">
+    <link rel="stylesheet" href="/css/site.css">
 </head>
 <body>
-<header>
-<a href="http://library.caltech.edu" title="link to Caltech Library Homepage"><img src="https://caltechlibrary.github.io/assets/liblogo.gif" alt="Caltech Library logo"></a>
-</header>
 <nav>
 <ul>
     <li><a href="/">Home</a></li>
@@ -17,10 +13,10 @@
     <li><a href="INSTALL.html">INSTALL</a></li>
     <li><a href="user_manual.html">User Manual</a></li>
     <li><a href="about.html">About</a></li>
+    <li><a href="search.html">Search</a></li>
     <li><a href="https://github.com/caltechlibrary/cold">GitHub</a></li>
 </ul>
 </nav>
-
 <section>
 <h1 id="installation-for-development-of-cold">Installation for
 development of <strong>cold</strong></h1>
@@ -46,10 +42,12 @@ manage the applications.</p>
 <h2 id="required-software">Required software</h2>
 <ol type="1">
 <li>Git (to clone the cold repository on GitHub)</li>
-<li>Deno &gt;= 2.0.6 (to run the public and management web
+<li>Deno &gt;= 2.1.7 (to run the public and management web
 services)</li>
 <li>Dataset &gt;= 2.1.23 (datasetd provides the JSON API for cold public
 and admin services)</li>
+<li>CMTools &gt;= 0.0.8 (used to generate version.ts, CITATION.cff and
+about.md)</li>
 <li>Pandoc &gt; 3.1 (to build or update documentation)</li>
 </ol>
 <h2 id="setting-up-cold">Setting up cold</h2>
@@ -101,9 +99,8 @@ This is the management JSON API for <code>cold</code>
 systemd service scripts. See <a href="deployment.html">deployments</a>
 documentation for details.</p>
 </section>
-
 <footer>
-<span>&copy; 2022 <a href="https://www.library.caltech.edu/copyright">Caltech Library</a></span>
+<span>&copy; 2025 <a href="https://www.library.caltech.edu/copyright">Caltech Library</a></span>
 <address>1200 E California Blvd, Mail Code 1-32, Pasadena, CA 91125-3200</address>
 <span><a href="mailto:library@caltech.edu">Email Us</a></span>
 <span>Phone: <a href="tel:+1-626-395-3405">(626)395-3405</a></span>

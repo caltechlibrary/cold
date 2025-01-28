@@ -87,11 +87,11 @@
     "https://github.com/caltechlibrary/dataset"
   ],
   "softwareRequirements": [
-    "Deno >= 2.0.6",
+    "Deno >= 2.1.7",
     "GNU Make",
     "Pandoc >= 3.1",
     "datasetd >= 2.1.23",
-    "CMTools >= 0.0.7"
+    "CMTools >= 0.0.9"
   ],
   "version": "0.0.13",
   "developmentStatus": "wip",

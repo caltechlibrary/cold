@@ -38,7 +38,7 @@ Requirements
 - The following are required to build the UI and compile the assets needed by **COLD**
   - Deno >= 2.1.7
   - GNU Make
-  - CMTools
+  - CMTools >= 0.0.9
   - [Pandoc](https://pandoc.org) >= 3.1 (to build documentation and man page)
   - A text editor (e.g. Zed, VSCode, micro, nano, vi, emacs ...)
 - A front end web server with SSO or Basic Auth (e.g. during development) support

@@ -190,3 +190,92 @@ directory
 
 
 `;
+
+export const journalVocabularyHelpText =
+  `%{app_name}(1) user manual | {version}  {release_hash}
+% R. S.Doiel
+% {release_date}
+
+# NAME
+    
+{app_name}
+    
+# SYNOPSIS
+    
+{app_name} [OPTIONS]
+    
+# DESCRIPTION
+
+{app_name} generates an RDM Vocabulary for Journals based on
+the ISSN data held in the dataset collection called "issn.ds".
+The dataset collection must be in the same directory where you
+run {app_name}.  It must have the "issn_names" query defined
+for the dataset collection in the "cold_api.yaml" file. The
+cold JSON API must be running for {app_name} to work.
+If all goes well {app_name} should exist with a zero status code.
+
+# OPTION
+
+-h, --help
+: display this help page
+
+-l, --license
+: display the license information
+
+-v, --version
+: display version number
+
+# EXAMPLE
+
+Aside from being in the same directory as "issn.ds" {app_name}
+will do the rest.
+
+~~~shell
+{app_name}
+~~~
+
+`;
+
+export const groupsVocabularyHelpText =
+  `%{app_name}(1) user manual | {version}  {release_hash}
+% R. S.Doiel
+% {release_date}
+
+# NAME
+    
+{app_name}
+    
+# SYNOPSIS
+    
+{app_name} [OPTIONS]
+    
+# DESCRIPTION
+
+{app_name} generates an RDM Vocabulary for Groups based on
+the dataset collection called "groups.ds".
+The dataset collection must be in the same directory where you
+run {app_name}.  It must have the "groups_vocabulary" query defined
+in the dataset collection. If all goes well {app_name} should
+exist with a zero status code.
+
+# OPTION
+
+-h, --help
+: display this help page
+
+-l, --license
+: display the license information
+
+-v, --version
+: display version number
+
+# EXAMPLE
+
+Aside from being in the same directory as "groups.ds" {app_name}
+will do the rest.
+
+~~~shell
+{app_name}
+~~~
+
+`;
