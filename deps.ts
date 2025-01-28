@@ -12,7 +12,6 @@ export { walk } from "@std/fs";
 
 /* Deno stuff that isn't jsr */
 export * as common_mark from "https://deno.land/x/rusty_markdown/mod.ts";
-export { extractYaml } from "@std/front-matter";
 
 /* Caltech Library Modules */
 export {
@@ -23,7 +22,8 @@ export {
 /* COLD related packages */
 export { ConfigureHandler, apiPort, httpPort } from "./config.ts";
 export { makePage, renderPage } from "./render.ts";
-export { appInfo, fmtHelp } from "./version.ts";
+export { version, releaseDate, releaseHash, licenseText } from "./version.ts";
+export { fmtHelp } from "./helptext.ts";
 export { OptionsProcessor, matchType } from "./options.ts";
 export { handlePeople, People } from "./people.ts";
 export type { PeopleInterface } from "./people.ts";

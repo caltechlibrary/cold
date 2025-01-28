@@ -34,10 +34,11 @@ __An important point COLD's access control is deferred to the front end web serv
 Requirements
 ------------
 
-- Deno >= 2.0.6
 - Dataset >= 2.1.23 (using SQL JSON storage)
 - The following are required to build the UI and compile the assets needed by **COLD**
+  - Deno >= 2.1.7
   - GNU Make
+  - CMTools
   - [Pandoc](https://pandoc.org) >= 3.1 (to build documentation and man page)
   - A text editor (e.g. Zed, VSCode, micro, nano, vi, emacs ...)
 - A front end web server with SSO or Basic Auth (e.g. during development) support

@@ -9,89 +9,20 @@ import { send_email } from "./send_mail.ts";
 
 import {
   apiPort,
-  appInfo,
   Dataset,
   formDataToObject,
+  licenseText,
   OptionsProcessor,
+  releaseDate,
+  releaseHash,
   renderPage,
+  version,
 } from "./deps.ts";
+import { coldReportsHelpText, fmtHelp } from "./helptext.ts";
 
 const ds = new Dataset(apiPort, "reports.ds");
 const wait_in_seconds = 0;
-
-/**
- * helpText assembles the help information for COLD UI.
- *
- * @param {[k: string]: string} helpOpt holds the help options defined for the app.
- */
-function helpText(helpOpt: { [k: string]: string }): string {
-  const app_name = "cold_reports";
-  const version = appInfo.version;
-  const release_date = appInfo.releaseDate;
-  const release_hash = appInfo.releaseHash;
-
-  const txt: string[] = [
-    `%${app_name}(1) user manual | ${version} ${release_date} ${release_hash}
-% R. S.Doiel
-% ${release_date} ${release_hash}
-    
-# NAME
-    
-${app_name}
-    
-# SYNOPSIS
-    
-${app_name} [OPTIONS] [REPORTS_YAML]
-
-# DESCRIPTION
-    
-${app_name} processes the report request queue. ${app_name} is expected to validate
-the report request, launch the report. The report is responsible to writing it's output
-to standard out which is read by the ${app_name}. ${app_name} then renders the report
-to a known location and updates the link data in the report request record.
-
-REPORTS_YAML is the filename to read for configuring which reports are allowed to run and
-what programs are executed as a result. If it is not provided then "cold_reports.yaml" is looked
-for in the current working directory.
-
-${app_name} requires access to the COLD JSON API to manage report requests.
-
-Two example reports are provided in the COLD repository. Both are written in Bash and
-require that dataset's dsquery program are available.  The provided report examples
-are "run_people_csv.bash" and "run_groups_csv.bash".
-
-Reports can be written in any langauge supported by the host system or can be 
-compiled programs. The primary requirement is that they write their results to standard
-out so that the report runner can manage making the reports available via the COLD web app.
-    
-${app_name} is designed as daemon suitable to run under systemd or other service management
-system.  Logging is written to standard output. Included in the COLD repository is an example
-service file to use when deploying ${app_name}.
-
-# OPTIONS
-`,
-  ];
-
-  for (let attr in helpOpt) {
-    const msg = helpOpt[attr];
-    txt.push(`${attr}
-: ${msg}
-`);
-  }
-  txt.push(`
-# EXAMPLE
-
-Shown is starting ${app_name} with an explicit configuration file, "my_cold_reports.yaml" file, then
-run with the default configuration file, "cold_reports.yaml" in the same working directory.
-
-~~~shell
-${app_name} my_cold_reports.yaml
-${app_name}
-~~~
-
-`);
-  return txt.join("\n");
-}
+const appName = "cold_reports";
 
 // getId: This function that returns a new UUID v5 on a payload holding the object and a timestamp.
 // If two payloads are equivallent then the UUID returned will be the same. When using
@@ -573,15 +504,17 @@ async function main(): Promise<void> {
   let args = op.args;
 
   if (options.help) {
-    console.log(helpText(op.help));
+    console.log(
+      fmtHelp(coldReportsHelpText, appName, version, releaseDate, releaseHash),
+    );
     Deno.exit(0);
   }
   if (options.license) {
-    console.log(appInfo.licenseText);
+    console.log(licenseText);
     Deno.exit(0);
   }
   if (options.version) {
-    console.log(`${appInfo.appName} ${appInfo.version} ${appInfo.releaseHash}`);
+    console.log(`${appName} ${version} ${releaseHash}`);
     Deno.exit(0);
   }
 

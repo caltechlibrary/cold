@@ -1,6 +1,6 @@
-%cold(1) user manual | 0.0.12 2024-11-21 6666f89
+%cold(1) user manual | 0.0.13 10b0297
 % R. S.Doiel
-% 2024-11-21 6666f89
+% 2025-01-29
 
 # NAME
 
@@ -51,7 +51,8 @@ the "/var/www/html/cold/app" directory.  The datasetd service is setup to run at
 collections.
 
 ~~~shell
-cold -port=8111 -htdocs=/var/www/html/cold/app            -apiUrl=http://localhost:8112
+cold -port=8111 -htdocs=/var/www/html/cold/app \
+           -apiUrl=http://localhost:8112
 ~~~
 
 

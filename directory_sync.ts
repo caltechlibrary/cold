@@ -4,79 +4,28 @@
  */
 import {
   apiPort,
-  appInfo,
   Dataset,
   //  DatasetApiClient,
   directoryLookup,
   DirectoryRecord,
   directoryUrl,
+  licenseText,
   //  DOMParser,
   //  Element,
   //  fmtHelp,
   //  matchType,
   OptionsProcessor,
   People,
+  releaseDate,
+  releaseHash,
   sleepRandomAmountOfSeconds,
+  version,
 } from "./deps.ts";
 
+import { directorySyncHelpText, fmtHelp } from "./helptext.ts";
+
 const MAX_ERROR_COUNT = 25;
-
-/**
- * helpText assembles the help information for COLD UI.
- *
- * @param {[k: string]: string} helpOpt holds the help options defined for the app.
- */
-function helpText(helpOpt: { [k: string]: string }): string {
-  const app_name = "directory_sync";
-  const version = appInfo.version;
-  const release_date = appInfo.releaseDate;
-  const release_hash = appInfo.releaseHash;
-
-  const txt: string[] = [
-    `%${app_name}(1) user manual | ${version} ${release_date} ${release_hash}
-% R. S.Doiel
-% ${release_date} ${release_hash}
-    
-# NAME
-    
-${app_name}
-    
-# SYNOPSIS
-    
-${app_name} [OPTIONS]
-    
-# DESCRIPTION
-    
-${app_name} synchronizes the content between Caltech Directory and CaltechPEOPLE.
-It uses the COLD Admin API as well as the Caltech Directory website content as a
-data source.
-    
-Assuming COLD Admin is running on it's standard ports no configuration is needed.
-    
-${app_name} is suitable to run from a cronjob on the same machine which hosts COLD.
-    
-# OPTIONS
-`,
-  ];
-
-  for (let attr in helpOpt) {
-    const msg = helpOpt[attr];
-    txt.push(`${attr}
-: ${msg}
-`);
-  }
-  txt.push(`
-# EXAMPLE
-
-${app_name} is setup to contact ${directoryUrl} to harvest directory content.
-
-~~~shell
-${app_name}
-~~~
-
-`);
-  return txt.join("\n");
-}
+const appName = "directory_sync";
 
 function formatDate(date: Date): string {
   return date.toJSON().substring(0, 10);
@@ -248,15 +197,23 @@ async function main() {
   const args = op.args;
 
   if (options.help) {
-    console.log(helpText(op.help));
+    console.log(
+      fmtHelp(
+        directorySyncHelpText,
+        appName,
+        version,
+        releaseDate,
+        releaseHash,
+      ),
+    );
     Deno.exit(0);
   }
   if (options.license) {
-    console.log(appInfo.licenseText);
+    console.log(licenseText);
     Deno.exit(0);
   }
   if (options.version) {
-    console.log(`${appInfo.appName} ${appInfo.version} ${appInfo.releaseHash}`);
+    console.log(`${appName} ${version} ${releaseHash}`);
     Deno.exit(0);
   }
 

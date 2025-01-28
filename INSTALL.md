@@ -13,9 +13,10 @@ Required software
 -----------------
 
 1. Git (to clone the cold repository on GitHub)
-2. Deno >= 2.0.6 (to run the public and management web services)
+2. Deno >= 2.1.7 (to run the public and management web services)
 3. Dataset >= 2.1.23 (datasetd provides the JSON API for cold public and admin services)
-4. Pandoc > 3.1 (to build or update documentation)
+4. CMTools >= 0.0.8 (used to generate version.ts, CITATION.cff and about.md)
+5. Pandoc > 3.1 (to build or update documentation)
 
 Setting up cold
 ---------------

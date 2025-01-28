@@ -1,6 +1,6 @@
-%cold_reports(1) user manual | 0.0.12 2024-11-21 6666f89
+%cold_reports(1) user manual | 0.0.13 {releese_hash}
 % R. S.Doiel
-% 2024-11-21 6666f89
+% 2025-01-29
     
 # NAME
     

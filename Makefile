@@ -56,15 +56,7 @@ check: $(TS_MODS)
 	deno task check
 
 version.ts: codemeta.json .FORCE
-	echo '' | pandoc --from t2t --to plain \
-                --metadata-file codemeta.json \
-                --metadata package=$(PROJECT) \
-                --metadata version=$(VERSION) \
-                --metadata release_date=$(RELEASE_DATE) \
-                --metadata release_hash=$(RELEASE_HASH) \
-                --template codemeta-version-ts.tmpl \
-                LICENSE >version.ts
-	
+	cmt codemeta.json version.ts
 
 format: $(shell ls -1 *.ts | grep -v version.ts | grep -v deps.ts)
 
@@ -98,13 +90,10 @@ $(MAN_PAGES_1): .FORCE
 	pandoc $@.md --from markdown --to man -s >man/man1/$@
 
 CITATION.cff: codemeta.json .FORCE
-	cat codemeta.json | sed -E   's/"@context"/"at__context"/g;s/"@type"/"at__type"/g;s/"@id"/"at__id"/g' >_codemeta.json
-	echo "" | pandoc --metadata title="Cite $(PROJECT)" --metadata-file=_codemeta.json --template=codemeta-cff.tmpl >CITATION.cff
+	cmt codemeta.json CITATION.cff
 
 about.md: codemeta.json .FORCE
-	cat codemeta.json | sed -E 's/"@context"/"at__context"/g;s/"@type"/"at__type"/g;s/"@id"/"at__id"/g' >_codemeta.json
-	echo "" | pandoc --metadata-file=_codemeta.json --template codemeta-md.tmpl >about.md 2>/dev/null
-	if [ -f _codemeta.json ]; then rm _codemeta.json; fi
+	cmt codemeta.json about.md
 	cp about.md htdocs/
 	deno task htdocs
 

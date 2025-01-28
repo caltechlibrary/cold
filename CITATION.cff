@@ -1,31 +1,28 @@
+
 cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
 type: software
-title: "cold"
-abstract: "cold provides a localhost web services for managing
-controlled object lists and datum. It also includes scripts to
-syncrhonize with Caltech’s public directory data as well as push changes
-into feeds.library.caltech.edu which hosts the public API of cold
-content."
+title: cold
+abstract: "cold provides a localhost web services for managing controlled object lists and datum. It also includes scripts to syncrhonize with Caltech&#x27;s public directory data as well as push changes into feeds.library.caltech.edu which hosts the public API of cold content."
 authors:
   - family-names: Doiel
     given-names: R. S.
-    orcid: ""
+    orcid: https://orcid.org/0000-0003-0900-6903
+    email: rsdoiel@caltech.edu
 
-contributors:
-  - family-names: Johnson
-    given-names: Kathy
-    orcid: ""
-  - family-names: Morrell
-    given-names: Thomas E
-    orcid: ""
-
-maintainers:
+contacts:
   - family-names: Doiel
     given-names: R. S.
-    orcid: ""
+    orcid: https://orcid.org/0000-0003-0900-6903
+    email: rsdoiel@caltech.edu
 
 repository-code: "https://github.com/caltechlibrary/cold"
-version: 0.0.12
+version: 0.0.13
+date-released: 2024-11-21
+
 license-url: "https://caltechlibrary.github.io/cold/LICENSE"
-keywords: [ "metadata", "objects", "controlled vocabulary" ]
+keywords:
+  - metadata
+  - objects
+  - controlled vocabulary
+

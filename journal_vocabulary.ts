@@ -8,7 +8,7 @@ import {
   yaml,
 } from "./deps.ts";
 
-import type { ISSN, ISSNInterface } from "./issn.ts";
+import type { ISSN } from "./issn.ts";
 
 const ds = new Dataset(apiPort, "issn.ds");
 

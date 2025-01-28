@@ -1,7 +1,7 @@
-%directory_sync(1) user manual | 0.0.12 2024-11-21 6666f89
+%directory_sync(1) user manual | 0.0.13  10b0297
 % R. S.Doiel
-% 2024-11-21 6666f89
-    
+% 2025-01-29
+
 # NAME
     
 directory_sync
@@ -48,5 +48,6 @@ directory_sync is setup to contact https://directory.caltech.edu to harvest dire
 ~~~shell
 directory_sync
 ~~~
+
 
 

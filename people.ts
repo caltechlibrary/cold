@@ -6,9 +6,9 @@ import {
   Dataset,
   formDataToObject,
   matchType,
+  mdt,
   pathIdentifier,
   renderPage,
-  mdt,
 } from "./deps.ts";
 
 const ds = new Dataset(apiPort, "people.ds");
@@ -132,7 +132,7 @@ export class People implements PeopleInterface {
       }
     }
     if (row.hasOwnProperty("isni")) {
-      if (mdt.valdiateISNI(row.isni)) {
+      if (mdt.validateISNI(row.isni)) {
         this.isni = row.isni;
       } else {
         console.warn(`${row.isni} is not a valid ISNI, skipped`);
@@ -238,7 +238,7 @@ export class People implements PeopleInterface {
       wikidata: this.wikidata,
       snac: mdt.normalizeSNAC(this.snac),
       orcid: mdt.normalizeORCID(this.orcid),
-      ror:  mdt.normalizeROR(this.ror),
+      ror: mdt.normalizeROR(this.ror),
       image_url: this.image_url,
       education: this.education,
       caltech: this.caltech,
