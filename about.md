@@ -39,7 +39,7 @@ keywords:
   - objects
   - controlled vocabulary
 
-date_released: 2024-11-21
+date_released: 2025-01-28
 ---
 
 About this software
