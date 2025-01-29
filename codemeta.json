@@ -97,5 +97,5 @@
   "developmentStatus": "wip",
   "issueTracker": "https://github.com/caltechlibrary/cold/issues",
   "downloadUrl": "https://github.com/caltechlibrary/cold/release/latest",
-  "releaseNotes": "Proof of concept"
+  "releaseNotes": "Working proof of concept. Added support for generating group vocabulary file for RDM."
 }

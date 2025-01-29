@@ -236,7 +236,7 @@ will do the rest.
 
 `;
 
-export const groupsVocabularyHelpText =
+export const groupVocabularyHelpText =
   `%{app_name}(1) user manual | {version}  {release_hash}
 % R. S.Doiel
 % {release_date}
@@ -254,9 +254,9 @@ export const groupsVocabularyHelpText =
 {app_name} generates an RDM Vocabulary for Groups based on
 the dataset collection called "groups.ds".
 The dataset collection must be in the same directory where you
-run {app_name}.  It must have the "groups_vocabulary" query defined
-in the dataset collection. If all goes well {app_name} should
-exist with a zero status code.
+run {app_name}.  It must have the "group_names" query defined
+in the "cold_api.yaml" file and the "cold_api" service running. 
+If all goes well {app_name} should exist with a zero status code.
 
 # OPTION
 

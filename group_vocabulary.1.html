@@ -18,24 +18,36 @@
 </ul>
 </nav>
 <section>
-<h1 id="user-manual">User Manual</h1>
-<ul>
-<li><a href="search.html">Site search</a></li>
-</ul>
-<h2 id="public-interface">Public Interface</h2>
-<ul>
-<li><a href="INSTALL.html">Installation</a></li>
-<li><a href="deployment.html">deployments</a></li>
-<li><a href="cold.1.html">cold</a> (man page)</li>
-<li><a href="cold_reports.1.html">cold_reports</a> (man page)</li>
-<li><a href="directory_sync.1.html">directory_sync</a> (man page)</li>
-<li><a href="journal_vocabulary.1.html">journal_vocabulary</a> (man
-page)</li>
-<li><a href="jouranl_vocabulary.1.html">group_vocabulary</a> (man
-page)</li>
-<li><a href="development_notes.html">devemopment notes</a></li>
-<li><a href="presentations/presentation1.html">presentations</a></li>
-</ul>
+<h1 id="name">NAME</h1>
+<p>group_vocabulary</p>
+<h1 id="synopsis">SYNOPSIS</h1>
+<p>group_vocabulary [OPTIONS]</p>
+<h1 id="description">DESCRIPTION</h1>
+<p>group_vocabulary generates an RDM Vocabulary for Groups based on the
+dataset collection called “groups.ds”. The dataset collection must be in
+the same directory where you run group_vocabulary. It must have the
+“group_names” query defined in the “cold_api.yaml” file and the
+“cold_api” service running. If all goes well group_vocabulary should
+exist with a zero status code.</p>
+<h1 id="option">OPTION</h1>
+<dl>
+<dt>-h, –help</dt>
+<dd>
+display this help page
+</dd>
+<dt>-l, –license</dt>
+<dd>
+display the license information
+</dd>
+<dt>-v, –version</dt>
+<dd>
+display version number
+</dd>
+</dl>
+<h1 id="example">EXAMPLE</h1>
+<p>Aside from being in the same directory as “groups.ds”
+group_vocabulary will do the rest.</p>
+<pre class="shell"><code>group_vocabulary</code></pre>
 </section>
 <footer>
 <span>&copy; 2025 <a href="https://www.library.caltech.edu/copyright">Caltech Library</a></span>
