@@ -21,13 +21,16 @@ My current recommendation is the following.
 3. Run Deno tasks `setup` (if the collections don't exist) and `build` to build the binary for the cold service
 5. Copy `cold.service-example` to `cold.service`, edit it and move to `/etc/systemd/system/`
 6. Copy `cold_api.service-example` to `cold_api.service`, edit it and and move to `/etc/systemd/system/`
+7. Copy `cold_reports.service-example` to `cold_reports.service`, edit it and and move to `/etc/systemd/system/`
 7. Reload the systemd daemon, `sudo systemctl daemon-reload`
 8. Enable the services (only needed the first time, may return a warning about symbolic link)
     a. `sudo systemctl enable cold.service`
     b. `sudo systemctl enable cold_api.service`
+    c. `sudo systemctl enable cold_reports.service`
 9. Start the services using `systemctl` in the usual way
     a. `sudo systemctl start cold.service`
     b. `sudo systemctl start cold_api.service`
+    b. `sudo systemctl start cold_reports.service`
 10. Test web services using eLinks. If you get a gateway error it means datasetd isn't running correctly in port 8111. Debug with curl, systemctl status, journalctl.
 11. Make sure the `htdocs/rpt` directory has the correct ownership and sticky bit set so that reports can be run from a cronjob and from the reports UI and not get "stuck".
 
@@ -53,11 +56,16 @@ sudo mv cold.service /etc/systemd/system/
 cp cold_api.service-example cold_api.service
 nano cold_api.service
 sudo mv cold_api.service /etc/systemd/system/
+cp cold_reports.service-example cold_reports.service
+nano cold_reports.service
+sudo mv cold_reports.service /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable cold.service
 sudo systemctl enable cold_api.service
+sudo systemctl enable cold_reports.service
 sudo systemctl start cold.service
 sudo systemctl start cold_api.service
+sudo systemctl start cold_reports.service
 elinks http://localhost:8111
 sudo chown -R $USER:$USER htdocs/rpt
 chmod +t htdocs/rpt
