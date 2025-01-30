@@ -2,73 +2,53 @@
   "version": "4",
   "specifiers": {
     "jsr:@b-fuze/deno-dom@*": "0.1.49",
-    "jsr:@b-fuze/deno-dom@~0.1.49": "0.1.49",
     "jsr:@david/dax@0.42": "0.42.0",
     "jsr:@david/path@0.2": "0.2.0",
     "jsr:@david/which@~0.4.1": "0.4.1",
     "jsr:@deno/cache-dir@0.13.2": "0.13.2",
     "jsr:@deno/emit@*": "0.46.0",
-    "jsr:@deno/emit@0.46": "0.46.0",
-    "jsr:@denosaurs/plug@1.0.3": "1.0.3",
     "jsr:@std/assert@0.221": "0.221.0",
     "jsr:@std/assert@0.223": "0.223.0",
     "jsr:@std/assert@^1.0.11": "1.0.11",
-    "jsr:@std/assert@~0.213.1": "0.213.1",
     "jsr:@std/bytes@0.221": "0.221.0",
     "jsr:@std/bytes@0.223": "0.223.0",
     "jsr:@std/bytes@^1.0.2": "1.0.4",
     "jsr:@std/bytes@^1.0.3": "1.0.4",
     "jsr:@std/cli@^1.0.11": "1.0.11",
     "jsr:@std/cli@^1.0.8": "1.0.11",
-    "jsr:@std/collections@^1.0.5": "1.0.9",
+    "jsr:@std/collections@^1.0.9": "1.0.10",
     "jsr:@std/crypto@^1.0.3": "1.0.3",
     "jsr:@std/csv@^1.0.5": "1.0.5",
     "jsr:@std/dotenv@~0.225.3": "0.225.3",
-    "jsr:@std/encoding@0.213.1": "0.213.1",
-    "jsr:@std/encoding@^1.0.5": "1.0.5",
-    "jsr:@std/fmt@0.213.1": "0.213.1",
+    "jsr:@std/encoding@^1.0.5": "1.0.6",
     "jsr:@std/fmt@0.223": "0.223.0",
     "jsr:@std/fmt@1": "1.0.4",
     "jsr:@std/fmt@^1.0.3": "1.0.4",
-    "jsr:@std/fmt@^1.0.4": "1.0.4",
-    "jsr:@std/front-matter@*": "1.0.5",
     "jsr:@std/front-matter@^1.0.5": "1.0.5",
-    "jsr:@std/fs@0.213.1": "0.213.1",
     "jsr:@std/fs@0.223": "0.223.0",
     "jsr:@std/fs@1": "1.0.10",
     "jsr:@std/fs@^1.0.10": "1.0.10",
     "jsr:@std/html@^1.0.3": "1.0.3",
     "jsr:@std/http@^1.0.12": "1.0.12",
-    "jsr:@std/internal@^1.0.2": "1.0.2",
     "jsr:@std/internal@^1.0.5": "1.0.5",
     "jsr:@std/io@0.221": "0.221.0",
     "jsr:@std/io@0.223": "0.223.0",
     "jsr:@std/media-types@^1.1.0": "1.1.0",
     "jsr:@std/net@^1.0.4": "1.0.4",
     "jsr:@std/path@*": "1.0.8",
-    "jsr:@std/path@0.213.1": "0.213.1",
     "jsr:@std/path@0.223": "0.223.0",
     "jsr:@std/path@1": "1.0.8",
-    "jsr:@std/path@^1.0.7": "1.0.8",
     "jsr:@std/path@^1.0.8": "1.0.8",
-    "jsr:@std/path@~0.213.1": "0.213.1",
     "jsr:@std/streams@0.221": "0.221.0",
     "jsr:@std/streams@^1.0.8": "1.0.8",
-    "jsr:@std/toml@^1.0.1": "1.0.1",
+    "jsr:@std/toml@^1.0.1": "1.0.2",
     "jsr:@std/uuid@*": "1.0.4",
     "jsr:@std/uuid@^1.0.4": "1.0.4",
-    "jsr:@std/yaml@*": "1.0.5",
     "jsr:@std/yaml@^1.0.5": "1.0.5"
   },
   "jsr": {
-    "@b-fuze/deno-dom@0.1.47": {
-      "integrity": "270a888de91329f8ce3849211ece0ad97ce1e8b9a8a774f2bed2f43c8b0ffe8e"
-    },
     "@b-fuze/deno-dom@0.1.49": {
-      "integrity": "45c40175fdd1e74ab2d4b54c4fdaabbad6e5b76ee28df12a48e076b3fa7901a9",
-      "dependencies": [
-        "jsr:@denosaurs/plug"
-      ]
+      "integrity": "45c40175fdd1e74ab2d4b54c4fdaabbad6e5b76ee28df12a48e076b3fa7901a9"
     },
     "@david/dax@0.42.0": {
       "integrity": "0c547c9a20577a6072b90def194c159c9ddab82280285ebfd8268a4ebefbd80b",
@@ -108,38 +88,17 @@
         "jsr:@std/path@0.223"
       ]
     },
-    "@denosaurs/plug@1.0.3": {
-      "integrity": "b010544e386bea0ff3a1d05e0c88f704ea28cbd4d753439c2f1ee021a85d4640",
-      "dependencies": [
-        "jsr:@std/encoding@0.213.1",
-        "jsr:@std/fmt@0.213.1",
-        "jsr:@std/fs@0.213.1",
-        "jsr:@std/path@0.213.1"
-      ]
-    },
-    "@std/assert@0.213.1": {
-      "integrity": "24c28178b30c8e0782c18e8e94ea72b16282207569cdd10ffb9d1d26f2edebfe"
-    },
     "@std/assert@0.221.0": {
       "integrity": "a5f1aa6e7909dbea271754fd4ab3f4e687aeff4873b4cef9a320af813adb489a"
     },
     "@std/assert@0.223.0": {
       "integrity": "eb8d6d879d76e1cc431205bd346ed4d88dc051c6366365b1af47034b0670be24"
     },
-    "@std/assert@1.0.3": {
-      "integrity": "b0d03ce1ced880df67132eea140623010d415848df66f6aa5df76507ca7c26d8",
-      "dependencies": [
-        "jsr:@std/internal@^1.0.2"
-      ]
-    },
     "@std/assert@1.0.11": {
       "integrity": "2461ef3c368fe88bc60e186e7744a93112f16fd110022e113a0849e94d1c83c1",
       "dependencies": [
-        "jsr:@std/internal@^1.0.5"
+        "jsr:@std/internal"
       ]
-    },
-    "@std/async@1.0.0-rc.4": {
-      "integrity": "6d16ba99f2df32a7aa587c99e2a87140cc1eb8f38321dab3415b624bce90cc14"
     },
     "@std/bytes@0.221.0": {
       "integrity": "64a047011cf833890a4a2ab7293ac55a1b4f5a050624ebc6a0159c357de91966"
@@ -153,11 +112,8 @@
     "@std/cli@1.0.11": {
       "integrity": "ec219619fdcd31bcf0d8e53bee1e2706ec9a02f70255365a094f69755dadd340"
     },
-    "@std/collections@1.0.5": {
-      "integrity": "ab9eac23b57a0c0b89ba45134e61561f69f3d001f37235a248ed40be260c0c10"
-    },
-    "@std/collections@1.0.9": {
-      "integrity": "4f58104ead08a04a2199374247f07befe50ba01d9cca8cbb23ab9a0419921e71"
+    "@std/collections@1.0.10": {
+      "integrity": "903af106a3d92970d74e20f7ebff77d9658af9bef4403f1dc42a7801c0575899"
     },
     "@std/crypto@1.0.3": {
       "integrity": "a2a32f51ddef632d299e3879cd027c630dcd4d1d9a5285d6e6788072f4e51e7f"
@@ -171,20 +127,11 @@
     "@std/dotenv@0.225.3": {
       "integrity": "a95e5b812c27b0854c52acbae215856d9cce9d4bbf774d938c51d212711e8d4a"
     },
-    "@std/encoding@0.213.1": {
-      "integrity": "fcbb6928713dde941a18ca5db88ca1544d0755ec8fb20fe61e2dc8144b390c62"
-    },
-    "@std/encoding@1.0.5": {
-      "integrity": "ecf363d4fc25bd85bd915ff6733a7e79b67e0e7806334af15f4645c569fefc04"
-    },
-    "@std/fmt@0.213.1": {
-      "integrity": "a06d31777566d874b9c856c10244ac3e6b660bdec4c82506cd46be052a1082c3"
+    "@std/encoding@1.0.6": {
+      "integrity": "ca87122c196e8831737d9547acf001766618e78cd8c33920776c7f5885546069"
     },
     "@std/fmt@0.223.0": {
       "integrity": "6deb37794127dfc7d7bded2586b9fc6f5d50e62a8134846608baf71ffc1a5208"
-    },
-    "@std/fmt@1.0.3": {
-      "integrity": "97765c16aa32245ff4e2204ecf7d8562496a3cb8592340a80e7e554e0bb9149f"
     },
     "@std/fmt@1.0.4": {
       "integrity": "e14fe5bedee26f80877e6705a97a79c7eed599e81bb1669127ef9e8bc1e29a74"
@@ -193,24 +140,11 @@
       "integrity": "abddc64030a33eb5bc524b8c73e7c417cea09177aaeb4abf75a56b540c4b6e60",
       "dependencies": [
         "jsr:@std/toml",
-        "jsr:@std/yaml@^1.0.5"
-      ]
-    },
-    "@std/fs@0.213.1": {
-      "integrity": "fbcaf099f8a85c27ab0712b666262cda8fe6d02e9937bf9313ecaea39a22c501",
-      "dependencies": [
-        "jsr:@std/assert@~0.213.1",
-        "jsr:@std/path@~0.213.1"
+        "jsr:@std/yaml"
       ]
     },
     "@std/fs@0.223.0": {
       "integrity": "3b4b0550b2c524cbaaa5a9170c90e96cbb7354e837ad1bdaf15fc9df1ae9c31c"
-    },
-    "@std/fs@1.0.5": {
-      "integrity": "41806ad6823d0b5f275f9849a2640d87e4ef67c51ee1b8fb02426f55e02fd44e",
-      "dependencies": [
-        "jsr:@std/path@^1.0.7"
-      ]
     },
     "@std/fs@1.0.10": {
       "integrity": "bf041f9d7a0a460817f0421be8946d0e06011b3433e6c83a215628de5e3c7c2c",
@@ -225,7 +159,7 @@
       "integrity": "85246d8bfe9c8e2538518725b158bdc31f616e0869255f4a8d9e3de919cab2aa",
       "dependencies": [
         "jsr:@std/cli@^1.0.8",
-        "jsr:@std/encoding@^1.0.5",
+        "jsr:@std/encoding",
         "jsr:@std/fmt@^1.0.3",
         "jsr:@std/html",
         "jsr:@std/media-types",
@@ -233,9 +167,6 @@
         "jsr:@std/path@^1.0.8",
         "jsr:@std/streams@^1.0.8"
       ]
-    },
-    "@std/internal@1.0.2": {
-      "integrity": "f4cabe2021352e8bfc24e6569700df87bf070914fc38d4b23eddd20108ac4495"
     },
     "@std/internal@1.0.5": {
       "integrity": "54a546004f769c1ac9e025abd15a76b6671ddc9687e2313b67376125650dc7ba"
@@ -254,32 +185,17 @@
         "jsr:@std/bytes@0.223"
       ]
     },
-    "@std/media-types@1.0.3": {
-      "integrity": "b12d30a7852f7578f4d210622df713bbfd1cbdd9b4ec2eaf5c1845ab70bab159"
-    },
     "@std/media-types@1.1.0": {
       "integrity": "c9d093f0c05c3512932b330e3cc1fe1d627b301db33a4c2c2185c02471d6eaa4"
     },
     "@std/net@1.0.4": {
       "integrity": "2f403b455ebbccf83d8a027d29c5a9e3a2452fea39bb2da7f2c04af09c8bc852"
     },
-    "@std/path@0.213.1": {
-      "integrity": "f187bf278a172752e02fcbacf6bd78a335ed320d080a7ed3a5a59c3e88abc673",
-      "dependencies": [
-        "jsr:@std/assert@~0.213.1"
-      ]
-    },
     "@std/path@0.223.0": {
       "integrity": "593963402d7e6597f5a6e620931661053572c982fc014000459edc1f93cc3989",
       "dependencies": [
         "jsr:@std/assert@0.223"
       ]
-    },
-    "@std/path@1.0.3": {
-      "integrity": "cd89d014ce7eb3742f2147b990f6753ee51d95276bfc211bc50c860c1bc7df6f"
-    },
-    "@std/path@1.0.7": {
-      "integrity": "76a689e07f0e15dcc6002ec39d0866797e7156629212b28f27179b8a5c3b33a1"
     },
     "@std/path@1.0.8": {
       "integrity": "548fa456bb6a04d3c1a1e7477986b6cffbce95102d0bb447c67c4ee70e0364be"
@@ -296,8 +212,8 @@
         "jsr:@std/bytes@^1.0.3"
       ]
     },
-    "@std/toml@1.0.1": {
-      "integrity": "b55b407159930f338d384b1f8fd317c8e8a35e27ebb8946155f49e3a158d16c4",
+    "@std/toml@1.0.2": {
+      "integrity": "5892ba489c5b512265a384238a8fe8dddbbb9498b4b210ef1b9f0336a423a39b",
       "dependencies": [
         "jsr:@std/collections"
       ]
@@ -309,45 +225,43 @@
         "jsr:@std/crypto"
       ]
     },
-    "@std/yaml@1.0.4": {
-      "integrity": "f1e38fa5e110ff8550e938715e52c33347676dd00a1db858e092dd21a9df9941"
-    },
     "@std/yaml@1.0.5": {
       "integrity": "71ba3d334305ee2149391931508b2c293a8490f94a337eef3a09cade1a2a2742"
     }
   },
   "redirects": {
     "https://deno.land/x/rusty_markdown/mod.ts": "https://deno.land/x/rusty_markdown@v0.4.1/mod.ts",
-    "https://deno.land/x/sleep/mod.ts": "https://deno.land/x/sleep@v1.3.0/mod.ts",
-    "https://deno.land/x/smtp/mod.ts": "https://deno.land/x/smtp@v0.7.0/mod.ts"
+    "https://deno.land/x/sleep/mod.ts": "https://deno.land/x/sleep@v1.3.0/mod.ts"
   },
   "remote": {
-    "https://caltechlibrary.github.io/metadatatools/arxiv.ts": "ba36bff87027655391843d80ffe1adeb0527cafb78fcc25d2313b9da3bf50a5d",
+    "https://caltechlibrary.github.io/metadatatools/arxiv.ts": "78b54cd78dfacd62fb86d6ee93bdedd52575f866cc17f357614fc36a6a1f2490",
     "https://caltechlibrary.github.io/metadatatools/arxiv_record.ts": "0d7e5bc6848272e7a71049bb0e0988ad3b627f37dbc41b7943f6cfe74f002b57",
-    "https://caltechlibrary.github.io/metadatatools/doi.ts": "aadabfe1f3d0ff57895e6a69598bcd3ca719e5bc2971556beefd966f2f8d57ba",
+    "https://caltechlibrary.github.io/metadatatools/doi.ts": "2cdd53e1b0c502c1d8b47d46ba3a38fd245ac58009644a912f4bd042e56351a4",
     "https://caltechlibrary.github.io/metadatatools/doi_record.ts": "e47b6c6222158e9ba7f3fd9f0971968a5c18aa18a23c9f4778e1621dadf972a8",
-    "https://caltechlibrary.github.io/metadatatools/isbn.ts": "972092d2d1c04ae17ebad55856a6d73bf20237014aaf165c56f9b789ff843a11",
+    "https://caltechlibrary.github.io/metadatatools/email.ts": "d8df1ff1e6844b34fb3f7eee5f3dd2f06be9c2422d98bab3bab31884e9371573",
+    "https://caltechlibrary.github.io/metadatatools/isbn.ts": "c1aecb974574483f971ca65aa5dd3217f703b78c6a441676cd676494e5c91898",
     "https://caltechlibrary.github.io/metadatatools/isbn_record.ts": "7a770aac2549cf41ba2e8f32226cd0c871d6886c564add9a469847e50c15d123",
-    "https://caltechlibrary.github.io/metadatatools/isni.ts": "e78d38fa63330f9b051a299214c29f95a09062165cc1ced88637c61565c3bde7",
-    "https://caltechlibrary.github.io/metadatatools/isni_record.ts": "11cc23cb28c32e12b6f38d79256e2030b9a09edee8ffe91820936eb645dfec80",
-    "https://caltechlibrary.github.io/metadatatools/issn.ts": "14e2bf125ad22320aef07735ddfddcf9bf277758fb4298c45f53c689aa50067e",
+    "https://caltechlibrary.github.io/metadatatools/isni.ts": "15b6b89e70cb3cc340bd0118fcbd62504dbe4b331fc23a88e5b09b56f4bc0c0e",
+    "https://caltechlibrary.github.io/metadatatools/isni_record.ts": "94828ce4cce5099867e39db9834db08fd770b5cc66a201b905b81c36607f9049",
+    "https://caltechlibrary.github.io/metadatatools/issn.ts": "acd7959daf7d13065d0153d4478bb3492a20e1cbf3a7b9dc991e3fe3b78ca09c",
     "https://caltechlibrary.github.io/metadatatools/issn_record.ts": "8d0d65b3411fc21eb8a58d53abde19c7a4a3600c1f8eb30e7986f421044fe924",
-    "https://caltechlibrary.github.io/metadatatools/lcnaf.ts": "e66ee26778709392c6f0adeea09901abae244c4a86b0fe2f302cc3d7140fd485",
+    "https://caltechlibrary.github.io/metadatatools/lcnaf.ts": "a0e9acdb7b11afe7dbb10274fe49849ef99083a19baecff2a7777d5139ad3d82",
     "https://caltechlibrary.github.io/metadatatools/lcnaf_record.ts": "3767dfeddf07e54ea5b5454c242b6f55a2153be9d544fb1ee250e42721aac182",
-    "https://caltechlibrary.github.io/metadatatools/mod.ts": "fa53876b8085b907156ff1122c25d6c8df2d14291c35c75a94bfd71afa446bb8",
-    "https://caltechlibrary.github.io/metadatatools/orcid.ts": "cb54a9b62ae85344b7f2fa2b49cfbb149272cbfd331ed35db5bd6b9542dd99be",
-    "https://caltechlibrary.github.io/metadatatools/orcid_record.ts": "c6875cb725c357a88f469e610dc35c1ac7dc38ffb6b358c3a986d3f2c7f6a1b7",
-    "https://caltechlibrary.github.io/metadatatools/pmcid.ts": "53f8f9f95b8e41d64c466c6d008cbd54ebd99987991cfeace02d0838930e56fd",
+    "https://caltechlibrary.github.io/metadatatools/mod.ts": "78d0091db39499be95cca5febf38049efafcfab5cef5c136031f145e609e5aaa",
+    "https://caltechlibrary.github.io/metadatatools/orcid.ts": "f7d746f3ed64d0ac65223be430ed4bae546a018eed40bb0666aa15d974435d8a",
+    "https://caltechlibrary.github.io/metadatatools/orcid_record.ts": "e174552951f6ae2916d5700636b40c197da72f3b37f4525c9130b46e1170f670",
+    "https://caltechlibrary.github.io/metadatatools/pmcid.ts": "21d1ac871562907862296944653cef4d632e02245fd1b33376d73f2e76c27461",
     "https://caltechlibrary.github.io/metadatatools/pmcid_record.ts": "aad1c3b63d39140acc36a230453229215409f2b28d529045b4c81b7c4f038608",
-    "https://caltechlibrary.github.io/metadatatools/pmid.ts": "a3bf7bdc241691eec9831e5ac60e47b68e6028b706703c9b8a9498b7c7817fab",
+    "https://caltechlibrary.github.io/metadatatools/pmid.ts": "048b4054f660a84c1ebd09e50fc3a2d8ae0b5099f708dbeb5fa0ad10e604987b",
     "https://caltechlibrary.github.io/metadatatools/pmid_record.ts": "5cf373683eb48d1d674751186e3de253e07959f1c742169cf72e2dbcd7a6c30f",
-    "https://caltechlibrary.github.io/metadatatools/ror.ts": "10dccec2c5ffbc3895d8ab08001d731d3488b01465bb37c9b062905b2702ae69",
+    "https://caltechlibrary.github.io/metadatatools/ror.ts": "46880b8203673de87fa209a94e371a9affacc6159777ad597660d67427d36a98",
     "https://caltechlibrary.github.io/metadatatools/ror_record.ts": "bfd6a29a84198451fc89f08cdef5cfc7825e9e0a74924fd4072412cb3851612b",
-    "https://caltechlibrary.github.io/metadatatools/snac.ts": "4a53a1e3143c2a1e6362bbeba738d399c8b25cd8bc4f8778dcbf6fbeac7ab345",
+    "https://caltechlibrary.github.io/metadatatools/snac.ts": "714ee391909b164e9a192d247d617a72010068b418695a4b73812e10f9527d1d",
     "https://caltechlibrary.github.io/metadatatools/snac_record.ts": "874b64cff8a096c9ade7a9ddad06ffb5bb06a6bb9581106db1f1b2886b0d4c98",
-    "https://caltechlibrary.github.io/metadatatools/utility.ts": "58eece074cc8dfff0eab75172268d065e53474602b3ebd242fe12b5e4dff6978",
-    "https://caltechlibrary.github.io/metadatatools/version.ts": "e047d33da0bf7be1a1121151237d616660f718dc7f7d57e35c1e34cd377406e3",
-    "https://caltechlibrary.github.io/metadatatools/viaf.ts": "b15b5d71101c66f87d3f42eedec539115f93ff0c595a28f90d73b4f5f3ec16bc",
+    "https://caltechlibrary.github.io/metadatatools/tel.ts": "7048f37e67eeffea7bbb308d8f9bbecc623239b6e241131468d46c8f8e5e88e9",
+    "https://caltechlibrary.github.io/metadatatools/utility.ts": "736351e92e16f4020849355e85ee1adee938bd68061249e813a7424bba41070e",
+    "https://caltechlibrary.github.io/metadatatools/version.ts": "f28e251d055eb0cda9f37bef40e639d53a50df223dc819131d692418b7565b2c",
+    "https://caltechlibrary.github.io/metadatatools/viaf.ts": "ca8eeab2689aca0c9787b844a8b7a232f47714c462590ec4b4daf6fb2a003f9b",
     "https://caltechlibrary.github.io/metadatatools/viaf_record.ts": "7cefe217c60269a6b88a161e4627d2e7b0ed0663f655668a11fc920e3c2855cd",
     "https://caltechlibrary.github.io/ts_dataset/dataset.ts": "ae2d19209418c936f20d599436a7f16065bff799edbd327fe60d00cbc51e4c74",
     "https://caltechlibrary.github.io/ts_dataset/mod.ts": "ba7809cdb7c837ea7fb7101a9bf060eff9cab903b94f8b9c1bec8d2f72ba8a8f",
@@ -434,11 +348,6 @@
     "https://deno.land/std@0.224.0/path/windows/resolve.ts": "8dae1dadfed9d46ff46cc337c9525c0c7d959fb400a6308f34595c45bdca1972",
     "https://deno.land/std@0.224.0/path/windows/to_file_url.ts": "40e560ee4854fe5a3d4d12976cef2f4e8914125c81b11f1108e127934ced502e",
     "https://deno.land/std@0.224.0/path/windows/to_namespaced_path.ts": "4ffa4fb6fae321448d5fe810b3ca741d84df4d7897e61ee29be961a6aac89a4c",
-    "https://deno.land/std@0.81.0/_util/assert.ts": "e1f76e77c5ccb5a8e0dbbbe6cce3a56d2556c8cb5a9a8802fc9565af72462149",
-    "https://deno.land/std@0.81.0/bytes/mod.ts": "e4f91c6473fe13e3cf1a23649137f87f49135c10bc08fc0f83382a0fb0b03744",
-    "https://deno.land/std@0.81.0/encoding/utf8.ts": "1b7e77db9a12363c67872f8a208886ca1329f160c1ca9133b13d2ed399688b99",
-    "https://deno.land/std@0.81.0/io/bufio.ts": "3cbbe1f761c1c636d1e7128ed4e7fdca6bf21d9199aa3cae71e69972a6ae8f93",
-    "https://deno.land/std@0.81.0/textproto/mod.ts": "4c378eda3cb6216608bb4c3a34201761c65f6980c4669455ca224c330cd5b790",
     "https://deno.land/x/lz4@v0.1.2/mod.ts": "4decfc1a3569d03fd1813bd39128b71c8f082850fe98ecfdde20025772916582",
     "https://deno.land/x/lz4@v0.1.2/wasm.js": "b9c65605327ba273f0c76a6dc596ec534d4cda0f0225d7a94ebc606782319e46",
     "https://deno.land/x/rusty_markdown@v0.4.1/event.ts": "d77c27dca6e70837f2adcffecdb032742dd6e79cf2d56d73227f2eaa910cb6c4",
@@ -446,10 +355,6 @@
     "https://deno.land/x/rusty_markdown@v0.4.1/wasm/deno_rusty_markdown.js": "fcdbce8bd23a6c8237254f882e82fe89e04444f3abdd56bb8297ffb1f6dee6d6",
     "https://deno.land/x/sleep@v1.3.0/mod.ts": "e9955ecd3228a000e29d46726cd6ab14b65cf83904e9b365f3a8d64ec61c1af3",
     "https://deno.land/x/sleep@v1.3.0/sleep.ts": "b6abaca093b094b0c2bba94f287b19a60946a8d15764d168f83fcf555f5bb59e",
-    "https://deno.land/x/smtp@v0.7.0/code.ts": "f388fae4995b4d35d99fb6b8bfded522f5a3e7e7d63babdf318a059d6db43baf",
-    "https://deno.land/x/smtp@v0.7.0/deps.ts": "5e2a437e3ae35f0e83719fd2e707858dcb750c1111ff5bebc729522a1380b53d",
-    "https://deno.land/x/smtp@v0.7.0/mod.ts": "9b0d8fbdacc184d1af10f727980e51486e0ddf9d2ec7227c8dfce90db5bfbcf5",
-    "https://deno.land/x/smtp@v0.7.0/smtp.ts": "47c72a99925ad07f3174037f9325dbb8b703dc1177277b9161dc6209c7fa4f90",
     "https://esm.sh/handlebars@4.7.8": "216fcab7c7eed350aff771ac741f7ded527bc1c5a88adf3e6970975cbd1f49e8",
     "https://esm.sh/v135/handlebars@4.7.8/denonext/handlebars.mjs": "f8a53ecdbb0a189a94479519d25f7a97b19220be7ddf53d94b2937cbb2f5dc0b",
     "https://esm.sh/v135/source-map@0.6.1/denonext/source-map.mjs": "ccff3bb06dea7c01a2c83cf12113697592e418fd06b55ae2bb4cb0a4e51a98b8"

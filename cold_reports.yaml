@@ -15,3 +15,8 @@ reports:
     basename: journal_vocabulary
     append_datestamp: false
     content_type: application/yaml
+  group_vocabulary:
+    cmd: ./run_group_vocabulary.bash
+    basename: group_vocabulary
+    append_datestamp: false
+    content_type: application/yaml
