@@ -70,3 +70,15 @@ Example "file://datawork.library.caltech.edu/Sites/feeds_v1.6/htdocs/people/peop
 
 
 I've written a prototype in TypeScript compiled with Deno.   Creating webservices that take advantage of concurrency is more convoluted in TypeScript (e.g. need to use service workers) than Go.  The report runner server should run as a systemd service. It is easy to implement a sequencial report runner in TypeScript but since reports can sometimes take hours to complete this isn't ideal. Taking advantage of concurrency in TypeScript means using service works. Given that case it makes more sense in writing the report runner in Go and taking advantage of Go's maturity in concurrency and as a service platform.
+
+## Current implementation
+
+- cold_reports runs a service monitoring the contents of reports.ds collection
+- the reports that are authorized to run are defined in cold_reports.yaml
+- the program that runs the report are currently Bash wrapping runable programs like,
+  - `bin/group_vocabulary`
+  - `bin/journal_vocabulary`
+- the Reports web UI is defined in the template, `views/report_list.hbs`
+  - if adding a new report you need to update the template
+  - define the new report in cold_reports.yaml
+  - the cold_reports service needs to be restarted
