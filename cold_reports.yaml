@@ -10,6 +10,11 @@ reports:
     basename: groups
     append_datestamp: false
     content_type: text/csv
+  run_division_people_csv:
+    cmd: ./run_division_people.bash
+    basename: division_people
+    append_datestamp: false
+    content_type: text/csv
   journal_vocabulary:
     cmd: ./run_journal_vocabulary.bash
     basename: journal_vocabulary

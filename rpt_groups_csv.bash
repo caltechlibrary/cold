@@ -1,34 +1,7 @@
 #!/bin/bash
-cd /Sites/cold
-# {
-#     "Scope": "",
-#     "activity": "active",
-#     "alternative": [
-#         "RSI"
-#     ],
-#     "clgid": "Resnick-Sustainability-Institute",
-#     "date": "10/23/18",
-#     "description": "",
-#     "email": "joy@caltech.edu",
-#     "end_date": "",
-#     "grid": "",
-#     "include_in_feeds": true,
-#     "is_approx_end": false,
-#     "is_approx_start": false,
-#     "isni": "",
-#     "name": "Resnick Sustainability Institute",
-#     "parent": "Jonas Peters",
-#     "pi": "",
-#     "prefix": "",
-#     "ringold": "",
-#     "ror": "",
-#     "start_date": "",
-#     "updated": "3/26/20",
-#     "viaf": "",
-#     "website": "https://resnick.caltech.edu/"
-# }
+if [ -d /Sites/cold ]; then cd /Sites/cold; fi
 
-cat <<SQL>groups_rpt.sql
+cat <<SQL >groups_rpt.sql
 select json_object(
     'key', src->'clgid',
     'name', src->'name',
@@ -57,4 +30,7 @@ from groups
 order by src->'name'
 SQL
 
-dsquery -csv "key,name,alternative,email,date,description,start,approx_start,activity,end,approx_end,website,pi,parent,prefix,grid,isni,ringold,viaf,ror,updated,Scope" -sql groups_rpt.sql groups.ds >groups.csv
+dsquery -csv "key,name,alternative,email,date,description,start,approx_start,activity,end,approx_end,website,pi,parent,prefix,grid,isni,ringold,viaf,ror,updated,Scope" \
+  -sql groups_rpt.sql \
+  groups.ds \
+  >groups.csv
