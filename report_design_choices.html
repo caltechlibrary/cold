@@ -133,6 +133,26 @@ take hours to complete this isn’t ideal. Taking advantage of concurrency
 in TypeScript means using service works. Given that case it makes more
 sense in writing the report runner in Go and taking advantage of Go’s
 maturity in concurrency and as a service platform.</p>
+<h2 id="current-implementation">Current implementation</h2>
+<ul>
+<li>cold_reports runs a service monitoring the contents of reports.ds
+collection</li>
+<li>the reports that are authorized to run are defined in
+cold_reports.yaml</li>
+<li>the program that runs the report are currently Bash wrapping runable
+programs like,
+<ul>
+<li><code>bin/group_vocabulary</code></li>
+<li><code>bin/journal_vocabulary</code></li>
+</ul></li>
+<li>the Reports web UI is defined in the template,
+<code>views/report_list.hbs</code>
+<ul>
+<li>if adding a new report you need to update the template</li>
+<li>define the new report in cold_reports.yaml</li>
+<li>the cold_reports service needs to be restarted</li>
+</ul></li>
+</ul>
 </section>
 <footer>
 <span>&copy; 2025 <a href="https://www.library.caltech.edu/copyright">Caltech Library</a></span>

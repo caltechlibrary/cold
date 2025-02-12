@@ -53,8 +53,8 @@
     }
   ],
   "dateCreated": "2023-12-12",
-  "dateModified": "2025-01-28",
-  "datePublished": "2025-01-28",
+  "dateModified": "2025-02-11",
+  "datePublished": "2025-02-11",
   "description": "cold provides a localhost web services for managing controlled object lists and datum. It also includes scripts to syncrhonize with Caltech's public directory data as well as push changes into feeds.library.caltech.edu which hosts the public API of cold content.",
   "funder": [
     {
@@ -87,15 +87,15 @@
     "https://github.com/caltechlibrary/dataset"
   ],
   "softwareRequirements": [
-    "Deno >= 2.1.7",
+    "Deno >= 2.1.9",
     "GNU Make",
     "Pandoc >= 3.1",
     "datasetd >= 2.1.23",
     "CMTools >= 0.0.9"
   ],
-  "version": "0.0.13",
+  "version": "0.0.14",
   "developmentStatus": "wip",
   "issueTracker": "https://github.com/caltechlibrary/cold/issues",
   "downloadUrl": "https://github.com/caltechlibrary/cold/release/latest",
-  "releaseNotes": "Working proof of concept. Added support for generating group vocabulary file for RDM."
+  "releaseNotes": "Working proof of concept. Added division people report."
 }

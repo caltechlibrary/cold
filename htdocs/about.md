@@ -20,7 +20,7 @@ maintainer:
     orcid: https://orcid.org/0000-0003-0900-6903
 
 repository_code: https://github.com/caltechlibrary/cold
-version: 0.0.13
+version: 0.0.14
 license_url: https://caltechlibrary.github.io/cold/LICENSE
 operating_system:
   - Linux
@@ -39,25 +39,27 @@ keywords:
   - objects
   - controlled vocabulary
 
-date_released: 2025-01-28
+date_released: 2025-02-11
 ---
 
 About this software
 ===================
 
-## cold 0.0.13
+## cold 0.0.14
+
+Working proof of concept. Added division people report.
 
 ### Authors
 
-- R. S. Doiel https://orcid.org/0000-0003-0900-6903
+- R. S. Doiel, ORCID: <https://orcid.org/0000-0003-0900-6903>
 
 ### Contributors
 
-- Kathy Johnson https://orcid.org/0000-0002-0026-2516- Thomas E Morrell https://orcid.org/0000-0001-9266-5146
+- Kathy Johnson, ORCID: <https://orcid.org/0000-0002-0026-2516>- Thomas E Morrell, ORCID: <https://orcid.org/0000-0001-9266-5146>
 
 ### Maintainers
 
-- R. S. Doiel https://orcid.org/0000-0003-0900-6903
+- R. S. Doiel, ORCID: <https://orcid.org/0000-0003-0900-6903>
 
 cold provides a localhost web services for managing controlled object lists and datum. It also includes scripts to syncrhonize with Caltech&#x27;s public directory data as well as push changes into feeds.library.caltech.edu which hosts the public API of cold content.
 
@@ -83,7 +85,7 @@ cold provides a localhost web services for managing controlled object lists and 
 
 ### Software Requirements
 
-- Deno &gt;&#x3D; 2.1.7
+- Deno &gt;&#x3D; 2.1.9
 - GNU Make
 - Pandoc &gt;&#x3D; 3.1
 - datasetd &gt;&#x3D; 2.1.23

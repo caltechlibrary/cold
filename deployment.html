@@ -46,6 +46,9 @@ edit it and move to <code>/etc/systemd/system/</code></li>
 <li>Copy <code>cold_api.service-example</code> to
 <code>cold_api.service</code>, edit it and and move to
 <code>/etc/systemd/system/</code></li>
+<li>Copy <code>cold_reports.service-example</code> to
+<code>cold_reports.service</code>, edit it and and move to
+<code>/etc/systemd/system/</code></li>
 <li>Reload the systemd daemon,
 <code>sudo systemctl daemon-reload</code></li>
 <li>Enable the services (only needed the first time, may return a
@@ -53,11 +56,13 @@ warning about symbolic link)
 <ol type="a">
 <li><code>sudo systemctl enable cold.service</code></li>
 <li><code>sudo systemctl enable cold_api.service</code></li>
+<li><code>sudo systemctl enable cold_reports.service</code></li>
 </ol></li>
 <li>Start the services using <code>systemctl</code> in the usual way
 <ol type="a">
 <li><code>sudo systemctl start cold.service</code></li>
 <li><code>sudo systemctl start cold_api.service</code></li>
+<li><code>sudo systemctl start cold_reports.service</code></li>
 </ol></li>
 <li>Test web services using eLinks. If you get a gateway error it means
 datasetd isn’t running correctly in port 8111. Debug with curl,
@@ -89,11 +94,16 @@ sudo mv cold.service /etc/systemd/system/
 cp cold_api.service-example cold_api.service
 nano cold_api.service
 sudo mv cold_api.service /etc/systemd/system/
+cp cold_reports.service-example cold_reports.service
+nano cold_reports.service
+sudo mv cold_reports.service /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable cold.service
 sudo systemctl enable cold_api.service
+sudo systemctl enable cold_reports.service
 sudo systemctl start cold.service
 sudo systemctl start cold_api.service
+sudo systemctl start cold_reports.service
 elinks http://localhost:8111
 sudo chown -R $USER:$USER htdocs/rpt
 chmod +t htdocs/rpt</code></pre>
