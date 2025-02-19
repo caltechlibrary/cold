@@ -29,6 +29,7 @@ export interface PeopleInterface {
   title: string;
   bio: string;
   division: string;
+  groups: string[];
   status: string;
   viaf: string;
   lcnaf: string;
@@ -67,6 +68,7 @@ export class People implements PeopleInterface {
   title: string = "";
   bio: string = "";
   division: string = "";
+  groups: string[] = [];
   status: string = "";
   viaf: string = "";
   lcnaf: string = "";
@@ -191,6 +193,9 @@ export class People implements PeopleInterface {
     if (row.hasOwnProperty("division")) {
       this.division = row.division;
     }
+    if (row.hasOwnProperty("groups")) {
+      this.groups = row.groups.split("\n");
+    }
     if (row.hasOwnProperty("updated")) {
       this.updated = row.updated;
     } else {
@@ -231,6 +236,7 @@ export class People implements PeopleInterface {
       title: this.title,
       bio: this.bio,
       division: this.division,
+      groups: this.groups,
       status: this.status,
       viaf: mdt.normalizeVIAF(this.viaf),
       lcnaf: mdt.normalizeLCNAF(this.lcnaf),

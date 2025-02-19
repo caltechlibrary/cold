@@ -55,6 +55,14 @@
 <label set="division">Division</label> <input type="text" id="division" name="division" value="{{people.division}}" placeholder="pulled from directory if empty" size="80" />
 </div>
 
+<div>
+<label set="groups">Groups</label> <textarea id="groups" name="groups" placeholder="enter one group per line" rows="10" cols="60">
+{{#each people.groups}}
+{{ . }}
+{{/each}}
+</textarea>
+</div>
+
 <hr>
 
 <div class="identifiers">

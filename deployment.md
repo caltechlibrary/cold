@@ -3,9 +3,9 @@
 
 Deploying cold on a remote system requires manual setup.  You will need the following software to successfully build and deploy.
 
-- Deno >= 2.1.7 (for compiling COLD)
+- Deno >= 2.2.0 (for compiling COLD)
 - Dataset >= 2.1.23
-- CMTools >= 0.0.9 (for generating version.ts, about.md, CITATION.cff)
+- CMTools >= 0.0.18 (for generating version.ts, about.md, CITATION.cff)
 - Pandoc >= 3.1 (for compiling documentation)
 - GNU Make 
 - Git

@@ -24,6 +24,15 @@
 
 {{#if people.division}}<p><div class="division">Division: {{people.division}}<div>{{/if}}
 
+{{#if people.groups}}<p><div class="groups">Groups:
+<ul>
+{{#each people.groups}}
+<li>{{.}}</li>
+{{/each}}
+</ul>
+</div>
+{{/if}}
+
 {{#if people.email}}<p><div class="email">EMail: {{people.email}}</div>{{/if}}
 
 {{#if people.directory_user_id}}<p>{{#if people.caltech}}

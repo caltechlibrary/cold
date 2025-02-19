@@ -43,7 +43,7 @@ export function timeStamp(dt: Date): string {
  * @returns {Object}
  */
 export function formDataToObject(form: FormData): object {
-  const obj: { [k: string]: string | boolean } = {};
+  const obj: { [k: string]: string | string[] | boolean } = {};
   for (const v of form.entries()) {
     const key: string = v[0];
     if (key !== "submit") {
@@ -54,6 +54,14 @@ export function formDataToObject(form: FormData): object {
         obj[key] = false;
       } else {
         obj[key] = val;
+      }
+      if (key === 'groups') {
+        obj[key] = [];
+        for (const grp of val.split('\n')) {
+          if (grp.trim() !== '') {
+            obj[key].push(grp.trim());
+          }
+        }
       }
     }
   }
