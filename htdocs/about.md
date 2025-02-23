@@ -20,7 +20,7 @@ maintainer:
     orcid: https://orcid.org/0000-0003-0900-6903
 
 repository_code: https://github.com/caltechlibrary/cold
-version: 0.0.14
+version: 0.0.15
 license_url: https://caltechlibrary.github.io/cold/LICENSE
 operating_system:
   - Linux
@@ -39,15 +39,15 @@ keywords:
   - objects
   - controlled vocabulary
 
-date_released: 2025-02-11
+date_released: 2025-02-20
 ---
 
 About this software
 ===================
 
-## cold 0.0.14
+## cold 0.0.15
 
-Working proof of concept. Added division people report.
+Working proof of concept. Added a groups list to the people object.
 
 ### Authors
 
@@ -85,9 +85,9 @@ cold provides a localhost web services for managing controlled object lists and 
 
 ### Software Requirements
 
-- Deno &gt;&#x3D; 2.1.9
+- Deno &gt;&#x3D; 2.2.0
 - GNU Make
 - Pandoc &gt;&#x3D; 3.1
 - datasetd &gt;&#x3D; 2.1.23
-- CMTools &gt;&#x3D; 0.0.9
+- CMTools &gt;&#x3D; 0.0.18
 

@@ -21,3 +21,4 @@ groups_rpt.sql
 in_feeds.csv
 htdocs/rpt/*
 *.zip
+*.tgz

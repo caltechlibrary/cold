@@ -55,10 +55,10 @@ export function formDataToObject(form: FormData): object {
       } else {
         obj[key] = val;
       }
-      if (key === 'groups') {
+      if (key === "groups") {
         obj[key] = [];
-        for (const grp of val.split('\n')) {
-          if (grp.trim() !== '') {
+        for (const grp of val.split("\n")) {
+          if (grp.trim() !== "") {
             obj[key].push(grp.trim());
           }
         }
