@@ -1,4 +1,4 @@
-%journal_vocabulary(1) user manual | 0.0.15  deb90dd
+%journal_vocabulary(1) user manual | 0.0.15  c31840b
 % R. S.Doiel
 % 2025-02-20
 

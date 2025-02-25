@@ -1,0 +1,60 @@
+/**
+ * client_api.ts provides the browser side API for interactive dataset API via the COLD web service.
+ * That in turn wraps the datasetd JSON API via ts_dataset.ts.
+ */ /**
+ * ClientAPI wraps the browser facing web service and handles retrieving information about peoples, groups, etc.
+ */ class ClientAPI {
+  baseUrl = "http://localhost:8111";
+  constructor(baseUrl1){
+    baseUrl1 === undefined ? "" : this.baseUrl = baseUrl1;
+  }
+  async getList(c_name, query_name, params) {
+    const base_url = `${baseUrl}/api/${c_name}/${query_name}`;
+    let uri = base_url;
+    let resp;
+    if (params !== undefined) {
+      uri = `${base_url}?${params}`;
+    }
+    try {
+      resp = await fetch(uri, {
+        headers: {
+          "Content-Type": "application/json"
+        },
+        method: "GET"
+      });
+    } catch (err) {
+      return [];
+    }
+    if (resp.ok) {
+      const src = await resp.text();
+      if (src !== undefined && src !== "") {
+        let l = [];
+        try {
+          l = JSON.parse(src);
+        } catch (err) {
+          return [];
+        }
+        return l;
+      }
+    }
+    return [];
+  }
+  /**
+   * getGroupsList returns an array of clgid and group names.  If list can't be retrieved
+   * then an empty list is return.
+   * @returns an array of objects consisting of clgid and group name.
+   */ async getGroupsList() {
+    const c_name = "groups";
+    const query_name = "group_names";
+    return await this.getList(c_name, query_name);
+  }
+  /**
+   * getPeopleList returns an array of clpid and group names.  If list can't be retrieved
+   * then an empty list is return.
+   * @returns an array of objects consisting of clgid and group name.
+   */ async getPeopleList() {
+    const c_name = "people";
+    const query_name = "people_names";
+    return await this.getList(c_name, query_name);
+  }
+}
