@@ -117,7 +117,7 @@ publish: website .FORCE
 
 htdocs: .FORCE
 	deno task htdocs
-	deno task transpile
+	deno task build
 
 test: .FORCE
 	deno task test

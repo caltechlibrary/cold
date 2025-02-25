@@ -1,4 +1,4 @@
-%cold(1) user manual | 0.0.15 188d3c9
+%cold(1) user manual | 0.0.15 deb90dd
 % R. S.Doiel
 % 2025-02-20
 

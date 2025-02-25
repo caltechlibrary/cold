@@ -5,7 +5,7 @@ page_title: Development Notes
 Development Notes
 =================
 
-NOTE: this document describes my thinking during the development process. It is not a description of how things actually got implemented.
+NOTE: this document describes my thinking during the development process. It is not necessarily a description of how things actually wound up being implemented.
 
 Application layout and structure
 --------------------------------
@@ -25,7 +25,7 @@ The data models are enforced only via the datasetd service.  Eventually model su
 Data models are expressed in YAML and are shared between dataset and the model YAML used by Newt. Both use the same models package written in Go. The models package provides a means of define more types as well as adding renders. It is being developed in parallel with Newt, Dataset and the COLD where the latter is providing a real world use case to test the approach.
 -->
 
-The public API isn't part of COLD directly. COLD is for curating object lists but it does export those objects to feeds.library.caltech.edu which then provides the public API.  Content is exported in JSON, YAML and CSV formats as needed by Caltech Library systems and services.
+The public API isn't part of COLD directly. COLD is for curating object lists but it does export those objects to feeds.library.caltech.edu which then provides the public API.  Content is exported in JSON, YAML and CSV formats as needed by Caltech Library systems and services. Additionally there is a reports system where content like vocabularly files can be generated on demand or on a schedule.
 
 
 Data enhancement
@@ -152,3 +152,6 @@ A garbage collections script should clear out old requests in a timely fashion (
 
 A request queue is implemented track report requests via the COLD UI. A separate process reads the queue, renders the reports and then updates the queue upon completion or error.  If email addresses are provided then they will be contact with the result of the report request. The message should include the report's request id, name, status and link or error message.
 
+## Web UI and JavaScript behaviors
+
+Some of the objects managed by COLD are complex in the sense they each will have nested structure. E.g. a list of groups a person is associated with. These need to be validated both server and browser side. Since COLD is being developed primarily as a Deno+TypeScript application the code that validates can be used both server and browser side too. This is accomplished by cross compiling the TypeScript to JavaScript using Deno's emit package.  There is a task called "htdocs" defined in the "deno.json" file. This in turn calls "build.ts" which uses the "emit" package to generate the JavaScript used by the browser. The generated JavaScript is written to "htdocs/modules".

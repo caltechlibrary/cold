@@ -1,8 +1,12 @@
 #!/usr/bin/env deno
 
-//import { transpile } from "@deno/emit";
 import { common_mark, makePage, path } from "./deps.ts";
 import { extractYaml } from "@std/front-matter";
+import { transpile } from "@deno/emit";
+import { ERROR_COLOR } from "./colors.ts";
+
+/* Transpile directory_client.ts to JavaScript to be used by the people edit form. */
+const modules_path = path.join("htdocs", "modules");
 
 export async function renderHtdocs(startDir: string) {
   for await (const dirEntry of Deno.readDir(startDir)) {
@@ -33,5 +37,51 @@ export async function renderHtdocs(startDir: string) {
   }
 }
 
+// transpileJavaScript accepts a list of TypeScript files to be rendered
+// as JavaScript for use in the browser. It relies on the "emit" package.
+// @params javaScriptFiles (array of string) to be processed
+// @params targetPath (string) the target of where to render the JavaScript files to.
+export async function transpileToJavaScript(
+  javaScriptFiles: string[],
+  targetPath: string,
+): Promise<boolean> {
+  for (const fname of javaScriptFiles) {
+    const url = new URL(fname, import.meta.url);
+    let result: Map<string, string>;
+    try {
+      result = await transpile(url);
+    } catch (err) {
+      console.log(`%ctranspile error: ${err}`, ERROR_COLOR);
+      return false;
+    }
+    const src: string | undefined = result.get(url.href);
+    if (src === undefined) {
+      console.log(`failed to compile ${fname}, not output.`);
+      return false;
+    }
+    const targetName = path.join(targetPath, fname.replace(/.ts$/, ".js"));
+    try {
+      await Deno.writeTextFile(targetName, src);
+    } catch (err) {
+      console.log(`%cfailed to write ${targetName}, ${err}`, ERROR_COLOR);
+      return false;
+    }
+    return true;
+  }
+  return true;
+}
+
 // Run build.ts
-if (import.meta.main) await renderHtdocs("./htdocs");
+if (import.meta.main) {
+  await renderHtdocs("./htdocs");
+  await Deno.mkdir(modules_path, { mode: 0o775, recursive: true });
+  if (
+    !await transpileToJavaScript([
+      "client_api.ts",
+      "directory_client.ts",
+    ], modules_path)
+  ) {
+    console.log(`%cERROR: failed to transpile ${javaScriptFiles}`, ERROR_COLOR);
+    Deno.exit(1);
+  }
+}

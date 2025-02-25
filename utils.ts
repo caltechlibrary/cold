@@ -28,6 +28,49 @@ export function pathIdentifier(u: string): string {
 }
 
 /**
+ * apiPathParse extracts the elements in the API path and returns them as an object.
+ *
+ * @param {string} uri holds the unparsed URL you want to pull the identifier from.
+ * @returns {[key:string]: any} an object representing the API request.
+ *
+ * @example
+ * ```
+ *    const uri = new URL('https://localhost:8111/api/groups?q=LIGO');
+ *    const obj = apiPathParse(uri);
+ *    console.log("Collection ", obj.c_name, " query is ", obj.q);
+ * ```
+ */
+export function apiPathParse(uri: string): { [key: string]: string } {
+  let resp: { [key: string]: string } = {};
+  const u = new URL(uri);
+  let parts: string[] = u.pathname.replace(/^\/api/, "").split("/");
+  // Trim the leading slash element
+  if (parts.length > 0 && parts[0] === "") {
+    parts.shift();
+  }
+
+  let c_name: string | undefined = parts.shift();
+  let query_name: string | undefined = parts.shift();
+  // handle decodeing the element in the path.
+  (c_name === undefined) ? "" : resp.c_name = decodeURIComponent(c_name);
+  (query_name === undefined)
+    ? ""
+    : resp.query_name = decodeURIComponent(query_name);
+
+  // Handle none coliding query string parameters.
+  let params = new URLSearchParams(u.search);
+  for (const key of params.keys()) {
+    if (["c_name", "query_name"].indexOf(key) === -1) {
+      const val = params.get(key);
+      if (val !== null) {
+        resp[key] = val;
+      }
+    }
+  }
+  return resp;
+}
+
+/**
  * timeStamp takes a Date object and returns a simople timestamp as a string.
  * @param dt: Date
  * @returns string

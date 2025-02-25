@@ -87,7 +87,7 @@
     "https://github.com/caltechlibrary/dataset"
   ],
   "softwareRequirements": [
-    "Deno >= 2.2.0",
+    "Deno >= 2.2.1",
     "GNU Make",
     "Pandoc >= 3.1",
     "datasetd >= 2.1.23",

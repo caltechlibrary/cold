@@ -7,6 +7,7 @@ import {
   formDataToObject,
   matchType,
   pathIdentifier,
+  renderJSON,
   renderPage,
 } from "./deps.ts";
 
@@ -270,7 +271,9 @@ async function handleGetGroups(
   const url = new URL(req.url);
   const clgid = pathIdentifier(req.url);
   const params = url.searchParams;
+  const lookup: string | null = params.get("q");
   let view = params.get("view");
+
   let tmpl = "group_list";
   if (clgid !== undefined && clgid !== "") {
     if (view !== undefined && view === "edit") {
@@ -285,7 +288,7 @@ async function handleGetGroups(
   }
 
   if (tmpl === "group_list") {
-    /* display a list of groups */
+    /* display a list of groups or lookup result */
     const group_list = await ds.query("group_names", [], {});
     if (group_list !== undefined) {
       return renderPage(tmpl, {

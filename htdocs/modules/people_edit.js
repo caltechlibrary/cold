@@ -1,11 +1,15 @@
 import * as mdt from './mdt.js';
+import { ClientAPI } from './client_api.js';
+
+const clientAPI = new ClientAPI(window.location);
 
 let orcidElem = document.getElementById("orcid"),
     rorElem = document.getElementById("ror"),
     isniElem = document.getElementById("isni"),
     lcnafElem = document.getElementById('lcnaf'),
     viafElem = document.getElementById('viaf'),
-    snacElem = document.getElementById('snac');
+    snacElem = document.getElementById('snac'),
+    groupsElem = document.getElementById('groups');
 
 orcidElem.addEventListener('change', function (evt) {
     let val = orcidElem.value;
@@ -46,5 +50,16 @@ snacElem.addEventListener('change', function (evt) {
     let val = snacElem.value;
     if (mdt.validateSNAC(val)) {
         snacElem.value = mdt.normalizeSNAC(val);
+    }
+});
+
+groupsElem.addEventListener('change', async function (evt) {
+    let vals = groupsElem.value;
+    for (const val of vals.split(/\n/g)) {
+        console.log(`%cDEBUG group name -> ${val}`, 'color: green');
+        const clgid = await clientAPI.lookupGroupName(val);
+        if (clgid === undefined) {
+            console.log(`%cfailed to find group name -> ${val}`, 'color: red');
+        }
     }
 });

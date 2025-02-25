@@ -21,7 +21,7 @@ export {
 
 /* COLD related packages */
 export { ConfigureHandler, apiPort, httpPort } from "./config.ts";
-export { makePage, renderPage } from "./render.ts";
+export { makePage, renderPage, renderJSON } from "./render.ts";
 export { version, releaseDate, releaseHash, licenseText } from "./version.ts";
 export { fmtHelp } from "./helptext.ts";
 export { OptionsProcessor, matchType } from "./options.ts";
@@ -33,7 +33,7 @@ export { handleFunders, Funder } from "./funders.ts";
 export { handleSubjects, Subject } from "./subjects.ts";
 export { handleISSN, ISSN } from "./issn.ts";
 export { handleDOIPrefix, DOIPrefix } from "./doi_prefix.ts";
-export { formDataToObject, pathIdentifier } from "./utils.ts";
+export { formDataToObject, pathIdentifier, apiPathParse } from "./utils.ts";
 export { ColdReadWriteHandler } from "./cold.ts";
 
 /* directory_sync setup */

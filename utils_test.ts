@@ -2,7 +2,22 @@ import {
   assertStrictEquals,
   formDataToObject,
   pathIdentifier,
+  apiPathParse,
 } from "./deps.ts";
+
+Deno.test("testApiPathParse", () => {
+  let uri = "http://localhost:8111/api/groups?q=" + encodeURIComponent("This is a bit thing/widget");
+  let o = apiPathParse(uri);
+  assertStrictEquals(o.c_name, "groups", `expected "groups", got "${o.c_name}"`);
+  assertStrictEquals(o.q, "This is a bit thing/widget", `expected "This is a bit thing/widget", got "${o.q}"`)
+  assertStrictEquals(o.query_name, undefined, `expected the query name to be undefined, got "${o.query_name}"`);
+  uri = "http://localhost:8111/api/people/lookup_people?clpid=Doiel-R-S";
+  o = apiPathParse(uri);
+  assertStrictEquals(o.c_name, "people");
+  assertStrictEquals(o.query_name, "lookup_people");
+  assertStrictEquals(o.q, undefined, `expected q to be undefined, got "${o.q}"`);
+  assertStrictEquals(o.clpid, "Doiel-R-S", `expected clpid to be "Doiel-R-S", got "${o.clpid}"`);
+});
 
 Deno.test("testPathIdentifier", () => {
   let uri = "http://localhost:8111/groups/LIGO";

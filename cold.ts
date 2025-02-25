@@ -12,6 +12,7 @@ import {
   path,
   serveDir,
 } from "./deps.ts";
+import { handleBrowserAPI } from "./browser_api.ts";
 import { coldHelpText, fmtHelp } from "./helptext.ts";
 import { licenseText, releaseDate, releaseHash, version } from "./version.ts";
 
@@ -74,6 +75,9 @@ export function ColdReadWriteHandler(
   }
   if (pathname.startsWith("/directory_api")) {
     return handleDirectoryLookup(req, options);
+  }
+  if (pathname.startsWith("/api")) {
+    return handleBrowserAPI(req, options);
   }
   if (options.debug) {
     console.log(

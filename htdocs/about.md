@@ -85,7 +85,7 @@ cold provides a localhost web services for managing controlled object lists and 
 
 ### Software Requirements
 
-- Deno &gt;&#x3D; 2.2.0
+- Deno &gt;&#x3D; 2.2.1
 - GNU Make
 - Pandoc &gt;&#x3D; 3.1
 - datasetd &gt;&#x3D; 2.1.23
