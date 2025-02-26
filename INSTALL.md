@@ -18,17 +18,27 @@ Required software
 4. CMTools >= 0.0.9 (used to generate version.ts, CITATION.cff and about.md)
 5. Pandoc > 3.1 (to build or update documentation)
 
+Required source code
+--------------------
+
+**cold** relies on several Caltech Library adjancent projects. These should be in parallel directories to where your **cold** repository exists. They should be accessible with the prefix "../" during the compilation, checking or running from source.
+
+- [metadatatools](https://github.com/caltechlibrary/metadatatools)
+- [ts_dataset](https://github.com/caltechlibrary/ts_dataset)
+
 Setting up cold
 ---------------
 
 These are setup instructions for testing and development.  Step four changes
 if you are setting up for production.
 
-1. Retrieve cold and cold_admin repositories
+1. Retrieve cold and related repositories
     a. `cd`
-    b. `git clone https://github.com/caltechlibrary/cold`
-    c. `cd cold`
-    d. `git pull origin main`
+    b. `git clone https://github.com/caltechlibrary/metadatatools`
+    c. `git clone https://github.com/caltechlibrary/ts_dataset`
+    d. `git clone https://github.com/caltechlibrary/cold`
+    e. `cd cold`
+    f. `git pull origin main`
 2. Setup cold services
     a. `deno task setup`
     b. (optional) `deno task load_data` (initially populate COLD from CSV files)

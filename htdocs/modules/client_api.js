@@ -3,13 +3,13 @@
  * That in turn wraps the datasetd JSON API via ts_dataset.ts.
  */ /**
  * ClientAPI wraps the browser facing web service and handles retrieving information about peoples, groups, etc.
- */ class ClientAPI {
+ */ export class ClientAPI {
   baseUrl = "http://localhost:8111";
-  constructor(baseUrl1){
-    baseUrl1 === undefined ? "" : this.baseUrl = baseUrl1;
+  constructor(baseUrl){
+    baseUrl === undefined ? "" : this.baseUrl = baseUrl;
   }
   async getList(c_name, query_name, params) {
-    const base_url = `${baseUrl}/api/${c_name}/${query_name}`;
+    const base_url = `${this.baseUrl}/api/${c_name}/${query_name}`;
     let uri = base_url;
     let resp;
     if (params !== undefined) {
@@ -56,5 +56,12 @@
     const c_name = "people";
     const query_name = "people_names";
     return await this.getList(c_name, query_name);
+  }
+  async lookupGroupName(name) {
+    const c_name = "groups.ds";
+    const query_name = "lookup_name";
+    let params = new URLSearchParams();
+    params.append("q", name);
+    return await this.getList(c_name, query_name, params);
   }
 }

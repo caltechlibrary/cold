@@ -1,7 +1,8 @@
 import * as mdt from './mdt.js';
 import { ClientAPI } from './client_api.js';
 
-const clientAPI = new ClientAPI(window.location);
+//console.log(`DEBUG window.localhost -> ${window.localtion}`);
+const clientAPI = new ClientAPI('../');
 
 let orcidElem = document.getElementById("orcid"),
     rorElem = document.getElementById("ror"),
@@ -56,10 +57,15 @@ snacElem.addEventListener('change', function (evt) {
 groupsElem.addEventListener('change', async function (evt) {
     let vals = groupsElem.value;
     for (const val of vals.split(/\n/g)) {
-        console.log(`%cDEBUG group name -> ${val}`, 'color: green');
-        const clgid = await clientAPI.lookupGroupName(val);
-        if (clgid === undefined) {
-            console.log(`%cfailed to find group name -> ${val}`, 'color: red');
+        if (val === undefined || val === '') {
+            console.log(`%cDEBUG skipping empty query value`, 'color: magenta');
+        } else {
+            console.log(`%cDEBUG group name -> ${val}`, 'color: green');
+            const obj = await clientAPI.lookupGroupName(val);
+            if (obj === undefined) {
+                console.log(`%cfailed to find group name -> ${val}`, 'color: red');
+            }
+            console.log(`%cDEBUG lookup data -> ${obj} -> ${JSON.stringify(obj)}`, 'color: yellow');
         }
     }
 });

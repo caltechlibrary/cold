@@ -28,6 +28,7 @@ collections:
   - dataset: groups.ds
     query:
       group_names: select json_object('clgid', src->'clgid', 'group_name', src->'name') as src from groups order by src->'name' ASC;
+      lookup_name: select json_object('clgid', src->'clgid', 'group_name', src->'name') as src from groups where src->>'name' like ? order by src->'name' ASC;
     # What follows are object level permissions
     keys: true
     create: true

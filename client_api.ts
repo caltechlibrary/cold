@@ -6,10 +6,10 @@
 /**
  * ClientAPI wraps the browser facing web service and handles retrieving information about peoples, groups, etc.
  */
-class ClientAPI {
+export class ClientAPI {
   baseUrl: string = "http://localhost:8111";
 
-  constructor(baseUrl?: string | undefined) {
+  constructor(baseUrl?: string) {
     (baseUrl === undefined) ? "" : this.baseUrl = baseUrl;
   }
 
@@ -18,7 +18,7 @@ class ClientAPI {
     query_name: string,
     params?: URLSearchParams,
   ): Promise<{ [key: string]: any }[]> {
-    const base_url = `${baseUrl}/api/${c_name}/${query_name}`;
+    const base_url = `${this.baseUrl}/api/${c_name}/${query_name}`;
     let uri: string = base_url;
     let resp: Response;
     if (params !== undefined) {
@@ -76,6 +76,21 @@ class ClientAPI {
       family_name: string;
       given_name: string;
       orcid: string;
+    }[];
+  }
+
+  async lookupGroupName(name: string): Promise<
+    { clgid: string; name: string; ok: boolean; msg: string }[]
+  > {
+    const c_name = "groups.ds";
+    const query_name = "lookup_name";
+    let params = new URLSearchParams();
+    params.append("q", name);
+    return await this.getList(c_name, query_name, params) as {
+      clgid: string;
+      name: string;
+      ok: boolean;
+      msg: string;
     }[];
   }
 }
