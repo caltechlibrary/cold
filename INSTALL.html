@@ -50,13 +50,27 @@ and admin services)</li>
 about.md)</li>
 <li>Pandoc &gt; 3.1 (to build or update documentation)</li>
 </ol>
+<h2 id="required-source-code">Required source code</h2>
+<p><strong>cold</strong> relies on several Caltech Library adjancent
+projects. These should be in parallel directories to where your
+<strong>cold</strong> repository exists. They should be accessible with
+the prefix “../” during the compilation, checking or running from
+source.</p>
+<ul>
+<li><a
+href="https://github.com/caltechlibrary/metadatatools">metadatatools</a></li>
+<li><a
+href="https://github.com/caltechlibrary/ts_dataset">ts_dataset</a></li>
+</ul>
 <h2 id="setting-up-cold">Setting up cold</h2>
 <p>These are setup instructions for testing and development. Step four
 changes if you are setting up for production.</p>
 <ol type="1">
-<li>Retrieve cold and cold_admin repositories
+<li>Retrieve cold and related repositories
 <ol type="a">
 <li><code>cd</code></li>
+<li><code>git clone https://github.com/caltechlibrary/metadatatools</code></li>
+<li><code>git clone https://github.com/caltechlibrary/ts_dataset</code></li>
 <li><code>git clone https://github.com/caltechlibrary/cold</code></li>
 <li><code>cd cold</code></li>
 <li><code>git pull origin main</code></li>

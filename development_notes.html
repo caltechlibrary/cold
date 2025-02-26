@@ -20,8 +20,8 @@
 <section>
 <h1 id="development-notes">Development Notes</h1>
 <p>NOTE: this document describes my thinking during the development
-process. It is not a description of how things actually got
-implemented.</p>
+process. It is not necessarily a description of how things actually
+wound up being implemented.</p>
 <h2 id="application-layout-and-structure">Application layout and
 structure</h2>
 <p>The primary task of the COLD UI is to provide a means of curating our
@@ -54,7 +54,9 @@ Data models are expressed in YAML and are shared between dataset and the model Y
 object lists but it does export those objects to
 feeds.library.caltech.edu which then provides the public API. Content is
 exported in JSON, YAML and CSV formats as needed by Caltech Library
-systems and services.</p>
+systems and services. Additionally there is a reports system where
+content like vocabularly files can be generated on demand or on a
+schedule.</p>
 <h2 id="data-enhancement">Data enhancement</h2>
 <p>The content curated in cold can be enhanced from external sources.
 This is done via scheduled tasks. Initially these tasks are going to be
@@ -259,6 +261,18 @@ the queue upon completion or error. If email addresses are provided then
 they will be contact with the result of the report request. The message
 should include the report’s request id, name, status and link or error
 message.</p>
+<h2 id="web-ui-and-javascript-behaviors">Web UI and JavaScript
+behaviors</h2>
+<p>Some of the objects managed by COLD are complex in the sense they
+each will have nested structure. E.g. a list of groups a person is
+associated with. These need to be validated both server and browser
+side. Since COLD is being developed primarily as a Deno+TypeScript
+application the code that validates can be used both server and browser
+side too. This is accomplished by cross compiling the TypeScript to
+JavaScript using Deno’s emit package. There is a task called “htdocs”
+defined in the “deno.json” file. This in turn calls “build.ts” which
+uses the “emit” package to generate the JavaScript used by the browser.
+The generated JavaScript is written to “htdocs/modules”.</p>
 </section>
 <footer>
 <span>&copy; 2025 <a href="https://www.library.caltech.edu/copyright">Caltech Library</a></span>
