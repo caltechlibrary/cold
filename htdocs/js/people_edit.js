@@ -1,8 +1,16 @@
-import * as mdt from './mdt.js';
-import { ClientAPI } from './client_api.js';
+import * as mdt from '../modules/mdt.js';
+import { ClientAPI } from '../modules/client_api.js';
+import * as path from './path.js';
 
-//console.log(`DEBUG window.localhost -> ${window.localtion}`);
-const clientAPI = new ClientAPI('../');
+/*might not need this after all
+//NOTE: We need to caculate the path to the application root, not windows.location root.
+//people_edit.js is called from people_edit page so we need move up two directories to
+//finc the root.
+const apiPath = path.join(window.location.pathname, '..', '..');
+console.log(`DEBUG API path -> ${apiPath} <-- ${window.location}`)
+*/
+
+const clientAPI = new ClientAPI();
 
 let orcidElem = document.getElementById("orcid"),
     rorElem = document.getElementById("ror"),
@@ -56,16 +64,23 @@ snacElem.addEventListener('change', function (evt) {
 
 groupsElem.addEventListener('change', async function (evt) {
     let vals = groupsElem.value;
+    let resolvedVals = [];
     for (const val of vals.split(/\n/g)) {
         if (val === undefined || val === '') {
             console.log(`%cDEBUG skipping empty query value`, 'color: magenta');
         } else {
             console.log(`%cDEBUG group name -> ${val}`, 'color: green');
             const obj = await clientAPI.lookupGroupName(val);
-            if (obj === undefined) {
+            // If we get zero results back then just accept the value otherwise
+            // we'll turn this into a CSV row with name followed by id.
+            if (obj === undefined || obj.length === 0) {
                 console.log(`%cfailed to find group name -> ${val}`, 'color: red');
+                resolvedVals.push({'group_name': val});
+            } else {
+                console.log(`%cDEBUG lookup data -> ${obj} -> ${JSON.stringify(obj)}`, 'color: yellow');
+                resolvedVals.push(obj[0]);
             }
-            console.log(`%cDEBUG lookup data -> ${obj} -> ${JSON.stringify(obj)}`, 'color: yellow');
         }
     }
+    console.log(`%cDEBUG resolved lines -> ${JSON.stringify(resolvedVals)}`, 'color: magenta');
 });
