@@ -14,7 +14,7 @@
 <section>
 <h1>{{#isCreateObject}}Create:{{/isCreateObject}}{{^isCreateObject}}Edit:{{/isCreateObject}} {{people.name}}</h1>
 
-<form action="{{people.clpid}}" method="post">
+<form id="people_edit" name="people_edit" action="{{people.clpid}}" method="post">
 
 <div>
 <label set="directory_user_id">Directory User ID</label> <input type="text" id="directory_user_id" name="directory_user_id" value="{{people.directory_user_id}}">
@@ -56,11 +56,12 @@
 </div>
 
 <div>
-<label set="groups">Groups</label> <textarea id="groups" name="groups" placeholder="enter one group per line" rows="10" cols="60">
+<label set="groups">Groups</label> 
+<csv-textarea id="groups" name="groups" title="Curate the affiliated groups for this person. Enter a group name or alt name in the group name column. Add rows as needed." column-headings="group_name,clgid" rows="1" cols="2">
 {{#each people.groups}}
 {{ . }}
 {{/each}}
-</textarea>
+</csv-textarea>
 </div>
 
 <hr>
@@ -157,5 +158,6 @@
 <script type="module" src="{{base_url}}/modules/directory_client.js"></script>
 <script type="module" src="{{base_url}}/modules/client_api.js"></script>
 <script type="module" src="{{base_url}}/modules/mdt.js"></script>
+<script type="module" src="{{base_url}}/js/csvtextarea.js"></script>
 <script type="module" src="{{base_url}}/js/people_edit.js"></script>
 </html>

@@ -89,6 +89,7 @@ export function formDataToObject(form: FormData): object {
   const obj: { [k: string]: string | string[] | boolean } = {};
   for (const v of form.entries()) {
     const key: string = v[0];
+    console.log(`DEBUG formDataToObject processing key -> ${key} -> v -> ${v}`)
     if (key !== "submit") {
       const val: any = v[1];
       if (val === "true" || val === "on") {
