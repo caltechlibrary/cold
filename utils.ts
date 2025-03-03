@@ -3,6 +3,13 @@
  * and extraction from the URL pathname.
  */
 import { parse as parseCSV } from "@std/csv/parse";
+import { ERROR_COLOR } from './colors.ts';
+import { apiPort, Dataset } from './deps.ts';
+import { People } from './people.ts';
+
+const dsPeople = new Dataset(apiPort, "people.ds");
+const dsGroups = new Dataset(apiPort, "groups.ds");
+
 
 /**
  * pathIdentifier extracts the identifier from the last element of the URL pathname.
@@ -127,4 +134,109 @@ export function formDataToObject(form: FormData): object {
   /*  NOTE: Make sure we update obj.updated */
   obj["updated"] = timeStamp(new Date());
   return obj;
+}
+
+async function lookupGroupInfo(name: string): Promise<
+{ clgid: string, name: string, ok: boolean, msg: string }
+> {
+  let obj: {[key: string]: any} | undefined
+     = await dsGroups.query('lookup_name',
+      ['name', 'alternatives' ], 
+      {'name': name, 'alternatives': name});
+  if (obj === undefined) {
+    return {'ok': false, 'msg': `failed to find group name ${name}`, name: '', clgid: ''};
+  }
+  let clgid: string = '';
+  let group_name: string = '';
+  (obj.clgid === undefined ) ? clgid = '': clgid = obj.clgid;
+  (obj.group_name === undefined) ? group_name = name: group_name = obj.group_name;  
+  return { ok: true, msg: '', clgid: clgid, name: group_name};
+}
+
+
+/**
+ * updatePeopleWithGroupInfo(clpid, orcid, familyName, givenName, division, groups);
+ */
+async function updatePeopleWithGroupInfo(clpid: string, groups: {group_name: string, clgid: string}[]): Promise<string> {
+  let obj: {[key: string]:any} | undefined = {};
+  try { 
+    obj = await dsPeople.read(clpid);
+  } catch (err) {
+    return `${err}`;
+  }
+  if (obj === undefined) {
+    return `failed to find ${clpid} in people.ds`;
+  }
+  let person = (new People());
+  person.fromObject(obj);
+  person.groups = [];
+  for (let row of groups) {
+    if (row.group_name !== undefined && row.group_name !== '') {
+      const groupInfo = await lookupGroupInfo(row.group_name);
+      if (groupInfo.ok) {
+        row.group_name = groupInfo.name;
+        row.clgid = groupInfo.clgid;
+      }
+      person.groups.push(row);
+    }
+  }
+  if (await dsPeople.update(clpid, person.asObject()) === false) {
+    return `failed to update ${clpid} in people.ds`;
+  }
+  return '';
+}
+
+/**
+ * loadPeopleFromGroupsCSV. This will read a CSV file with the following columns.
+ *   "division","clpid","orcid","family_name","given_name","other group","other group", ...
+ * The columns must be in this specific order since we don't know how many groups a person
+ * maybe afficiliated with.
+ * 
+ * @param filename: string, this is the name of the CSV file to read
+ * @return string, the returned string is empty if no errors encountered otherwise an
+ * error message is returned.
+ */
+export async function loadPeopleFromGroupsCSV(filename: string): Promise<string> {
+  let src: string = '';
+  try {
+    src = await Deno.readTextFile(filename);
+  } catch (err) {
+    return `${err}`;
+  }
+  const data = parseCSV(src);
+  let division: string = '';
+  let clpid: string = '';
+  let clgid: string = '';
+  let orcid: string = '';
+  let familyName: string = '';
+  let givenName: string = '';
+  let groups: {group_name: string, clgid: string}[] = [];
+  let i = 0;
+  for (let row of data) {
+    i++;
+    (row[0] === undefined) ? division = '' : division = row.shift().trim();
+    (row[0] === undefined) ? clpid = '' : clpid = row.shift().trim();
+    if(clpid === '') {
+      console.log(`%crow ${i} has no clpid, skipping`, ERROR_COLOR);
+      continue;
+    }
+    (row[0] === undefined) ? orcid = '' : orcid = row.shift().trim();
+    (row[0] === undefined) ? familyName = '': familyName = row.shift().trim();
+    (row[0] === undefined) ? givenName = '': givenName = row.shift().trim();
+    groups = [];
+    if (division !== '') {
+      groups.push({ group_name: division, clgid: ''});
+    }
+    for (const column of row) {
+      if (column.trim() !== '') {
+        clgid = await lookupGroupName(group_name);
+        groups.push({group_name: column.trim(), clgid: ''});
+      }
+    }
+    const errMsg = await updatePeopleWithGroupInfo(clpid, groups);
+    if (errMsg !== '') {
+      return errMsg;
+    }
+  }
+  return '';
 }

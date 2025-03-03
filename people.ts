@@ -10,6 +10,7 @@ import {
   pathIdentifier,
   renderPage,
 } from "./deps.ts";
+import { timeStamp } from "./utils.ts";
 
 const ds = new Dataset(apiPort, "people.ds");
 
@@ -223,7 +224,110 @@ export class People implements PeopleInterface {
     return true;
   }
 
-  asObject(): Object {
+  fromObject(obj: { [key: string]: any }) {
+    (obj.clpid === undefined)
+      ? this.clpid = ""
+      : this.clpid = obj.clpid as unknown as string;
+    (obj.thesis_id === undefined)
+      ? this.thesis_id = ""
+      : this.thesis_id = obj.thesis_id as unknown as string;
+    (obj.authors_id === undefined)
+      ? this.authors_id = ""
+      : this.authors_id = obj.author_id as unknown as string;
+    (obj.advisors_id === undefined)
+      ? this.advisors_id = ""
+      : this.advisors_id = obj.advisor_id as unknown as string;
+    (obj.include_in_feeds === undefined)
+      ? this.include_in_feeds = false
+      : this.include_in_feeds = obj.include_in_feeds as unknown as boolean;
+    (obj.family_name === undefined)
+      ? this.family_name = ""
+      : this.family_name = obj.family_name as unknown as string;
+    (obj.given_name === undefined)
+      ? this.given_name = ""
+      : this.given_name = obj.given_name as unknown as string;
+    (obj.email === undefined)
+      ? this.email = ""
+      : this.email = obj.email as unknown as string;
+    (obj.archivesspace_id === undefined)
+      ? this.archivesspace_id = ""
+      : this.archivesspace_id = obj.archivesspace_id as unknown as string;
+    (obj.directory_user_id === undefined)
+      ? this.directory_user_id = ""
+      : this.directory_user_id = obj.directory_user_id as unknown as string;
+    (obj.directory_person_type === undefined)
+      ? this.directory_person_type = ""
+      : this.directory_person_type = obj
+        .directory_person_type as unknown as string;
+    (obj.title === undefined)
+      ? this.title = ""
+      : this.title = obj.title as unknown as string;
+    (obj.bio === undefined)
+      ? this.bio = ""
+      : this.bio = obj.bio as unknown as string;
+    (obj.division === undefined)
+      ? this.division = ""
+      : this.division = obj.division as unknown as string;
+    (obj.groups === undefined)
+      ? this.groups = []
+      : this.groups = obj.groups as unknown as {
+        group_name: string;
+        clgid: string;
+      }[];
+    (obj.status === undefined)
+      ? this.status = ""
+      : this.status = obj.status as unknown as string;
+    (obj.viaf === undefined)
+      ? this.viaf = ""
+      : this.viaf = mdt.normalizeVIAF(obj.viaf);
+    (obj.lcnaf === undefined)
+      ? this.lcnaf = ""
+      : this.lcnaf = mdt.normalizeLCNAF(obj.lcnaf);
+    (obj.isni === undefined)
+      ? this.isni = ""
+      : this.isni = mdt.normalizeISNI(obj.isni);
+    (obj.wikidata === undefined)
+      ? this.wikidata = ""
+      : this.wikidata = obj.wikidata as unknown as string;
+    (obj.snac === undefined)
+      ? this.snac = ""
+      : this.snac = mdt.normalizeSNAC(obj.snac);
+    (obj.orcid === undefined)
+      ? this.orcid = ""
+      : this.orcid = mdt.normalizeORCID(obj.orcid);
+    (obj.ror === undefined)
+      ? this.ror = ""
+      : this.ror = mdt.normalizeROR(obj.ror);
+    (obj.image_url === undefined)
+      ? this.image_url = ""
+      : this.image_url = obj.image_url as unknown as string;
+    (obj.education === undefined)
+      ? this.education = ""
+      : this.education = obj.education as unknown as string;
+    (obj.caltech === undefined)
+      ? this.caltech = false
+      : this.caltech = obj.caltech as unknown as boolean;
+    (obj.jpl === undefined)
+      ? this.jpl = false
+      : this.jpl = obj.jpl as unknown as boolean;
+    (obj.faculty === undefined)
+      ? this.faculty = false
+      : this.faculty = obj.faculty as unknown as boolean;
+    (obj.staff === undefined)
+      ? this.staff = false
+      : this.staff = obj.staff as unknown as boolean;
+    (obj.alumn === undefined)
+      ? this.alumn = false
+      : this.alumn = obj.alumn as unknown as boolean;
+    (obj.internal_notes === undefined)
+      ? this.internal_notes = ""
+      : this.internal_notes = obj.internal_notes as unknown as string;
+    (obj.updated === undefined)
+      ? this.updated = timeStamp(new Date())
+      : this.updated = obj.updated as unknown as string;
+  }
+
+  asObject(): {[key: string]: any} {
     return {
       clpid: this.clpid,
       thesis_id: this.thesis_id,
