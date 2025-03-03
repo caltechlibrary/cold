@@ -11,6 +11,7 @@
 - [cold](cold.1.md) (man page)
 - [cold_reports](cold_reports.1.md) (man page)
 - [directory_sync](directory_sync.1.md) (man page)
+- [division_peoplpe](division_people.1.md) (man page)
 - [journal_vocabulary](journal_vocabulary.1.md) (man page)
 - [group_vocabulary](jouranl_vocabulary.1.md) (man page)
 - [devemopment notes](development_notes.md)
