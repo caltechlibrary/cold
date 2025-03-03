@@ -1,6 +1,6 @@
-%journal_vocabulary(1) user manual | 0.0.15  9a813dc
+%journal_vocabulary(1) user manual | 0.0.15  1c54270
 % R. S.Doiel
-% 2025-02-20
+% 2025-03-03
 
 # NAME
     

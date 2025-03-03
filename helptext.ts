@@ -279,3 +279,55 @@ will do the rest.
 ~~~
 
 `;
+
+export const divisionPeopleHelpText =
+  `%{app_name}(1) user manual | {version} {release_hash}
+% R. S.Doiel
+% {release_date}
+
+# NAME
+
+{app_name}
+
+# SYNOPSIS
+
+{app_name} load|dump CSV_FILENAME
+
+# DESCRIPTION
+
+{app_name} can be use to dump a list of people, their division and group
+as a CSV file or load to a similar CSV and have it update the people.ds
+dataset collection.
+
+Loading will not create new people in the people.ds collection. It will only
+update existing people's group affilication. All people to be updated need
+to have a "clpid" (Caltech Library People Identifier).  The "division" and
+"other group" columns will update the groups lists for the person identified
+with the "clpid".
+
+# OPTIONS
+
+-h, --help
+: display help
+
+-l, --license
+: display license
+
+-v, --version
+: display version
+
+# EXAMPLE
+
+Updating our people data from file called "division_people.csv".
+
+~~~
+{app_name} load division_people.csv
+~~~
+
+Reporting the people with division and groups to a file
+called "division_people_2025-03-03.csv".
+
+~~~
+{app_name} dump division_people_2025-03-03.csv
+~~~
+`;

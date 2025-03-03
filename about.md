@@ -39,7 +39,7 @@ keywords:
   - objects
   - controlled vocabulary
 
-date_released: 2025-02-20
+date_released: 2025-03-03
 ---
 
 About this software
@@ -85,7 +85,7 @@ cold provides a localhost web services for managing controlled object lists and 
 
 ### Software Requirements
 
-- Deno &gt;&#x3D; 2.2.1
+- Deno &gt;&#x3D; 2.2.2
 - GNU Make
 - Pandoc &gt;&#x3D; 3.1
 - datasetd &gt;&#x3D; 2.1.23

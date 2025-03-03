@@ -225,47 +225,48 @@ export class People implements PeopleInterface {
   }
 
   fromObject(obj: { [key: string]: any }) {
-    (obj.clpid === undefined)
+    (obj.clpid === undefined || obj.clpid === "")
       ? this.clpid = ""
       : this.clpid = obj.clpid as unknown as string;
-    (obj.thesis_id === undefined)
+    (obj.thesis_id === undefined || obj.thesid_id === "")
       ? this.thesis_id = ""
       : this.thesis_id = obj.thesis_id as unknown as string;
-    (obj.authors_id === undefined)
+    (obj.authors_id === undefined || obj.authors_id === "")
       ? this.authors_id = ""
       : this.authors_id = obj.author_id as unknown as string;
-    (obj.advisors_id === undefined)
+    (obj.advisors_id === undefined || obj.advisors_id === "")
       ? this.advisors_id = ""
       : this.advisors_id = obj.advisor_id as unknown as string;
     (obj.include_in_feeds === undefined)
       ? this.include_in_feeds = false
       : this.include_in_feeds = obj.include_in_feeds as unknown as boolean;
-    (obj.family_name === undefined)
+    (obj.family_name === undefined || obj.family_name === "")
       ? this.family_name = ""
       : this.family_name = obj.family_name as unknown as string;
-    (obj.given_name === undefined)
+    (obj.given_name === undefined || obj.given_name === "")
       ? this.given_name = ""
       : this.given_name = obj.given_name as unknown as string;
-    (obj.email === undefined)
+    (obj.email === undefined || obj.email === "")
       ? this.email = ""
       : this.email = obj.email as unknown as string;
-    (obj.archivesspace_id === undefined)
+    (obj.archivesspace_id === undefined || obj.archivesspace_id === "")
       ? this.archivesspace_id = ""
       : this.archivesspace_id = obj.archivesspace_id as unknown as string;
-    (obj.directory_user_id === undefined)
+    (obj.directory_user_id === undefined || obj.directory_user_id === "")
       ? this.directory_user_id = ""
       : this.directory_user_id = obj.directory_user_id as unknown as string;
-    (obj.directory_person_type === undefined)
+    (obj.directory_person_type === undefined ||
+        obj.directory_person_type === "")
       ? this.directory_person_type = ""
       : this.directory_person_type = obj
         .directory_person_type as unknown as string;
-    (obj.title === undefined)
+    (obj.title === undefined || obj.title === "")
       ? this.title = ""
       : this.title = obj.title as unknown as string;
-    (obj.bio === undefined)
+    (obj.bio === undefined || obj.bio === "")
       ? this.bio = ""
       : this.bio = obj.bio as unknown as string;
-    (obj.division === undefined)
+    (obj.division === undefined || obj.division === "")
       ? this.division = ""
       : this.division = obj.division as unknown as string;
     (obj.groups === undefined)
@@ -274,34 +275,34 @@ export class People implements PeopleInterface {
         group_name: string;
         clgid: string;
       }[];
-    (obj.status === undefined)
+    (obj.status === undefined || obj.status === "")
       ? this.status = ""
       : this.status = obj.status as unknown as string;
-    (obj.viaf === undefined)
+    (obj.viaf === undefined || obj.viaf === "")
       ? this.viaf = ""
       : this.viaf = mdt.normalizeVIAF(obj.viaf);
-    (obj.lcnaf === undefined)
+    (obj.lcnaf === undefined || obj.lcnad === "")
       ? this.lcnaf = ""
       : this.lcnaf = mdt.normalizeLCNAF(obj.lcnaf);
-    (obj.isni === undefined)
+    (obj.isni === undefined || obj.isni === "")
       ? this.isni = ""
       : this.isni = mdt.normalizeISNI(obj.isni);
-    (obj.wikidata === undefined)
+    (obj.wikidata === undefined || obj.wikidate === "")
       ? this.wikidata = ""
       : this.wikidata = obj.wikidata as unknown as string;
-    (obj.snac === undefined)
+    (obj.snac === undefined || obj.snac === "")
       ? this.snac = ""
       : this.snac = mdt.normalizeSNAC(obj.snac);
-    (obj.orcid === undefined)
+    (obj.orcid === undefined || obj.orcid === "" || obj.orcid === "---")
       ? this.orcid = ""
       : this.orcid = mdt.normalizeORCID(obj.orcid);
-    (obj.ror === undefined)
+    (obj.ror === undefined || obj.ror === "")
       ? this.ror = ""
       : this.ror = mdt.normalizeROR(obj.ror);
-    (obj.image_url === undefined)
+    (obj.image_url === undefined || obj.image_url === "")
       ? this.image_url = ""
       : this.image_url = obj.image_url as unknown as string;
-    (obj.education === undefined)
+    (obj.education === undefined || obj.education === "")
       ? this.education = ""
       : this.education = obj.education as unknown as string;
     (obj.caltech === undefined)
@@ -319,15 +320,15 @@ export class People implements PeopleInterface {
     (obj.alumn === undefined)
       ? this.alumn = false
       : this.alumn = obj.alumn as unknown as boolean;
-    (obj.internal_notes === undefined)
+    (obj.internal_notes === undefined || obj.internal_notes === "")
       ? this.internal_notes = ""
       : this.internal_notes = obj.internal_notes as unknown as string;
-    (obj.updated === undefined)
+    (obj.updated === undefined || obj.update === "")
       ? this.updated = timeStamp(new Date())
       : this.updated = obj.updated as unknown as string;
   }
 
-  asObject(): {[key: string]: any} {
+  asObject(): { [key: string]: any } {
     return {
       clpid: this.clpid,
       thesis_id: this.thesis_id,
@@ -345,13 +346,15 @@ export class People implements PeopleInterface {
       division: this.division,
       groups: this.groups,
       status: this.status,
-      viaf: mdt.normalizeVIAF(this.viaf),
-      lcnaf: mdt.normalizeLCNAF(this.lcnaf),
-      isni: mdt.normalizeISNI(this.isni),
+      viaf: (this.viaf.trim() === "") ? "" : mdt.normalizeVIAF(this.viaf),
+      lcnaf: (this.lcnaf.trim() === "") ? "" : mdt.normalizeLCNAF(this.lcnaf),
+      isni: (this.isni.trim() === "") ? "" : mdt.normalizeISNI(this.isni),
       wikidata: this.wikidata,
-      snac: mdt.normalizeSNAC(this.snac),
-      orcid: mdt.normalizeORCID(this.orcid),
-      ror: mdt.normalizeROR(this.ror),
+      snac: (this.snac.trim() === "") ? "" : mdt.normalizeSNAC(this.snac),
+      orcid: (this.orcid === "" || this.orcid === "---")
+        ? ""
+        : mdt.normalizeORCID(this.orcid),
+      ror: (this.ror.trim() === "") ? "" : mdt.normalizeROR(this.ror),
       image_url: this.image_url,
       education: this.education,
       caltech: this.caltech,
