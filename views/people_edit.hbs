@@ -59,7 +59,7 @@
 <label set="groups">Groups</label> 
 <csv-textarea id="groups" name="groups" title="Curate the affiliated groups for this person. Enter a group name or alt name in the group name column. Add rows as needed." column-headings="group_name,clgid" rows="1" cols="2">
 {{#each people.groups}}
-{{ . }}
+"{{ group_name }}", "{{ clgid }}"
 {{/each}}
 </csv-textarea>
 </div>

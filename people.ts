@@ -29,7 +29,7 @@ export interface PeopleInterface {
   title: string;
   bio: string;
   division: string;
-  groups: string[];
+  groups: { group_name: string; clgid: string }[];
   status: string;
   viaf: string;
   lcnaf: string;
@@ -68,7 +68,7 @@ export class People implements PeopleInterface {
   title: string = "";
   bio: string = "";
   division: string = "";
-  groups: string[] = [];
+  groups: { group_name: string; clgid: string }[] = [];
   status: string = "";
   viaf: string = "";
   lcnaf: string = "";
@@ -194,7 +194,10 @@ export class People implements PeopleInterface {
       this.division = row.division;
     }
     if (row.hasOwnProperty("groups")) {
-      this.groups = row.groups.split("\n");
+      this.groups = [];
+      for (let group_name of row.groups.split("\n")) {
+        this.groups.push({ "group_name": group_name, "clgid": "" });
+      }
     }
     if (row.hasOwnProperty("updated")) {
       this.updated = row.updated;

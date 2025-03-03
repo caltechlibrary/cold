@@ -2,6 +2,7 @@
  * utils.ts modules holds the method related to handling identifiers. E.g. validatin
  * and extraction from the URL pathname.
  */
+import { parse as parseCSV } from "@std/csv/parse";
 
 /**
  * pathIdentifier extracts the identifier from the last element of the URL pathname.
@@ -86,10 +87,12 @@ export function timeStamp(dt: Date): string {
  * @returns {Object}
  */
 export function formDataToObject(form: FormData): object {
-  const obj: { [k: string]: string | string[] | boolean } = {};
+  const obj: {
+    [k: string]: string | { group_name: string; clgid: string }[] | boolean;
+  } = {};
   for (const v of form.entries()) {
     const key: string = v[0];
-    console.log(`DEBUG formDataToObject processing key -> ${key} -> v -> ${v}`)
+    console.log(`DEBUG formDataToObject processing key -> ${key} -> v -> ${v}`);
     if (key !== "submit") {
       const val: any = v[1];
       if (val === "true" || val === "on") {
@@ -100,12 +103,24 @@ export function formDataToObject(form: FormData): object {
         obj[key] = val;
       }
       if (key === "groups") {
-        obj[key] = [];
+        obj.groups = [];
+        let rows = parseCSV(val);
+        let group_name: string = "";
+        let clgid: string = "";
+        for (const row of rows) {
+          (row[0] === undefined) ? group_name = "" : group_name = row[0].trim();
+          (row[1] === undefined) ? clgid = "" : clgid = row[1].trim();
+          if (group_name !== "" || clgid !== "") {
+            obj.groups.push({ "group_name": group_name, "clgid": clgid });
+          }
+        }
+        /*
         for (const grp of val.split("\n")) {
           if (grp.trim() !== "") {
             obj[key].push(grp.trim());
           }
         }
+        */
       }
     }
   }

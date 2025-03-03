@@ -27,7 +27,11 @@
 {{#if people.groups}}<p><div class="groups">Groups:
 <ul>
 {{#each people.groups}}
-<li>{{.}}</li>
+<li>{{#if clgid }}
+  <a href="../groups/{{ clgid }}">{{ group_name }}</a>
+  {{else}}
+  {{ group_name }}
+  {{/if}}</li>
 {{/each}}
 </ul>
 </div>
