@@ -76,7 +76,7 @@ groupsElem.addEventListener("change", async function (event) {
     "color: magenta",
   );
   const val = event.detail.value.trim();
-  if (val === undefined) {
+  if (val === undefined || val === '') {
     return;
   }
   // Check if clgid has previously been set.
