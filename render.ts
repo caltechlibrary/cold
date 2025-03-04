@@ -48,7 +48,10 @@ export async function renderJSON(
   }
   return new Response(src, {
     status: statusNo,
-    headers: { "content-type": "application/json" },
+    headers: {
+      "content-type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+    },
   });
 }
 

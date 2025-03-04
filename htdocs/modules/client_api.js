@@ -4,7 +4,7 @@
  */ /**
  * ClientAPI wraps the browser facing web service and handles retrieving information about peoples, groups, etc.
  */ export class ClientAPI {
-  baseUrl = "http://localhost:8111";
+  baseUrl = "../";
   constructor(baseUrl){
     baseUrl === undefined ? "" : this.baseUrl = baseUrl;
   }
