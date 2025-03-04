@@ -1,6 +1,8 @@
 ---
 title: cold
-abstract: "cold provides a localhost web services for managing controlled object lists and datum. It also includes scripts to syncrhonize with Caltech&#x27;s public directory data as well as push changes into feeds.library.caltech.edu which hosts the public API of cold content."
+abstract: "Caltech Library maintains a list of people, groups and funders and their related identifiers. For many years these were managed using a spreadsheets. That has become cumbersome. **COLD** manages data as JSON objects in [dataset](https://github.com/caltechlibrary/dataset) collections. TypeScript provides a middleware for the user interface with datasetd providing object management. The front end web server provides access control (e.g. via Shibboleth).
+
+**COLD** is implemented as a set of localhost web services and collection of programs and scripts. The localhost web services for managing controlled object lists and datum."
 authors:
   - family_name: Doiel
     given_name: R. S.
@@ -61,7 +63,9 @@ Working proof of concept. Added a groups list to the people object.
 
 - R. S. Doiel, ORCID: <https://orcid.org/0000-0003-0900-6903>
 
-cold provides a localhost web services for managing controlled object lists and datum. It also includes scripts to syncrhonize with Caltech&#x27;s public directory data as well as push changes into feeds.library.caltech.edu which hosts the public API of cold content.
+Caltech Library maintains a list of people, groups and funders and their related identifiers. For many years these were managed using a spreadsheets. That has become cumbersome. **COLD** manages data as JSON objects in [dataset](https://github.com/caltechlibrary/dataset) collections. TypeScript provides a middleware for the user interface with datasetd providing object management. The front end web server provides access control (e.g. via Shibboleth).
+
+**COLD** is implemented as a set of localhost web services and collection of programs and scripts. The localhost web services for managing controlled object lists and datum.
 
 - License: <https://caltechlibrary.github.io/cold/LICENSE>
 - GitHub: <https://github.com/caltechlibrary/cold>
