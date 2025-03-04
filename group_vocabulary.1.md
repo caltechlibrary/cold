@@ -1,4 +1,4 @@
-%group_vocabulary(1) user manual | 0.0.15  13dbcbf
+%group_vocabulary(1) user manual | 0.0.15  1675edd
 % R. S.Doiel
 % 2025-03-03
 

@@ -88,6 +88,7 @@ export function ColdReadWriteHandler(
   // requesting a static asset.
   return serveDir(req, {
     fsRoot: htdocs,
+    enableCors: true,
   });
 }
 
