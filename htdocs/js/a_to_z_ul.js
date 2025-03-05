@@ -78,6 +78,10 @@ class AToZUL extends HTMLElement {
         const sectionHeadingLink = document.createElement('a');
         sectionHeadingLink.href = `#menu`;
         sectionHeadingLink.textContent = letter;
+        sectionHeadingLink.addEventListener('click', (event) => {
+          event.preventDefault();
+          this.scrollToSection(menu);
+        });
         sectionHeading.appendChild(sectionHeadingLink);
         section.appendChild(sectionHeading);
 
@@ -89,6 +93,14 @@ class AToZUL extends HTMLElement {
         listContainer.appendChild(section);
       }
     });
+
+    const backToMenuLink = this.shadowRoot.querySelector('.back-to-menu');
+    if (backToMenuLink) {
+      backToMenuLink.addEventListener('click', (event) => {
+        event.preventDefault();
+        this.scrollToSection(menu);
+      });
+    }
   }
 
   scrollToSection(section) {
