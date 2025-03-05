@@ -45,12 +45,12 @@ class AToZUL extends HTMLElement {
     const ulElement = this.querySelector('ul');
     if (!ulElement) return;
 
-    const items = Array.from(ulElement.querySelectorAll('li')).map(li => li.textContent.trim());
+    const items = Array.from(ulElement.querySelectorAll('li'));
     const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     const sections = {};
 
     items.forEach(item => {
-      const firstLetter = item[0].toUpperCase();
+      const firstLetter = item.textContent.trim()[0].toUpperCase();
       if (!sections[firstLetter]) {
         sections[firstLetter] = [];
       }
@@ -86,9 +86,8 @@ class AToZUL extends HTMLElement {
         section.appendChild(sectionHeading);
 
         sections[letter].forEach(item => {
-          const listItem = document.createElement('li');
-          listItem.textContent = item;
-          section.appendChild(listItem);
+          const clonedItem = item.cloneNode(true); // Clone the item to preserve nested HTML
+          section.appendChild(clonedItem);
         });
         listContainer.appendChild(section);
       }
