@@ -1,5 +1,6 @@
 import * as mdt from "../modules/mdt.js";
 import { ClientAPI } from "../modules/client_api.js";
+import { getORCIDNames } from "../modules/orcid_api.js";
 
 //import * as path from './path.js';
 
@@ -13,7 +14,10 @@ console.log(`DEBUG API path -> ${apiPath} <-- ${window.location}`)
 
 const clientAPI = new ClientAPI();
 
-let orcidElem = document.getElementById("orcid"),
+let displayNameElem = document.getElementById('display_name'),
+  familyNameElem = document.getElementById('family_name'),
+  givenNameElem = document.getElementById('given_name'),
+  orcidElem = document.getElementById("orcid"),
   rorElem = document.getElementById("ror"),
   isniElem = document.getElementById("isni"),
   lcnafElem = document.getElementById("lcnaf"),
@@ -22,10 +26,20 @@ let orcidElem = document.getElementById("orcid"),
   groupsElem = document.getElementById("groups"),
   submitButton = document.getElementById("submit");
 
-orcidElem.addEventListener("change", function (evt) {
+orcidElem.addEventListener("change", async function (evt) {
   let val = orcidElem.value;
+  if (val === undefined || val === '') {
+	  return;
+  }
   if (mdt.validateORCID(val)) {
     orcidElem.value = mdt.normalizeORCID(val);
+  }
+  // Check if names need to be updated from ORCID record
+  if (familyNameElem.value === "" || givenNameElem.value === "" || displayNameElem.value === "") {
+    let obj = await getORCIDNames(orcidElem.value);
+    (displayNameElem.value === '') ? displayNameElem.value = obj.display_name : '';
+    (familyNameElem.value === '') ? familyNameElem.value = obj.family_name : '';
+    (givenNameElem.value === '') ? givenNameElem.value = obj.given_name: '';
   }
 });
 

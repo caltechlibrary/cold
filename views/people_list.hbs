@@ -12,6 +12,7 @@
 </nav>
 <section>
 <h1>CaltechPEOPLE</h1>
+<a-to-z-ul id="people_list" long>
 <ul>
 {{#people_list}}
   <li><a href="{{clpid}}" title="view people details">{{family_name}}, {{given_name}}</a></li>
@@ -19,5 +20,6 @@
 </ul>
 </section>
 {{>footer}}
+<script type="module" src="{{base_url}}/js/a_to_z_ul.js"></script>
 </body>
 </html>

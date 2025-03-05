@@ -45,7 +45,12 @@ export async function transpileToJavaScript(
   javaScriptFiles: string[],
   targetPath: string,
 ): Promise<boolean> {
+  console.log(
+    `%ctranspiling ${javaScriptFiles} to ${modules_path}`,
+    "color: green",
+  );
   for (const fname of javaScriptFiles) {
+    console.log(`%creading ${fname}`, "color: green");
     const url = new URL(fname, import.meta.url);
     let result: Map<string, string>;
     try {
@@ -60,13 +65,13 @@ export async function transpileToJavaScript(
       return false;
     }
     const targetName = path.join(targetPath, fname.replace(/.ts$/, ".js"));
+    console.log(`%cwriting ${targetName}`, "color: yellow");
     try {
       await Deno.writeTextFile(targetName, src);
     } catch (err) {
       console.log(`%cfailed to write ${targetName}, ${err}`, ERROR_COLOR);
       return false;
     }
-    return true;
   }
   return true;
 }
@@ -75,12 +80,13 @@ export async function transpileToJavaScript(
 if (import.meta.main) {
   await renderHtdocs("./htdocs");
   await Deno.mkdir(modules_path, { mode: 0o775, recursive: true });
+  let transpileFiles = ["client_api.ts", "directory_client.ts", "orcid_api.ts"];
+  let ok: boolean = await transpileToJavaScript(transpileFiles, modules_path);
   if (
-    !await transpileToJavaScript([
-      "client_api.ts",
-      "directory_client.ts",
-    ], modules_path)
+    ok
   ) {
+    console.log(`transpile ${transpileFiles} success!`);
+  } else {
     console.log(`%cERROR: failed to transpile ${javaScriptFiles}`, ERROR_COLOR);
     Deno.exit(1);
   }

@@ -20,7 +20,7 @@
     "cold_reports.ts": "deno compile --allow-all --output bin/cold_reports cold_reports.ts",
     "journal_vocabulary.ts": "deno compile --allow-net --output bin/journal_vocabulary journal_vocabulary.ts",
     "group_vocabulary.ts": "deno compile --allow-net --output bin/group_vocabulary group_vocabulary.ts",
-    "htdocs": "deno run --allow-read --allow-env --allow-write=htdocs build.ts",
+    "htdocs": "deno run --allow-read --allow-env --allow-write=htdocs --allow-import build.ts",
     "test": "dsquery test.ds 'delete from test' ; deno test --allow-net dataset_test.ts ; deno test options_test.ts ; deno test config_test.ts ; deno test people_test.ts ; deno test groups_test.ts ; deno test cold_test.ts ",
     "import_people_csv": "deno run  --allow-read --allow-net ds_importer.ts people.ds people.csv",
     "import_groups_csv": "deno run  --allow-read --allow-net ds_importer.ts groups.ds groups.csv",

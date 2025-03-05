@@ -17,7 +17,7 @@ export * as common_mark from "https://deno.land/x/rusty_markdown/mod.ts";
 export {
   Dataset,
   DatasetApiClient,
-} from "../ts_dataset/mod.ts";
+} from '../ts_dataset/mod.ts'; //"https://caltechlibrary.github.io/ts_dataset/mod.ts";
 
 /* COLD related packages */
 export { ConfigureHandler, apiPort, httpPort } from "./config.ts";
@@ -48,4 +48,4 @@ export { handleReports } from "./cold_reports.ts";
 export type { ReportInterface, Report } from "./cold_reports.ts";
 
 /* Metadata Tools package hosted at caltechlibrary.github.io/metadatatools/mod.ts */
-export * as mdt from '../metadatatools/mod.ts';
+export * as mdt from '../metadatatools/mod.ts'; //'https://caltechlibrary.github.io/metadatatools/mod.ts';

@@ -6,16 +6,7 @@
 const directory_elem = document.getElementById("directory_user_id");
 let directory_id = directory_elem.value;
 function updateRecord(obj) {
-  const family_name_elem = document.getElementById("family_name"),
-    lived_name_elem = document.getElementById("given_name"),
-    display_name_elem = document.getElementById("display_name"),
-    title_elem = document.getElementById("title"),
-    email_elem = document.getElementById("email"),
-    division_elem = document.getElementById("division"),
-    bio_elem = document.getElementById("bio"),
-    directory_person_type = document.getElementById("directory_person_type"),
-    caltech_elem = document.getElementById("caltech"),
-    ror_elem = document.getElementById("ror");
+  const family_name_elem = document.getElementById("family_name"), lived_name_elem = document.getElementById("given_name"), display_name_elem = document.getElementById("display_name"), title_elem = document.getElementById("title"), email_elem = document.getElementById("email"), division_elem = document.getElementById("division"), bio_elem = document.getElementById("bio"), directory_person_type = document.getElementById("directory_person_type"), caltech_elem = document.getElementById("caltech"), ror_elem = document.getElementById("ror");
   if (obj !== undefined && obj !== null) {
     if (obj.display_name !== undefined && obj.display_name !== "") {
       display_name_elem.value = obj.display_name;
@@ -37,10 +28,7 @@ function updateRecord(obj) {
     if (obj.bio !== undefined && obj.bio !== "") {
       bio_elem.innerText = obj.bio;
     }
-    if (
-      obj.directory_person_type !== undefined &&
-      obj.directory_person_type !== ""
-    ) {
+    if (obj.directory_person_type !== undefined && obj.directory_person_type !== "") {
       directory_person_type.value = obj.directory_person_type;
     }
     if (obj.title !== undefined && obj.title !== "") {
@@ -56,9 +44,9 @@ async function directoryUpdateRecord(evt) {
     const uri = `../directory_api/${directory_id}`;
     const resp = await fetch(uri, {
       headers: {
-        "content-type": "application/json",
+        "content-type": "application/json"
       },
-      method: "GET",
+      method: "GET"
     });
     if (resp.ok) {
       // Since we're fetching from the proxied API we will get JSON back.
