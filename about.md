@@ -6,23 +6,23 @@ abstract: "Caltech Library maintains a list of people, groups and funders and th
 authors:
   - family_name: Doiel
     given_name: R. S.
-    orcid: https://orcid.org/0000-0003-0900-6903
+    id: https://orcid.org/0000-0003-0900-6903
 
 contributor:
   - family_name: Johnson
     given_name: Kathy
-    orcid: https://orcid.org/0000-0002-0026-2516
+    id: https://orcid.org/0000-0002-0026-2516
   - family_name: Morrell
     given_name: Thomas E
-    orcid: https://orcid.org/0000-0001-9266-5146
+    id: https://orcid.org/0000-0001-9266-5146
 
 maintainer:
   - family_name: Doiel
     given_name: R. S.
-    orcid: https://orcid.org/0000-0003-0900-6903
+    id: https://orcid.org/0000-0003-0900-6903
 
 repository_code: https://github.com/caltechlibrary/cold
-version: 0.0.16
+version: 0.0.17
 license_url: https://caltechlibrary.github.io/cold/LICENSE
 operating_system:
   - Linux
@@ -41,27 +41,27 @@ keywords:
   - objects
   - controlled vocabulary
 
-date_released: 2025-03-04
+date_released: 2025-03-05
 ---
 
 About this software
 ===================
 
-## cold 0.0.16
+## cold 0.0.17
 
-Working proof of concept. Added a groups list to the people object. Fixed client api error and CORS confusion.
+Working proof of concept. Added A to Z list for lists of people and groups.
 
 ### Authors
 
-- R. S. Doiel, ORCID: <https://orcid.org/0000-0003-0900-6903>
+- R. S. Doiel, <https://orcid.org/0000-0003-0900-6903>
 
 ### Contributors
 
-- Kathy Johnson, ORCID: <https://orcid.org/0000-0002-0026-2516>- Thomas E Morrell, ORCID: <https://orcid.org/0000-0001-9266-5146>
+- Kathy Johnson, <https://orcid.org/0000-0002-0026-2516>- Thomas E Morrell, <https://orcid.org/0000-0001-9266-5146>
 
 ### Maintainers
 
-- R. S. Doiel, ORCID: <https://orcid.org/0000-0003-0900-6903>
+- R. S. Doiel, <https://orcid.org/0000-0003-0900-6903>
 
 Caltech Library maintains a list of people, groups and funders and their related identifiers. For many years these were managed using a spreadsheets. That has become cumbersome. **COLD** manages data as JSON objects in [dataset](https://github.com/caltechlibrary/dataset) collections. TypeScript provides a middleware for the user interface with datasetd providing object management. The front end web server provides access control (e.g. via Shibboleth).
 
