@@ -23,7 +23,7 @@ class AToZUL extends HTMLElement {
         .letter-section {
           list-style-type: none;
         }
-        .letter-section a {
+        .letter-section li:first a {
           text-decoration: none;
           font-weight: bold;
         }
