@@ -11,11 +11,14 @@
 </nav>
 <section>
 <h1>CaltechGROUPS</h1>
+<a-to-z-ul id="group_list" long>
 <ul>
 {{#group_list}}
   <li><a href="{{clgid}}" title="view group details">{{group_name}}</a></li>
 {{/group_list}}
 </ul>
+</a-to-z-ul>
 </section>
 {{>footer}}
+<script type="module" src="{{base_url}}/js/a_to_z_ul.js"></script>
 </html>
