@@ -78,44 +78,44 @@ snacElem.addEventListener("change", function (evt) {
   }
 });
 
-groupsElem.addEventListener("change", async function (event) {
+async function updateRowGroupID(event) {
+  /*
+  console.log(
+    `DEBUG %cevent.detail -> ${JSON.stringify(event.detail, null, 2)}`,
+    "color: magenta",
+  );
+  */
   // Do we have an interesting event?
   if (event.detail === undefined) {
     return;
   }
   // What row are we working with?
-  let row = event.detail.row;
-  console.log(
-    `DEBUG %cevent.detail -> ${JSON.stringify(event.detail, null, 2)}`,
-    "color: magenta",
-  );
-  const val = event.detail.value.trim();
-  if (val === undefined || val === '') {
-    return;
+  const row = event.detail.rowIndex || 0;
+  const col = event.detail.colIndex || 0;
+  if (col === 1) {
+    // Check if we have a clpid populated.
+    let clgid = (event.detail.value === undefined) ? '' : event.detail.value.trim();
+    if (clgid === '') {
+      const groupName = groupsElem.getCellValue(row, 0);
+      if (groupName === '') {
+        return;
+      }
+      const objList = await clientAPI.lookupGroupName(groupName);
+      for (const obj of objList) {
+        if (obj.group_name === groupName) {
+          groupsElem.setCellValue(row, 1, obj.clgid)
+          return;
+        }
+      }
+      return;
+    }
   }
-  // Check if clgid has previously been set.
-  let clgid = this.getCellValue(row, 2) || "";
-  if (clgid !== "") {
-    return;
-  }
-  // OK if we get back a lookup result, pick the first one and update the cell values.
-  const objList = await clientAPI.lookupGroupName(val);
-  if (objList === undefined || objList.length === 0) {
-    console.log(`%cfailed to find group name -> ${val}`, "color: red");
-    return;
-  }
-  const obj = objList[0];
-  let group_name = (obj.group_name === undefined || obj.group_name === "")
-    ? val
-    : obj.group_name;
-  if (group_name !== val) {
-    console.log(`DEBUG updating cell (${row}, 'group_name') to ${group_name}`);
-    this.setCellValue(row, "group_name", group_name);
-  }
-  clgid = obj.clgid;
-  console.log(`DEBUG updating cell (${row}, 'clgid') to ${clgid}`);
-  this.setCellValue(row, "clgid", clgid);
+}
+
+groupsElem.addEventListener('focused', async function (event) {
+  await updateRowGroupID(event)
 });
+
 
 function getViewURL() {
     // Get the protocol (e.g., http: or https:)
@@ -136,15 +136,34 @@ function getViewURL() {
 
 const peopleEditForm = document.getElementById("people_edit");
 
+async function updateGroupNameList(csvData) {
+  let groupNames = [];
+  // Get the list of group names and build a options for the autocomplete datalist
+
+  const objList = await clientAPI.getList("groups.ds", "group_names");
+  if (objList.length > 0 ) {
+    for (const obj of objList) {
+      groupNames.push({"value": obj.group_name});
+    }
+  } 
+  if (groupNames.length > 0) {
+    csvData.setAutocomplete(0, groupNames);
+  }
+};
+
+document.addEventListener('DOMContentLoaded', async function(event) {
+	await updateGroupNameList(groupsElem);
+});
+
 peopleEditForm.addEventListener("submit", async function (event) {
+  event.preventDefault();
   let formData = new FormData(this);
-  const groupData = groupsElem.innerHTML;
+  const groupData = groupsElem.toCSV();
   console.log(`DEBUG setting formData.groups to ${groupData}`);
   formData.set("groups", groupData);
   for (let v of formData.entries()) {
     console.log(`%cDEBUG form elements -> ${v}`, "color: green");
   }
-  event.preventDefault(); // DEBUG
 
   try {
     const response = await fetch(this.action, {

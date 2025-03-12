@@ -23,9 +23,9 @@ class AToZUL extends HTMLElement {
         .letter-section {
           list-style-type: none;
         }
-        .letter-section li:first a {
+        .letter-section li {
           text-decoration: none;
-          font-weight: bold;
+          font-weight: none;         
         }
         .back-to-menu {
           display: block;
