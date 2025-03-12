@@ -22,7 +22,7 @@ maintainer:
     id: https://orcid.org/0000-0003-0900-6903
 
 repository_code: https://github.com/caltechlibrary/cold
-version: 0.0.17
+version: 0.0.18
 license_url: https://caltechlibrary.github.io/cold/LICENSE
 operating_system:
   - Linux
@@ -41,15 +41,15 @@ keywords:
   - objects
   - controlled vocabulary
 
-date_released: 2025-03-05
+date_released: 2025-03-12
 ---
 
 About this software
 ===================
 
-## cold 0.0.17
+## cold 0.0.18
 
-Working proof of concept. Added A to Z list for lists of people and groups.
+Working proof of concept. Updated COLD with a new version of CL-web-components.
 
 ### Authors
 
