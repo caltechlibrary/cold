@@ -156,7 +156,7 @@ document.addEventListener('DOMContentLoaded', async function(event) {
   // Once the DOM is setup we can add our  cleanup filter element to groupsElem.
   groupsElem.customCleanupFilter = (row) => {
     const cells = row.querySelectorAll('input');
-    for (cell of cells) {
+    for (let cell of cells) {
       if (cell.value.trim() === "") {
         return false;
       }
