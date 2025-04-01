@@ -1,22 +1,22 @@
 
 COLD has a report request service with a web user interface.  To generate a report a report runner service is needed.
 
-Once the report request is made a record is created in the reports.ds collection. The report runner is expected to check that collection and run requested reports keeping the records updated as the reporting running processes proceeds. The final step is to either turn an error message of why the request failed or return the status of "available" with a link to where the report can be viewed or downloaded.
+Once the report request is made a record is created in the reports.ds collection. The report runner is expected to check that collection and run requested reports keeping the records updated as the report running processes proceeds. The final step is to either return an error message of why the request failed or return the status of "available" with a link to where the report can be viewed or downloaded.
 
-The system is deliberately simple. This is to keep it maintainable, easy for everyone to understand (developers and the people who request reports) and importantly easy to maintain. Report systems tend towards complexity so it is vital that the initial system be as simple as possible but still accomodate bith quick reports and those which may take hours to complete.
+The system is deliberately simple. This is to keep it maintainable, easy for everyone to understand (developers and the people who request reports). Most importantly it needs to be easy to maintain. Report systems tend towards complexity so it is vital that the initial system be as simple as possible but still accomodate both quick reports and those which may take hours to complete.
 
 
-The report request process is integrated into the COLD admin UI. That UI lists the requests and includes a form to making a new request. When the report runner picks up a request several things need to happen.
+The report request process is integrated into the COLD UI. That UI lists the requests and includes a form to making a new request. When the report runner picks up a request several things need to happen.
 
 - report status should show that the report request is being processed
-- the report request needs to be validated and if their is s problem an error returned the request processed close
+- the report request needs to be validated and if their is s problem an error returned and the request processed close
 
 If the request is valid then several things need to happen.
 
 - the report definition needs to be retrieved (probably from memory)
 - the designated script/program needs to be run
 - the output of the script/program (stdout) needs to be read and streamed into a report document at the location specified by the report definition
-- as the report executes output should be written to storage and a link generated
+- as the report executes output should be written to the web tree (e.g. htdocs/reports) and a link generated
 - if their is a problem the report process should terminal and the request updated with the status of error and message
 - if the report executes successfully the request record should be updated wiht the status of "available" and the link
 - if there are email(s) associated with the request a message needs to be sent out with the report name, final status and link if available or error message if not

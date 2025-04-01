@@ -153,6 +153,16 @@ async function updateGroupNameList(csvData) {
 
 document.addEventListener('DOMContentLoaded', async function(event) {
 	await updateGroupNameList(groupsElem);
+  // Once the DOM is setup we can add our  cleanup filter element to groupsElem.
+  groupsElem.customCleanupFilter = (row) => {
+    const cells = row.querySelectorAll('input');
+    for (cell of cells) {
+      if (cell.value.trim() === "") {
+        return false;
+      }
+    }
+    return true;
+  };
 });
 
 peopleEditForm.addEventListener("submit", async function (event) {
