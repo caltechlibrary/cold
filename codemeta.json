@@ -94,9 +94,9 @@
     "datasetd >= 2.1.23",
     "CMTools >= 0.0.18"
   ],
-  "version": "0.0.19",
+  "version": "0.0.20",
   "developmentStatus": "wip",
   "issueTracker": "https://github.com/caltechlibrary/cold/issues",
   "downloadUrl": "https://github.com/caltechlibrary/cold/release/latest",
-  "releaseNotes": "Updated CL-web-components to v0.0.5, added `customCleanupFilter` to groups element in people web form."
+  "releaseNotes": "Added display of group members on group page."
 }
