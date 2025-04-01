@@ -22,7 +22,7 @@ maintainer:
     id: https://orcid.org/0000-0003-0900-6903
 
 repository_code: https://github.com/caltechlibrary/cold
-version: 0.0.18
+version: 0.0.19
 license_url: https://caltechlibrary.github.io/cold/LICENSE
 operating_system:
   - Linux
@@ -41,15 +41,15 @@ keywords:
   - objects
   - controlled vocabulary
 
-date_released: 2025-03-12
+date_released: NaN-NaN-NaN
 ---
 
 About this software
 ===================
 
-## cold 0.0.18
+## cold 0.0.19
 
-Working proof of concept. Updated COLD with a new version of CL-web-components.
+Updated CL-web-components to v0.0.5, added &#x60;customCleanupFilter&#x60; to groups element in people web form.
 
 ### Authors
 
@@ -89,7 +89,7 @@ Caltech Library maintains a list of people, groups and funders and their related
 
 ### Software Requirements
 
-- Deno &gt;&#x3D; 2.2.2
+- Deno &gt;&#x3D; 2.2.5
 - GNU Make
 - Pandoc &gt;&#x3D; 3.1
 - datasetd &gt;&#x3D; 2.1.23
