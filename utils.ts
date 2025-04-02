@@ -3,7 +3,7 @@
  * and extraction from the URL pathname.
  */
 import { parse as parseCSV } from "@std/csv/parse";
-import { ERROR_COLOR } from "./colors.ts";
+import { ERROR_COLOR, GREEN, MAROON, YELLOW } from "./colors.ts";
 import { apiPort, Dataset } from "./deps.ts";
 import { People } from "./people.ts";
 import { stringify as stringifyCSV } from "@std/csv";
@@ -99,7 +99,7 @@ export function formDataToObject(form: FormData): object {
   } = {};
   for (const v of form.entries()) {
     const key: string = v[0];
-    console.log(`DEBUG formDataToObject processing key -> ${key} -> v -> ${v}`);
+    //console.log(`DEBUG formDataToObject processing key -> ${key} -> v -> ${v}`);
     if (key !== "submit") {
       const val: any = v[1];
       if (val === "true" || val === "on") {
@@ -152,12 +152,10 @@ async function lookupGroupInfo(name: string): Promise<
       clgid: "",
     };
   }
-  let clgid: string = "";
-  let group_name: string = "";
-  (obj.clgid === undefined) ? clgid = "" : clgid = obj.clgid;
-  (obj.group_name === undefined)
-    ? group_name = name
-    : group_name = obj.group_name;
+  //console.log(`DEGUG lookupGroupInfo -> ${JSON.stringify(obj)}`);
+  let clgid: string = (obj[0] === undefined) ? "" : obj[0].clgid;
+  let group_name: string = (obj[0] === undefined) ? name : obj[0].group_name;
+  //console.log(`DEGUG return lookupGroupInfo -> clgid: '${clgid}', name: '${group_name}'`);
   return { ok: true, msg: "", clgid: clgid, name: group_name };
 }
 
@@ -189,12 +187,14 @@ async function updatePeopleWithGroupInfo(
       const groupInfo = await lookupGroupInfo(row.group_name);
       if (groupInfo.ok) {
         row.group_name = groupInfo.name;
-        row.clgid = groupInfo.clgid;
+        row.clgid = groupInfo.clgid.trim() === ""
+          ? "MISSING_CLGID"
+          : groupInfo.clgid;
       }
       person.groups.push(row);
     }
   }
-  console.log(`DEBUG person.orcid -> ${person.orcid}`);
+  //console.log(`DEBUG person.orcid -> ${person.orcid}`);
   if (await dsPeople.update(clpid, person.asObject()) === false) {
     return `failed to update ${clpid} in people.ds`;
   }
@@ -208,10 +208,14 @@ async function updatePeopleWithGroupInfo(
  * maybe afficiliated with.
  *
  * @param filename: string, this is the name of the CSV file to read
+ * @param verbose?: boolean, if true additional logging is performed
  * @return string, the returned string is empty if no errors encountered otherwise an
  * error message is returned.
  */
-export async function loadDivisionPeopleCSV(filename: string): Promise<string> {
+export async function loadDivisionPeopleCSV(
+  filename: string,
+  verbose?: boolean,
+): Promise<string> {
   let src: string = "";
   try {
     src = await Deno.readTextFile(filename);
@@ -226,8 +230,8 @@ export async function loadDivisionPeopleCSV(filename: string): Promise<string> {
   let givenName: string = "";
   let groups: { group_name: string; clgid: string }[] = [];
   let i = 0;
-  for (let row of data) {
-    console.log(`DEBUG row[${i}] -> ${row}`);
+  for (let row of data.slice(1)) {
+    if (verbose) console.log(`%crow[${i}] -> ${row}`, YELLOW);
     i++;
     (row.length === 0) ? division = "" : division = row.shift() || "";
     (row.length === 0) ? clpid = "" : clpid = row.shift() || "";
@@ -240,17 +244,44 @@ export async function loadDivisionPeopleCSV(filename: string): Promise<string> {
     (row.length === 0) ? givenName = "" : givenName = row.shift() || "";
     groups = [];
     if (division !== "") {
-      groups.push({ group_name: division, clgid: "" });
+      const groupInfo = await lookupGroupInfo(division);
+      if (verbose) {
+        console.log(`%cgroupInfo -> ${JSON.stringify(groupInfo)}`, MAROON);
+      }
+      if (groupInfo.ok && groupInfo.clgid !== "") {
+        groups.push({ group_name: groupInfo.name, clgid: groupInfo.clgid });
+      } else {
+        console.log(
+          `%cgroup_name: ${division} is missing clgid, row ${i}, col: 0`,
+          ERROR_COLOR,
+        );
+        groups.push({ group_name: division, clgid: "" });
+        Deno.exit(1); // DEBUG
+      }
     }
+    let j = 0;
     for (const column of row) {
       if (column.trim() !== "") {
         const groupInfo = await lookupGroupInfo(column.trim());
-        if (groupInfo.ok) {
+        if (groupInfo.ok && groupInfo.clgid !== "") {
           groups.push({ group_name: groupInfo.name, clgid: groupInfo.clgid });
         } else {
+          console.log(
+            `%cgroup_name: ${column.trim()} is missing clgid, row ${i}, col: ${j}`,
+            ERROR_COLOR,
+          );
           groups.push({ group_name: column.trim(), clgid: "" });
         }
       }
+      j++;
+    }
+    if (verbose) {
+      console.log(
+        `%c updating ${clpid} with division: ${division} and groups: ${
+          JSON.stringify(groups)
+        }`,
+        GREEN,
+      );
     }
     const errMsg = await updatePeopleWithGroupInfo(
       clpid,
@@ -270,10 +301,14 @@ export async function loadDivisionPeopleCSV(filename: string): Promise<string> {
  *   "division","clpid","orcid","family_name","given_name","other group","other group", ...
  *
  * @param filename: string, this is the name of the CSV file to read
+ * @param verbose?: boolean, if true additional logging is performed
  * @return string, the returned string is empty if no errors encountered otherwise an
  * error message is returned.
  */
-export async function dumpDivisionPeopleCSV(filename: string): Promise<string> {
+export async function dumpDivisionPeopleCSV(
+  filename: string,
+  verbose?: boolean,
+): Promise<string> {
   let keys: string[] = await dsPeople.keys();
   let division: string = "";
   let clpid: string = "";

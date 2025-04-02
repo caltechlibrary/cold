@@ -19,11 +19,13 @@ async function main() {
       help: "h",
       license: "l",
       version: "v",
+      verbose: "V",
     },
     default: {
       help: false,
       version: false,
       license: false,
+      verbose: false,
     },
   });
   if (app.help) {
@@ -68,10 +70,10 @@ async function main() {
   let err: string = "";
   switch (cmd) {
     case "load":
-      err = await loadDivisionPeopleCSV(csvFilename);
+      err = await loadDivisionPeopleCSV(csvFilename, app.verbose);
       break;
     case "dump":
-      err = await dumpDivisionPeopleCSV(csvFilename);
+      err = await dumpDivisionPeopleCSV(csvFilename, app.verbose);
       break;
   }
   if (err !== "") {
