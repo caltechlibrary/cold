@@ -9,10 +9,9 @@ function getClgidFromPath() {
 
 document.addEventListener("DOMContentLoaded", async function (event) {
   const groupMembersElem = document.getElementById("group-members");
-  //FIXME: Figure out what the clgid is to use...
   const clgid = getClgidFromPath();
-  console.log(`DEBUG clgid -> '${clgid}'`);
   const objList = await clientAPI.lookupGroupMembership(clgid);
+
   groupMembersElem.innerHTML = ''; // Clear the element so we can populate it.
   if (objList.length > 0) {
     for (const obj of objList) {

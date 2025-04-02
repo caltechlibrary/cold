@@ -1,4 +1,4 @@
-%group_vocabulary(1) user manual | 0.0.20  c85c97e
+%group_vocabulary(1) user manual | 0.0.20  912d174
 % R. S.Doiel
 % NaN-NaN-NaN
 
