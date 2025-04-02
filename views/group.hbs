@@ -28,7 +28,9 @@
 
 {{#if group.website}}<div class="website">Group website: <a href="{{group.website}}" title="group website">{{group.website}}</a></div>{{/if}}
 
-{{#if group.include_in_feeds}}<div class="feeds_link">View in feeds: <a href="https://feeds.library.caltech.edu/groups/{{group.clgid}}" title="group in feeds" target="_blank">{{group.clgid}}</a></div>{{/if}}
+{{#if group.include_in_feeds}}<div class="feeds_link">View <a href="https://feeds.library.caltech.edu/groups/{{group.clgid}}" title="group in feeds" target="_blank">@feeds {{group.clgid}}</a></div>{{/if}}
+
+{{#if group.clgid}}View <a href="https://authors.library.caltech.edu/search?q=custom_fields.caltech%5C%3Agroups.id%3A%22{{group.clgid}}%22" title="search CaltechAUTHORS" target="_blank">@CaltechAUTHORS</a>{{/if}}
 
 {{#if group.pi}}<div class="pi">P.I.: {{group.pi}}</div>{{/if}}
 
@@ -54,11 +56,7 @@
 {{#if group.date}}<span class="dates">created: {{group.date}}</span>{{/if}}
 {{#if group.updated}}<span class="updated">updated: {{group.updated}}</span>{{/if}}
 </div>
-
-
-<p>
-<ul id="group-members" class="group-members-list"></ul>
-<p>
+<p><ul id="group-members" class="group-members-list"></ul></p>
 </section>
 {{>footer}}
 <script type="module" src="../js/group_view.js"></script>
