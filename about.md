@@ -22,7 +22,7 @@ maintainer:
     id: https://orcid.org/0000-0003-0900-6903
 
 repository_code: https://github.com/caltechlibrary/cold
-version: 0.0.20
+version: 0.0.21
 license_url: https://caltechlibrary.github.io/cold/LICENSE
 operating_system:
   - Linux
@@ -41,15 +41,16 @@ keywords:
   - objects
   - controlled vocabulary
 
-date_released: NaN-NaN-NaN
+date_released: 2025-04-02
 ---
 
 About this software
 ===================
 
-## cold 0.0.20
+## cold 0.0.21
 
-Added display of group members on group page.
+Fixed bug in get lookupGroupInfo where clgid wasn&#x27;t getting passed through from query result.
+Improved &#x60;division_people.ts&#x60; so loading division and group data from csv now works.
 
 ### Authors
 

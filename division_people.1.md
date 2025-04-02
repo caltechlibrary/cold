@@ -1,4 +1,4 @@
-%division_people(1) user manual | 0.0.20 1245151
+%division_people(1) user manual | 0.0.21 28e45f4
 % R. S.Doiel
 % NaN-NaN-NaN
 

@@ -19,8 +19,8 @@ contacts:
     email: rsdoiel@caltech.edu
 
 repository-code: "https://github.com/caltechlibrary/cold"
-version: 0.0.20
-date-released: NaN-NaN-NaN
+version: 0.0.21
+date-released: 2025-04-02
 
 license-url: "https://caltechlibrary.github.io/cold/LICENSE"
 keywords:
