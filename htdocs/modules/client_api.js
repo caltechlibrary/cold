@@ -64,4 +64,11 @@
     params.append("q", name);
     return await this.getList(c_name, query_name, params);
   }
+  async lookupGroupMembership(clgid) {
+    const c_name = "people.ds";
+    const query_name = "lookup_clgid";
+    let params = new URLSearchParams();
+    params.append("q", clgid);
+    return await this.getList(c_name, query_name, params);
+  }
 }

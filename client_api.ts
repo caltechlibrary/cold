@@ -93,4 +93,19 @@ export class ClientAPI {
       msg: string;
     }[];
   }
+
+  async lookupGroupMembership(clgid: string): Promise<
+    { clgid: string; name: string; ok: boolean; msg: string }[]
+  > {
+    const c_name = "people.ds";
+    const query_name = "lookup_clgid";
+    let params = new URLSearchParams();
+    params.append("q", clgid);
+    return await this.getList(c_name, query_name, params) as {
+      clgid: string;
+      name: string;
+      ok: boolean;
+      msg: string;
+    }[];
+  }
 }

@@ -1,4 +1,4 @@
-%cold_reports(1) user manual | 0.0.19 a34fb5c
+%cold_reports(1) user manual | 0.0.20 c85c97e
 % R. S.Doiel
 % NaN-NaN-NaN
     

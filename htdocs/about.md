@@ -22,7 +22,7 @@ maintainer:
     id: https://orcid.org/0000-0003-0900-6903
 
 repository_code: https://github.com/caltechlibrary/cold
-version: 0.0.19
+version: 0.0.20
 license_url: https://caltechlibrary.github.io/cold/LICENSE
 operating_system:
   - Linux
@@ -47,9 +47,9 @@ date_released: NaN-NaN-NaN
 About this software
 ===================
 
-## cold 0.0.19
+## cold 0.0.20
 
-Updated CL-web-components to v0.0.5, added &#x60;customCleanupFilter&#x60; to groups element in people web form.
+Added display of group members on group page.
 
 ### Authors
 
