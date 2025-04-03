@@ -2,8 +2,9 @@
   "tasks": {
     "setup": "dataset init people.ds 'sqlite://collection.db' ; dataset init groups.ds 'sqlite://collection.db' ; dataset init funders.ds 'sqlite://collection.db' ; dataset init issn.ds 'sqlite://collection.db'; dataset init doi_prefix.ds 'sqlite://collection.db' ; dataset init subjects.ds 'sqlite://collection.db' ; dataset init test.ds 'sqlite://collection.db' ; dataset init reports.ds 'sqlite://collection.db'",
     "cold_api": "datasetd cold_api.yaml",
-    "cold_api_debug": "datasetd --debug cold_api.yaml",
     "cold": "deno run --watch  --allow-read --allow-net --watch cold.ts --htdocs=./htdocs --baseUrl=http://localhost:8111",
+    "cold_api_debug": "datasetd --debug cold_api.yaml",
+    "cold_debug": "deno run --watch  --allow-read --allow-net --watch cold.ts --htdocs=./htdocs --baseUrl=http://localhost:8111 --debug",
     "cold_reports": "deno run --watch --allow-all cold_reports.ts",
     "reset_data": "dsquery groups.ds 'delete from groups' ; dsquery people.ds 'delete from people' ; dsquery funders.ds 'delete from funders' ; dsquery issn.ds 'delete from issn'",
     "load_data": "deno task import_groups_csv ; deno task import_people_csv ; deno task import_issn_journal_publisher_csv",

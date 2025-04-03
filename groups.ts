@@ -12,6 +12,7 @@ import {
 } from "./deps.ts";
 
 import { timeStamp } from "./utils.ts";
+import { YELLOW } from "./colors.ts";
 
 const ds = new Dataset(apiPort, "groups.ds");
 
@@ -307,7 +308,7 @@ async function handleGetGroups(
     const clgid = pathIdentifier(req.url);
     const isCreateObject = clgid === "";
     const obj = await ds.read(clgid);
-    console.log(`We have a GET for group object ${clgid}, view = ${view}`);
+    if (options.debug) console.log(`We have a GET for group object ${clgid}, view = ${view}, %c${JSON.stringify(obj, null, 2)}`, YELLOW);
     return renderPage(tmpl, {
       base_path: "",
       isCreateObject: isCreateObject,
@@ -345,6 +346,12 @@ async function handlePostGroups(
         headers: { "content-type": "text/html" },
       });
     }
+    if (options.debug) {
+      console.log(
+        `DEBUG form object -> %c${JSON.stringify(obj, null, 2)}`,
+        YELLOW,
+      );
+    }
     if (isCreateObject) {
       console.log("DEBUG detected create request");
       clgid = obj.clgid as unknown as string;
@@ -359,7 +366,7 @@ async function handlePostGroups(
       );
     }
     if (isCreateObject) {
-      console.log(`send to dataset create object ${clgid}`);
+      if (options.debug) console.log(`send to dataset create object ${clgid} -> %c${JSON.stringify(obj, null, 2)}`, YELLOW);
       if (!(await ds.create(clgid, obj))) {
         return new Response(
           `<html>problem creating object ${clgid}, try again later`,
@@ -370,7 +377,7 @@ async function handlePostGroups(
         );
       }
     } else {
-      console.log(`send to dataset update object ${clgid}`);
+      if (options.debug) console.log(`send to dataset update object ${clgid} -> %c${JSON.stringify(obj, null, 2)}`, YELLOW);
       if (!(await ds.update(clgid, obj))) {
         return new Response(
           `<html>problem updating object ${clgid}, try again later`,

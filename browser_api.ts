@@ -38,7 +38,7 @@ export async function handleBrowserAPI(
   let resp = await ds.query(apiReq.query_name, ["name", "alternative"], body);
   if (resp.ok) {
     console.log(
-      `DEBUG resp -> ok ? ${resp.ok} -> ${resp} -> ${JSON.stringify(resp)}`,
+      `DEBUG resp -> ok ? ${resp.ok}`,
     );
     let data = await resp.json();
     console.log(
