@@ -20,7 +20,6 @@
 <label set="directory_user_id">Directory User ID</label> <input type="text" id="directory_user_id" name="directory_user_id" value="{{people.directory_user_id}}">
 </div>
 
-
 <div>
 <label set="clpid">Caltech Library People ID</label> <input type="text" id="clpid" name="clpid" value="{{people.clpid}}" {{^isCreateObject}}readonly{{/isCreateObject}} required="true" />
 </div>
@@ -31,27 +30,27 @@
 
 <hr>
 
-<div>
+<div class="label-input-block">
 <label set="display_name">Display Name</label> <input type="text" id="display_name" name="display_name" value="{{people.display_name}}" size="60" /> 
 </div>
 
-<div>
+<div class="label-input-block">
 <label set="family_name">Family Name</label> <input type="text" id="family_name" name="family_name" value="{{people.family_name}}" required="true" size="60" />
 </div>
 
-<div>
+<div class="label-input-block">
 <label set="given_name">Given/Lived Name</label> <input type="text" id="given_name" name="given_name" value="{{people.given_name}}" required="true" size="60" />
 </div>
 
-<div>
+<div class="label-input-block">
 <label set="email">Contact Email</label> <input type="email" id="email" name="email" pattern=".+@.+\.edu" value="{{people.email}}" size="60" />
 </div>
 
-<div>
+<div class="label-input-block">
   <label set="title">Title</label> <input type="text" id="title" name="title" value="{{people.title}}" placeholder="job title" size="80" />
 </div>
 
-<div>
+<div class="label-input-block">
 <label set="division">Division</label> <input type="text" id="division" name="division" value="{{people.division}}" placeholder="pulled from directory if empty" size="80" />
 </div>
 

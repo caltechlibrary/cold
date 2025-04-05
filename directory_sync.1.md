@@ -1,4 +1,4 @@
-%directory_sync(1) user manual | 0.0.21  95fb528
+%directory_sync(1) user manual | 0.0.21  d17aeda
 % R. S.Doiel
 % NaN-NaN-NaN
 

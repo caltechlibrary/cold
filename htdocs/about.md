@@ -56,13 +56,17 @@ Improved &#x60;division_people.ts&#x60; so loading division and group data from 
 
 - R. S. Doiel, <https://orcid.org/0000-0003-0900-6903>
 
+
 ### Contributors
 
-- Kathy Johnson, <https://orcid.org/0000-0002-0026-2516>- Thomas E Morrell, <https://orcid.org/0000-0001-9266-5146>
+- Kathy Johnson, <https://orcid.org/0000-0002-0026-2516>
+- Thomas E Morrell, <https://orcid.org/0000-0001-9266-5146>
+
 
 ### Maintainers
 
 - R. S. Doiel, <https://orcid.org/0000-0003-0900-6903>
+
 
 Caltech Library maintains a list of people, groups and funders and their related identifiers. For many years these were managed using a spreadsheets. That has become cumbersome. **COLD** manages data as JSON objects in [dataset](https://github.com/caltechlibrary/dataset) collections. TypeScript provides a middleware for the user interface with datasetd providing object management. The front end web server provides access control (e.g. via Shibboleth).
 

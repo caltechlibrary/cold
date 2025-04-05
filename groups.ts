@@ -308,7 +308,14 @@ async function handleGetGroups(
     const clgid = pathIdentifier(req.url);
     const isCreateObject = clgid === "";
     const obj = await ds.read(clgid);
-    if (options.debug) console.log(`We have a GET for group object ${clgid}, view = ${view}, %c${JSON.stringify(obj, null, 2)}`, YELLOW);
+    if (options.debug) {
+      console.log(
+        `We have a GET for group object ${clgid}, view = ${view}, %c${
+          JSON.stringify(obj, null, 2)
+        }`,
+        YELLOW,
+      );
+    }
     return renderPage(tmpl, {
       base_path: "",
       isCreateObject: isCreateObject,
@@ -335,7 +342,7 @@ async function handlePostGroups(
 
   if (req.body !== null) {
     const form = await req.formData();
-    let obj: Object = formDataToObject(form);
+    let obj: { [key: string]: any } = formDataToObject(form);
     console.log(
       `DEBUG form data after converting to object -> ${JSON.stringify(obj)}`,
     );
@@ -349,6 +356,14 @@ async function handlePostGroups(
     if (options.debug) {
       console.log(
         `DEBUG form object -> %c${JSON.stringify(obj, null, 2)}`,
+        YELLOW,
+      );
+    }
+    if (obj.alternative !== undefined) {
+      console.log(
+        `DEBUG form object.object.alternative -> %c${
+          JSON.stringify(obj.alternative, null, 2)
+        }`,
         YELLOW,
       );
     }
@@ -366,7 +381,14 @@ async function handlePostGroups(
       );
     }
     if (isCreateObject) {
-      if (options.debug) console.log(`send to dataset create object ${clgid} -> %c${JSON.stringify(obj, null, 2)}`, YELLOW);
+      if (options.debug) {
+        console.log(
+          `send to dataset create object ${clgid} -> %c${
+            JSON.stringify(obj, null, 2)
+          }`,
+          YELLOW,
+        );
+      }
       if (!(await ds.create(clgid, obj))) {
         return new Response(
           `<html>problem creating object ${clgid}, try again later`,
@@ -377,7 +399,14 @@ async function handlePostGroups(
         );
       }
     } else {
-      if (options.debug) console.log(`send to dataset update object ${clgid} -> %c${JSON.stringify(obj, null, 2)}`, YELLOW);
+      if (options.debug) {
+        console.log(
+          `send to dataset update object ${clgid} -> %c${
+            JSON.stringify(obj, null, 2)
+          }`,
+          YELLOW,
+        );
+      }
       if (!(await ds.update(clgid, obj))) {
         return new Response(
           `<html>problem updating object ${clgid}, try again later`,

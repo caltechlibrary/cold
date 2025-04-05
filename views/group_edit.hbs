@@ -14,25 +14,29 @@
 <section>
 <h1>{{#isCreateObject}}Create:{{/isCreateObject}}{{^isCreateObject}}Edit:{{/isCreateObject}} {{group.name}}</h1>
 
-<form action="{{group.clgid}}" method="post">
+<form id="group-edit-form" action="{{group.clgid}}" method="post">
 
-<div>
-<label set="clgid">Caltech Library Group ID</label> <input type="text" id="clgid" name="clgid" value="{{group.clgid}}" {{^isCreateObject}}readonly{{/isCreateObject}} required="true" />
+<div class="label-input-block">
+<label set="clgid">Caltech Library Group ID</label> <input type="text" id="clgid" name="clgid" value="{{group.clgid}}" size="60" {{^isCreateObject}}readonly{{/isCreateObject}} required="true" />
 </div>
 
-<div>
-<label set="name">Name</label> <input type="text" id="name" name="name" value="{{group.name}}" required="true" />
+<div class="label-input-block"  >
+<label set="name">Name</label> <input type="text" id="name" name="name" value="{{group.name}}" size="60" required="true" />
 </div>
 
 <hr>
 
 <div>
 <label set="alternative">Alternate Names (one per line)</label><br >
+<csv-textarea id="alternative" name="alternative" title="Curate the affiliated group names. Enter a alt name, one per row. Add rows as needed. Cleanup removes empty rows." column-headings="alternative">
+<datalist id="column-0"></datalist>
+
 <textarea id="alternative" name="alternative" rows="10" cols="60">
 {{#group.alternative}}
 {{ . }}
 {{/group.alternative}}
 </textarea>
+</csv-textarea>
 </div>
 
 <div>
@@ -119,6 +123,8 @@
 <p>
 </section>
 {{>footer}}
+<script type="module" src="{{base_url}}/js/csvtextarea.js"></script>
+<script type="module" src="{{base_url}}/js/group_edit.js"></script>
 <!-- <code><pre>{{debug_src}}</pre></code> -->
 </body>
 </html>
