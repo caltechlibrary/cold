@@ -1,5 +1,5 @@
 #!/bin/bash
-if [ -d /Sites/cold ]; then cd /Sites/cold; fi
+if [ -d /Sites/cold ]; then cd /Sites/cold || exit 1; fi
 
 cat <<SQL >groups_rpt.sql
 select json_object(

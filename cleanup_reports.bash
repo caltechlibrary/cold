@@ -3,9 +3,7 @@
 #
 # Cleanup Reports will looks for stale reports and removed them from reports.ds and from htdocs/rpt path.
 #
-if [ -d /Sites/cold ]; then
-    cd /Sites/cold || echo "work directory is $(pwd)"
-fi
+if [ -d /Sites/cold ]; then cd /Sites/cold || exit 1; fi
 
 # Remove all but the latest run_people_csv and run_groups_csv reports.
 function prune_standard_reports () {
