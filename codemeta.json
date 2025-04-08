@@ -53,9 +53,9 @@
     }
   ],
   "dateCreated": "2023-12-12",
-  "dateModified": "2025-03-32",
-  "datePublished": "2025-04-02",
-  "description": "Caltech Library maintains a list of people, groups and funders and their related identifiers. For many years these were managed using a spreadsheets. That has become cumbersome. **COLD** manages data as JSON objects in [dataset](https://github.com/caltechlibrary/dataset) collections. TypeScript provides a middleware for the user interface with datasetd providing object management. The front end web server provides access control (e.g. via Shibboleth).\n\n**COLD** is implemented as a set of localhost web services and collection of programs and scripts. The localhost web services for managing controlled object lists and datum.",
+  "dateModified": "2025-04-08",
+  "datePublished": "2025-04-08",
+  "description": "Caltech Library maintains a list of people, groups and funders and their related identifiers. For many years these were managed using a spreadsheets. That has become cumbersome. \n**COLD** manages data as JSON objects in [dataset](https://github.com/caltechlibrary/dataset) collections. \n\n**COLD** is implemented as three web web services\n\n- cold web UI\n- cold JSON API (provided by datasetd)\n- cold reports (the report request system)\n\nReports are implemented as a set of programs or bash scripts.\n\nTypeScript+Deno is used to implement the web UI and report system.\nThe JSON API is provided by Dataset's datasetd.\nAccess control is provided by the front end web server integrated with Shibboleth.",
   "funder": [
     {
       "@id": "https://doi.org/10.13039/100006961",
@@ -78,6 +78,7 @@
     "HTML",
     "JavaScript",
     "JSON",
+    "shell (Bash)",
     "SQL",
     "Typescript",
     "YAML"
@@ -87,6 +88,7 @@
     "https://github.com/caltechlibrary/dataset",
     "https://github.com/caltechlibrary/csvtextarea"
   ],
+  "runtimePlatform": "- Deno 2.2",
   "softwareRequirements": [
     "Deno >= 2.2.5",
     "GNU Make",
@@ -94,9 +96,9 @@
     "datasetd >= 2.1.23",
     "CMTools >= 0.0.18"
   ],
-  "version": "0.0.21",
+  "version": "0.0.22",
   "developmentStatus": "wip",
   "issueTracker": "https://github.com/caltechlibrary/cold/issues",
   "downloadUrl": "https://github.com/caltechlibrary/cold/release/latest",
-  "releaseNotes": "Fixed bug in get lookupGroupInfo where clgid wasn't getting passed through from query result.\nImproved `division_people.ts` so loading division and group data from csv now works."
+  "releaseNotes": "- improved display of group information\n- added CSVTextarea to manage alternative group names\n- added reports for crosswalking group and people\n- added reports for crosswalking division and people"
 }
