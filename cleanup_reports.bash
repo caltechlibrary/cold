@@ -36,5 +36,7 @@ SQL
 
 prune_standard_reports "run_people_csv" "rpt/people.csv"
 prune_standard_reports "run_groups_csv" "rpt/groups.csv"
+prune_standard_reports "run_group_people_crossalk_csv" "rpt/group_people_crosswalk.csv"
+prune_standard_reports "run_authors_report" "rpt/authors_report.csv"
 prune_standard_reports "journal_vocabulary" "rpt/journal_vocabulary.yaml"
 prune_stale_processing_reports 

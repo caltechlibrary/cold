@@ -16,13 +16,7 @@
 <h1>{{group.name}}</h1>
 <div class="identifier">{{clgid}}</div>
 
-{{#if group.alternative}}DEBUG alternative:...
-<ul>
-{{#each group.alternative}}
-<li>({{group.alternative}})</li>
-{{/each}}
-</ul>
-{{/if}}
+{{#if group.alternative}}<div id="alternative" class="alternative">{{group.alternative}}</div>{{/if}}
 
 {{#if group.description}}<div class="description">{{group.description}}</div>{{/if}}
 

@@ -1,6 +1,3 @@
-#!/bin/bash
-if [ -d /Sites/cold ]; then cd /Sites/cold || exit 1; fi
-cat <<SQL >group_people_crosswalk_rpt.sql
 SELECT
     json_object(
         'tag', T.clgid,
@@ -22,11 +19,3 @@ FROM (
 ORDER BY
     T.clgid,
     T.clpid;
-SQL
-
-dsquery \
-    -csv "tag,clpid,orcid" \
-    -sql group_people_crosswalk_rpt.sql \
-    people.ds \
-    >group_people_crosswalk.csv
-

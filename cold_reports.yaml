@@ -15,6 +15,16 @@ reports:
     basename: division_people
     append_datestamp: false
     content_type: text/csv
+  run_group_people_crosswalk_csv:
+    cmd: ./run_group_people_crosswalk.bash
+    basename: group_people_crosswalk
+    append_datestamp: false
+    content_type: text/csv
+  run_division_people_crosswalk_csv:
+    cmd: ./run_division_people_crosswalk.bash
+    basename: division_people_crosswalk
+    append_datestamp: false
+    content_type: text/csv
   journal_vocabulary:
     cmd: ./run_journal_vocabulary.bash
     basename: journal_vocabulary
