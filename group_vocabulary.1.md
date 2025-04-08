@@ -1,6 +1,6 @@
-%group_vocabulary(1) user manual | 0.0.21  d17aeda
+%group_vocabulary(1) user manual | 0.0.22  601bf82
 % R. S.Doiel
-% NaN-NaN-NaN
+% 2025-04-08
 
 # NAME
     

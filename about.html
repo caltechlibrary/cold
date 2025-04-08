@@ -19,10 +19,13 @@
 </nav>
 <section>
 <h1 id="about-this-software">About this software</h1>
-<h2 id="cold-0.0.21">cold 0.0.21</h2>
-<p>Fixed bug in get lookupGroupInfo where clgid wasn't getting passed
-through from query result. Improved `division_people.ts` so loading
-division and group data from csv now works.</p>
+<h2 id="cold-0.0.22">cold 0.0.22</h2>
+<ul>
+<li>improved display of group information</li>
+<li>added CSVTextarea to manage alternative group names</li>
+<li>added reports for crosswalking group and people</li>
+<li>added reports for crosswalking division and people</li>
+</ul>
 <h3 id="authors">Authors</h3>
 <ul>
 <li>R. S. Doiel, <a href="https://orcid.org/0000-0003-0900-6903"
@@ -31,8 +34,8 @@ class="uri">https://orcid.org/0000-0003-0900-6903</a></li>
 <h3 id="contributors">Contributors</h3>
 <ul>
 <li>Kathy Johnson, <a href="https://orcid.org/0000-0002-0026-2516"
-class="uri">https://orcid.org/0000-0002-0026-2516</a>- Thomas E Morrell,
-<a href="https://orcid.org/0000-0001-9266-5146"
+class="uri">https://orcid.org/0000-0002-0026-2516</a></li>
+<li>Thomas E Morrell, <a href="https://orcid.org/0000-0001-9266-5146"
 class="uri">https://orcid.org/0000-0001-9266-5146</a></li>
 </ul>
 <h3 id="maintainers">Maintainers</h3>
@@ -45,12 +48,17 @@ their related identifiers. For many years these were managed using a
 spreadsheets. That has become cumbersome. <strong>COLD</strong> manages
 data as JSON objects in <a
 href="https://github.com/caltechlibrary/dataset">dataset</a>
-collections. TypeScript provides a middleware for the user interface
-with datasetd providing object management. The front end web server
-provides access control (e.g. via Shibboleth).</p>
-<p><strong>COLD</strong> is implemented as a set of localhost web
-services and collection of programs and scripts. The localhost web
-services for managing controlled object lists and datum.</p>
+collections.</p>
+<p><strong>COLD</strong> is implemented as three web web services</p>
+<ul>
+<li>cold web UI</li>
+<li>cold JSON API (provided by datasetd)</li>
+<li>cold reports (the report request system)</li>
+</ul>
+<p>Reports are implemented as a set of programs or bash scripts.</p>
+<p>TypeScript+Deno is used to implement the web UI and report system.
+The JSON API is provided by Dataset's datasetd. Access control is
+provided by the front end web server integrated with Shibboleth.</p>
 <ul>
 <li>License: <a href="https://caltechlibrary.github.io/cold/LICENSE"
 class="uri">https://caltechlibrary.github.io/cold/LICENSE</a></li>
@@ -65,6 +73,7 @@ class="uri">https://github.com/caltechlibrary/cold/issues</a></li>
 <li>HTML</li>
 <li>JavaScript</li>
 <li>JSON</li>
+<li>shell (Bash)</li>
 <li>SQL</li>
 <li>Typescript</li>
 <li>YAML</li>
