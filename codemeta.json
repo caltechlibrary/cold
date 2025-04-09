@@ -93,7 +93,7 @@
     "Deno >= 2.2.5",
     "GNU Make",
     "Pandoc >= 3.1",
-    "datasetd >= 2.1.23",
+    "Dataset >= 2.2",
     "CMTools >= 0.0.18"
   ],
   "version": "0.0.22",
