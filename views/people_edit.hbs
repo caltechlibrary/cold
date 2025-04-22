@@ -50,10 +50,6 @@
   <label set="title">Title</label> <input type="text" id="title" name="title" value="{{people.title}}" placeholder="job title" size="80" />
 </div>
 
-<div class="label-input-block">
-<label set="division">Division</label> <input type="text" id="division" name="division" value="{{people.division}}" placeholder="pulled from directory if empty" size="80" />
-</div>
-
 <div>
 <label set="groups">Groups</label> 
 <csv-textarea id="groups" name="groups" title="Curate the affiliated groups for this person. Enter a group name or alt name in the group name column. Add rows as needed." column-headings="group_name,clgid">
@@ -133,6 +129,11 @@
 </div>
 
 <hr>
+
+<div class="label-input-block">
+<label set="division">
+<a class="#foot_note" href="#directory_note"><sup>◇</sup></a> Organizational Unit</label> <input type="text" id="division" name="division" value="{{people.division}}" placeholder="pulled from directory if empty" size="80" />
+</div>
 
 <div>
 <label set="directory_person_type"><a class="#foot_note" href="#directory_note"><sup>◇</sup></a> Directory Person Type</label> <input type="text" id="directory_person_type" name="directory_person_type" value="{{people.directory_person_type}}" placeholder="pulled from directory" readonly>
