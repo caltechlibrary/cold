@@ -33,7 +33,7 @@ maintainer:
     id: https://orcid.org/0000-0003-0900-6903
 
 repository_code: https://github.com/caltechlibrary/cold
-version: 0.0.22
+version: 0.0.23
 license_url: https://caltechlibrary.github.io/cold/LICENSE
 operating_system:
   - Linux
@@ -53,18 +53,15 @@ keywords:
   - objects
   - controlled vocabulary
 
-date_released: 2025-04-08
+date_released: 2025-04-28
 ---
 
 About this software
 ===================
 
-## cold 0.0.22
+## cold 0.0.23
 
-- improved display of group information
-- added CSVTextarea to manage alternative group names
-- added reports for crosswalking group and people
-- added reports for crosswalking division and people
+Improved crosswalking division and people to allow using either a division name or clgid in the &quot;division&quot; column of the CSV file.
 
 ### Authors
 

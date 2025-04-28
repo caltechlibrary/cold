@@ -1,6 +1,6 @@
-%cold_reports(1) user manual | 0.0.22 428486f
+%cold_reports(1) user manual | 0.0.23 08c80d9
 % R. S.Doiel
-% 2025-04-08
+% 2025-04-28
     
 # NAME
     

@@ -53,8 +53,8 @@
     }
   ],
   "dateCreated": "2023-12-12",
-  "dateModified": "2025-04-08",
-  "datePublished": "2025-04-08",
+  "dateModified": "2025-04-28",
+  "datePublished": "2025-04-28",
   "description": "Caltech Library maintains a list of people, groups and funders and their related identifiers. For many years these were managed using a spreadsheets. That has become cumbersome. \n**COLD** manages data as JSON objects in [dataset](https://github.com/caltechlibrary/dataset) collections. \n\n**COLD** is implemented as three web web services\n\n- cold web UI\n- cold JSON API (provided by datasetd)\n- cold reports (the report request system)\n\nReports are implemented as a set of programs or bash scripts.\n\nTypeScript+Deno is used to implement the web UI and report system.\nThe JSON API is provided by Dataset's datasetd.\nAccess control is provided by the front end web server integrated with Shibboleth.",
   "funder": [
     {
@@ -96,9 +96,9 @@
     "Dataset >= 2.2",
     "CMTools >= 0.0.18"
   ],
-  "version": "0.0.22",
+  "version": "0.0.23",
   "developmentStatus": "wip",
   "issueTracker": "https://github.com/caltechlibrary/cold/issues",
   "downloadUrl": "https://github.com/caltechlibrary/cold/release/latest",
-  "releaseNotes": "- improved display of group information\n- added CSVTextarea to manage alternative group names\n- added reports for crosswalking group and people\n- added reports for crosswalking division and people"
+  "releaseNotes": "Improved crosswalking division and people to allow using either a division name or clgid in the \"division\" column of the CSV file."
 }

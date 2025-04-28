@@ -1,6 +1,6 @@
-%division_people(1) user manual | 0.0.22 428486f
+%division_people(1) user manual | 0.0.23 08c80d9
 % R. S.Doiel
-% 2025-04-08
+% 2025-04-28
 
 # NAME
 
@@ -21,6 +21,14 @@ update existing people's group affilication. All people to be updated need
 to have a "clpid" (Caltech Library People Identifier).  The "division" and
 "other group" columns will update the groups lists for the person identified
 with the "clpid".
+
+When loading a CSV file it must have at least three columns.
+
+~~~csv
+division,clpid,orcid
+~~~
+
+The "division" column can be a division name or a clgid.
 
 # OPTIONS
 
