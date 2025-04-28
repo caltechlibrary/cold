@@ -305,6 +305,14 @@ to have a "clpid" (Caltech Library People Identifier).  The "division" and
 "other group" columns will update the groups lists for the person identified
 with the "clpid".
 
+When loading a CSV file it must have at least three columns.
+
+~~~csv
+division,clpid,orcid
+~~~
+
+The "division" column can be a division name or a clgid.
+
 # OPTIONS
 
 -h, --help

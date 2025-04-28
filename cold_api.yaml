@@ -29,7 +29,7 @@ collections:
   - dataset: groups.ds
     query:
       group_names: select json_object('clgid', src->'clgid', 'group_name', src->'name') as src from groups order by src->'name' ASC;
-      lookup_name: select json_object('clgid', src->'clgid', 'group_name', src->'name') from groups where src->>'name' like ? or exists(select true from json_each(src->'alternative') where json_each.value like ?) ORDER BY src->>'name' ASC;
+      lookup_name: select json_object('clgid', src->'clgid', 'group_name', src->'name') from groups where src->>'name' like ? or src->>'clgid' like ? or exists(select true from json_each(src->'alternative') where json_each.value like ?) ORDER BY src->>'name' ASC;
     # What follows are object level permissions
     keys: true
     create: true

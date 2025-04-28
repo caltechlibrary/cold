@@ -141,8 +141,8 @@ async function lookupGroupInfo(name: string): Promise<
 > {
   let obj: { [key: string]: any } | undefined = await dsGroups.query(
     "lookup_name",
-    ["name", "alternatives"],
-    { "name": name, "alternatives": name },
+    ["name", "clgid", "alternatives"],
+    { "name": name, "clgid": name, "alternatives": name },
   );
   if (obj === undefined) {
     return {
@@ -224,6 +224,7 @@ export async function loadDivisionPeopleCSV(
   }
   const data = parseCSV(src);
   let division: string = "";
+  let clgid: string = "";
   let clpid: string = "";
   let orcid: string = "";
   let familyName: string = "";
@@ -234,7 +235,11 @@ export async function loadDivisionPeopleCSV(
     if (verbose) console.log(`%crow[${i}] -> ${row}`, YELLOW);
     i++;
     (row.length === 0) ? division = "" : division = row.shift() || "";
-    (row.length === 0) ? clpid = "" : clpid = row.shift() || "";
+    (row.length === 0)
+      ? clgid = ""
+      : (row.length === 0)
+      ? clpid = ""
+      : clpid = row.shift() || "";
     if (clpid === "") {
       console.log(`%crow ${i} has no clpid, skipping`, ERROR_COLOR);
       continue;

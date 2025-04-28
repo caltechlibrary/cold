@@ -4,6 +4,8 @@
  * `"division","clpid","orcid","family_name","given_name","other group","other group", ...
  * and import the list of people updating their groups memberships based on the "division" column and
  * any column labeld "other group".
+ *
+ * NOTE: Enhancement, "division" column can contain either a division name or clgid value. RSD 2025-04-28
  */
 import { licenseText, releaseDate, releaseHash, version } from "./deps.ts";
 import * as cli from "@std/cli";
