@@ -62,6 +62,8 @@
     const query_name = "lookup_name";
     let params = new URLSearchParams();
     params.append("q", name);
+    //params.append("clgid", name);
+    //params.append("alternative", name);
     return await this.getList(c_name, query_name, params);
   }
   async lookupGroupMembership(clgid) {

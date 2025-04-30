@@ -28,8 +28,31 @@ collections:
     versions: true
   - dataset: groups.ds
     query:
-      group_names: select json_object('clgid', src->'clgid', 'group_name', src->'name') as src from groups order by src->'name' ASC;
-      lookup_name: select json_object('clgid', src->'clgid', 'group_name', src->'name') from groups where src->>'name' like ? or src->>'clgid' like ? or exists(select true from json_each(src->'alternative') where json_each.value like ?) ORDER BY src->>'name' ASC;
+      group_names: |
+        select json_object('clgid', src->'clgid', 'group_name', src->'name') as src
+        from groups
+        order by src->'name' ASC;
+      lookup_name: |        
+        select json_object('clgid', src->'clgid', 'group_name', src->'name')
+        from groups
+        where (src->>'name' like ?) or
+              exists(
+                    select true 
+                    from json_each(src->'alternative') 
+                    where (json_each.value like ?) 
+              )
+        order by src->>'name' asc;
+      lookup_name_or_clgid:
+        select json_object('clgid', src->'clgid', 'group_name', src->'name')
+        from groups
+        where (src->>'name' like ?) or
+              (src->>'clgid' like ?) or
+              exists(
+                    select true 
+                    from json_each(src->'alternative') 
+                    where (json_each.value like ?) 
+              )
+        order by src->>'name' asc;
     # What follows are object level permissions
     keys: true
     create: true

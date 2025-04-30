@@ -140,7 +140,7 @@ async function lookupGroupInfo(name: string): Promise<
   { clgid: string; name: string; ok: boolean; msg: string }
 > {
   let obj: { [key: string]: any } | undefined = await dsGroups.query(
-    "lookup_name",
+    "lookup_name_or_clgid",
     ["name", "clgid", "alternatives"],
     { "name": name, "clgid": name, "alternatives": name },
   );
