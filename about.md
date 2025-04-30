@@ -33,7 +33,7 @@ maintainer:
     id: https://orcid.org/0000-0003-0900-6903
 
 repository_code: https://github.com/caltechlibrary/cold
-version: 0.0.23
+version: 0.0.24
 license_url: https://caltechlibrary.github.io/cold/LICENSE
 operating_system:
   - Linux
@@ -53,15 +53,16 @@ keywords:
   - objects
   - controlled vocabulary
 
-date_released: 2025-04-28
+date_released: 2025-04-30
 ---
 
 About this software
 ===================
 
-## cold 0.0.23
+## cold 0.0.24
 
-Improved crosswalking division and people to allow using either a division name or clgid in the &quot;division&quot; column of the CSV file.
+Fix bug in lookup_name SQL call, broke the UI in looking up a clgid from group name. Split it out
+to a new function for division_people called &#x60;lookup_name_or_clgid&#x60;.
 
 ### Authors
 

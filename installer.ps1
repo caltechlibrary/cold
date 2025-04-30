@@ -5,7 +5,7 @@
 # Set the package name and version to install
 #
 $PACKAGE = "cold"
-$VERSION = "0.0.23"
+$VERSION = "0.0.24"
 $GIT_GROUP = "caltechlibrary"
 $RELEASE = "https://github.com/${GIT_GROUP}/${PACKAGE}/releases/tag/v${VERSION}"
 $SYSTEM_TYPE = Get-ComputerInfo -Property CsSystemType
