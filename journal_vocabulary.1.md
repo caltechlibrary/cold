@@ -1,4 +1,4 @@
-%journal_vocabulary(1) user manual | 0.0.25  01a7c0e
+%journal_vocabulary(1) user manual | 0.0.26  55c6255
 % R. S.Doiel
 % 2025-05-07
 

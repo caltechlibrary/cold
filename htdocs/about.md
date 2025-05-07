@@ -33,7 +33,7 @@ maintainer:
     id: https://orcid.org/0000-0003-0900-6903
 
 repository_code: https://github.com/caltechlibrary/cold
-version: 0.0.25
+version: 0.0.26
 license_url: https://caltechlibrary.github.io/cold/LICENSE
 operating_system:
   - Linux
@@ -59,9 +59,9 @@ date_released: 2025-05-07
 About this software
 ===================
 
-## cold 0.0.25
+## cold 0.0.26
 
-Turn of CaltechFUNDERS collection.
+Turn of CaltechFUNDERS collection, integrated web components into funder view and edit.
 
 ### Authors
 
