@@ -24,9 +24,19 @@
 </ul>
 {{/if}}
 
-{{#if funder.description}}<div class="description">{{funder.description}}</div>{{/if}}
+{{#if funder.description}}<div class="description">{{funder.description}}</div><p>{{/if}}
+
+{{#if funder.type}}<div class="type">organization Type: {{funder.type}}</div>{{/if}}
+
+{{#if funder.url}}<div class="url">website: <a href="{{funder.url}}" title="funder website">{{funder.url}}</a></div>{{/if}}
 
 {{#if funder.include_in_feeds}}<div class="feeds_link">View in feeds: <a href="https://feeds.library.caltech.edu/funders/{{funder.clfid}}" title="funder in feeds" target="_blank">{{funder.clfid}}</a></div>{{/if}}
+
+{{#if funder.grant_numbers}}
+<div id="grant_numbers" class="grant_numbers">{{#funder.grant_numbers}}
+{{.}}
+{{/funder.grant_numbers}}</div>
+{{/if}}
 
 <div class="identifiers">
   {{#if funder.ror}}<div class="ror">ror: {{funder.ror}}</div>{{/if}}
@@ -38,10 +48,10 @@
 {{#if funder.updated}}<span class="updated">updated: {{funder.updated}}</span>{{/if}}
 </div>
 
-
 <p>
 </section>
 {{>footer}}
-<code><pre>{{debug_src}}</pre></code>
+<!-- {{#if debug_src}}<code><pre>{{debug_src}}</pre></code>{{/if}} -->
+<script type="module" src="../js/funder_view.js"></script>
 </body>
 </html>

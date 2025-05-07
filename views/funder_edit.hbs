@@ -14,7 +14,7 @@
 <section>
 <h1>{{#isCreateObject}}Create:{{/isCreateObject}}{{^isCreateObject}}Edit:{{/isCreateObject}} {{funder.name}}</h1>
 
-<form action="{{funder.clfid}}" method="post">
+<form id="funder-edit-form" action="{{funder.clfid}}" method="post">
 
 <div>
 <label set="clfid">clfid</label> <input type="text" id="clfid" name="clfid" value="{{funder.clfid}}" {{^isCreateObject}}readonly{{/isCreateObject}} required="true" />
@@ -25,17 +25,31 @@
 </div>
 
 <div>
-<label set="alternative">Grant Numbers (one per line)</label><br >
-<textarea id="grant_numbers" name="grant_numbers" rows="10" cols="60">
+<label set="grant_numbers">Grant Numbers (one per line)</label><br >
+<csv-textarea id="grant_numbers" name="grant_numbers" title="Curate the grant numbers for an funder. Enter one per row. Add rows as needed. Cleanup removes empty rows." column-headings="grant_number">
+<datalist id="column-0"></datalist>
+
+<textarea id="grant_numbers" name="grant_numbers" rows="10" cols="60" title="enter grant numbers, one per line">
 {{#funder.grant_numbers}}
 {{ . }}
 {{/funder.grant_numbers}}
 </textarea>
+</csv-textarea>
 </div>
 
 <div>
 <label set="description">Description</label><br >
 <textarea id="description" name="description" rows="10" cols="60">{{funder.description}}</textarea>
+</div>
+
+<div>
+<label set="type">Funder Type</label><br >
+<input id="type" type="text" name="type" value="{{funder.type}}" >
+</div>
+
+<div>
+<label set="url">Funder Website</label><br >
+<input id="url" type="url" name="url" value="{{funder.url}}" >
 </div>
 
 <div>
@@ -68,6 +82,8 @@
 <p>
 </section>
 {{>footer}}
-<code><pre>{{debug_src}}</pre></code>
+<script type="module" src="../js/csvtextarea.js"></script>
+<script type="module" src="../js/funder_edit.js"></script>
+<!-- <code><pre>{{debug_src}}</pre></code> -->
 </body>
 </html>

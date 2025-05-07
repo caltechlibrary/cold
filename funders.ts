@@ -19,6 +19,8 @@ export interface FunderInterface {
   include_in_feeds: boolean;
   name: string;
   description: string;
+  type: string;
+  url: string;
   ror: string;
   ofr: string;
   doi: string;
@@ -34,6 +36,8 @@ export class Funder implements FunderInterface {
   include_in_feeds: boolean = false;
   name: string = "";
   description: string = "";
+  type: string = "";
+  url: string = "";
   ror: string = "";
   ofr: string = "";
   doi: string = "";
@@ -55,6 +59,12 @@ export class Funder implements FunderInterface {
     }
     if (row.hasOwnProperty("description")) {
       this.description = row.description;
+    }
+    if (row.hasOwnProperty("type")) {
+      this.type = row.type;
+    }
+    if (row.hasOwnProperty("url")) {
+      this.url = row.rul;
     }
     if (row.hasOwnProperty("ror")) {
       this.ror = row.ror;
@@ -81,10 +91,13 @@ export class Funder implements FunderInterface {
       clfid: this.clfid,
       include_in_feeds: this.include_in_feeds,
       name: this.name,
+      description: this.description,
+      type: this.type,
+      url: this.url,
       grant_numbers: this.grant_numbers,
       ror: this.ror,
       ofr: this.ofr,
-      description: this.description,
+      doi: this.doi,
       updated: this.updated,
     };
   }
