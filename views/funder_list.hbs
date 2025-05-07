@@ -11,11 +11,14 @@
 </nav>
 <section>
 <h1>CaltechFUNDERS</h1>
+<a-to-z-ul id="funder_list" long>
 <ul>
 {{#funder_list}}
   <li><a href="{{clfid}}" title="view funder details">{{name}}</a></li>
 {{/funder_list}}
 </ul>
+</a-to-z-ul>
 </section>
 {{>footer}}
+<script type="module" src="../js/a_to_z_ul.js"></script>
 </html>
