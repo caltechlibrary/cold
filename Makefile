@@ -41,7 +41,7 @@ PREFIX = $(HOME)
 
 TS_MODS = $(shell ls -1 *.ts | grep -v _test.ts | grep -v deps.ts | grep -v version.ts)
 
-build: version.ts $(TS_MODS) CITATION.cff about.md htdocs bin compile installer.sh installer.ps1 $(HTML_PAGES)
+build: version.ts $(TS_MODS) CITATION.cff about.md INSTALL.md htdocs bin compile installer.sh installer.ps1 $(HTML_PAGES)
 
 bin: .FORCE
 	mkdir -p bin
@@ -99,6 +99,9 @@ about.md: codemeta.json .FORCE
 	cmt codemeta.json about.md
 	cp about.md htdocs/
 	deno task htdocs
+
+INSTALL.md: codemeta.json .FORCE
+	cmt codemeta.json INSTALL.md
 
 status:
 	git status
