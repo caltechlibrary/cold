@@ -1,65 +1,59 @@
 Installation for development of **cold**
-========================================
+===========================================
 
-**cold** is experimental software for curation of managed controlled object lists (e.g. people, groups and controlled vocabularies) through several services.
+**cold** Caltech Library maintains a list of people, groups and funders and their related identifiers. For many years these were managed using a spreadsheets. That has become cumbersome. **COLD** manages data as JSON objects in [dataset](https://github.com/caltechlibrary/dataset) collections.
 
-**cold** web services are intended to run behind a front facing web server (e.g. Apache 2) providing access control and authentication. In a development setting this can be as simple as configuring BasicAuth.  In a production setting you need something robust like Shibboleth.  An example apache2 configuration is included in the source repository for **cold**. It will require adaptation to your specific web server configuration.
+**COLD** is implemented as three web web services
 
-**cold** requires the datasetd web service to provide access to people.ds, group.ds and other collections. For **cold** your collections should use SQL storage, e.g. SQLite3 or PostgreSQL. Setting up SQLite3 dataset collections can be done using a Deno task or via the Makefile (which calls the deno task).
+- cold web UI
+- cold JSON API (provided by datasetd)
+- cold reports (the report request system)
 
-If you are setting up to run in production you should compile the services and install the systemd service scripts so that systemd can manage the applications.
+Reports are implemented as a set of programs or bash scripts.
 
-Required software
------------------
+TypeScript+Deno is used to implement the web UI and report system.
+The JSON API is provided by Dataset&#x27;s datasetd.
+Access control is provided by the front end web server integrated with Shibboleth.
 
-1. Git (to clone the cold repository on GitHub)
-2. Deno >= 2.1.7 (to run the public and management web services)
-3. Dataset >= 2.1.23 (datasetd provides the JSON API for cold public and admin services)
-4. CMTools >= 0.0.9 (used to generate version.ts, CITATION.cff and about.md)
-5. Pandoc > 3.1 (to build or update documentation)
+Quick install with curl or irm
+------------------------------
 
-Required source code
---------------------
+There is an experimental installer.sh script that can be run with the following command to install latest table release. This may work for macOS, Linux and if you’re using Windows with the Unix subsystem. This would be run from your shell (e.g. Terminal on macOS).
 
-**cold** relies on several Caltech Library adjancent projects. These should be in parallel directories to where your **cold** repository exists. They should be accessible with the prefix "../" during the compilation, checking or running from source.
+~~~shell
+curl https://caltechlibrary.github.io/cold/installer.sh | sh
+~~~
 
-- [metadatatools](https://github.com/caltechlibrary/metadatatools)
-- [ts_dataset](https://github.com/caltechlibrary/ts_dataset)
+This will install the programs included in cold in your `$HOME/bin` directory.
 
-Setting up cold
----------------
+If you are running Windows 10 or 11 use the Powershell command below.
 
-These are setup instructions for testing and development.  Step four changes
-if you are setting up for production.
+~~~ps1
+irm https://caltechlibrary.github.io/cold/installer.ps1 | iex
+~~~
 
-1. Retrieve cold and related repositories
-    a. `cd`
-    b. `git clone https://github.com/caltechlibrary/metadatatools`
-    c. `git clone https://github.com/caltechlibrary/ts_dataset`
-    d. `git clone https://github.com/caltechlibrary/cold`
-    e. `cd cold`
-    f. `git pull origin main`
-2. Setup cold services
-    a. `deno task setup`
-    b. (optional) `deno task load_data` (initially populate COLD from CSV files)
-3. You need to start two web services, I recommend using tmux. You can then split the window to create each session and still see everything going on.
-    a. start up tmux
-      a. `tmux`
-    a. start the JSON API and setup your dataset collections
-      a. `deno task cold_api`
-    b. open another tmux window, start the cold middle ware service
-      a. split the screen, e.g. `Ctl-%`
-      b. `deno task cold`
-    c. in yet anthe tmux window, start the cold reports service
-      a. split the screen, e.g. `Ctl-%`
-      b. `deno task cold_reports`
+Installing from source
+----------------------
 
-You should now have two web services running on localhost at ports 8111 (web service), 8112 (JSON API).
+### Required software
 
-Port 8111
-: This is the management web service
+- Deno &gt;&#x3D; 2.3
+- GNU Make
+- Pandoc &gt;&#x3D; 3.1
+- Dataset &gt;&#x3D; 2.2
+- CMTools &gt;&#x3D; 0.0.25
 
-Port 8112
-: This is the management JSON API for `cold`
+### Steps
 
-In a remote deployment you'd setup up to run these services using systemd service scripts. See [deployments](deployment.md) documentation for details.
+1. git clone https://github.com/caltechlibrary/cold
+2. Change directory into the `cold` directory
+3. Make to build, test and install
+
+~~~shell
+git clone https://github.com/caltechlibrary/cold
+cd cold
+make
+make test
+make install
+~~~
+

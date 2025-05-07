@@ -115,9 +115,9 @@ Access control is provided by the front end web server integrated with Shibbolet
 
 ### Software Requirements
 
-- Deno &gt;&#x3D; 2.2.5
+- Deno &gt;&#x3D; 2.3
 - GNU Make
 - Pandoc &gt;&#x3D; 3.1
 - Dataset &gt;&#x3D; 2.2
-- CMTools &gt;&#x3D; 0.0.18
+- CMTools &gt;&#x3D; 0.0.25
 
