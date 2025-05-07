@@ -1,7 +1,6 @@
 ---
 title: cold
-abstract: "Caltech Library maintains a list of people, groups and funders and their related identifiers. For many years these were managed using a spreadsheets. That has become cumbersome. 
-**COLD** manages data as JSON objects in [dataset](https://github.com/caltechlibrary/dataset) collections. 
+abstract: "Caltech Library maintains a list of people, groups and funders and their related identifiers. For many years these were managed using a spreadsheets. That has become cumbersome. **COLD** manages data as JSON objects in [dataset](https://github.com/caltechlibrary/dataset) collections.
 
 **COLD** is implemented as three web web services
 
@@ -79,8 +78,7 @@ Turn of CaltechFUNDERS collection, integrated web components into funder view an
 - R. S. Doiel, <https://orcid.org/0000-0003-0900-6903>
 
 
-Caltech Library maintains a list of people, groups and funders and their related identifiers. For many years these were managed using a spreadsheets. That has become cumbersome. 
-**COLD** manages data as JSON objects in [dataset](https://github.com/caltechlibrary/dataset) collections. 
+Caltech Library maintains a list of people, groups and funders and their related identifiers. For many years these were managed using a spreadsheets. That has become cumbersome. **COLD** manages data as JSON objects in [dataset](https://github.com/caltechlibrary/dataset) collections.
 
 **COLD** is implemented as three web web services
 
