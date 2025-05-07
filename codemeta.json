@@ -53,8 +53,8 @@
     }
   ],
   "dateCreated": "2023-12-12",
-  "dateModified": "2025-04-30",
-  "datePublished": "2025-04-30",
+  "dateModified": "2025-05-07",
+  "datePublished": "2025-05-07",
   "description": "Caltech Library maintains a list of people, groups and funders and their related identifiers. For many years these were managed using a spreadsheets. That has become cumbersome. \n**COLD** manages data as JSON objects in [dataset](https://github.com/caltechlibrary/dataset) collections. \n\n**COLD** is implemented as three web web services\n\n- cold web UI\n- cold JSON API (provided by datasetd)\n- cold reports (the report request system)\n\nReports are implemented as a set of programs or bash scripts.\n\nTypeScript+Deno is used to implement the web UI and report system.\nThe JSON API is provided by Dataset's datasetd.\nAccess control is provided by the front end web server integrated with Shibboleth.",
   "funder": [
     {
@@ -96,9 +96,9 @@
     "Dataset >= 2.2",
     "CMTools >= 0.0.18"
   ],
-  "version": "0.0.24",
+  "version": "0.0.25",
   "developmentStatus": "wip",
   "issueTracker": "https://github.com/caltechlibrary/cold/issues",
   "downloadUrl": "https://github.com/caltechlibrary/cold/release/latest",
-  "releaseNotes": "Fix bug in lookup_name SQL call, broke the UI in looking up a clgid from group name. Split it out\nto a new function for division_people called `lookup_name_or_clgid`."
+  "releaseNotes": "Turn of CaltechFUNDERS collection."
 }

@@ -17,23 +17,23 @@ Access control is provided by the front end web server integrated with Shibbolet
 authors:
   - family_name: Doiel
     given_name: R. S.
-    orcid: https://orcid.org/0000-0003-0900-6903
+    id: https://orcid.org/0000-0003-0900-6903
 
 contributor:
   - family_name: Johnson
     given_name: Kathy
-    orcid: https://orcid.org/0000-0002-0026-2516
+    id: https://orcid.org/0000-0002-0026-2516
   - family_name: Morrell
     given_name: Thomas E
-    orcid: https://orcid.org/0000-0001-9266-5146
+    id: https://orcid.org/0000-0001-9266-5146
 
 maintainer:
   - family_name: Doiel
     given_name: R. S.
-    orcid: https://orcid.org/0000-0003-0900-6903
+    id: https://orcid.org/0000-0003-0900-6903
 
 repository_code: https://github.com/caltechlibrary/cold
-version: 0.0.24
+version: 0.0.25
 license_url: https://caltechlibrary.github.io/cold/LICENSE
 operating_system:
   - Linux
@@ -53,25 +53,31 @@ keywords:
   - objects
   - controlled vocabulary
 
-date_released: 2025-04-30
+date_released: 2025-05-07
 ---
 
 About this software
 ===================
 
-## cold 0.0.24
+## cold 0.0.25
+
+Turn of CaltechFUNDERS collection.
 
 ### Authors
 
-- R. S. Doiel https://orcid.org/0000-0003-0900-6903
+- R. S. Doiel, <https://orcid.org/0000-0003-0900-6903>
+
 
 ### Contributors
 
-- Kathy Johnson https://orcid.org/0000-0002-0026-2516- Thomas E Morrell https://orcid.org/0000-0001-9266-5146
+- Kathy Johnson, <https://orcid.org/0000-0002-0026-2516>
+- Thomas E Morrell, <https://orcid.org/0000-0001-9266-5146>
+
 
 ### Maintainers
 
-- R. S. Doiel https://orcid.org/0000-0003-0900-6903
+- R. S. Doiel, <https://orcid.org/0000-0003-0900-6903>
+
 
 Caltech Library maintains a list of people, groups and funders and their related identifiers. For many years these were managed using a spreadsheets. That has become cumbersome. 
 **COLD** manages data as JSON objects in [dataset](https://github.com/caltechlibrary/dataset) collections. 
