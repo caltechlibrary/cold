@@ -35,3 +35,8 @@ reports:
     basename: group_vocabulary
     append_datestamp: false
     content_type: application/yaml
+  people_vocabulary:
+    cmd: ./run_people_vocabulary.bash
+    basename: people_vocabulary
+    append_datestamp: false
+    content_type: application/yaml

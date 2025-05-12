@@ -1,6 +1,6 @@
 {
   "tasks": {
-    "setup": "dataset init people.ds 'sqlite://collection.db' ; dataset init groups.ds 'sqlite://collection.db' ; dataset init funders.ds 'sqlite://collection.db' ; dataset init issn.ds 'sqlite://collection.db'; dataset init doi_prefix.ds 'sqlite://collection.db' ; dataset init subjects.ds 'sqlite://collection.db' ; dataset init test.ds 'sqlite://collection.db' ; dataset init reports.ds 'sqlite://collection.db'",
+    "setup": "dataset init people.ds 'sqlite://collection.db' ; dataset init groups.ds 'sqlite://collection.db' ; dataset init funders.ds 'sqlite://collection.db' ; dataset init issn.ds 'sqlite://collection.db'; dataset init doi_prefix.ds 'sqlite://collection.db' ; dataset init subjects.ds 'sqlite://collection.db' ; dataset init test.ds 'sqlite://collection.db' ; dataset init reports.ds 'sqlite://collection.db' ; dataset init journals.ds ; ",
     "cold_api": "datasetd cold_api.yaml",
     "cold": "deno run --watch  --allow-read --allow-net --watch cold.ts --htdocs=./htdocs --baseUrl=http://localhost:8111",
     "cold_api_debug": "datasetd --debug cold_api.yaml",
@@ -14,13 +14,14 @@
     "dev": "deno run  --allow-read --allow-net --watch cold.ts --htdocs=./htdocs",
     "reload_dev": "deno run  --allow-read --allow-net --reload --write-lock --watch cold.ts --htdocs=./htdocs",
     "start": "deno run --allow-read --allow-net cold.ts",
-    "build": "deno task cold.ts ; deno task directory_sync.ts ; deno task cold_reports.ts ; deno task journal_vocabulary.ts ; deno task group_vocabulary.ts ; deno task division_people.ts",
+    "build": "deno task cold.ts ; deno task directory_sync.ts ; deno task cold_reports.ts ; deno task journal_vocabulary.ts ; deno task group_vocabulary.ts ; deno task people_vocabulary.ts ; deno task division_people.ts",
     "cold.ts": "deno compile  --allow-read --allow-net --output bin/cold cold.ts",
     "directory_sync.ts": "deno compile  --allow-read --allow-net --output bin/directory_sync directory_sync.ts",
     "division_people.ts": "deno compile --allow-read --allow-write --allow-net --output bin/division_people division_people.ts",
     "cold_reports.ts": "deno compile --allow-all --output bin/cold_reports cold_reports.ts",
     "journal_vocabulary.ts": "deno compile --allow-net --output bin/journal_vocabulary journal_vocabulary.ts",
     "group_vocabulary.ts": "deno compile --allow-net --output bin/group_vocabulary group_vocabulary.ts",
+    "people_vocabulary.ts": "deno compile --allow-net --output bin/people_vocabulary people_vocabulary.ts",
     "htdocs": "deno run --allow-read --allow-env --allow-write=htdocs --allow-import build.ts",
     "test": "dsquery test.ds 'delete from test' ; deno test --allow-net dataset_test.ts ; deno test options_test.ts ; deno test config_test.ts ; deno test people_test.ts ; deno test groups_test.ts ; deno test cold_test.ts ",
     "import_people_csv": "deno run  --allow-read --allow-net ds_importer.ts people.ds people.csv",

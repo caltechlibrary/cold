@@ -32,7 +32,7 @@ maintainer:
     id: https://orcid.org/0000-0003-0900-6903
 
 repository_code: https://github.com/caltechlibrary/cold
-version: 0.0.26
+version: 0.0.27
 license_url: https://caltechlibrary.github.io/cold/LICENSE
 operating_system:
   - Linux
@@ -52,15 +52,15 @@ keywords:
   - objects
   - controlled vocabulary
 
-date_released: 2025-05-07
+date_released: 2025-05-12
 ---
 
 About this software
 ===================
 
-## cold 0.0.26
+## cold 0.0.27
 
-Turn of CaltechFUNDERS collection, integrated web components into funder view and edit.
+Added People Vacabulary generation. Changed cold API query for groups vocabulary to be called group_vocabulary to machine query defined for people vocabulary.
 
 ### Authors
 

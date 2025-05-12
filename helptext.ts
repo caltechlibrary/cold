@@ -254,7 +254,7 @@ export const groupVocabularyHelpText =
 {app_name} generates an RDM Vocabulary for Groups based on
 the dataset collection called "groups.ds".
 The dataset collection must be in the same directory where you
-run {app_name}.  It must have the "group_names" query defined
+run {app_name}.  It must have the "group_vocabulary" query defined
 in the "cold_api.yaml" file and the "cold_api" service running. 
 If all goes well {app_name} should exist with a zero status code.
 
@@ -272,6 +272,50 @@ If all goes well {app_name} should exist with a zero status code.
 # EXAMPLE
 
 Aside from being in the same directory as "groups.ds" {app_name}
+will do the rest.
+
+~~~shell
+{app_name}
+~~~
+
+`;
+
+export const peopleVocabularyHelpText =
+  `%{app_name}(1) user manual | {version}  {release_hash}
+% R. S.Doiel
+% {release_date}
+
+# NAME
+    
+{app_name}
+    
+# SYNOPSIS
+    
+{app_name} [OPTIONS]
+    
+# DESCRIPTION
+
+{app_name} generates an RDM Vocabulary for People based on
+the dataset collection called "people.ds".
+The dataset collection must be in the same directory where you
+run {app_name}.  It must have the "people_vocabulary" query defined
+in the "cold_api.yaml" file and the "cold_api" service running. 
+If all goes well {app_name} should exist with a zero status code.
+
+# OPTION
+
+-h, --help
+: display this help page
+
+-l, --license
+: display the license information
+
+-v, --version
+: display version number
+
+# EXAMPLE
+
+Aside from being in the same directory as "people.ds" {app_name}
 will do the rest.
 
 ~~~shell

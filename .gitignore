@@ -18,8 +18,10 @@ cdh.yaml
 cold_directory_sync.yaml
 logs/*
 groups_rpt.sql
+*.csv
 *_final.csv
 in_feeds.csv
 htdocs/rpt/*
 *.zip
 *.tgz
+*.jsonl

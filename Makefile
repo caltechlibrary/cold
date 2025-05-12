@@ -5,9 +5,9 @@ PROJECT = cold
 
 PACKAGE =  $(shell ls -1 *.ts | grep -v 'version.ts')
 
-PROGRAMS = cold cold_reports directory_sync journal_vocabulary group_vocabulary division_people
+PROGRAMS = cold cold_reports directory_sync journal_vocabulary group_vocabulary people_vocabulary division_people
 
-TS_MODS = cold.ts cold_reports.ts directory_sync.ts journal_vocabulary.ts group_vocabulary.ts
+TS_MODS = cold.ts cold_reports.ts directory_sync.ts journal_vocabulary.ts group_vocabulary.ts people_vocabulary.ts
 
 GIT_GROUP = caltechlibrary
 

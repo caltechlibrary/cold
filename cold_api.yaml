@@ -11,6 +11,47 @@ collections:
   # /api/<dataset_name>/...
   - dataset: people.ds
     query:
+      people_vocabulary: |
+        select json_object('clpid', src->'clpid',
+            'family_name', src->'family_name',
+            'given_name', src->'given_name',
+            'debug_orcid', src->'orcid',
+            'debug_orcid_length', length(src->>'orcid'),
+            'identifiers',
+              if(length(src->>'orcid') > 1, 
+                json_array(
+                  json_object(
+                    'scheme', 'clpid',
+                    'identifier', src->'clpid'
+                  ),
+                  json_object(
+                    'scheme', 'orcid',
+                    'identifier', src->'orcid'
+                  )
+                ),
+                length(src->>'orcid') = 0,
+                json_array(
+                  json_object(
+                    'scheme', 'clpid',
+                    'identifier', src->'clpid'
+                  )
+                )
+              ),
+            'affiliations',
+              if(src->>'ror' = 'https://ror.org/05dxps055',
+                json_array(
+                  json_object(
+                    'id', replace(src->>'ror', 'https://ror.org/', ''),
+                    'name', 'Caltech' 
+                  )
+                ),
+                src->>'ror' <> 'https://ror.org/05dxps055',
+                json_array()
+              )
+            )
+          as src
+        from people
+        order by src->'family_name' ASC, src->'given_name' ASC;
       people_names: |
         select json_object('clpid', src->'clpid', 'family_name', src->'family_name', 'given_name', src->'given_name') as src
         from people
@@ -84,6 +125,10 @@ collections:
     versions: true
   - dataset: groups.ds
     query:
+      group_vocabulary: |
+        select json_object('clgid', src->'clgid', 'group_name', src->'name') as src
+        from groups
+        order by src->'name' asc;
       group_names: |
         select json_object('clgid', src->'clgid', 'group_name', src->'name') as src
         from groups

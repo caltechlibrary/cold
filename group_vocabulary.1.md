@@ -1,6 +1,6 @@
-%group_vocabulary(1) user manual | 0.0.26  40da2e7
+%group_vocabulary(1) user manual | 0.0.27  a032f5c
 % R. S.Doiel
-% 2025-05-07
+% 2025-05-12
 
 # NAME
     
@@ -15,7 +15,7 @@ group_vocabulary [OPTIONS]
 group_vocabulary generates an RDM Vocabulary for Groups based on
 the dataset collection called "groups.ds".
 The dataset collection must be in the same directory where you
-run group_vocabulary.  It must have the "group_names" query defined
+run group_vocabulary.  It must have the "group_vocabulary" query defined
 in the "cold_api.yaml" file and the "cold_api" service running. 
 If all goes well group_vocabulary should exist with a zero status code.
 

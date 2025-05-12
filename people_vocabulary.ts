@@ -1,5 +1,5 @@
 /**
- * group_vocabulary.ts turns the groups collection into an RDM style vocabulary (YAML)
+ * people_vocabulary.ts turns people collection into an RDM style vocabulary (YAML)
  */
 import { parseArgs } from "@std/cli";
 import {
@@ -9,35 +9,45 @@ import {
   yaml,
 } from "./deps.ts";
 
-//import { Group } from "./groups.ts";
-
 import { licenseText, releaseDate, releaseHash, version } from "./version.ts";
-import { fmtHelp, groupVocabularyHelpText } from "./helptext.ts";
+import { fmtHelp, peopleVocabularyHelpText } from "./helptext.ts";
 
-const appName = "group_vocabulary";
-const ds = new Dataset(apiPort, "groups.ds");
+const appName = "people_vocabulary";
+const ds = new Dataset(apiPort, "people.ds");
 
 /**
  * toRDMObject() returns an abbreviated object that maps to RDM's vocabularies
  */
 function toRDMObject(obj: { [key: string]: any }): Object {
   //console.log(`DEBUG item : ${JSON.stringify(obj)}`);
+  /* Example structure for irdmtools, issues #74
+  family_name: Aagard
+  given_name: Brad Thomas
+  id: Aagard-Brad-Thomas
+  identifiers:
+    - scheme: clpid
+      identifier: Aagard-Brad-Thomas
+  affiliations:
+    - id: 05dxps055
+      name: Caltech
+  */
   return {
-    id: obj.clgid,
-    title: {
-      en: obj.group_name,
-    },
+    id: obj.clpid,
+    family_name: obj.family_name,
+    given_name: obj.given_name,
+    identifiers: obj.identifiers,
+    affiliations: obj.affiliations,
   };
 }
 
-/* Generate the Group vocabulary file for RDM. */
-async function group_vocabulary() {
-  const group_list = (await ds.query("group_names", [], {})) as {
+/* Generate the people vocabulary file for RDM. */
+async function people_vocabulary() {
+  const people_list = (await ds.query("people_vocabulary", [], {})) as {
     [key: string]: any;
   }[];
   let l: { [key: string]: any }[] = [];
-  if (group_list !== undefined) {
-    for (let item of group_list) {
+  if (people_list !== undefined) {
+    for (let item of people_list) {
       l.push(toRDMObject(item));
     }
   }
@@ -60,7 +70,7 @@ function main() {
   if (app.help) {
     console.log(
       fmtHelp(
-        groupVocabularyHelpText,
+        peopleVocabularyHelpText,
         appName,
         version,
         releaseDate,
@@ -78,7 +88,7 @@ function main() {
     Deno.exit(0);
   }
 
-  group_vocabulary();
+  people_vocabulary();
 }
 
 if (import.meta.main) main();
