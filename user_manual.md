@@ -14,8 +14,9 @@
 - [directory_sync](directory_sync.1.md) (man page)
 - [division_people](division_people.1.md) (man page)
 - [journal_vocabulary](journal_vocabulary.1.md) (man page)
+- [thesis_option_vocabulary](thesis_option_vocabulary.1.md) (man page)
 - [group_vocabulary](group_vocabulary.1.md) (man page)
-- [people_vocabulary](peopl_vocabulary.1.md) (man page)
+- [people_vocabulary](people_vocabulary.1.md) (man page)
 - [devemopment notes](development_notes.md)
 - [presentations](presentations/presentation1.md)
 
