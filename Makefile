@@ -5,9 +5,9 @@ PROJECT = cold
 
 PACKAGE =  $(shell ls -1 *.ts | grep -v 'version.ts')
 
-PROGRAMS = cold cold_reports directory_sync journal_vocabulary group_vocabulary people_vocabulary division_people
+PROGRAMS = cold cold_reports directory_sync journal_vocabulary group_vocabulary people_vocabulary division_people thesis_option_vocabulary
 
-TS_MODS = cold.ts cold_reports.ts directory_sync.ts journal_vocabulary.ts group_vocabulary.ts people_vocabulary.ts
+TS_MODS = cold.ts cold_reports.ts directory_sync.ts journal_vocabulary.ts group_vocabulary.ts people_vocabulary.ts thesis_option_vocabulary.ts
 
 GIT_GROUP = caltechlibrary
 
@@ -51,8 +51,10 @@ compile: check $(TS_MODS)
 	bin/cold$(EXT) --help >cold.1.md
 	bin/directory_sync$(EXT) --help >directory_sync.1.md
 	bin/cold_reports$(EXT) --help >cold_reports.1.md
-	bin/journal_vocabulary$(EXT) --help >journal_vocabulary.1.md
 	bin/group_vocabulary$(EXT) --help >group_vocabulary.1.md
+	bin/people_vocabulary$(EXT) --help >people_vocabulary.1.md
+	bin/thesis_option_vocabulary$(EXT) --help >thesis_option_vocabulary.1.md
+	bin/journal_vocabulary$(EXT) --help >journal_vocabulary.1.md
 	bin/division_people$(EXT) --help >division_people.1.md
 
 check: $(TS_MODS)

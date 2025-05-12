@@ -236,6 +236,51 @@ will do the rest.
 
 `;
 
+export const thesisOptionVocabularyHelpText =
+  `%{app_name}(1) user manual | {version}  {release_hash}
+% R. S.Doiel
+% {release_date}
+
+# NAME
+    
+{app_name}
+    
+# SYNOPSIS
+    
+{app_name} [OPTIONS]
+    
+# DESCRIPTION
+
+{app_name} generates an RDM Thesis Option Vocabulary. It based on
+the Thesis Option data held in the dataset collection called "thesis_options.ds".
+The dataset collection must be in the same directory where you
+run {app_name}.  It must have the "thesis_option_names" query defined
+for the dataset collection in the "cold_api.yaml" file. The
+cold JSON API must be running for {app_name} to work.
+If all goes well {app_name} should exist with a zero status code.
+
+# OPTION
+
+-h, --help
+: display this help page
+
+-l, --license
+: display the license information
+
+-v, --version
+: display version number
+
+# EXAMPLE
+
+Aside from being in the same directory as "thesis_options.ds" {app_name}
+will do the rest.
+
+~~~shell
+{app_name}
+~~~
+
+`;
+
 export const groupVocabularyHelpText =
   `%{app_name}(1) user manual | {version}  {release_hash}
 % R. S.Doiel

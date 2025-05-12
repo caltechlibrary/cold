@@ -45,3 +45,8 @@ reports:
     basename: people_vocabulary
     append_datestamp: false
     content_type: application/yaml
+  thesis_option_vocabulary:
+    cmd: ./run_thesis_option_vocabulary.bash
+    basename: thesis_option_vocabulary
+    append_datestamp: false
+    content_type: application/yaml 

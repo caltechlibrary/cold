@@ -32,7 +32,7 @@ maintainer:
     id: https://orcid.org/0000-0003-0900-6903
 
 repository_code: https://github.com/caltechlibrary/cold
-version: 0.0.27
+version: 0.0.28
 license_url: https://caltechlibrary.github.io/cold/LICENSE
 operating_system:
   - Linux
@@ -58,9 +58,9 @@ date_released: 2025-05-12
 About this software
 ===================
 
-## cold 0.0.27
+## cold 0.0.28
 
-Added People Vacabulary generation. Changed cold API query for groups vocabulary to be called group_vocabulary to machine query defined for people vocabulary.
+Added Thesis Option Vacabulary generation. Fixed issue with vocabulary generaiton via cronjob by adding a &quot;push_to_cold&quot; option to each vocabulary report.
 
 ### Authors
 

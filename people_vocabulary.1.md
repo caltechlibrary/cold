@@ -1,6 +1,6 @@
-%people_vocabulary(1) user manual | 0.0.26  a032f5c
+%people_vocabulary(1) user manual | 0.0.28  2a1b4e5
 % R. S.Doiel
-% 2025-05-07
+% 2025-05-12
 
 # NAME
     

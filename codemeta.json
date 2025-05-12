@@ -96,9 +96,9 @@
     "Dataset >= 2.2",
     "CMTools >= 0.0.25"
   ],
-  "version": "0.0.27",
+  "version": "0.0.28",
   "developmentStatus": "wip",
   "issueTracker": "https://github.com/caltechlibrary/cold/issues",
   "downloadUrl": "https://github.com/caltechlibrary/cold/release/latest",
-  "releaseNotes": "Added People Vacabulary generation. Changed cold API query for groups vocabulary to be called group_vocabulary to machine query defined for people vocabulary."
+  "releaseNotes": "Added Thesis Option Vacabulary generation. Fixed issue with vocabulary generaiton via cronjob by adding a \"push_to_cold\" option to each vocabulary report."
 }
