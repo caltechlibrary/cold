@@ -4,6 +4,7 @@ man/*
 dist/*
 _codemeta.json
 *.ds/
+.~*
 *.swp
 *~
 *.bak
