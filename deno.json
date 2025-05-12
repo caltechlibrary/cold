@@ -1,6 +1,6 @@
 {
   "tasks": {
-    "setup": "dataset init people.ds 'sqlite://collection.db' ; dataset init groups.ds 'sqlite://collection.db' ; dataset init funders.ds 'sqlite://collection.db' ; dataset init issn.ds 'sqlite://collection.db'; dataset init doi_prefix.ds 'sqlite://collection.db' ; dataset init subjects.ds 'sqlite://collection.db' ; dataset init test.ds 'sqlite://collection.db' ; dataset init reports.ds 'sqlite://collection.db' ; dataset init journals.ds ; ",
+    "setup": "dataset init people.ds ; dataset init groups.ds ; dataset init funders.ds ; dataset init issn.ds ; dataset init doi_prefix.ds ; dataset init subjects.ds ; dataset init test.ds ; dataset init reports.ds ; dataset init thesis_options.ds ",
     "cold_api": "datasetd cold_api.yaml",
     "cold": "deno run --watch  --allow-read --allow-net --watch cold.ts --htdocs=./htdocs --baseUrl=http://localhost:8111",
     "cold_api_debug": "datasetd --debug cold_api.yaml",

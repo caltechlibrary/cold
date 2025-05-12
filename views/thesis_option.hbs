@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en-US">
+{{>head}}
+<body>
+{{>header}}
+<nav>
+<ul>
+<li><a href="/" title="return home">Home</a></li>
+<li><a href="../" title="return to dashboard">Dashboard</a></li>
+<li><a href="./" title="return to Thesis Options list">Thesis Options</a></li>
+<li><a href="{{thesis_option.option_id}}?view=edit">Edit {{thesis_option.name}}</a></li>
+</ul>
+</nav>
+<section>
+
+<h1>Name: {{thesis_option.name}}</h1>
+
+<div class="identifier">identifier: {{thesis_option.option_id}}</div>
+
+{{#if thesis_option.division}}<h2>Division Name: {{thesis_option.division}}</h2>{{/if}}
+
+<div class="labeled_dates">
+{{#if thesis_option.updated}}<span class="updated">updated: {{thesis_option.updated}}</span>{{/if}}
+</div>
+
+
+<p>
+</section>
+{{>footer}}
+<!-- <code><pre>{{debug_src}}</pre></code> -->  
+</body>
+</html>

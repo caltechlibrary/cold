@@ -8,6 +8,7 @@ import {
   handlePeople,
   handleReports,
   handleSubjects,
+  handleThesisOption,
   OptionsProcessor,
   path,
   serveDir,
@@ -64,8 +65,12 @@ export function ColdReadWriteHandler(
   if (pathname.startsWith("/subjects")) {
     return handleSubjects(req, options);
   }
+  // FIXME: This is the journals vocabulary, really need to rename this at some point.
   if (pathname.startsWith("/issn")) {
     return handleISSN(req, options);
+  }
+  if (pathname.startsWith("/thesis_options")) {
+    return handleThesisOption(req, options);
   }
   if (pathname.startsWith("/doi_prefix")) {
     return handleDOIPrefix(req, options);

@@ -35,6 +35,7 @@ export { handleISSN, ISSN } from "./issn.ts";
 export { handleDOIPrefix, DOIPrefix } from "./doi_prefix.ts";
 export { formDataToObject, pathIdentifier, apiPathParse } from "./utils.ts";
 export { ColdReadWriteHandler } from "./cold.ts";
+export { handleThesisOption, ThesisOption } from "./thesis_option.ts";
 
 /* directory_sync setup */
 export { DOMParser, Document, Element } from "jsr:@b-fuze/deno-dom";

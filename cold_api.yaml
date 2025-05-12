@@ -187,6 +187,23 @@ collections:
     update: true
     # This sets versioning behavior
     versions: true
+  - dataset: thesis_options.ds
+    query:
+      thesis_option_names: |
+        select json_object(
+           'option_id', src->'option_id',
+           'name', src->'name',
+           'division', src->'division'
+        ) as src
+        from thesis_options
+        order by src->'name';
+    # What follows are object level permissions
+    keys: true
+    create: true
+    read: true
+    update: true
+    # This sets versioning behavior
+    versions: true
   - dataset: issn.ds
     query:
       issn_names: |
