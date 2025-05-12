@@ -25,6 +25,11 @@ reports:
     basename: division_people_crosswalk
     append_datestamp: false
     content_type: text/csv
+  run_people_identifier_csv:
+    cmd: ./run_people_identifier_csv.bash
+    basename: people_identifier
+    append_datestamp: true
+    content_type: text/csv
   journal_vocabulary:
     cmd: ./run_journal_vocabulary.bash
     basename: journal_vocabulary
