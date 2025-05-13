@@ -17,9 +17,10 @@
 {{#people_list}}
   <li>
     <a href="{{clpid}}" title="view people details">{{family_name}}, {{given_name}}</a>
-    {{#if orcid}} @ORCID:<a href="https://orcid.org/{{orcid}}" title="view at ORCID.org" target="_blank">{{orcid}}</a>{{/if}}
-    {{#if thesis_id}} @CaltechTHESIS:<a href="https://thesis.library.caltech.edu/view/author/{{thesis_id}}.html" title="view at CaltechTHESIS" target="_blank">{{thesis_id}}</a>{{/if}}
-    {{#if directory_id}} @CaltechDirectory:<a href="https://directory.caltech.edu/personnel/{{directory_id}}" title="view in Caltech Directory" target="_blank">{{directory_id}}</a>{{/if}}
+    {{#if orcid}}<br> @ORCID: <a href="https://orcid.org/{{orcid}}" title="view at ORCID.org" target="_blank">{{orcid}}</a>{{/if}}
+    {{#if thesis_id}}<br> @CaltechTHESIS: <a href="https://thesis.library.caltech.edu/view/author/{{thesis_id}}.html" title="view at CaltechTHESIS" target="_blank">{{thesis_id}}</a>{{/if}}
+    {{#if directory_id}}<br> @CaltechDirectory: <a href="https://directory.caltech.edu/personnel/{{directory_id}}" title="view in Caltech Directory" target="_blank">{{directory_id}}</a>{{/if}}
+    <p>
   </li>
 {{/people_list}}
 </ul>
