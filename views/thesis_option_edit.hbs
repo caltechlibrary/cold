@@ -14,10 +14,10 @@
 <section>
 <h1>{{#isCreateObject}}Create:{{/isCreateObject}}{{^isCreateObject}}Edit:{{/isCreateObject}} {{thesis_option.name}}</h1>
 
-<form action="{{thesis_option.id}}" method="post">
+<form action="{{thesis_option.option_id}}" method="post">
 
 <div>
-<label set="option_id">Identifier</label> <input type="text" id="option_id" name="option_id" value="{{thesis_option.id}}" {{^isCreateObject}}readonly{{/isCreateObject}} required="true" />
+<label set="option_id">Identifier</label> <input type="text" id="option_id" name="option_id" value="{{thesis_option.option_id}}" {{^isCreateObject}}readonly{{/isCreateObject}} required="true" />
 </div>
 
 <div>

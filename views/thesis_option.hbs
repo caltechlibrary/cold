@@ -15,10 +15,11 @@
 
 <h1>Name: {{thesis_option.name}}</h1>
 
-<div class="identifier">identifier: {{thesis_option.option_id}}</div>
+<div class="identifier">Identifier: {{thesis_option.option_id}}</div>
+<div class="identifier">Option: {{thesis_option.name}}</div>
 
-{{#if thesis_option.division}}<h2>Division Name: {{thesis_option.division}}</h2>{{/if}}
-
+{{#if thesis_option.division}}<div>Division: {{thesis_option.division}}</div>{{/if}}
+<p>
 <div class="labeled_dates">
 {{#if thesis_option.updated}}<span class="updated">updated: {{thesis_option.updated}}</span>{{/if}}
 </div>

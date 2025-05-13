@@ -32,7 +32,7 @@ maintainer:
     id: https://orcid.org/0000-0003-0900-6903
 
 repository_code: https://github.com/caltechlibrary/cold
-version: 0.0.28
+version: 0.0.29
 license_url: https://caltechlibrary.github.io/cold/LICENSE
 operating_system:
   - Linux
@@ -52,15 +52,15 @@ keywords:
   - objects
   - controlled vocabulary
 
-date_released: 2025-05-12
+date_released: 2025-05-13
 ---
 
 About this software
 ===================
 
-## cold 0.0.28
+## cold 0.0.29
 
-Added Thesis Option Vacabulary generation. Fixed issue with vocabulary generaiton via cronjob by adding a &quot;push_to_cold&quot; option to each vocabulary report.
+Improved Thesis Option Vacabulary curation. Setup for importing Thesis Options.
 
 ### Authors
 

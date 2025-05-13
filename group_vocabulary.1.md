@@ -1,6 +1,6 @@
-%group_vocabulary(1) user manual | 0.0.28  2a1b4e5
+%group_vocabulary(1) user manual | 0.0.29  df3dce7
 % R. S.Doiel
-% 2025-05-12
+% 2025-05-13
 
 # NAME
     
