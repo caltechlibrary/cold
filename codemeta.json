@@ -96,9 +96,9 @@
     "Dataset >= 2.2",
     "CMTools >= 0.0.25"
   ],
-  "version": "0.0.29",
+  "version": "0.0.30",
   "developmentStatus": "wip",
   "issueTracker": "https://github.com/caltechlibrary/cold/issues",
   "downloadUrl": "https://github.com/caltechlibrary/cold/release/latest",
-  "releaseNotes": "Improved Thesis Option Vacabulary curation. Setup for importing Thesis Options."
+  "releaseNotes": "Replace People List A to Z UL with a sortable table version."
 }

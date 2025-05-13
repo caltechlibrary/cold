@@ -32,7 +32,7 @@ maintainer:
     id: https://orcid.org/0000-0003-0900-6903
 
 repository_code: https://github.com/caltechlibrary/cold
-version: 0.0.29
+version: 0.0.30
 license_url: https://caltechlibrary.github.io/cold/LICENSE
 operating_system:
   - Linux
@@ -58,9 +58,9 @@ date_released: 2025-05-13
 About this software
 ===================
 
-## cold 0.0.29
+## cold 0.0.30
 
-Improved Thesis Option Vacabulary curation. Setup for importing Thesis Options.
+Replace People List A to Z UL with a sortable table version.
 
 ### Authors
 
