@@ -53,7 +53,13 @@ collections:
         from people
         order by src->'family_name' ASC, src->'given_name' ASC;
       people_names: |
-        select json_object('clpid', src->'clpid', 'family_name', src->'family_name', 'given_name', src->'given_name') as src
+        select json_object(
+          'clpid', src->'clpid',
+          'family_name', src->'family_name',
+          'given_name', src->'given_name',
+          'orcid', ifnull(src->'orcid', ''),
+          'thesis_id', ifnull(src->'thesis_id', ''),
+          'directory_id', ifnull(src->'directory_user_id', '')) as src
         from people
         order by src->'family_name' ASC, src->'given_name' ASC;
       missing_bios: |

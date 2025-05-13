@@ -15,7 +15,12 @@
 <a-to-z-ul id="people_list" long>
 <ul>
 {{#people_list}}
-  <li><a href="{{clpid}}" title="view people details">{{family_name}}, {{given_name}}</a></li>
+  <li>
+    <a href="{{clpid}}" title="view people details">{{family_name}}, {{given_name}}</a>
+    {{#if orcid}} @ORCID: <a href="https://orcid.org/{{orcid}}" title="view orcid record" target="_blank">{{orcid}}</a>{{/if}}
+    {{#if directory_id}} @Caltech: <a href="https://directory.caltech.edu/personnel/{{directory_id}}">{{directory_id}}@caltech.edu</a>{{/if}}
+    {{#if thesis_id}} @CaltechTHESIS: <a href="https://thesis.library.caltech.edu/view/author/{{thesis_id}}.html">{{thesis_id}}</a>{{/if}}
+  </li>
 {{/people_list}}
 </ul>
 </section>
