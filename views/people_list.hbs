@@ -12,20 +12,25 @@
 </nav>
 <section>
 <h1>CaltechPEOPLE</h1>
-<a-to-z-ul id="people_list" long>
-<ul>
+<sortable-table id="people_list">
+<table>
+  <thead>
+    <tr><th>name</th><th>clpid</th><th>orcid</th><th>thesis id</th><th>directory</th></tr>
+  </thead>
+  <tbody>
 {{#people_list}}
-  <li>
-    <a href="{{clpid}}" title="view people details">{{family_name}}, {{given_name}}</a>
-    {{#if orcid}}<br> @ORCID: <a href="https://orcid.org/{{orcid}}" title="view at ORCID.org" target="_blank">{{orcid}}</a>{{/if}}
-    {{#if thesis_id}}<br> @CaltechTHESIS: <a href="https://thesis.library.caltech.edu/view/author/{{thesis_id}}.html" title="view at CaltechTHESIS" target="_blank">{{thesis_id}}</a>{{/if}}
-    {{#if directory_id}}<br> @CaltechDirectory: <a href="https://directory.caltech.edu/personnel/{{directory_id}}" title="view in Caltech Directory" target="_blank">{{directory_id}}</a>{{/if}}
-    <p>
-  </li>
+  <tr>
+    <td><a href="{{clpid}}" title="view people details">{{family_name}}, {{given_name}}</a></td>
+    <td>{{clpid}}</td>
+    <td>{{#if orcid}}<a href="https://orcid.org/{{orcid}}" title="view at ORCID.org" target="_blank">{{orcid}}</a>{{/if}}</td>
+    <td>{{#if thesis_id}}<a href="https://thesis.library.caltech.edu/view/author/{{thesis_id}}.html" title="view at CaltechTHESIS" target="_blank">{{thesis_id}}</a>{{/if}}</td>
+    <td>{{#if directory_id}}<a href="https://directory.caltech.edu/personnel/{{directory_id}}" title="view in Caltech Directory" target="_blank">{{directory_id}}</a>{{/if}}</td>
+  </tr>
 {{/people_list}}
-</ul>
+  </tbody>
+</table>
 </section>
 {{>footer}}
-<script type="module" src="../js/a_to_z_ul.js"></script>
+<script type="module" src="../js/sortable_table.js"></script>
 </body>
 </html>
