@@ -14,7 +14,7 @@
 <section>
 <h1>{{#isCreateObject}}Create:{{/isCreateObject}}{{^isCreateObject}}Edit:{{/isCreateObject}} {{issn.name}}</h1>
 
-<form action="{{issn.issn}}" method="post">
+<form id="issn-edit-form" action="{{issn.issn}}" method="post">
 
 <div>
 <label set="issn">issn</label> <input type="text" id="issn" name="issn" value="{{issn.issn}}" {{^isCreateObject}}readonly{{/isCreateObject}} required="true" />
@@ -26,11 +26,15 @@
 
 <div>
 <label set="alternative_names">Other Names (one per line)</label><br>
+<csv-textarea id="alternative_names" name="alternative_names" title="Curate the affiliated group names. Enter a alt name, one per row. Add rows as needed. Cleanup removes empty rows." column-headings="alternative">
+<datalist id="column-0"></datalist>
+
 <textarea id="alternative_names" name="alternative_names" rows="10" cols="60">
 {{#issn.alternative_names}}
 {{ . }}
 {{/issn.alternative_names}}
 </textarea>
+</csv-textarea>
 </div>
 
 <div>
@@ -70,6 +74,8 @@
 <p>
 </section>
 {{>footer}}
+<script type="module" src="../js/csvtextarea.js"></script>
+<script type="module" src="../js/issn_edit.js"></script>
 <!-- <code><pre>{{debug_src}}</pre></code> -->
 </body>
 </html>
