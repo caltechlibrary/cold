@@ -14,10 +14,10 @@
 <section>
 <h1>{{#isCreateObject}}Create:{{/isCreateObject}}{{^isCreateObject}}Edit:{{/isCreateObject}} {{subject.name}}</h1>
 
-<form action="{{subject.clsid}}" method="post">
+<form id="subject-edit-form" action="{{subject.clsid}}" method="post">
 
 <div>
-<label set="clsid">clsid</label> <input type="text" id="clsid" name="clsid" value="{{subject.clsid}}" {{^isCreateObject}}readonly{{/isCreateObject}} required="true" />
+<label set="clsid">clsid</label> <input type="text" id="clsid" name="clsid" pattern="(\w|\.|-)+" value="{{subject.clsid}}" title="clsid is formed from alphanumeric characters, dash, period and underscores" {{^isCreateObject}}readonly{{/isCreateObject}} title="enter the clsid to use without using the URL protocol prefix" required="true" />
 </div>
 
 <div>

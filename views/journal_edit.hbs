@@ -17,7 +17,7 @@
 <form id="issn-edit-form" action="{{journal.issn}}" method="post">
 
 <div>
-<label set="issn">issn</label> <input type="text" id="issn" name="issn" value="{{journal.issn}}" {{^isCreateObject}}readonly{{/isCreateObject}} required="true" />
+<label set="issn">issn</label> <input type="text" id="issn" name="issn" pattern="^(\d{4})-(\d{3}[\dX])$" value="{{journal.issn}}" {{^isCreateObject}}readonly{{/isCreateObject}} required="true" />
 </div>
 
 <div>

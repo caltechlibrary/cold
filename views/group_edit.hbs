@@ -17,7 +17,7 @@
 <form id="group-edit-form" action="{{group.clgid}}" method="post">
 
 <div class="label-input-block">
-<label set="clgid">Caltech Library Group ID</label> <input type="text" id="clgid" name="clgid" value="{{group.clgid}}" size="60" {{^isCreateObject}}readonly{{/isCreateObject}} required="true" />
+<label set="clgid">Caltech Library Group ID</label> <input type="text" id="clgid" name="clgid" pattern="(\w|\.|-)+"  value="{{group.clgid}}" size="60" {{^isCreateObject}}readonly{{/isCreateObject}} required="true" />
 </div>
 
 <div class="label-input-block"  >

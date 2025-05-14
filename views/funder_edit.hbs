@@ -17,7 +17,7 @@
 <form id="funder-edit-form" action="{{funder.clfid}}" method="post">
 
 <div>
-<label set="clfid">clfid</label> <input type="text" id="clfid" name="clfid" value="{{funder.clfid}}" {{^isCreateObject}}readonly{{/isCreateObject}} required="true" />
+<label set="clfid">clfid</label> <input type="text" id="clfid" name="clfid" value="{{funder.clfid}}" pattern="[\w\-˙​]+"  {{^isCreateObject}}readonly{{/isCreateObject}} required="true" />
 </div>
 
 <div>

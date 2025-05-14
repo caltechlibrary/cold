@@ -21,7 +21,7 @@
 </div>
 
 <div>
-<label set="clpid">Caltech Library People ID</label> <input type="text" id="clpid" name="clpid" value="{{people.clpid}}" {{^isCreateObject}}readonly{{/isCreateObject}} required="true" />
+<label set="clpid">Caltech Library People ID</label> <input type="text" id="clpid" name="clpid" pattern="(\w|\.|-)+" value="{{people.clpid}}" {{^isCreateObject}}readonly{{/isCreateObject}} required="true" />
 </div>
 
 <div>
