@@ -4,7 +4,7 @@ import {
   handleDOIPrefix,
   handleFunders,
   handleGroups,
-  handleISSN,
+  handleJournals,
   handlePeople,
   handleReports,
   handleSubjects,
@@ -66,8 +66,8 @@ export function ColdReadWriteHandler(
     return handleSubjects(req, options);
   }
   // FIXME: This is the journals vocabulary, really need to rename this at some point.
-  if (pathname.startsWith("/issn")) {
-    return handleISSN(req, options);
+  if (pathname.startsWith("/journals")) {
+    return handleJournals(req, options);
   }
   if (pathname.startsWith("/thesis_options")) {
     return handleThesisOption(req, options);

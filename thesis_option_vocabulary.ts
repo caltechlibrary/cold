@@ -1,5 +1,5 @@
 /**
- * journal_vocabulary.ts turns the issn collection into an RDM style Journals vocabulary (YAML)
+ * journal_vocabulary.ts turns the thesis_option collection into an RDM style Journals vocabulary (YAML)
  */
 import { parseArgs } from "@std/cli";
 import {
@@ -30,13 +30,13 @@ function toRDMObject(obj: ThesisOption): Object {
 
 /* Generate the Thesis Option vocabulary file for RDM. */
 async function thesis_option_vocabulary() {
-  const issn_list =
+  const thesis_option_list =
     (await ds.query("thesis_option_names", [], {})) as ThesisOption[];
   let l: object[] = [];
-  if (issn_list !== undefined) {
-    for (let item of issn_list) {
+  if (thesis_option_list !== undefined) {
+    for (let item of thesis_option_list) {
       l.push(toRDMObject(item));
-      //        l.push({"id": item.issn, "title": { "en": item.name});
+      //        l.push({"id": item.thesis_option, "title": { "en": item.name});
       //        console.log(`DEBUG item ${item}`);
     }
   }

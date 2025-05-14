@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en-US">
+{{>head}}
+<body>
+{{>header}}
+<nav>
+<ul>
+<li><a href="/" title="return home">Home</a></li>
+<li><a href="../" title="return to dashboard">Dashboard</a></li>
+<li><a href="./" title="return to Journals list">Journals</a></li>
+<li><a href="{{journal.issn}}">View {{journal.name}}</a></li>
+</ul>
+</nav>
+<section>
+<h1>{{#isCreateObject}}Create:{{/isCreateObject}}{{^isCreateObject}}Edit:{{/isCreateObject}} {{journal.name}}</h1>
+
+<form id="issn-edit-form" action="{{journal.issn}}" method="post">
+
+<div>
+<label set="issn">issn</label> <input type="text" id="issn" name="issn" value="{{journal.issn}}" {{^isCreateObject}}readonly{{/isCreateObject}} required="true" />
+</div>
+
+<div>
+<label set="name">Serial Name</label> <input type="text" id="name" name="name" value="{{journal.name}}" required="true" />
+</div>
+
+<div>
+<label set="alternative_names">Other Names (one per line)</label><br>
+<csv-textarea id="alternative_names" name="alternative_names" title="Curate the affiliated group names. Enter a alt name, one per row. Add rows as needed. Cleanup removes empty rows." column-headings="alternative">
+<datalist id="column-0"></datalist>
+
+<textarea id="alternative_names" name="alternative_names" rows="10" cols="60">
+{{#journal.alternative_names}}
+{{ . }}
+{{/journal.alternative_names}}
+</textarea>
+</csv-textarea>
+</div>
+
+<div>
+<label set="publisher_name">Publisher Name</label> <input type="text" id="publisher_name" name="publisher_name" value="{{journal.publisher_name}}" />
+</div>
+
+<div>
+<label set="publisher_location">Publisher Location</label> <input type="text" id="publisher_location" name="publisher_location" value="{{journal.publisher_location}}" />
+</div>
+
+<div>
+<label set="publisher_address">Publisher Address</label> <input type="text" id="publisher_address" name="publisher_address" value="{{journal.publisher_address}}" />
+</div>
+
+
+<div>
+<label set="description">Description</label><br >
+<textarea id="description" name="description" rows="10" cols="60">{{journal.description}}</textarea>
+</div>
+
+<hr>
+
+<div>
+<label set="internal_notes">Internal Notes</label><br >
+<textarea id="internal_notes" name="internal_notes" rows="10" cols="60">{{journal.internal_notes}}</textarea>
+</div>
+
+<p>
+{{#if journal.updated}}<label set="updated">updated</label> {{journal.updated}}{{/if}}
+</p>
+
+<div>
+<input type="submit" id="submit" name="submit" value="submit"> <input type="reset" id="reset" name="reset" value="reset">
+</div>
+</form>
+
+<p>
+</section>
+{{>footer}}
+<script type="module" src="../js/csvtextarea.js"></script>
+<script type="module" src="../js/issn_edit.js"></script>
+<!-- <code><pre>{{debug_src}}</pre></code> -->
+</body>
+</html>

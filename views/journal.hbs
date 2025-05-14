@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en-US">
+{{>head}}
+<body>
+{{>header}}
+<nav>
+<ul>
+<li><a href="/" title="return home">Home</a></li>
+<li><a href="../" title="return to dashboard">Dashboard</a></li>
+<li><a href="./" title="return to issn list">Journals</a></li>
+<li><a href="{{journal.issn}}?view=edit">Edit {{journal.name}}</a></li>
+</ul>
+</nav>
+<section>
+<h1>{{journal.name}}</h1>
+
+<div class="identifier">ISSN: {{journal.issn}}</div>
+
+{{#if journal.alternative_names}}
+Other names:
+<ul>
+{{#journal.alternative_names}}
+  <li>{{ . }}</li>
+{{/journal.alternative_names}}
+</ul>
+{{/if}}
+
+{{#if journal.publisher_name}}<div>Publisher: {{journal.publisher_name}}</div>{{/if}}
+
+{{#if journal.publisher_location}}<div>Publisher Location: {{journal.publisher_location}}</div>{{/if}}
+
+{{#if journal.publisher_address}}<div>Publisher Address: {{journal.publisher_address}}</div>{{/if}}
+
+{{#if journal.description}}<p><div class="description">{{journal.description}}</div>{{/if}}
+
+<div class="labeled_dates">
+{{#if journal.updated}}<span class="updated">updated: {{journal.updated}}</span>{{/if}}
+</div>
+
+<p>
+</section>
+{{>footer}}
+<!-- <code><pre>journal = {{debug_src}};</pre></code> --> 
+</body>
+</html>

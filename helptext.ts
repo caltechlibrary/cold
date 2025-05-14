@@ -207,9 +207,9 @@ export const journalVocabularyHelpText =
 # DESCRIPTION
 
 {app_name} generates an RDM Vocabulary for Journals based on
-the ISSN data held in the dataset collection called "issn.ds".
+the Journals data held in the dataset collection called "journals.ds".
 The dataset collection must be in the same directory where you
-run {app_name}.  It must have the "issn_names" query defined
+run {app_name}.  It must have the "journal_names" query defined
 for the dataset collection in the "cold_api.yaml" file. The
 cold JSON API must be running for {app_name} to work.
 If all goes well {app_name} should exist with a zero status code.
@@ -227,7 +227,7 @@ If all goes well {app_name} should exist with a zero status code.
 
 # EXAMPLE
 
-Aside from being in the same directory as "issn.ds" {app_name}
+Aside from being in the same directory as "journals.ds" {app_name}
 will do the rest.
 
 ~~~shell

@@ -1,4 +1,4 @@
-%journal_vocabulary(1) user manual | 0.0.30  26fc9a1
+%journal_vocabulary(1) user manual | 0.0.30  0047e7b
 % R. S.Doiel
 % 2025-05-13
 
@@ -13,9 +13,9 @@ journal_vocabulary [OPTIONS]
 # DESCRIPTION
 
 journal_vocabulary generates an RDM Vocabulary for Journals based on
-the ISSN data held in the dataset collection called "issn.ds".
+the Journals data held in the dataset collection called "journals.ds".
 The dataset collection must be in the same directory where you
-run journal_vocabulary.  It must have the "issn_names" query defined
+run journal_vocabulary.  It must have the "journal_names" query defined
 for the dataset collection in the "cold_api.yaml" file. The
 cold JSON API must be running for journal_vocabulary to work.
 If all goes well journal_vocabulary should exist with a zero status code.
@@ -33,7 +33,7 @@ If all goes well journal_vocabulary should exist with a zero status code.
 
 # EXAMPLE
 
-Aside from being in the same directory as "issn.ds" journal_vocabulary
+Aside from being in the same directory as "journals.ds" journal_vocabulary
 will do the rest.
 
 ~~~shell

@@ -6,15 +6,15 @@
 <ul>
 <li><a href="/" title="return home">Home</a></li>
 <li><a href="../" title="return to dashboard">Dashboard</a></li>
-<li><a href="./?view=create">Add JOURNAL by ISSN</a></li>
+<li><a href="./?view=create">Add a Journal</a></li>
 </ul>
 </nav>
 <section>
-<h1>ISSN Mapping</h1>
+<h1>Journals</h1>
 <ul>
-{{#issn_list}}
-  <li><a href="{{issn}}" title="journal issn details">{{name}}</a></li>
-{{/issn_list}}
+{{#journal_list}}
+  <li><a href="{{issn}}" title="journal details">{{name}}</a></li>
+{{/journal_list}}
 </ul>
 </section>
 {{>footer}}

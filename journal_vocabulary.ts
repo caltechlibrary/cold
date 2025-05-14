@@ -1,5 +1,5 @@
 /**
- * journal_vocabulary.ts turns the issn collection into an RDM style Journals vocabulary (YAML)
+ * journal_vocabulary.ts turns the journal collection into an RDM style Journals vocabulary (YAML)
  */
 import { parseArgs } from "@std/cli";
 import {
@@ -9,18 +9,18 @@ import {
   yaml,
 } from "./deps.ts";
 
-import type { ISSN } from "./issn.ts";
+import type { Journal } from "./journals.ts";
 
 import { licenseText, releaseDate, releaseHash, version } from "./version.ts";
 import { fmtHelp, journalVocabularyHelpText } from "./helptext.ts";
 
 const appName = "journal_vocabulary";
-const ds = new Dataset(apiPort, "issn.ds");
+const ds = new Dataset(apiPort, "journals.ds");
 
 /**
  * toRDMObject() returns an abbreviated object that maps to RDM's vocabularies
  */
-function toRDMObject(obj: ISSN): Object {
+function toRDMObject(obj: Journal): Object {
   return {
     id: obj.issn,
     title: {
@@ -29,12 +29,12 @@ function toRDMObject(obj: ISSN): Object {
   };
 }
 
-/* Generate the ISSN Journal vocabulary file for RDM. */
+/* Generate the Journals Journal vocabulary file for RDM. */
 async function journal_vocabulary() {
-  const issn_list = (await ds.query("issn_names", [], {})) as ISSN[];
+  const journal_list = (await ds.query("journal_names", [], {})) as Journal[];
   let l: object[] = [];
-  if (issn_list !== undefined) {
-    for (let item of issn_list) {
+  if (journal_list !== undefined) {
+    for (let item of journal_list) {
       l.push(toRDMObject(item));
       //        l.push({"id": item.issn, "title": { "en": item.name});
       //        console.log(`DEBUG item ${item}`);

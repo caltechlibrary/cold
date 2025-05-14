@@ -210,11 +210,11 @@ collections:
     update: true
     # This sets versioning behavior
     versions: true
-  - dataset: issn.ds
+  - dataset: journals.ds
     query:
-      issn_names: |
+      journal_names: |
         select json_object('issn', src->'issn', 'name', src->'name') as src
-        from issn
+        from journals
         order by src->'name';
     # What follows are object level permissions
     keys: true

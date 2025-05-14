@@ -6,7 +6,7 @@ export { handlePeople, People } from "./people.ts";
 export { Group, handleGroups } from "./groups.ts";
 export { Funder, handleFunders } from "./funders.ts";
 export { handleSubjects, Subject } from "./subjects.ts";
-export { handleISSN, ISSN } from "./issn.ts";
+export { handleJournals, Journals } from "./journals.ts";
 export { DOIPrefix, handleDOIPrefix } from "./doi_prefix.ts";
 export { renderHtdocs } from "./build.ts";
 export type { PeopleInterface } from "./people.ts";

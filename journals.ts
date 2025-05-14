@@ -1,17 +1,17 @@
 /**
- * issn.ts implements the issn object handler for listing, creating, retrieving, updating and delete issn objects.
+ * journals.ts implements the journals object handler for listing, creating, retrieving, updating and delete journals objects.
  */
 import { apiPort, Dataset, pathIdentifier, renderPage } from "./deps.ts";
 
 import { timeStamp } from "./utils.ts";
 
-const ds = new Dataset(apiPort, "issn.ds");
+const ds = new Dataset(apiPort, "journals.ds");
 
 /**
- * ISSNInterface
+ * JournalsInterface
  */
-export interface ISSNInterface {
-  /* ISSN is the primary identifier for record */
+export interface JournalInterface {
+  /* Journals is the primary identifier for record */
   issn: string;
   /* Name of Journal */
   name: string;
@@ -32,9 +32,9 @@ export interface ISSNInterface {
 }
 
 /**
- * ISSN class defines the data shape of the issn object managed by cold.
+ * Journal class defines the data shape of the journals object managed by cold.
  */
-export class ISSN implements ISSNInterface {
+export class Journal implements JournalInterface {
   issn: string = "";
   name: string = "";
   alternate_names: string[] = [];
@@ -46,8 +46,8 @@ export class ISSN implements ISSNInterface {
   updated: string = "";
 
   migrateCsv(row: any): boolean {
-    if (row.hasOwnProperty("ISSN") && row.issn !== "") {
-      this.issn = row.ISSN;
+    if (row.hasOwnProperty("Journals") && row.issn !== "") {
+      this.issn = row.issn;
     } else {
       return false;
     }
@@ -87,7 +87,7 @@ export class ISSN implements ISSNInterface {
   }
 
   /**
-   * asObject() returns a simple object version of a instantiated issn object.
+   * asObject() returns a simple object version of a instantiated journals object.
    */
   asObject(): Object {
     return {
@@ -104,7 +104,7 @@ export class ISSN implements ISSNInterface {
   }
 
   /**
-   * toJSON() returns a clean JSON representation of the issn object.
+   * toJSON() returns a clean JSON representation of the journals object.
    */
   toJSON(): string {
     return JSON.stringify(this.asObject());
@@ -112,7 +112,7 @@ export class ISSN implements ISSNInterface {
 }
 
 /**
- * formDataToJournal turn the form data into a ISSN object.
+ * formDataToJournal turn the form data into a Journals object.
  * The difference from the utils.ts forDataToObject is that the
  * alternative names fields needs to be converted from form text to an
  * array of string, one per line of form text.
@@ -148,14 +148,14 @@ export function formDataToJournal(form: FormData): object {
 }
 
 /**
- * handleISSN provides the dataset collection UI for managing ISSN.
+ * handleJournals provides the dataset collection UI for managing Journals.
  * It is response for the following actions
  *
- * - list or search for issn
- * - create a issn
- * - view a issn
- * - update a issn
- * - remove a issn
+ * - list or search for journals
+ * - create a journals
+ * - view a journals
+ * - update a journals
+ * - remove a journals
  *
  * http methods and their interpretation
  *
@@ -165,19 +165,19 @@ export function formDataToJournal(form: FormData): object {
  * - `PUT /{id}` update an object
  * - `DELETE /{id}` delete an object
  *
- * @param {Request} req holds the request to the issn handler
+ * @param {Request} req holds the request to the journals handler
  * @param {debug: boolean, htdocs: string} options holds options passed from ColdReadWriteHandlerr.
  * @returns {Response}
  */
-export async function handleISSN(
+export async function handleJournals(
   req: Request,
   options: { debug: boolean; htdocs: string; apiUrl: string },
 ): Promise<Response> {
   if (req.method === "GET") {
-    return await handleGetISSN(req, options);
+    return await handleGetJournals(req, options);
   }
   if (req.method === "POST") {
-    return await handlePostISSN(req, options);
+    return await handlePostJournals(req, options);
   }
   const body = `<html>${req.method} not supported</html>`;
   return new Response(body, {
@@ -187,52 +187,53 @@ export async function handleISSN(
 }
 
 /**
- * handleGetISSN handle GET actions on issn object(s).
+ * handleGetJournals handle GET actions on journals object(s).
  *
- * @param {Request} req holds the request to the issn handler
+ * @param {Request} req holds the request to the journals handler
  * @param {debug: boolean, htdocs: string} options holds options passed from
- * handleISSN.
+ * handleJournals.
  * @returns {Response}
  *
  * The expected paths are in the form
  *
- * - `/` list the issn by issn name (`?q=...` would perform a search by issn name)
+ * - `/` list the journals by journal name (`?q=...` would perform a search by issn)
  * - `/{issn}` indicates retrieving a single object by the Caltech Library issn id
  */
-async function handleGetISSN(
+async function handleGetJournals(
   req: Request,
   options: { debug: boolean; htdocs: string; apiUrl: string },
 ): Promise<Response> {
   /* parse the URL */
   const url = new URL(req.url);
   const issn = pathIdentifier(req.url);
+  console.log(`DEBUG issn -> ${issn}`);
   const params = url.searchParams;
   let view = params.get("view");
-  let tmpl = "issn_list";
+  let tmpl = "journal_list";
   if (issn !== undefined && issn !== "") {
     if (view !== undefined && view === "edit") {
-      tmpl = "issn_edit";
+      tmpl = "journal_edit";
     } else {
-      tmpl = "issn";
+      tmpl = "journal";
     }
   } else {
     if (view !== "undefined" && view === "create") {
-      tmpl = "issn_edit";
+      tmpl = "journal_edit";
     }
   }
 
-  if (tmpl === "issn_list") {
-    /* display a list of issn */
-    const issn_list = await ds.query("issn_names", [], {});
-    if (issn_list !== undefined) {
+  if (tmpl === "journal_list") {
+    /* display a list of journals */
+    const journal_list = await ds.query("journal_names", [], {});
+    if (journal_list !== undefined) {
       return renderPage(tmpl, {
         base_path: "",
-        issn_list: issn_list,
+        journal_list: journal_list,
       });
     } else {
       return renderPage(tmpl, {
         base_path: "",
-        issn_list: [],
+        journal_list: [],
       });
     }
   } else {
@@ -241,25 +242,29 @@ async function handleGetISSN(
     const issn = pathIdentifier(req.url);
     const isCreateObject = issn === "";
     const obj = await ds.read(issn);
-    console.log(`We have a GET for issn object ${issn}, view = ${view}`);
+    console.log(
+      `We have a GET for journals object ${issn}, view = ${view}, obj -> ${
+        JSON.stringify(obj)
+      }`,
+    );
     return renderPage(tmpl, {
       base_path: "",
       isCreateObject: isCreateObject,
-      issn: obj,
+      journal: obj,
       debug_src: JSON.stringify(obj, null, 2),
     });
   }
 }
 
 /**
- * handlePostISSN handle POST actions on issn object(s).
+ * handlePostJournals handle POST actions on journals object(s).
  *
- * @param {Request} req holds the request to the issn handler
+ * @param {Request} req holds the request to the journals handler
  * @param {debug: boolean, htdocs: string} options holds options passed from
- * handleISSN.
+ * handleJournals.
  * @returns {Response}
  */
-async function handlePostISSN(
+async function handlePostJournals(
   req: Request,
   options: { debug: boolean; htdocs: string; apiUrl: string },
 ): Promise<Response> {
