@@ -28,7 +28,7 @@
 
 {{#if funder.type}}<div class="type">organization Type: {{funder.type}}</div>{{/if}}
 
-{{#if funder.url}}<div class="url">website: <a href="{{funder.url}}" title="funder website">{{funder.url}}</a></div>{{/if}}
+{{#if funder.url}}<div class="url">website: <a href="{{funder.url}}" title="go to funder website" target="_blank">{{funder.url}}</a></div>{{/if}}
 
 {{#if funder.include_in_feeds}}<div class="feeds_link">View in feeds: <a href="https://feeds.library.caltech.edu/funders/{{funder.clfid}}" title="funder in feeds" target="_blank">{{funder.clfid}}</a></div>{{/if}}
 
@@ -39,9 +39,10 @@
 {{/if}}
 
 <div class="identifiers">
-  {{#if funder.ror}}<div class="ror">ror: {{funder.ror}}</div>{{/if}}
+  {{#if funder.ror}}<div class="ror">ror: <a href="{{funder.ror}}" title="go to ror.org" target="_blank">{{funder.ror}}</a></div>{{/if}}
   {{#if funder.ofr}}<div class="ofr">ofr: {{funder.ofr}}</div>{{/if}}
-  {{#if funder.doi}}<div class="doi">isni: {{funder.doi}}</div>{{/if}}
+  {{#if funder.doi}}<div class="doi">doi: <a href="{{funder.doi}}" title="go to doi.org" target="_blank">{{funder.doi}}</a></div>{{/if}}
+  {{#if funder.isni}}<div class="isni">isni: {{funder.isni}}</div>{{/if}}
 </div>
 
 <div class="labeled_dates">

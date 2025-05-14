@@ -11,14 +11,23 @@
 </nav>
 <section>
 <h1>CaltechFUNDERS</h1>
-<a-to-z-ul id="funder_list" long>
-<ul>
+<sortable-table id="funder_list">
+<table>
+  <thead>
+    <tr><th>name</th><th>clfid</th><th>ror</th></tr>
+  </thead>
+  <tbody>
 {{#funder_list}}
-  <li><a href="{{clfid}}" title="view funder details">{{name}}</a></li>
+  <tr>
+    <td><a href="{{clfid}}" title="view funder details">{{name}}</a></td>
+    <td>{{clfid}}</td>
+    <td>{{#if ror}}<a href="{{ror}}" title="Go to ror.org" target="_blank">{{ror}}</a><{{/if}}/td>
+  </tr>
 {{/funder_list}}
-</ul>
-</a-to-z-ul>
+  </tbody>
+</table>
+</sortable-table>
 </section>
 {{>footer}}
-<script type="module" src="../js/a_to_z_ul.js"></script>
+<script type="module" src="../js/sortable_table.js"></script>
 </html>

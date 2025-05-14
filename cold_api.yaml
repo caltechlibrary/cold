@@ -170,7 +170,7 @@ collections:
   - dataset: funders.ds
     query:
       funder_names: |
-        select json_object('clfid', src->'clfid', 'name', src->'name') as src
+        select json_object('clfid', src->'clfid', 'name', src->'name', 'ror', src->'ror') as src
         from funders
         order by src->'name';
     # What follows are object level permissions
