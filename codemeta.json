@@ -94,7 +94,7 @@
     "GNU Make",
     "Pandoc >= 3.1",
     "Dataset >= 2.2",
-    "CMTools >= 0.0.25"
+    "CMTools >= 0.0.27"
   ],
   "version": "0.0.31",
   "developmentStatus": "wip",
