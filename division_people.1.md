@@ -1,4 +1,4 @@
-%division_people(1) user manual | 0.0.31 b962e90
+%division_people(1) user manual | 0.0.31 7dac453
 % R. S.Doiel
 % 2025-05-14
 

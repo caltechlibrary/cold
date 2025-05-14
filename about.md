@@ -16,20 +16,20 @@ Access control is provided by the front end web server integrated with Shibbolet
 authors:
   - family_name: Doiel
     given_name: R. S.
-    orcid: https://orcid.org/0000-0003-0900-6903
+    id: https://orcid.org/0000-0003-0900-6903
 
 contributor:
   - family_name: Johnson
     given_name: Kathy
-    orcid: https://orcid.org/0000-0002-0026-2516
+    id: https://orcid.org/0000-0002-0026-2516
   - family_name: Morrell
     given_name: Thomas E
-    orcid: https://orcid.org/0000-0001-9266-5146
+    id: https://orcid.org/0000-0001-9266-5146
 
 maintainer:
   - family_name: Doiel
     given_name: R. S.
-    orcid: https://orcid.org/0000-0003-0900-6903
+    id: https://orcid.org/0000-0003-0900-6903
 
 repository_code: https://github.com/caltechlibrary/cold
 version: 0.0.31
@@ -60,17 +60,23 @@ About this software
 
 ## cold 0.0.31
 
+Enabled subjects and doi prefix support. Renamed the dataset collection issn.ds to journals.ds and update source code, templates and paths to reflect that.
+
 ### Authors
 
-- R. S. Doiel https://orcid.org/0000-0003-0900-6903
+- R. S. Doiel, <https://orcid.org/0000-0003-0900-6903>
+
 
 ### Contributors
 
-- Kathy Johnson https://orcid.org/0000-0002-0026-2516- Thomas E Morrell https://orcid.org/0000-0001-9266-5146
+- Kathy Johnson, <https://orcid.org/0000-0002-0026-2516>
+- Thomas E Morrell, <https://orcid.org/0000-0001-9266-5146>
+
 
 ### Maintainers
 
-- R. S. Doiel https://orcid.org/0000-0003-0900-6903
+- R. S. Doiel, <https://orcid.org/0000-0003-0900-6903>
+
 
 Caltech Library maintains a list of people, groups and funders and their related identifiers. For many years these were managed using a spreadsheets. That has become cumbersome. **COLD** manages data as JSON objects in [dataset](https://github.com/caltechlibrary/dataset) collections.
 
