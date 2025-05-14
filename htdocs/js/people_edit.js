@@ -23,8 +23,8 @@ let displayNameElem = document.getElementById('display_name'),
   lcnafElem = document.getElementById("lcnaf"),
   viafElem = document.getElementById("viaf"),
   snacElem = document.getElementById("snac"),
-  groupsElem = document.getElementById("groups"),
-  submitButton = document.getElementById("submit");
+  groupsElem = document.getElementById("groups");
+
 
 orcidElem.addEventListener("change", async function (evt) {
   let val = orcidElem.value;

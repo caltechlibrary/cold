@@ -39,6 +39,12 @@ function updateRecord(obj) {
   }
 }
 async function directoryUpdateRecord(evt) {
+  const spinnerElem = document.getElementById("spinner");
+  if (directory_elem.value === undefined || directory_elem.value === "") {
+    spinnerElem === null ? "" : spinnerElem.style.display = "none";
+  } else {
+    spinnerElem === null ? "" : spinnerElem.style.display = "inline-block";
+  }
   directory_id = this.value;
   if (directory_id !== undefined && directory_id !== "") {
     const uri = `../directory_api/${directory_id}`;
@@ -56,9 +62,11 @@ async function directoryUpdateRecord(evt) {
         const obj = JSON.parse(src);
         //console.log(`DEBUG directory data -> ${obj}`);
         updateRecord(obj);
+        spinnerElem === null ? "" : spinnerElem.style.display = 'none';
       }
     } else {
       console.log(`ERROR: ${resp.status} ${resp.statusText}`);
+      spinnerElem === null ? "" : spinnerElem.style.display = 'none';
     }
   }
 }

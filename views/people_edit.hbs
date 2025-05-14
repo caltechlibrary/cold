@@ -15,9 +15,8 @@
 <h1>{{#isCreateObject}}Create:{{/isCreateObject}}{{^isCreateObject}}Edit:{{/isCreateObject}} {{people.name}}</h1>
 
 <form id="people_edit" name="people_edit" action="{{people.clpid}}" method="post">
-
 <div>
-<label set="directory_user_id">Directory User ID</label> <input type="text" id="directory_user_id" name="directory_user_id" value="{{people.directory_user_id}}">
+<label set="directory_user_id">Directory User ID</label><input type="text" id="directory_user_id" name="directory_user_id" value="{{people.directory_user_id}}"> <span id="spinner" style="display:none"></span> 
 </div>
 
 <div>

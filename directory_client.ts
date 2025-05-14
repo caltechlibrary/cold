@@ -58,9 +58,17 @@ function updateRecord(obj: object) {
 }
 
 async function directoryUpdateRecord(evt: Event) {
+  const spinnerElem = document.getElementById("spinner");
+  if (directory_elem.value === undefined || directory_elem.value === "") {
+    spinnerElem === null ? "" : spinnerElem.style.display = "none";
+  } else {
+    spinnerElem === null ? "" : spinnerElem.style.display = "inline-block";
+  }
+
   directory_id = this.value;
   if ((directory_id !== undefined) && (directory_id !== "")) {
     const uri = `../directory_api/${directory_id}`;
+
     const resp: Response = await fetch(uri, {
       headers: { "content-type": "application/json" },
       method: "GET",
@@ -73,9 +81,11 @@ async function directoryUpdateRecord(evt: Event) {
         const obj = JSON.parse(src);
         //console.log(`DEBUG directory data -> ${obj}`);
         updateRecord(obj);
+        spinnerElem === null ? "" : spinnerElem.style.display = 'none';
       }
     } else {
       console.log(`ERROR: ${resp.status} ${resp.statusText}`);
+      spinnerElem === null ? "" : spinnerElem.style.display = 'none';
     }
   }
 }
