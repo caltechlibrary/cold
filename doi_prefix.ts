@@ -225,13 +225,6 @@ async function handlePostDOIPrefix(
     if (isCreateObject) {
       console.log(`send to dataset create object ${doi_prefix}`);
       if (!(await ds.create(doi_prefix, obj))) {
-        console.log(
-          `failed to send to dataset create object ${doi_prefix}, ${
-            JSON.stringify(
-              obj,
-            )
-          }`,
-        );
         return new Response(
           `<html>problem creating object ${doi_prefix}, try again later`,
           {
@@ -257,7 +250,7 @@ async function handlePostDOIPrefix(
       headers: { Location: `${doi_prefix}` },
     });
   }
-  return new Response(`<html>problem creating doi_prefix data</html>`, {
+  return new Response(`<html>problem creating doi prefix data</html>`, {
     status: 400,
     headers: { "content-type": "text/html" },
   });

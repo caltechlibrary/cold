@@ -17,10 +17,8 @@ It also lets you manage lists of subjects, issn mappings to cannonical names and
 
 - [Journals](./journals/ "Journals mapping")
 - [Thesis Options](./thesis_options/ "Thesis options mapping")
-<!-- TO BE IMPLEMENTED 
 - [Subjects](./subjects/)
 - [DOI Prefix](./doi_prefix/)
--->
 
 ## Tools
 

@@ -14,10 +14,10 @@
 <section>
 <h1>{{#isCreateObject}}Create:{{/isCreateObject}}{{^isCreateObject}}Edit:{{/isCreateObject}} {{doi_prefix.name}}</h1>
 
-<form action="{{base_path}}/doi_prefix/{{doi_prefix.doi_prefix}}" method="post">
+<form id="doi-prefix-form" action="{{base_path}}/doi_prefix/{{doi_prefix.doi_prefix}}" method="post">
 
 <div>
-<label set="doi_prefix">doi_prefix</label> <input type="text" id="doi_prefix" name="doi_prefix" value="{{doi_prefix.doi_prefix}}" {{^isCreateObject}}readonly{{/isCreateObject}} required="true" />
+<label set="doi_prefix">doi_prefix</label> <input type="text" id="doi_prefix" name="doi_prefix" pattern="^10\.\d{4,9}$" value="{{doi_prefix.doi_prefix}}" {{^isCreateObject}}readonly{{/isCreateObject}} placeholder="10.22002" title="enter the 10. numeric value for the DOI prefix" required="true" />
 </div>
 
 <div>
@@ -41,6 +41,6 @@
 <p>
 </section>
 {{>footer}}
-<code><pre>{{debug_src}}</pre></code>
+<!-- <code><pre>{{debug_src}}</pre></code> -->
 </body>
 </html>

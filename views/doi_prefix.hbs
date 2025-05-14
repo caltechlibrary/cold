@@ -14,7 +14,7 @@
 <section>
 
 <h1>{{doi_prefix.name}}</h1>
-<div class="identifier">{{doi_prefix}}</div>
+<div class="identifier">https://doi.org/{{doi_prefix.doi_prefix}}</div>
 
 {{#if doi_prefix.description}}<div class="description">{{doi_prefix.description}}</div>{{/if}}
 
@@ -26,6 +26,6 @@
 <p>
 </section>
 {{>footer}}
-<code><pre>{{debug_src}}</pre></code>
+<!-- <code><pre>{{debug_src}}</pre></code> -->
 </body>
 </html>
