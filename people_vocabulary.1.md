@@ -1,6 +1,6 @@
-%people_vocabulary(1) user manual | 0.0.30  894860f
+%people_vocabulary(1) user manual | 0.0.31  9938fee
 % R. S.Doiel
-% 2025-05-13
+% 2025-05-14
 
 # NAME
     

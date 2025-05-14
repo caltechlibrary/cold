@@ -32,7 +32,7 @@ maintainer:
     id: https://orcid.org/0000-0003-0900-6903
 
 repository_code: https://github.com/caltechlibrary/cold
-version: 0.0.30
+version: 0.0.31
 license_url: https://caltechlibrary.github.io/cold/LICENSE
 operating_system:
   - Linux
@@ -52,15 +52,15 @@ keywords:
   - objects
   - controlled vocabulary
 
-date_released: 2025-05-13
+date_released: 2025-05-14
 ---
 
 About this software
 ===================
 
-## cold 0.0.30
+## cold 0.0.31
 
-Replace People List A to Z UL with a sortable table version.
+Enabled subjects and doi prefix support. Renamed the dataset collection issn.ds to journals.ds and update source code, templates and paths to reflect that.
 
 ### Authors
 

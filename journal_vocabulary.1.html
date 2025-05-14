@@ -24,11 +24,11 @@
 <p>journal_vocabulary [OPTIONS]</p>
 <h1 id="description">DESCRIPTION</h1>
 <p>journal_vocabulary generates an RDM Vocabulary for Journals based on
-the ISSN data held in the dataset collection called “issn.ds”. The
-dataset collection must be in the same directory where you run
-journal_vocabulary. It must have the “issn_names” query defined for the
-dataset collection in the “cold_api.yaml” file. The cold JSON API must
-be running for journal_vocabulary to work. If all goes well
+the Journals data held in the dataset collection called “journals.ds”.
+The dataset collection must be in the same directory where you run
+journal_vocabulary. It must have the “journal_names” query defined for
+the dataset collection in the “cold_api.yaml” file. The cold JSON API
+must be running for journal_vocabulary to work. If all goes well
 journal_vocabulary should exist with a zero status code.</p>
 <h1 id="option">OPTION</h1>
 <dl>
@@ -46,7 +46,7 @@ display version number
 </dd>
 </dl>
 <h1 id="example">EXAMPLE</h1>
-<p>Aside from being in the same directory as “issn.ds”
+<p>Aside from being in the same directory as “journals.ds”
 journal_vocabulary will do the rest.</p>
 <pre class="shell"><code>journal_vocabulary</code></pre>
 </section>

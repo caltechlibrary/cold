@@ -81,11 +81,11 @@ async function directoryUpdateRecord(evt: Event) {
         const obj = JSON.parse(src);
         //console.log(`DEBUG directory data -> ${obj}`);
         updateRecord(obj);
-        spinnerElem === null ? "" : spinnerElem.style.display = 'none';
+        spinnerElem === null ? "" : spinnerElem.style.display = "none";
       }
     } else {
       console.log(`ERROR: ${resp.status} ${resp.statusText}`);
-      spinnerElem === null ? "" : spinnerElem.style.display = 'none';
+      spinnerElem === null ? "" : spinnerElem.style.display = "none";
     }
   }
 }
