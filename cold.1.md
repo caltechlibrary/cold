@@ -1,4 +1,4 @@
-%cold(1) user manual | 0.0.31 9938fee
+%cold(1) user manual | 0.0.31 b962e90
 % R. S.Doiel
 % 2025-05-14
 
