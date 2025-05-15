@@ -39,10 +39,13 @@
 {{/if}}
 
 <div class="identifiers">
-  {{#if funder.ror}}<div class="ror">ror: <a href="{{funder.ror}}" title="go to ror.org" target="_blank">{{funder.ror}}</a></div>{{/if}}
-  {{#if funder.ofr}}<div class="ofr">ofr: {{funder.ofr}}</div>{{/if}}
-  {{#if funder.doi}}<div class="doi">doi: <a href="{{funder.doi}}" title="go to doi.org" target="_blank">{{funder.doi}}</a></div>{{/if}}
-  {{#if funder.isni}}<div class="isni">isni: {{funder.isni}}</div>{{/if}}
+  {{#if funder.ror}}<div class="ror">ROR: <a href="{{funder.ror}}" title="go to ror.org" target="_blank">{{funder.ror}}</a></div>{{/if}}
+  {{#if funder.ofr}}<div class="ofr">Open Funder Reference: {{funder.ofr}}</div>{{/if}}
+  {{#if funder.doi}}<div class="doi">DOI: <a href="{{funder.doi}}" title="go to doi.org" target="_blank">{{funder.doi}}</a></div>{{/if}}
+  {{#if funder.isni}}<div class="isni">ISNI: {{funder.isni}}</div>{{/if}}
+  {{#if funder.crfid}}<div class="crfid">CrossRef Funder ID: {{funder.crfid}}</div>{{/if}}
+  {{#if funder.grid}}<div class="grid">GRID: {{funder.grid}}</div>{{/if}}
+  {{#if funder.wikidata}}<div class="wikidata">GRID: {{funder.wikidata}}</div>{{/if}}
 </div>
 
 <div class="labeled_dates">
