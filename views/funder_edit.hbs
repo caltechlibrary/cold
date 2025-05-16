@@ -25,6 +25,18 @@
 </div>
 
 <div>
+<label set="acronyms">Acronyms (one per line)</label>
+<csvtextarea id="acronyms" name="acronyms" title="one acronym per line"><textarea id="acronyms" name="acronyms" title="one acronym per line" column-headings="acronym">
+<datalist id="column-0"></datalist>
+<textarea id="acronyms" name="acronyms">
+{{#funder.acronyms}}
+{{.}}
+{{/funder.acronyms}}
+</textarea>
+</csvtextarea>
+</div>
+
+<div>
 <label set="grant_numbers">Grant Numbers (one per line)</label><br >
 <csv-textarea id="grant_numbers" name="grant_numbers" title="Curate the grant numbers for an funder. Enter one per row. Add rows as needed. Cleanup removes empty rows." column-headings="grant_number">
 <datalist id="column-0"></datalist>

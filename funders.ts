@@ -18,6 +18,7 @@ export interface FunderInterface {
   clfid: string;
   include_in_feeds: boolean;
   name: string;
+  acronyms: string[];
   description: string;
   type: string;
   url: string;
@@ -35,6 +36,7 @@ export class Funder implements FunderInterface {
   clfid: string = "";
   include_in_feeds: boolean = false;
   name: string = "";
+  acronyms: string[] = [];
   description: string = "";
   type: string = "";
   url: string = "";
@@ -91,6 +93,7 @@ export class Funder implements FunderInterface {
       clfid: this.clfid,
       include_in_feeds: this.include_in_feeds,
       name: this.name,
+      acronyms: this.acronyms,
       description: this.description,
       type: this.type,
       url: this.url,
