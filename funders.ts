@@ -8,6 +8,7 @@ import {
   pathIdentifier,
   renderPage,
 } from "./deps.ts";
+import * as csv from "@std/csv";
 
 const ds = new Dataset(apiPort, "funders.ds");
 
@@ -244,6 +245,24 @@ async function handlePostFunders(
         status: 400,
         headers: { "content-type": "text/html" },
       });
+    }
+    if ("acronyms" in obj) {
+      const acronymData = csv.parse(obj.acronyms as unknown as string);
+      //console.log(`DEBUG acronyms data type ${typeof(data)} -> ${JSON.stringify(data)}`);
+      // Need to extract the single column into an array
+      let acronyms: string[] = [];
+      for (const row of acronymData) {
+        row[0] === undefined || row[0] === "" ? "" : acronyms.push(row[0]);
+      }
+      obj.acronyms = acronyms;
+    }
+    if ("grant_numbers" in obj) {
+      const grantData = csv.parse(obj.grant_numbers as unknown as string);
+      let grant_numbers: string[] = [];
+      for (const row of grantData) {
+        row[0] === undefined || row[0] === "" ? "" : grant_numbers.push(row[0]);
+      }
+      obj.grant_numbers = grant_numbers;
     }
     if (isCreateObject) {
       console.log("DEBUG detected create request");

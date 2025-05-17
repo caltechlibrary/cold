@@ -17,6 +17,8 @@
 - [thesis_option_vocabulary](thesis_option_vocabulary.1.md) (man page)
 - [group_vocabulary](group_vocabulary.1.md) (man page)
 - [people_vocabulary](people_vocabulary.1.md) (man page)
+- [ROR Integration](ror_integration.md)
+    - [ror_import](ror_import.1.md) (man page)
 - [devemopment notes](development_notes.md)
 - [presentations](presentations/presentation1.md)
 

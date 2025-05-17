@@ -119,5 +119,5 @@ Access control is provided by the front end web server integrated with Shibbolet
 - GNU Make
 - Pandoc &gt;&#x3D; 3.1
 - Dataset &gt;&#x3D; 2.2
-- CMTools &gt;&#x3D; 0.0.25
+- CMTools &gt;&#x3D; 0.0.27
 

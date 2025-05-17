@@ -259,3 +259,21 @@ collections:
     update: true
     # This sets versioning behavior
     versions: true
+  - dataset: ror.ds
+    query:
+      # Lookup a ror by name or acronym
+      lookup_funder: |
+        select src
+        from ror
+        where src->>'name' like ?
+           or exists (
+            select 1
+            from json_each(json_extract(src, '$.acronyms'))
+            where value like '?')
+      # clear the ror data
+      clear_ror_data: |
+        delete from ror
+    keys: true
+    read: true
+    create: true
+    update: true

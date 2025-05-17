@@ -41,7 +41,7 @@ Installing from source
 - GNU Make
 - Pandoc &gt;&#x3D; 3.1
 - Dataset &gt;&#x3D; 2.2
-- CMTools &gt;&#x3D; 0.0.25
+- CMTools &gt;&#x3D; 0.0.27
 
 ### Steps
 

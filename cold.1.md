@@ -1,4 +1,4 @@
-%cold(1) user manual | 0.0.31 7dac453
+%cold(1) user manual | 0.0.31 ea40df2
 % R. S.Doiel
 % 2025-05-14
 

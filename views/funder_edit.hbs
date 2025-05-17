@@ -26,19 +26,19 @@
 
 <div>
 <label set="acronyms">Acronyms (one per line)</label>
-<csvtextarea id="acronyms" name="acronyms" title="one acronym per line"><textarea id="acronyms" name="acronyms" title="one acronym per line" column-headings="acronym">
+<csv-textarea id="acronyms" name="acronyms"  column-headings="acronym" title="one acronym per line">
 <datalist id="column-0"></datalist>
-<textarea id="acronyms" name="acronyms">
+<textarea id="acronyms" name="acronyms" rows="10" cols="60" title="one acronym per line">
 {{#funder.acronyms}}
 {{.}}
 {{/funder.acronyms}}
 </textarea>
-</csvtextarea>
+</csv-textarea>
 </div>
 
 <div>
 <label set="grant_numbers">Grant Numbers (one per line)</label><br >
-<csv-textarea id="grant_numbers" name="grant_numbers" title="Curate the grant numbers for an funder. Enter one per row. Add rows as needed. Cleanup removes empty rows." column-headings="grant_number">
+<csv-textarea id="grant_numbers" name="grant_numbers"  column-headings="grant_number" title="Curate the grant numbers for an funder. Enter one per row. Add rows as needed. Cleanup removes empty rows.">
 <datalist id="column-0"></datalist>
 
 <textarea id="grant_numbers" name="grant_numbers" rows="10" cols="60" title="enter grant numbers, one per line">
