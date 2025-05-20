@@ -9,7 +9,6 @@ import {
   handleReports,
   handleSubjects,
   handleThesisOption,
-  handleRORLookup,
   OptionsProcessor,
   path,
   serveDir,
