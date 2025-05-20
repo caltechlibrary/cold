@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <title>COLD (Controlled Object List and Datum (Concept))</title>
+    <link rel="stylesheet" href="/css/site.css">
+</head>
+<body>
+<nav>
+<ul>
+    <li><a href="/">Home</a></li>
+    <li><a href="index.html">README</a></li>
+    <li><a href="LICENSE">LICENSE</a></li>
+    <li><a href="INSTALL.html">INSTALL</a></li>
+    <li><a href="user_manual.html">User Manual</a></li>
+    <li><a href="about.html">About</a></li>
+    <li><a href="search.html">Search</a></li>
+    <li><a href="https://github.com/caltechlibrary/cold">GitHub</a></li>
+</ul>
+</nav>
+<section>
+<h1 id="name">NAME</h1>
+<p>cold_api_test</p>
+<h1 id="synopsis">SYNOPSIS</h1>
+<p>cold_api_test C_NAME METHOD API_PATH [JSON_PAYLOAD]</p>
+<h1 id="description">DESCRIPTION</h1>
+<p>cold_api_test tests the COLD API as defined by the cold_api.yaml
+file.</p>
+<p>For paths that include a query you need to map the query parameters
+form the JSON object into the path. The JSON_PAYLOAD can be provided as
+either a final parameter or read from standard input.</p>
+<p>NOTE: Both GET and HEAD requests ignore JSON_PAYLOAD.</p>
+<h1 id="options">OPTIONS</h1>
+<dl>
+<dt>-h, –help</dt>
+<dd>
+display help
+</dd>
+<dt>-l, –license</dt>
+<dd>
+display license
+</dd>
+<dt>-v, –version</dt>
+<dd>
+display version
+</dd>
+</dl>
+<h1 id="example">EXAMPLE</h1>
+<p>Retrieve the locally hosted ROR data for <a
+href="https://ror.org/05dxps055"
+class="uri">https://ror.org/05dxps055</a>.</p>
+<pre><code>cold_api_test ror.ds get object/05dxps055</code></pre>
+<p>Run the lookup_by_acronym query.</p>
+<pre><code>cold_api_test ror.ds post query/lookup_by_acronym/q &#39;{&quot;q&quot;:&quot;NSF&quot;}&#39;</code></pre>
+<p>In this example there are two parameters in the SQL query. We need to
+name them in the JSON payload but also map them as an ordered array in
+the path. The two parameters in this example map to “name” and
+“acronym”. Even though we are search for one value the parameters are
+each provided.</p>
+<p>~~~ cold_api_test ror.ds post query/lookup_by_name_or_acronym/n/a
+‘{“n”:“NSF”,“a”:“NSF”}’</p>
+</section>
+<footer>
+<span>&copy; 2025 <a href="https://www.library.caltech.edu/copyright">Caltech Library</a></span>
+<address>1200 E California Blvd, Mail Code 1-32, Pasadena, CA 91125-3200</address>
+<span><a href="mailto:library@caltech.edu">Email Us</a></span>
+<span>Phone: <a href="tel:+1-626-395-3405">(626)395-3405</a></span>
+</footer>
+</body>
+</html>

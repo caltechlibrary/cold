@@ -19,6 +19,7 @@
 - [people_vocabulary](people_vocabulary.1.md) (man page)
 - [ROR Integration](ror_integration.md)
     - [ror_import](ror_import.1.md) (man page)
+- [cold_api_test](cold_api_test.1.md) (man page)
 - [devemopment notes](development_notes.md)
 - [presentations](presentations/presentation1.md)
 

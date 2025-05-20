@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <title>COLD (Controlled Object List and Datum (Concept))</title>
+    <link rel="stylesheet" href="/css/site.css">
+</head>
+<body>
+<nav>
+<ul>
+    <li><a href="/">Home</a></li>
+    <li><a href="index.html">README</a></li>
+    <li><a href="LICENSE">LICENSE</a></li>
+    <li><a href="INSTALL.html">INSTALL</a></li>
+    <li><a href="user_manual.html">User Manual</a></li>
+    <li><a href="about.html">About</a></li>
+    <li><a href="search.html">Search</a></li>
+    <li><a href="https://github.com/caltechlibrary/cold">GitHub</a></li>
+</ul>
+</nav>
+<section>
+<h1 id="ror-integration">ROR Integration</h1>
+<p>The ROR data is used to look up a name or acronym and populate our
+Funder records.</p>
+<p>COLD integrates with ROR for curating funder information. ROR
+releases updates every four to six weeks. The latest can be retreived
+from <a
+href="https://zenodo.org/communities/ror-data/records?q&amp;l=list&amp;p=1&amp;s=10&amp;sort=newest">Zenodo</a>,
+see <a href="https://github.com/ror-community/ror-updates/releases"
+class="uri">https://github.com/ror-community/ror-updates/releases</a>
+for the latest release.</p>
+<p>Currently the process is to fetch the complete data for ROR.
+<code>ror_import</code> to clear out the contents and update it from the
+ROR dump file zip.</p>
+<p>The <code>ror.ds</code> provides the backing data for doing a local
+look up of Funder information via the funder name or acronym. If the
+organization if found then the record is imported into the web form.</p>
+<h2 id="updating-ror.ds">Updating ror.ds</h2>
+<p>You need to be in the directory where COLD is installed.</p>
+<ol type="1">
+<li>Retrieve the latest release zip file from <a
+href="https://zenodo.org/communities/ror-data/records?q&amp;l=list&amp;p=1&amp;s=10&amp;sort=newest"
+class="uri">https://zenodo.org/communities/ror-data/records?q&amp;l=list&amp;p=1&amp;s=10&amp;sort=newest</a>.</li>
+<li>Run <code>ror_import ROR_DUMP_FILE_FILE</code> to proccess the Zip
+file and update <code>ror.ds</code>.</li>
+<li>Restart the COLD API to pickup the new data. Example, in production
+run <code>sudo systemctl restart cold_api</code>.</li>
+</ol>
+<p>This example show getting the release was v1.65 updated on
+2025-05-05. The zip file was is called “v1.65-2025-05-05-ror-data.zip”.
+Curl was being used to fetch the data, you could also just use your web
+browser.</p>
+<pre class="shell"><code>curl -L -O https://zenodo.org/records/15343380/files/v1.65-2025-05-05-ror-data.zip?download=1
+./bin/ror_import v1.65-2025-05-05-ror-data.zip 
+sudo systemctl restart cold_api</code></pre>
+</section>
+<footer>
+<span>&copy; 2025 <a href="https://www.library.caltech.edu/copyright">Caltech Library</a></span>
+<address>1200 E California Blvd, Mail Code 1-32, Pasadena, CA 91125-3200</address>
+<span><a href="mailto:library@caltech.edu">Email Us</a></span>
+<span>Phone: <a href="tel:+1-626-395-3405">(626)395-3405</a></span>
+</footer>
+</body>
+</html>

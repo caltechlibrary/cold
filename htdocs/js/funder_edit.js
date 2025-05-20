@@ -1,8 +1,8 @@
+
 // We need to intercept the form so we can conver the list from the CSVTextarea 
 // and set it up for submission since the fallback textarea inside the web component.
 const funderEditForm = document.getElementById("funder-edit-form");
 const grantNumbersElem = document.getElementById("grant_numbers");
-const acronymsElem = document.getElementById("acronyms");
 
 funderEditForm.addEventListener("submit", async function (event) {
   event.preventDefault();

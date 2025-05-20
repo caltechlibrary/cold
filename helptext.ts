@@ -478,3 +478,61 @@ The import process takes a while. Be patient.
 
 
 `;
+
+export const coldApiTestHelpText =
+  `%{app_name}(1) user manual | {version} {release_hash}
+% R. S.Doiel
+% {release_date}
+
+# NAME
+
+{app_name}
+
+# SYNOPSIS
+
+{app_name} C_NAME METHOD API_PATH [JSON_PAYLOAD]
+
+# DESCRIPTION
+
+{app_name} tests the COLD API as defined by the cold_api.yaml file.
+
+For paths that include a query you need to map the query parameters
+form the JSON object into the path.  The JSON_PAYLOAD can be provided
+as either a final parameter or read from standard input.
+
+NOTE: Both GET and HEAD requests ignore JSON_PAYLOAD.
+
+# OPTIONS
+
+-h, --help
+: display help
+
+-l, --license
+: display license
+
+-v, --version
+: display version
+
+# EXAMPLE
+
+Retrieve the locally hosted ROR data for <https://ror.org/05dxps055>.
+
+~~~
+{app_name} ror.ds get object/05dxps055
+~~~
+
+Run the lookup_by_acronym query.
+
+~~~
+{app_name} ror.ds post query/lookup_by_acronym/q '{"q":"NSF"}'
+~~~
+
+In this example there are two parameters in the SQL query. We need to
+name them in the JSON payload but also map them as an ordered array in
+the path.  The two parameters in this example map to "name" and "acronym".
+Even though we are search for one value the parameters are each provided.
+
+~~~
+{app_name} ror.ds post query/lookup_by_name_or_acronym/n/a '{"n":"NSF","a":"NSF"}'
+
+`;
