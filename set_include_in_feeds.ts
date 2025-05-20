@@ -2,15 +2,7 @@
  * set_include_in_feeds.ts this is a TypeScript program that sets the include in feeds property to true for
  * the list of clpid found in CSV file.
  */
-import {
-  apiPort,
-  csv_parse,
-  Dataset,
-  DatasetApiClient,
-  Group,
-  ISSN,
-  People,
-} from "./deps.ts";
+import { apiPort, csv_parse, Dataset } from "./deps.ts";
 import { PeopleInterface } from "./people.ts";
 
 function normalize_to_string(val: string | undefined): string {
