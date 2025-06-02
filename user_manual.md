@@ -19,4 +19,5 @@
 - [people_vocabulary](people_vocabulary.1.md) (man page)
 - [devemopment notes](development_notes.md)
 - [presentations](presentations/presentation1.md)
+- [changing keys and identifier](changing_keys_and_identifiers.md)
 
