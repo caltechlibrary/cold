@@ -11,12 +11,11 @@ ${APP_NAME}
 
 # SYNOPSIS
 
-#{APP_NAME} [OPTION] OLD_KEY NEW_KEY
+#{APP_NAME} [OPTION] KEY_TO_REMOVE
 
 # DESCRIPTION
 
-Move a people record from old key to new. This updates both the key and
-the internet clpid in the record.
+Remove a people record from people.ds collection. 
 
 NOTE: This will cause COLD to be off line momentarily to avoid conflicting
 writes to the SQLite3 database.
@@ -37,7 +36,7 @@ ${APP_NAME} "Miles_Drew-M" "Miles-Drew-M"
 TXT
 }
 
-if [ "$#" != "2" ]; then
+if [ "$#" != "1" ]; then
 	usage
 	exit 1
 fi
@@ -48,19 +47,14 @@ case "$1" in
 	exit 0;
 esac
 
-export OLD_KEY="$1"
-export NEW_KEY="$2"
+export KEY="$1"
 
 sudo systemctl stop cold
 sudo systemctl stop cold_reports
 sudo systemctl stop cold_api
-read -p "Moving ${OLD_KEY} to ${NEW_KEY}? y/N " Y_N
+read -p "Removing ${KEY} record? y/N " Y_N
 if [ "${Y_N}" = "y" ]; then
-	sqlite3 people.ds/collection.db << SQL
-update people 
-set _key = '${NEW_KEY}', src = json_set(src, '$.clpid', '${NEW_KEY}')
-where _key = '${OLD_KEY}';
-SQL
+	dataset delete people.ds "${KEY}"
 else
 	echo "aborting";
 fi
