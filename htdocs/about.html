@@ -22,8 +22,9 @@
 <section>
 
 <h1>About this software</h1>
-<h2>cold 0.0.31</h2>
-<p>Enabled subjects and doi prefix support. Renamed the dataset collection issn.ds to journals.ds and update source code, templates and paths to reflect that.</p>
+<h2>cold 0.0.32</h2>
+<p>Improved Funder metadata schema. Start integration of ROR data for Funder metadata. Added 'ror_import' to import a ROR data dump zipfile
+into 'ror.ds' dataset collection.</p>
 <h3>Authors</h3>
 <ul>
 <li>R. S. Doiel, <a href="https://orcid.org/0000-0003-0900-6903">https://orcid.org/0000-0003-0900-6903</a></li>
@@ -70,11 +71,14 @@ Access control is provided by the front end web server integrated with Shibbolet
 </ul>
 <h3>Software Requirements</h3>
 <ul>
-<li>Deno &gt;= 2.3</li>
+<li>Deno &gt;= 2.3.6</li>
+<li>Dataset &gt;= 2.2.7</li>
+<li>CMTools &gt;= 0.0.33</li>
+</ul>
+<h3>Software Suggestions</h3>
+<ul>
 <li>GNU Make</li>
-<li>Pandoc &gt;= 3.1</li>
-<li>Dataset &gt;= 2.2</li>
-<li>CMTools &gt;= 0.0.25</li>
+<li>Pandoc 3.1</li>
 </ul>
 
 

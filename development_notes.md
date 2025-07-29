@@ -10,23 +10,16 @@ NOTE: this document describes my thinking during the development process. It is 
 Application layout and structure
 --------------------------------
 
-The primary task of the COLD UI is to provide a means of curating our list of objects and vocabularies. Each list is held in a dataset collection. Datasetd is used to provide a JSON API to curate the collections. TypeScript compiled via Deno is providing the middleware to tie our JSON API with our static content. The front end web server (i.e. Apache 2) provides integration with Shibboleth provides single sign on and access control.
+The primary task of the COLD UI is to provide a means of curating our list of objects and vocabularies. Each list is held in a dataset collection. Datasetd is used to provide a JSON API to curate the collections. TypeScript compiled via Deno is providing the middleware to tie our JSON API with our static content. The front end web server (i.e. Apache 2) provides single sign on and access control (e.g. via Shibboleth).
 
-I am relying on feeds.library.caltech.edu to provide the public facing API.  Data is transferred to feeds via scripts run on a schedule or "on demand" via JavaScript contacting external systems.  Deno can compile the TypeScript code to JavaScript for browser consumption using the "@deno/emit" module.
+I am relying on feeds.library.caltech.edu to provide the public facing API.  Data is transferred to feeds via scripts run on a schedule or "on demand" in the reports module.
 
-The Go dataset and models package
----------------------------------
+The Go dataset collections
+--------------------------
 
-The latest evolution of dataset includes support for restricting collections to specific data models. A model is base on data types that easily map from HTML 5 form elements to SQL data types.  Additionally there are types associated with library and archives such as support for ISNI, ORCID and ROR. Dataset still supports ad hoc JSON object storage if that is needed.
+The `datasetd` program provides localhost static file and JSON API access for managing multiple dataset collection. These use the `https://caltechlibrary.github.io/ts_dataset/mod.ts` module for working with the datasetd JSON API.  The middleware provides pass through proxy services to the localhost instance of the datasetd API for selected queries (e.g. people, groups and ror lookups).
 
-<!--
-The data models are enforced only via the datasetd service.  Eventually model support will be unforced for the dataset cli.
-
-Data models are expressed in YAML and are shared between dataset and the model YAML used by Newt. Both use the same models package written in Go. The models package provides a means of define more types as well as adding renders. It is being developed in parallel with Newt, Dataset and the COLD where the latter is providing a real world use case to test the approach.
--->
-
-The public API isn't part of COLD directly. COLD is for curating object lists but it does export those objects to feeds.library.caltech.edu which then provides the public API.  Content is exported in JSON, YAML and CSV formats as needed by Caltech Library systems and services. Additionally there is a reports system where content like vocabularly files can be generated on demand or on a schedule.
-
+The public API isn't part of COLD. The reports system can replicate COLD public data to feeds if that is appropriate.
 
 Data enhancement
 ----------------

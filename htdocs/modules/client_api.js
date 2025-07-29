@@ -73,4 +73,25 @@
     params.append("q", clgid);
     return await this.getList(c_name, query_name, params);
   }
+  async getROR(ror) {
+    const c_name = "ror.ds";
+    const query_name = "get_ror";
+    let params = new URLSearchParams();
+    params.append("q", ror);
+    return await this.getList(c_name, query_name, params);
+  }
+  async lookupRORByName(funder_name) {
+    const c_name = "ror.ds";
+    const query_name = "lookup_ror_by_name";
+    let params = new URLSearchParams();
+    params.append("q", funder_name);
+    return await this.getList(c_name, query_name, params);
+  }
+  async lookupRORByAcronym(acronym) {
+    const c_name = "ror.ds";
+    const query_name = "lookup_ror_by_acronym";
+    let params = new URLSearchParams();
+    params.append("q", acronym);
+    return await this.getList(c_name, query_name, params);
+  }
 }

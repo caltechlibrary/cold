@@ -259,3 +259,58 @@ collections:
     update: true
     # This sets versioning behavior
     versions: true
+  - dataset: ror.ds
+    query:
+      # Retrieve ROR by ror prefix value
+      get_ror: |
+        select src
+        from ror
+        where _key = ?;
+      # Lookup a ror
+      lookup_by_name_or_acronym: |
+        select json_object(
+          'ror', _key,
+          'name', src->'name',
+          'country', src->'country',
+          'acronyms', src->'acronyms'
+        ) as src
+        from ror    
+        where src->>'name' like ?
+          or exists (
+            select 1
+            from json_each(src->'acronyms')
+            where value like ?)
+        order by src->'name';
+      # Lookup a ror by name
+      lookup_by_name: |
+        select json_object(
+          'ror', _key,
+          'name', src->'name',
+          'country', src->'country',
+          'acronyms', src->'acronyms'
+        ) as src
+        from ror
+        where src->>'name' like ?
+        order by src->'name';
+      # Lookup a ror by acronym
+      lookup_by_acronym: |
+        select json_object('ror', _key, 
+          'name', src->'name',
+          'country', src->'country',
+          'acronyms', src->'acronyms'
+        ) as src
+        from ror
+        where exists (
+            select 1
+            from json_each(src->'acronyms')
+            where value like ?)
+        order by src->'name';
+      # clear the ror data
+      clear_ror_data: |
+        delete from ror
+    keys: true
+    read: true
+    create: true
+    update: true
+    # This sets versioning behavior
+    versions: true

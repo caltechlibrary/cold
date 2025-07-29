@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en-US">
-{{>head}}
+{{>collection_head}}
 <body>
 {{>header}}
 <nav>
@@ -13,37 +13,35 @@
 </nav>
 <section>
 
-<h1>{{funder.name}}</h1>
-<div class="identifier">{{clfid}}</div>
-
-{{#if funder.grant_numbers}}
-<ul>
-{{#each funder.grant_numbers}}
-<li>({{this}})</li>
-{{/each}}
-</ul>
+<h1>{{funder.name}}{{#if funder.acronyms}}
+<span class="acronyms">({{#funder.acronyms}}{{#if @first}}{{this}}{{else}}, {{this}}{{/if}}{{/funder.acronyms}})</span>
 {{/if}}
+</h1>
+
+<div class="identifier">{{clfid}}</div>
 
 {{#if funder.description}}<div class="description">{{funder.description}}</div><p>{{/if}}
 
-{{#if funder.type}}<div class="type">organization Type: {{funder.type}}</div>{{/if}}
+{{#if funder.type}}<div class="type">Organization Type: {{funder.type}}</div>{{/if}}
 
-{{#if funder.url}}<div class="url">website: <a href="{{funder.url}}" title="go to funder website" target="_blank">{{funder.url}}</a></div>{{/if}}
+{{#if funder.url}}<div class="url">Website: <a href="{{funder.url}}" title="go to funder website" target="_blank">{{funder.url}}</a></div>{{/if}}
 
 {{#if funder.include_in_feeds}}<div class="feeds_link">View in feeds: <a href="https://feeds.library.caltech.edu/funders/{{funder.clfid}}" title="funder in feeds" target="_blank">{{funder.clfid}}</a></div>{{/if}}
 
 {{#if funder.grant_numbers}}
-<div id="grant_numbers" class="grant_numbers">{{#funder.grant_numbers}}
-{{.}}
-{{/funder.grant_numbers}}</div>
+<div id="grant_numbers" class="grant_numbers">Grant Numbers: {{#each funder.grant_numbers}}{{#if @first}}{{.}}{{else}}, {{.}}{{/if}}{{/each}}</div>
 {{/if}}
 
 <div class="identifiers">
-  {{#if funder.ror}}<div class="ror">ror: <a href="{{funder.ror}}" title="go to ror.org" target="_blank">{{funder.ror}}</a></div>{{/if}}
-  {{#if funder.ofr}}<div class="ofr">ofr: {{funder.ofr}}</div>{{/if}}
-  {{#if funder.doi}}<div class="doi">doi: <a href="{{funder.doi}}" title="go to doi.org" target="_blank">{{funder.doi}}</a></div>{{/if}}
-  {{#if funder.isni}}<div class="isni">isni: {{funder.isni}}</div>{{/if}}
+  {{#if funder.ror}}<div class="ror">ROR: <a href="{{funder.ror}}" title="go to ror.org" target="_blank">{{funder.ror}}</a></div>{{/if}}
+  {{#if funder.doi}}<div class="doi">DOI: <a href="{{funder.doi}}" title="go to doi.org" target="_blank">{{funder.doi}}</a></div>{{/if}}
+  {{#if funder.grid}}<div class="grid">GRID: {{funder.grid}}</div>{{/if}}
+  {{#if funder.crfid}}<div class="crfid">CrossRef Funder ID: {{funder.crfid}}</div>{{/if}}
+  {{#if funder.isni}}<div class="isni">ISNI: {{funder.isni}}</div>{{/if}}
+  {{#if funder.ofr}}<div class="ofr">Open Funder Reference: {{funder.ofr}}</div>{{/if}}
+  {{#if funder.wikidata}}<div class="wikidata">Wikidata: {{funder.wikidata}}</div>{{/if}}
 </div>
+<p>
 
 <div class="labeled_dates">
 {{#if funder.updated}}<span class="updated">updated: {{funder.updated}}</span>{{/if}}
@@ -52,7 +50,5 @@
 <p>
 </section>
 {{>footer}}
-<!-- {{#if debug_src}}<code><pre>{{debug_src}}</pre></code>{{/if}} -->
-<script type="module" src="../js/funder_view.js"></script>
 </body>
 </html>

@@ -110,4 +110,46 @@ export class ClientAPI {
       msg: string;
     }[];
   }
+
+  async getROR(ror: string): Promise<{ [key: string]: any }> {
+    const c_name = "ror.ds";
+    const query_name = "get_ror";
+    let params = new URLSearchParams();
+    params.append("q", ror);
+    return await this.getList(c_name, query_name, params) as {
+      obj: { [key: string]: any };
+      ok: boolean;
+      msg: string;
+    }[];
+  }
+
+  async lookupRORByName(
+    funder_name: string,
+  ): Promise<{ ror: string; name: string; ok: boolean; msg: string }[]> {
+    const c_name = "ror.ds";
+    const query_name = "lookup_ror_by_name";
+    let params = new URLSearchParams();
+    params.append("q", funder_name);
+    return await this.getList(c_name, query_name, params) as {
+      ror: string;
+      name: string;
+      ok: boolean;
+      msg: string;
+    }[];
+  }
+
+  async lookupRORByAcronym(
+    acronym: string,
+  ): Promise<{ ror: string; name: string; ok: boolean; msg: string }[]> {
+    const c_name = "ror.ds";
+    const query_name = "lookup_ror_by_acronym";
+    let params = new URLSearchParams();
+    params.append("q", acronym);
+    return await this.getList(c_name, query_name, params) as {
+      ror: string;
+      name: string;
+      ok: boolean;
+      msg: string;
+    }[];
+  }
 }

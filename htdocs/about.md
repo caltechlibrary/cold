@@ -32,7 +32,7 @@ maintainer:
     id: https://orcid.org/0000-0003-0900-6903
 
 repository_code: https://github.com/caltechlibrary/cold
-version: 0.0.31
+version: 0.0.32
 license_url: https://caltechlibrary.github.io/cold/LICENSE
 operating_system:
   - Linux
@@ -52,15 +52,16 @@ keywords:
   - objects
   - controlled vocabulary
 
-date_released: 2025-05-14
+date_released: NaN-NaN-NaN
 ---
 
 About this software
 ===================
 
-## cold 0.0.31
+## cold 0.0.32
 
-Enabled subjects and doi prefix support. Renamed the dataset collection issn.ds to journals.ds and update source code, templates and paths to reflect that.
+Improved Funder metadata schema. Start integration of ROR data for Funder metadata. Added &#x27;ror_import&#x27; to import a ROR data dump zipfile
+into &#x27;ror.ds&#x27; dataset collection.
 
 ### Authors
 
@@ -115,9 +116,14 @@ Access control is provided by the front end web server integrated with Shibbolet
 
 ### Software Requirements
 
-- Deno &gt;&#x3D; 2.3
+- Deno &gt;&#x3D; 2.3.6
+- Dataset &gt;&#x3D; 2.2.7
+- CMTools &gt;&#x3D; 0.0.33
+
+
+### Software Suggestions
+
 - GNU Make
-- Pandoc &gt;&#x3D; 3.1
-- Dataset &gt;&#x3D; 2.2
-- CMTools &gt;&#x3D; 0.0.25
+- Pandoc 3.1
+
 

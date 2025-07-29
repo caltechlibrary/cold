@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en-US">
-{{>head}}
+{{>collection_head}}
 <body>
 {{>header}}
 <nav>
@@ -21,12 +21,24 @@
 </div>
 
 <div>
-<label set="name">Name</label> <input type="text" id="name" name="name" value="{{funder.name}}" required="true" />
+<label set="name">Name</label> <input type="text" id="name" name="name" value="{{funder.name}}" size="80" required="true" />
+</div>
+
+<div>
+<label set="acronyms">Acronyms (one per line)</label>
+<csv-textarea id="acronyms" name="acronyms"  column-headings="acronym" title="one acronym per line">
+<datalist id="column-0"></datalist>
+<textarea id="acronyms" name="acronyms" rows="10" cols="60" title="one acronym per line">
+{{#funder.acronyms}}
+{{.}}
+{{/funder.acronyms}}
+</textarea>
+</csv-textarea>
 </div>
 
 <div>
 <label set="grant_numbers">Grant Numbers (one per line)</label><br >
-<csv-textarea id="grant_numbers" name="grant_numbers" title="Curate the grant numbers for an funder. Enter one per row. Add rows as needed. Cleanup removes empty rows." column-headings="grant_number">
+<csv-textarea id="grant_numbers" name="grant_numbers"  column-headings="grant_number" title="Curate the grant numbers for an funder. Enter one per row. Add rows as needed. Cleanup removes empty rows.">
 <datalist id="column-0"></datalist>
 
 <textarea id="grant_numbers" name="grant_numbers" rows="10" cols="60" title="enter grant numbers, one per line">
@@ -68,7 +80,26 @@
 <div>
 <label set="doi">doi</label> <input type="doi" id="doi" name="doi" value="{{funder.doi}}" title="Digital Object Identifier">
 </div>
+
+<div>
+<label set="isni">isni</label> <input type="isni" id="isni" name="isni" value="{{funder.isni}}" title="ISNI">
 </div>
+
+<div>
+<label set="grid">grid</label> <input type="grid" id="grid" name="grid" value="{{funder.grid}}" title="GRID">
+</div>
+
+<div>
+<label set="crfid">CrossRef Funder ID</label> <input type="crfid" id="crfid" name="crfid" value="{{funder.crfid}}" title="CrossRef Funder ID">
+</div>
+
+<div>
+<label set="wikidata">Wikidata</label> <input type="wikidata" id="wikidata" name="wikidata" value="{{funder.wikidata}}" title="Wikidata">
+</div>
+
+</div>
+
+
 
 <div>
 <label set="updated">record updated</label> <input type="text" id="updated" name="updated" value="{{funder.updated}}" readonly>

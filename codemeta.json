@@ -53,8 +53,8 @@
     }
   ],
   "dateCreated": "2023-12-12",
-  "dateModified": "2025-05-14",
-  "datePublished": "2025-05-14",
+  "dateModified": "2025-05-16",
+  "datePublished": "NaN-NaN-NaN",
   "description": "Caltech Library maintains a list of people, groups and funders and their related identifiers. For many years these were managed using a spreadsheets. That has become cumbersome. **COLD** manages data as JSON objects in [dataset](https://github.com/caltechlibrary/dataset) collections.\n\n**COLD** is implemented as three web web services\n\n- cold web UI\n- cold JSON API (provided by datasetd)\n- cold reports (the report request system)\n\nReports are implemented as a set of programs or bash scripts.\n\nTypeScript+Deno is used to implement the web UI and report system.\nThe JSON API is provided by Dataset's datasetd.\nAccess control is provided by the front end web server integrated with Shibboleth.",
   "funder": [
     {
@@ -90,15 +90,17 @@
   ],
   "runtimePlatform": "- Deno 2.2",
   "softwareRequirements": [
-    "Deno >= 2.3",
-    "GNU Make",
-    "Pandoc >= 3.1",
-    "Dataset >= 2.2",
-    "CMTools >= 0.0.27"
+    "Deno >= 2.3.6",
+    "Dataset >= 2.2.7",
+    "CMTools >= 0.0.33"
   ],
-  "version": "0.0.31",
+  "softwareSuggestions": [
+    "GNU Make",
+    "Pandoc 3.1"
+  ],
+  "version": "0.0.32",
   "developmentStatus": "wip",
   "issueTracker": "https://github.com/caltechlibrary/cold/issues",
   "downloadUrl": "https://github.com/caltechlibrary/cold/release/latest",
-  "releaseNotes": "Enabled subjects and doi prefix support. Renamed the dataset collection issn.ds to journals.ds and update source code, templates and paths to reflect that."
+  "releaseNotes": "Improved Funder metadata schema. Start integration of ROR data for Funder metadata. Added 'ror_import' to import a ROR data dump zipfile\ninto 'ror.ds' dataset collection."
 }
