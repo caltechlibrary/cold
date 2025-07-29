@@ -3,7 +3,7 @@
 #
 # Dump the dataset collections to corresponding JSON line files.
 #
-find ./ -type d -depth 1 |
+find ./ -maxdepth 1 -type d |
     grep -E '\.ds$' |
     while read -r C_NAME; do
         JSONL_NAME="$(basename "${C_NAME}" ".ds").jsonl"
