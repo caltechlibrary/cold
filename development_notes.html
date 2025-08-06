@@ -1,10 +1,16 @@
 <!DOCTYPE html>
 <html lang="en-US">
 <head>
-    <title>COLD (Controlled Object List and Datum (Concept))</title>
-    <link rel="stylesheet" href="/css/site.css">
+    <title>cold</title>
+    <link rel="stylesheet" href="https://caltechlibrary.github.io/css/site.css">
+    <link rel="stylesheet" href="https://media.library.caltech.edu/cl-webcomponents/css/code-blocks.css">
+    <script type="module" src="https://media.library.caltech.edu/cl-webcomponents/copyToClipboard.js"></script>
+    <script type="module" src="https://media.library.caltech.edu/cl-webcomponents/footer-global.js"></script>
 </head>
 <body>
+<header>
+<a href="https://library.caltech.edu"><img src="https://media.library.caltech.edu/assets/caltechlibrary-logo.png" alt="Caltech Library logo"></a>
+</header>
 <nav>
 <ul>
     <li><a href="/">Home</a></li>
@@ -29,34 +35,20 @@ list of objects and vocabularies. Each list is held in a dataset
 collection. Datasetd is used to provide a JSON API to curate the
 collections. TypeScript compiled via Deno is providing the middleware to
 tie our JSON API with our static content. The front end web server
-(i.e. Apache 2) provides integration with Shibboleth provides single
-sign on and access control.</p>
+(i.e. Apache 2) provides single sign on and access control (e.g. via
+Shibboleth).</p>
 <p>I am relying on feeds.library.caltech.edu to provide the public
 facing API. Data is transferred to feeds via scripts run on a schedule
-or “on demand” via JavaScript contacting external systems. Deno can
-compile the TypeScript code to JavaScript for browser consumption using
-the “<span class="citation" data-cites="deno/emit">@deno/emit</span>”
-module.</p>
-<h2 id="the-go-dataset-and-models-package">The Go dataset and models
-package</h2>
-<p>The latest evolution of dataset includes support for restricting
-collections to specific data models. A model is base on data types that
-easily map from HTML 5 form elements to SQL data types. Additionally
-there are types associated with library and archives such as support for
-ISNI, ORCID and ROR. Dataset still supports ad hoc JSON object storage
-if that is needed.</p>
-<!--
-The data models are enforced only via the datasetd service.  Eventually model support will be unforced for the dataset cli.
-
-Data models are expressed in YAML and are shared between dataset and the model YAML used by Newt. Both use the same models package written in Go. The models package provides a means of define more types as well as adding renders. It is being developed in parallel with Newt, Dataset and the COLD where the latter is providing a real world use case to test the approach.
--->
-<p>The public API isn’t part of COLD directly. COLD is for curating
-object lists but it does export those objects to
-feeds.library.caltech.edu which then provides the public API. Content is
-exported in JSON, YAML and CSV formats as needed by Caltech Library
-systems and services. Additionally there is a reports system where
-content like vocabularly files can be generated on demand or on a
-schedule.</p>
+or “on demand” in the reports module.</p>
+<h2 id="the-go-dataset-collections">The Go dataset collections</h2>
+<p>The <code>datasetd</code> program provides localhost static file and
+JSON API access for managing multiple dataset collection. These use the
+<code>https://caltechlibrary.github.io/ts_dataset/mod.ts</code> module
+for working with the datasetd JSON API. The middleware provides pass
+through proxy services to the localhost instance of the datasetd API for
+selected queries (e.g. people, groups and ror lookups).</p>
+<p>The public API isn’t part of COLD. The reports system can replicate
+COLD public data to feeds if that is appropriate.</p>
 <h2 id="data-enhancement">Data enhancement</h2>
 <p>The content curated in cold can be enhanced from external sources.
 This is done via scheduled tasks. Initially these tasks are going to be
@@ -274,11 +266,6 @@ defined in the “deno.json” file. This in turn calls “build.ts” which
 uses the “emit” package to generate the JavaScript used by the browser.
 The generated JavaScript is written to “htdocs/modules”.</p>
 </section>
-<footer>
-<span>&copy; 2025 <a href="https://www.library.caltech.edu/copyright">Caltech Library</a></span>
-<address>1200 E California Blvd, Mail Code 1-32, Pasadena, CA 91125-3200</address>
-<span><a href="mailto:library@caltech.edu">Email Us</a></span>
-<span>Phone: <a href="tel:+1-626-395-3405">(626)395-3405</a></span>
-</footer>
+<footer-global></footer-global>
 </body>
 </html>

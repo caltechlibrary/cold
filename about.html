@@ -1,10 +1,16 @@
 <!DOCTYPE html>
 <html lang="en-US">
 <head>
-    <title>COLD (Controlled Object List and Datum (Concept))</title>
-    <link rel="stylesheet" href="/css/site.css">
+    <title>cold</title>
+    <link rel="stylesheet" href="https://caltechlibrary.github.io/css/site.css">
+    <link rel="stylesheet" href="https://media.library.caltech.edu/cl-webcomponents/css/code-blocks.css">
+    <script type="module" src="https://media.library.caltech.edu/cl-webcomponents/copyToClipboard.js"></script>
+    <script type="module" src="https://media.library.caltech.edu/cl-webcomponents/footer-global.js"></script>
 </head>
 <body>
+<header>
+<a href="https://library.caltech.edu"><img src="https://media.library.caltech.edu/assets/caltechlibrary-logo.png" alt="Caltech Library logo"></a>
+</header>
 <nav>
 <ul>
     <li><a href="/">Home</a></li>
@@ -21,8 +27,8 @@
 <h1 id="about-this-software">About this software</h1>
 <h2 id="cold-0.0.32">cold 0.0.32</h2>
 <p>Improved Funder metadata schema. Start integration of ROR data for
-Funder metadata. Added 'ror_import' to import a ROR data dump zipfile
-into 'ror.ds' dataset collection.</p>
+Funder metadata. Added ‘ror_import’ to import a ROR data dump zipfile
+into ‘ror.ds’ dataset collection.</p>
 <h3 id="authors">Authors</h3>
 <ul>
 <li>R. S. Doiel, <a href="https://orcid.org/0000-0003-0900-6903"
@@ -81,18 +87,16 @@ class="uri">https://github.com/caltechlibrary/cold/issues</a></li>
 </ul>
 <h3 id="software-requirements">Software Requirements</h3>
 <ul>
-<li>Deno &gt;= 2.3</li>
+<li>Deno &gt;= 2.3.6</li>
+<li>Dataset &gt;= 2.2.7</li>
+<li>CMTools &gt;= 0.0.33</li>
+</ul>
+<h3 id="software-suggestions">Software Suggestions</h3>
+<ul>
 <li>GNU Make</li>
-<li>Pandoc &gt;= 3.1</li>
-<li>Dataset &gt;= 2.2</li>
-<li>CMTools &gt;= 0.0.27</li>
+<li>Pandoc 3.1</li>
 </ul>
 </section>
-<footer>
-<span>&copy; 2025 <a href="https://www.library.caltech.edu/copyright">Caltech Library</a></span>
-<address>1200 E California Blvd, Mail Code 1-32, Pasadena, CA 91125-3200</address>
-<span><a href="mailto:library@caltech.edu">Email Us</a></span>
-<span>Phone: <a href="tel:+1-626-395-3405">(626)395-3405</a></span>
-</footer>
+<footer-global></footer-global>
 </body>
 </html>

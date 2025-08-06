@@ -1,10 +1,16 @@
 <!DOCTYPE html>
 <html lang="en-US">
 <head>
-    <title>COLD (Controlled Object List and Datum (Concept))</title>
-    <link rel="stylesheet" href="/css/site.css">
+    <title>cold</title>
+    <link rel="stylesheet" href="https://caltechlibrary.github.io/css/site.css">
+    <link rel="stylesheet" href="https://media.library.caltech.edu/cl-webcomponents/css/code-blocks.css">
+    <script type="module" src="https://media.library.caltech.edu/cl-webcomponents/copyToClipboard.js"></script>
+    <script type="module" src="https://media.library.caltech.edu/cl-webcomponents/footer-global.js"></script>
 </head>
 <body>
+<header>
+<a href="https://library.caltech.edu"><img src="https://media.library.caltech.edu/assets/caltechlibrary-logo.png" alt="Caltech Library logo"></a>
+</header>
 <nav>
 <ul>
     <li><a href="/">Home</a></li>
@@ -18,7 +24,7 @@
 </ul>
 </nav>
 <section>
-<h1 id="cold-0.0.26">cold 0.0.26</h1>
+<h1 id="cold">cold</h1>
 <p>Caltech Library maintains a list of people, groups and funders and
 their related identifiers. For many years these were managed using a
 spreadsheets. That has become cumbersome. <strong>COLD</strong> manages
@@ -37,12 +43,13 @@ The JSON API is provided by Dataset’s datasetd. Access control is
 provided by the front end web server integrated with Shibboleth.</p>
 <h2 id="release-notes">Release Notes</h2>
 <ul>
-<li>version: 0.0.26</li>
+<li>version: 0.0.32</li>
 <li>status: wip</li>
-<li>released: 2025-05-07</li>
+<li>released: 2025-05-16</li>
 </ul>
-<p>Turn of CaltechFUNDERS collection, integrated web components into
-funder view and edit.</p>
+<p>Improved Funder metadata schema. Start integration of ROR data for
+Funder metadata. Added 'ror_import' to import a ROR data dump zipfile
+into 'ror.ds' dataset collection.</p>
 <h3 id="authors">Authors</h3>
 <ul>
 <li>Doiel, R. S.</li>
@@ -58,13 +65,17 @@ funder view and edit.</p>
 </ul>
 <h2 id="software-requirements">Software Requirements</h2>
 <ul>
-<li>Deno &gt;= 2.3</li>
-<li>GNU Make</li>
-<li>Pandoc &gt;= 3.1</li>
-<li>Dataset &gt;= 2.2</li>
-<li>CMTools &gt;= 0.0.25</li>
+<li>Deno &gt;= 2.3.6</li>
+<li>Dataset &gt;= 2.2.7</li>
+<li>CMTools &gt;= 0.0.33</li>
 </ul>
-<p>Uses: - Deno 2.2</p>
+<h3 id="software-suggestions">Software Suggestions</h3>
+<ul>
+<li>GNU Make</li>
+<li>Pandoc 3.1</li>
+</ul>
+<h4 id="runtime-platform">Runtime platform</h4>
+<p><strong>- Deno 2.2</strong></p>
 <h2 id="related-resources">Related resources</h2>
 <ul>
 <li><a
@@ -77,11 +88,6 @@ href="https://caltechlibrary.github.io/cold/LICENSE">LICENSE</a></li>
 <li><a href="about.html">About</a></li>
 </ul>
 </section>
-<footer>
-<span>&copy; 2025 <a href="https://www.library.caltech.edu/copyright">Caltech Library</a></span>
-<address>1200 E California Blvd, Mail Code 1-32, Pasadena, CA 91125-3200</address>
-<span><a href="mailto:library@caltech.edu">Email Us</a></span>
-<span>Phone: <a href="tel:+1-626-395-3405">(626)395-3405</a></span>
-</footer>
+<footer-global></footer-global>
 </body>
 </html>

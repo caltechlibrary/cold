@@ -1,6 +1,6 @@
 
 
-# cold 0.0.26
+# cold
 
 Caltech Library maintains a list of people, groups and funders and their related identifiers. For many years these were managed using a spreadsheets. That has become cumbersome. **COLD** manages data as JSON objects in [dataset](https://github.com/caltechlibrary/dataset) collections.
 
@@ -18,11 +18,12 @@ Access control is provided by the front end web server integrated with Shibbolet
 
 ## Release Notes
 
-- version: 0.0.26
+- version: 0.0.32
 - status: wip
-- released: 2025-05-07
+- released: 2025-05-16
 
-Turn of CaltechFUNDERS collection, integrated web components into funder view and edit.
+Improved Funder metadata schema. Start integration of ROR data for Funder metadata. Added &#x27;ror_import&#x27; to import a ROR data dump zipfile
+into &#x27;ror.ds&#x27; dataset collection.
 
 
 ### Authors
@@ -42,13 +43,18 @@ Turn of CaltechFUNDERS collection, integrated web components into funder view an
 
 ## Software Requirements
 
-- Deno &gt;&#x3D; 2.3
-- GNU Make
-- Pandoc &gt;&#x3D; 3.1
-- Dataset &gt;&#x3D; 2.2
-- CMTools &gt;&#x3D; 0.0.25
+- Deno >= 2.3.6
+- Dataset >= 2.2.7
+- CMTools >= 0.0.33
 
-Uses: - Deno 2.2
+### Software Suggestions
+
+- GNU Make
+- Pandoc 3.1
+
+#### Runtime platform
+
+**- Deno 2.2**
 
 ## Related resources
 
