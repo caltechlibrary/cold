@@ -25,7 +25,7 @@
     "thesis_option_vocabulary.ts": "deno compile --allow-net --output bin/thesis_option_vocabulary thesis_option_vocabulary.ts",
     "ror_import.ts": "deno compile --allow-net --allow-read --allow-run --output bin/ror_import ror_import.ts",
     "cold_api_test.ts": "deno compile --allow-net --output bin/cold_api_test cold_api_test.ts",
-    "htdocs": "deno run --allow-read --allow-env --allow-write=htdocs --allow-import build.ts",
+    "htdocs": "deno run --allow-net --allow-read --allow-env --allow-write=htdocs --allow-import build.ts",
     "test": "dsquery test.ds 'delete from test' ; deno test --allow-net dataset_test.ts ; deno test options_test.ts ; deno test config_test.ts ; deno test people_test.ts ; deno test groups_test.ts ; deno test cold_test.ts ",
     "import_people_csv": "deno run  --allow-read --allow-net ds_importer.ts people.ds people.csv",
     "import_groups_csv": "deno run  --allow-read --allow-net ds_importer.ts groups.ds groups.csv",
@@ -56,6 +56,6 @@
     "@std/path": "jsr:@std/path@^1.1.4",
     "@std/uuid": "jsr:@std/uuid@^1.1.0",
     "@std/yaml": "jsr:@std/yaml@^1.0.11",
-    "@zip-js/zip-js": "jsr:@zip-js/zip-js@^2.8.15"
+    "@zip-js/zip-js": "jsr:@zip-js/zip-js@^2.8.16"
   }
 }
