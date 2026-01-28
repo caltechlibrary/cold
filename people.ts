@@ -46,6 +46,10 @@ export interface PeopleInterface {
   faculty: boolean;
   alumn: boolean;
   staff: boolean;
+  postdoc: boolean;
+  visitor: boolean;
+  retired: boolean;
+  emeritus: boolean;
   updated: string;
   authors_id: string;
   thesis_id: string;
@@ -85,6 +89,10 @@ export class People implements PeopleInterface {
   faculty: boolean = false;
   alumn: boolean = false;
   staff: boolean = false;
+  postdoc: boolean = false;
+  visitor: boolean = false;
+  retired: boolean = false;
+  emeritus: boolean = false;
   updated: string = "";
   authors_id: string = "";
   thesis_id: string = "";
@@ -178,6 +186,18 @@ export class People implements PeopleInterface {
     }
     if (row.hasOwnProperty("staff")) {
       this.staff = matchType(this.staff, row.staff);
+    }
+    if (row.hasOwnProperty("postdoc")) {
+      this.postdoc = matchType(this.postdoc, row.postdoc);
+    }
+    if (row.hasOwnProperty("visitor")) {
+      this.visitor = matchType(this.visitor, row.visitor);
+    }
+    if (row.hasOwnProperty("retired")) {
+      this.retired = matchType(this.retired, row.retired);
+    }
+    if (row.hasOwnProperty("emeritus")) {
+      this.emeritus = matchType(this.emeritus, row.emeritus);
     }
     if (row.hasOwnProperty("status")) {
       this.status = matchType(this.status, row.status);
@@ -320,6 +340,18 @@ export class People implements PeopleInterface {
     (obj.alumn === undefined)
       ? this.alumn = false
       : this.alumn = obj.alumn as unknown as boolean;
+    (obj.postdoc === undefined)
+      ? this.postdoc = false
+      : this.postdoc = obj.postdoc as unknown as boolean;
+    (obj.visitor === undefined)
+      ? this.visitor = false
+      : this.visitor = obj.visitor as unknown as boolean;
+    (obj.retired === undefined)
+      ? this.retired = false
+      : this.retired = obj.retired as unknown as boolean;
+    (obj.emeritus === undefined)
+      ? this.emeritus = false
+      : this.emeritus = obj.emeritus as unknown as boolean;
     (obj.internal_notes === undefined || obj.internal_notes === "")
       ? this.internal_notes = ""
       : this.internal_notes = obj.internal_notes as unknown as string;
@@ -362,6 +394,10 @@ export class People implements PeopleInterface {
       faculty: this.faculty,
       staff: this.staff,
       alumn: this.alumn,
+      postdoc: this.postdoc,
+      visitor: this.visitor,
+      retired: this.retired,
+      emeritus: this.emeritus,
       internal_notes: this.internal_notes,
       updated: this.updated,
     };
@@ -450,6 +486,7 @@ async function handleGetPeople(
   if (tmpl === "people_list") {
     /* display a list of people */
     const people_list = await ds.query("people_names", [], {});
+	console.log(`DEBUG people_list (people_names) -> ${people_list}`)
     if (people_list !== undefined) {
       return renderPage(tmpl, {
         base_url: baseUrl,

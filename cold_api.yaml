@@ -73,7 +73,7 @@ collections:
           ) as src
         from people
         where json_extract(src, '$.directory_user_id') != '';
-      # family_name,given_name,cl_people_id,thesis_id,advisor_id,authors_id,archivesspace_id,directory_id,viaf_id,lcnaf,isni,wikidata,snac,orcid,image,educated_at,caltech,jpl,faculty,alumn,status,directory_person_type,title,bio,division,authors_count,thesis_count,data_count,advisor_count,editor_count,updated
+      # family_name,given_name,cl_people_id,thesis_id,advisor_id,authors_id,archivesspace_id,directory_id,viaf_id,lcnaf,isni,wikidata,snac,orcid,image,educated_at,caltech,jpl,faculty,alumn,staff,postdoc,visitor,retired,emeritus,status,directory_person_type,title,bio,division,authors_count,thesis_count,data_count,advisor_count,editor_count,updated
       people_csv: |
         select json_object(
           'family_name', src->'family_name',
@@ -90,12 +90,16 @@ collections:
           'wikidata', src->'wikidata',
           'orcid', src->'orcid',
           'image', '',
-          'educated_at',
-          src->'educated_at',
+          'educated_at', src->'educated_at',
           'caltech', src->'caltech',
           'jpl', src->'jpl',
           'faculty', src->'faculty',
           'alumn', src->'alumn',
+          'staff', src->'staff',
+          'postdoc', src->'postdoc',
+          'visitor', src->'visitor',
+          'retired', src->'retired',
+          'emeritus', src->'emeritus',
           'status', src->'status',
           'directory_person_type', src->'directory_person_type',
           'title', src->'title',

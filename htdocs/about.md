@@ -52,7 +52,7 @@ keywords:
   - objects
   - controlled vocabulary
 
-date_released: NaN-NaN-NaN
+date_released: 2025-05-16
 ---
 
 About this software
@@ -60,8 +60,8 @@ About this software
 
 ## cold 0.0.32
 
-Improved Funder metadata schema. Start integration of ROR data for Funder metadata. Added &#x27;ror_import&#x27; to import a ROR data dump zipfile
-into &#x27;ror.ds&#x27; dataset collection.
+Improved Funder metadata schema. Start integration of ROR data for Funder metadata. Added 'ror_import' to import a ROR data dump zipfile
+into 'ror.ds' dataset collection.
 
 ### Authors
 
@@ -116,9 +116,9 @@ Access control is provided by the front end web server integrated with Shibbolet
 
 ### Software Requirements
 
-- Deno &gt;&#x3D; 2.3.6
-- Dataset &gt;&#x3D; 2.2.7
-- CMTools &gt;&#x3D; 0.0.33
+- Deno >= 2.3.6
+- Dataset >= 2.2.7
+- CMTools >= 0.0.33
 
 
 ### Software Suggestions

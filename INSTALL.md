@@ -12,7 +12,7 @@ Installation for development of **cold**
 Reports are implemented as a set of programs or bash scripts.
 
 TypeScript+Deno is used to implement the web UI and report system.
-The JSON API is provided by Dataset&#x27;s datasetd.
+The JSON API is provided by Dataset's datasetd.
 Access control is provided by the front end web server integrated with Shibboleth.
 
 Quick install with curl or irm
@@ -31,6 +31,13 @@ If you are running Windows 10 or 11 use the Powershell command below.
 ~~~ps1
 irm https://caltechlibrary.github.io/cold/installer.ps1 | iex
 ~~~
+
+### If your are running macOS or Windows
+
+You may get security warnings if you are using macOS or Windows. See the notes for the specific operating system you're using to fix issues.
+
+- [INSTALL_NOTES_macOS.md](INSTALL_NOTES_macOS.md)
+- [INSTALL_NOTES_Windows.md](INSTALL_NOTES_Windows.md)
 
 Installing from source
 ----------------------
