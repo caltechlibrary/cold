@@ -1,6 +1,6 @@
-%division_people(1) user manual | 0.0.32 22936e7
+%division_people(1) user manual | 0.0.34 9ccfc25
 % R. S.Doiel
-% 2025-05-16
+% 2026-01-28
 
 # NAME
 

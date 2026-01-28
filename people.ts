@@ -486,7 +486,7 @@ async function handleGetPeople(
   if (tmpl === "people_list") {
     /* display a list of people */
     const people_list = await ds.query("people_names", [], {});
-	console.log(`DEBUG people_list (people_names) -> ${people_list}`)
+    console.log(`DEBUG people_list (people_names) -> ${people_list}`);
     if (people_list !== undefined) {
       return renderPage(tmpl, {
         base_url: baseUrl,

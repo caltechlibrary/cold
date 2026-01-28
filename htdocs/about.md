@@ -32,7 +32,7 @@ maintainer:
     id: https://orcid.org/0000-0003-0900-6903
 
 repository_code: https://github.com/caltechlibrary/cold
-version: 0.0.32
+version: 0.0.34
 license_url: https://caltechlibrary.github.io/cold/LICENSE
 operating_system:
   - Linux
@@ -52,16 +52,15 @@ keywords:
   - objects
   - controlled vocabulary
 
-date_released: 2025-05-16
+date_released: 2026-01-28
 ---
 
 About this software
 ===================
 
-## cold 0.0.32
+## cold 0.0.34
 
-Improved Funder metadata schema. Start integration of ROR data for Funder metadata. Added 'ror_import' to import a ROR data dump zipfile
-into 'ror.ds' dataset collection.
+- Implemented changes in issue #90, restricted dataset version to 2.2.0 due to bug in people_names query processing.
 
 ### Authors
 
@@ -116,9 +115,9 @@ Access control is provided by the front end web server integrated with Shibbolet
 
 ### Software Requirements
 
-- Deno >= 2.3.6
-- Dataset >= 2.2.7
-- CMTools >= 0.0.33
+- Deno >= 2.6.6
+- Dataset = 2.2.0
+- CMTools >= 0.0.40
 
 
 ### Software Suggestions
