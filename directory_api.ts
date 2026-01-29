@@ -56,6 +56,9 @@ export async function directoryLookup(
     record.bio = getElementValue(document, ".bio");
     record.office = getElementValue(document, ".office");
     record.email = getElementValue(document, ".email");
+    if (record.email.trim() === "[email protected]") {
+      record.email = "";
+    }
     return record;
   }
   if (resp.body !== null) {

@@ -34,9 +34,12 @@ function updateRecord(obj: object) {
     }
     if (
       obj.email !== undefined && obj.email !== "" &&
-      obj.email != "[email protected]"
+      obj.email.indexOf("[email protected]") >= 0
     ) {
       email_elem.value = obj.email;
+    }
+    if (email_elem.value.indexOf("[email protected]") >= 0) {
+      email_elem.value = "";
     }
     if (obj.division !== undefined && obj.division !== "") {
       if (division_elem.value === "") {
