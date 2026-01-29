@@ -32,7 +32,7 @@ maintainer:
     id: https://orcid.org/0000-0003-0900-6903
 
 repository_code: https://github.com/caltechlibrary/cold
-version: 0.0.34
+version: 0.0.35
 license_url: https://caltechlibrary.github.io/cold/LICENSE
 operating_system:
   - Linux
@@ -58,9 +58,10 @@ date_released: 2026-01-28
 About this software
 ===================
 
-## cold 0.0.34
+## cold 0.0.35
 
-- Implemented changes in issue #90, restricted dataset version to 2.2.0 due to bug in people_names query processing.
+- Implemented changes in issue #91 and issue #82
+- Minor UI view edits from release v0.0.34
 
 ### Authors
 

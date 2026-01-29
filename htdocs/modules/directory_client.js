@@ -17,8 +17,11 @@ function updateRecord(obj) {
     if (obj.given_name !== undefined && obj.given_name !== "") {
       lived_name_elem.value = obj.given_name;
     }
-    if (obj.email !== undefined && obj.email !== "") {
+    if (obj.email !== undefined && obj.email !== "" && obj.email.indexOf("[email protected]") >= 0) {
       email_elem.value = obj.email;
+    }
+    if (email_elem.value.indexOf("[email protected]") >= 0) {
+      email_elem.value = "";
     }
     if (obj.division !== undefined && obj.division !== "") {
       if (division_elem.value === "") {

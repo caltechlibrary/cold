@@ -266,7 +266,8 @@ export class People implements PeopleInterface {
     (obj.given_name === undefined || obj.given_name === "")
       ? this.given_name = ""
       : this.given_name = obj.given_name as unknown as string;
-    (obj.email === undefined || obj.email === "")
+    (obj.email === undefined || obj.email === "" ||
+        obj.email === "[email protected]")
       ? this.email = ""
       : this.email = obj.email as unknown as string;
     (obj.archivesspace_id === undefined || obj.archivesspace_id === "")
