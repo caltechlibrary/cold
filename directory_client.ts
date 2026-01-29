@@ -32,7 +32,10 @@ function updateRecord(obj: object) {
     if (obj.given_name !== undefined && obj.given_name !== "") {
       lived_name_elem.value = obj.given_name;
     }
-    if (obj.email !== undefined && obj.email !== "") {
+    if (
+      obj.email !== undefined && obj.email !== "" &&
+      obj.email != "[email protected]"
+    ) {
       email_elem.value = obj.email;
     }
     if (obj.division !== undefined && obj.division !== "") {
