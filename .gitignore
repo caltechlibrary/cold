@@ -26,3 +26,4 @@ htdocs/rpt/*
 *.zip
 *.tgz
 *.jsonl
+.DS_Store
