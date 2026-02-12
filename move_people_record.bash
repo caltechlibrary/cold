@@ -64,7 +64,7 @@ SQL
 else
 	echo "aborting";
 fi
-sudo systemctl starts cold_api
-sudo systemctl starts cold_reports
-sudo systemctl starts cold
+sudo systemctl restart cold_api
+sudo systemctl restart cold_reports
+sudo systemctl restart cold
 

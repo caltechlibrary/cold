@@ -17,6 +17,7 @@ reports:
     content_type: text/csv
   run_people_membership_csv:
     cmd: ./run_people_membership.bash
+    basename: people_membership
     append_datestamp: false
     content_type: text/csv
   run_group_people_crosswalk_csv:
