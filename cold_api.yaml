@@ -18,7 +18,7 @@ collections:
             'debug_orcid', src->'orcid',
             'debug_orcid_length', length(src->>'orcid'),
             'identifiers',
-              if(length(src->>'orcid') > 1, 
+              if(length(src->>'orcid') > 1,
                 json_array(
                   json_object(
                     'scheme', 'clpid',
@@ -42,7 +42,7 @@ collections:
                 json_array(
                   json_object(
                     'id', replace(src->>'ror', 'https://ror.org/', ''),
-                    'name', 'Caltech' 
+                    'name', 'Caltech'
                   )
                 ),
                 src->>'ror' <> 'https://ror.org/05dxps055',
@@ -170,14 +170,14 @@ collections:
         select json_object('clgid', src->'clgid', 'group_name', src->'name') as src
         from groups
         order by src->'name' asc;
-      lookup_name: |        
+      lookup_name: |
         select json_object('clgid', src->'clgid', 'group_name', src->'name')
         from groups
         where (src->>'name' like ?) or
               exists(
-                    select true 
-                    from json_each(src->'alternative') 
-                    where (json_each.value like ?) 
+                    select true
+                    from json_each(src->'alternative')
+                    where (json_each.value like ?)
               )
         order by src->>'name' asc;
       lookup_name_or_clgid:
@@ -186,9 +186,9 @@ collections:
         where (src->>'name' like ?) or
               (src->>'clgid' like ?) or
               exists(
-                    select true 
-                    from json_each(src->'alternative') 
-                    where (json_each.value like ?) 
+                    select true
+                    from json_each(src->'alternative')
+                    where (json_each.value like ?)
               )
         order by src->>'name' asc;
     # What follows are object level permissions
@@ -305,7 +305,7 @@ collections:
           'country', src->'country',
           'acronyms', src->'acronyms'
         ) as src
-        from ror    
+        from ror
         where src->>'name' like ?
           or exists (
             select 1
@@ -325,7 +325,7 @@ collections:
         order by src->'name';
       # Lookup a ror by acronym
       lookup_by_acronym: |
-        select json_object('ror', _key, 
+        select json_object('ror', _key,
           'name', src->'name',
           'country', src->'country',
           'acronyms', src->'acronyms'
@@ -341,6 +341,26 @@ collections:
         delete from ror
     keys: true
     read: true
+    create: true
+    update: true
+    # This sets versioning behavior
+    versions: true
+  - dataset: rdm_review_queue.ds
+    query:
+      # browser JSON objects by descending updated timestamp
+      browse:
+        select src
+        from rdm_review_queue
+        order by updated desc
+      # Search the JSON object for a user provided value
+      search: |
+        select src
+        from rdm_review_queue
+        where src like ?
+        order by updated desc
+    keys: true
+    read: true
+    # datasetd requires create,update permissions for support queries
     create: true
     update: true
     # This sets versioning behavior

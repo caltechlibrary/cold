@@ -1,7 +1,7 @@
 {
   "tasks": {
     "setup": "dataset init people.ds ; dataset init groups.ds ; dataset init funders.ds ; dataset init journals.ds ; dataset init doi_prefix.ds ; dataset init subjects.ds ; dataset init test.ds ; dataset init reports.ds ; dataset init thesis_options.ds ; dataset init ror.ds ",
-    "cold_api": "datasetd cold_api.yaml",
+    "cold_api": "datasetd -debug cold_api.yaml",
     "cold": "deno run --watch  --allow-read --allow-net --watch cold.ts --htdocs=./htdocs --baseUrl=http://localhost:8111",
     "cold_api_debug": "datasetd --debug cold_api.yaml",
     "cold_debug": "deno run --watch  --allow-read --allow-net --watch cold.ts --htdocs=./htdocs --baseUrl=http://localhost:8111 --debug",
