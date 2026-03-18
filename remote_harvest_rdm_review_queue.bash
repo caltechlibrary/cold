@@ -164,7 +164,6 @@ cat <<SQL_QUERY >"${RDM_DBNAME}_review_queue.sql"
   WHERE
     request_metadata.json->'receiver'->>'community' = 'aedd135f-227e-4fdf-9476-5b3fd011bac6'
     AND request_metadata.json->>'type' = 'community-submission'
-    AND request_metadata.json->>'status' = 'submitted'
   ORDER BY
     request_metadata.updated DESC;
 

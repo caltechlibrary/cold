@@ -34,3 +34,7 @@ changing_keys_and_identifiers.html
 dataset-installer.sh
 fetch_db_records.bash
 load_rdm_records.bash
+*.env
+*.new
+caltechauthors_review_queue.sql
+dockerCmd.bash
