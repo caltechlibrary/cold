@@ -80,7 +80,12 @@ export async function transpileToJavaScript(
 if (import.meta.main) {
   await renderHtdocs("./htdocs");
   await Deno.mkdir(modules_path, { mode: 0o775, recursive: true });
-  let transpileFiles = ["client_api.ts", "directory_client.ts", "orcid_api.ts"];
+  let transpileFiles = [
+    "client_api.ts",
+    "directory_client.ts",
+    "orcid_api.ts",
+    "rdm_review_queue.ts",
+  ];
   let ok: boolean = await transpileToJavaScript(transpileFiles, modules_path);
   if (
     ok

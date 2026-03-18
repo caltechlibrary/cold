@@ -51,7 +51,7 @@ collections:
             )
           as src
         from people
-        order by src->'family_name' ASC, src->'given_name' ASC;
+        order by src->'family_name' ASC, src->'given_name' ASC
       people_names: |
         select json_object(
           'clpid', src->'clpid',
