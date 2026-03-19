@@ -53,8 +53,8 @@
     }
   ],
   "dateCreated": "2023-12-12",
-  "dateModified": "2026-03-12",
-  "datePublished": "2026-03-12",
+  "dateModified": "2026-03-19",
+  "datePublished": "2026-03-19",
   "description": "Caltech Library maintains a list of people, groups and funders and their related identifiers. For many years these were managed using a spreadsheets. That has become cumbersome. **COLD** manages data as JSON objects in [dataset](https://github.com/caltechlibrary/dataset) collections.\n\n**COLD** is implemented as three web web services\n\n- cold web UI\n- cold JSON API (provided by datasetd)\n- cold reports (the report request system)\n\nReports are implemented as a set of programs or bash scripts.\n\nTypeScript+Deno is used to implement the web UI and report system.\nThe JSON API is provided by Dataset's datasetd.\nAccess control is provided by the front end web server integrated with Shibboleth.",
   "funder": [
     {
@@ -91,7 +91,7 @@
   "runtimePlatform": "- Deno 2.2",
   "softwareRequirements": [
     "Deno >= 2.7.5",
-    "Dataset = 2.2.0",
+    "Dataset = 2.3.4",
     "CMTools >= 0.0.40"
   ],
   "softwareSuggestions": [
@@ -99,8 +99,8 @@
     "Pandoc 3.1"
   ],
   "version": "0.0.36",
-  "developmentStatus": "wip",
+  "developmentStatus": "active",
   "issueTracker": "https://github.com/caltechlibrary/cold/issues",
   "downloadUrl": "https://github.com/caltechlibrary/cold/release/latest",
-  "releaseNotes": "- Add RDM Review queue support to COLD\n- updated dataset and deno version requirements"
+  "releaseNotes": "- Add RDM Review queue support to COLD\n- Add RDM Authors' submission Report to COLD\n- updated dataset and deno version requirements"
 }

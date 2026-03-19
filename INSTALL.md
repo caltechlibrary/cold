@@ -44,8 +44,8 @@ Installing from source
 
 ### Required software
 
-- Deno &gt;&#x3D; 2.6.6
-- Dataset &#x3D; 2.2.0
+- Deno &gt;&#x3D; 2.7.5
+- Dataset &#x3D; 2.3.4
 - CMTools &gt;&#x3D; 0.0.40
 
 ### Steps

@@ -9,8 +9,13 @@ bug
 next
 ----
 
-- [ ] Need to produce the Groups YAML vocabulary for CaltechAUTHORS
-- [ ] Add directoryLookup() call on submit of people_edit
+- [ ] Figure a useful way to snapshot the RDM Review queue tables and load into a dataset collection
+  - [X] harvest submitted status requests
+  - [ ] harvest accepted status requests
+- [ ] Create a Web UI to search the review queue collection
+- [ ] Create a set of status reports for the review queue, historical reports should include "accepted" status as well as "submitted" status requests
+- [X] Need to produce the Groups YAML vocabulary for CaltechAUTHORS
+- [X] Add directoryLookup() call on submit of people_edit
 - [X] Make sure `author_id` and `thesis_id` continue to be mapped on reloading data from CSV file, if a person has an "clpid" and only are alumni then that should go into the `thesis_id` field.
 - [X] Display name should always be taken from Caltech Directory
 - [X] If the name fields family_name, given_name should be taken from the Caltech Directory if empty

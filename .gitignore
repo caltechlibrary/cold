@@ -36,5 +36,6 @@ fetch_db_records.bash
 load_rdm_records.bash
 *.env
 *.new
-caltechauthors_review_queue.sql
-dockerCmd.bash
+*_review_queue.sql
+*_review_submissions.sql
+docker_*.bash

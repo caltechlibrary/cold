@@ -16,8 +16,9 @@ ${APP_NAME} [OPTIONS] <path_to_env_file>"
 # DESCRIPTION
 
 ${APP_NAME} takes a simple environment file and uses it to make a connection
-to the remote RDM deployment and render the RDM review queue as a JSONL document.
-The document is then copied back to the requesting host.
+to the remote RDM deployment and render the RDM submission requests from the RDM
+requests metadata table. The table is large so this should be run infrequently
+(once or twice a day).
 
 The script will then generate SQL and a docker command file to execute on the remote
 system. It'll copy them there then execute them via SSH. The resulting jsonl file is
@@ -117,8 +118,8 @@ if [ -z "$RDM_DBNAME" ]; then
 fi
 
 # Check if all variables are populated
-if [ -z "$RDM_HOST" ] || [ -z "$RDM_URL" ] || [ -z "$CONTAINER_NAME" ] || [ -z "$RDM_DBNAME" ]; then
-    echo "Error: All parameters (RDM_HOST, RDM_URL, CONTAINER_NAME, RDM_DBNAME) must be provided."
+if [ -z "$RDM_HOST" ] || [ -z "$CONTAINER_NAME" ] || [ -z "$RDM_DBNAME" ]; then
+    echo "Error: All parameters (RDM_HOST, CONTAINER_NAME, RDM_DBNAME) must be provided."
     exit 1
 fi
 
@@ -135,7 +136,6 @@ RDM_DBNAME=$RDM_DBNAME
 
 SCRIPT
         echo "Variables saved to $NEW_ENV_FILE"
-
     fi
 fi
 
@@ -153,22 +153,21 @@ CONTAINER_ID="$(ssh "${RDM_HOST}" "docker ps --filter 'name=${CONTAINER_NAME}' -
 echo "CONTAINER_ID -> ${CONTAINER_ID}"
 
 # SQL query (your provided query)
-cat <<SQL_QUERY >"${RDM_DBNAME}_review_queue.sql"
+cat <<SQL_QUERY >"${RDM_DBNAME}_review_submissions.sql"
   SELECT
     json_build_object(
       'key', request_metadata.json->'topic'->>'record',
       'object', json_build_object(
-        'rdmid', rdm_drafts_metadata.json->>'id',
-        'uuid', request_metadata.id,
-        'link', concat('${RDM_URL}/me/requests/', request_metadata.id),
+        'rdmid', rdm_records_metadata.json->>'id',
+        'link', concat('${RDM_URL}/records/', rdm_records_metadata.json->>'id'),
         'status', request_metadata.json->>'status',
         'title', request_metadata.json->'title',
-        'description', rdm_drafts_metadata.json->'metadata'->'description',
-        'publisher', rdm_drafts_metadata.json->'metadata'->>'publisher',
-        'publication_date', rdm_drafts_metadata.json->'metadata'->>'publication_date',
-        'custom_fields', rdm_drafts_metadata.json->'custom_fields',
-        'creators', rdm_drafts_metadata.json->'metadata'->'creators',
-        'funding', rdm_drafts_metadata.json->'metadata'->'funding',
+        'description', rdm_records_metadata.json->'metadata'->'description',
+        'publisher', rdm_records_metadata.json->'metadata'->>'publisher',
+        'publication_date', rdm_records_metadata.json->'metadata'->>'publication_date',
+        'custom_fields', rdm_records_metadata.json->'custom_fields',
+        'creators', rdm_records_metadata.json->'metadata'->'creators',
+        'funding', rdm_records_metadata.json->'metadata'->'funding',
         'submitted_by', username,
         'created', request_metadata.created::date,
         'updated', request_metadata.updated::date
@@ -176,36 +175,39 @@ cat <<SQL_QUERY >"${RDM_DBNAME}_review_queue.sql"
   FROM
     request_metadata
     LEFT JOIN accounts_user ON (request_metadata.json->'created_by'->>'user'::text = accounts_user.id::text)
-    LEFT JOIN rdm_drafts_metadata ON (request_metadata.json->'topic'->>'record' = rdm_drafts_metadata.json->>'id')
+    LEFT JOIN rdm_records_metadata ON (request_metadata.json->'topic'->>'record' = rdm_records_metadata.json->>'id')
   WHERE
     request_metadata.json->'receiver'->>'community' = 'aedd135f-227e-4fdf-9476-5b3fd011bac6'
     AND request_metadata.json->>'type' = 'community-submission'
-    AND request_metadata.json->>'status' = 'submitted'
+    AND request_metadata.json->>'status' != 'submitted'
   ORDER BY
     request_metadata.updated DESC;
 
 SQL_QUERY
 
-cat <<CMD >docker_cmd_review_queue.bash
+cat <<CMD >docker_cmd_submissions.bash
 
-docker cp "${RDM_DBNAME}_review_queue.sql" "${CONTAINER_ID}:${RDM_DBNAME}_review_queue.sql"
+docker cp "${RDM_DBNAME}_review_submissions.sql" "${CONTAINER_ID}:${RDM_DBNAME}_review_submissions.sql"
 
 docker exec -i ${CONTAINER_ID} \
-  psql --username ${RDM_DBNAME} $RDM_DBNAME -f ${RDM_DBNAME}_review_queue.sql  -t -A -F $'\t' \
-  >${RDM_DBNAME}_review_queue.jsonl
+  psql --username ${RDM_DBNAME} $RDM_DBNAME -f ${RDM_DBNAME}_review_submissions.sql  -t -A -F $'\t' \
+  >${RDM_DBNAME}_review_submissions.jsonl
 
 CMD
 
 # Execute the query inside the container and save the output as JSONL
-cat docker_cmd_review_queue.bash
-scp docker_cmd_review_queue.bash "${RDM_HOST}":./
-scp "${RDM_DBNAME}_review_queue.sql" "${RDM_HOST}":./
+cat docker_cmd_submissions.bash
+scp docker_cmd_submissions.bash "${RDM_HOST}":./
+scp "${RDM_DBNAME}_review_submissions.sql" "${RDM_HOST}":./
 
-ssh "${RDM_HOST}" "bash docker_cmd_review_queue.bash"
-scp "${RDM_HOST}":"${RDM_DBNAME}_review_queue.jsonl" ./
-if [ -f "${RDM_DBNAME}_review_queue.jsonl" ]; then
-    echo "Loading ${RDM_DBNAME}_review_queue.jsonl into rdm_review_queue.ds"
-    if dataset load -overwrite rdm_review_queue.ds <"${RDM_DBNAME}_review_queue.jsonl"; then
+ssh "${RDM_HOST}" "bash docker_cmd_submissions.bash"
+scp "${RDM_HOST}":"${RDM_DBNAME}_review_submissions.jsonl" ./
+if [ -f "${RDM_DBNAME}_review_submissions.jsonl" ]; then
+    echo "Loading ${RDM_DBNAME}_review_submissions.jsonl into rdm_review_queue.ds"
+    if dataset load -overwrite rdm_review_queue.ds <"${RDM_DBNAME}_review_submissions.jsonl"; then
+        echo "Cleanup canceled and declined records"
+        # ["accepted","cancelled","created","declined","submitted"]
+        dsquery rdm_review_queue.ds "DELETE FROM rdm_review_queue WHERE src->>'status' = 'created' OR src->>'status' = 'cancelled' OR src->>'status' = 'declined'" >/dev/null
         echo "Success!"
     else
         echo "Something went wrong"

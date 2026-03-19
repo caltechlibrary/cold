@@ -32,7 +32,7 @@ maintainer:
     id: https://orcid.org/0000-0003-0900-6903
 
 repository_code: https://github.com/caltechlibrary/cold
-version: 0.0.35
+version: 0.0.36
 license_url: https://caltechlibrary.github.io/cold/LICENSE
 operating_system:
   - Linux
@@ -52,16 +52,17 @@ keywords:
   - objects
   - controlled vocabulary
 
-date_released: 2026-01-28
+date_released: 2026-03-19
 ---
 
 About this software
 ===================
 
-## cold 0.0.35
+## cold 0.0.36
 
-- Implemented changes in issue #91 and issue #82
-- Minor UI view edits from release v0.0.34
+- Add RDM Review queue support to COLD
+- Add RDM Authors' submission Report to COLD
+- updated dataset and deno version requirements
 
 ### Authors
 
@@ -116,8 +117,8 @@ Access control is provided by the front end web server integrated with Shibbolet
 
 ### Software Requirements
 
-- Deno >= 2.6.6
-- Dataset = 2.2.0
+- Deno >= 2.7.5
+- Dataset = 2.3.4
 - CMTools >= 0.0.40
 
 
