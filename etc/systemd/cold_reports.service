@@ -1,22 +1,17 @@
-[Install]
-WantedBy=multi-user.target
-
 [Unit]
-Description=COLD service
-Documentation=man:cold(1)
+Description=COLD reports service
+Documentation=man:cold_reports(1)
 After=cold_api.service
 Requires=cold_api.service
 ConditionPathExists=!/Sites/cold/cold_not_to_be_run
 
 [Service]
 WorkingDirectory=/Sites/cold
-ExecStart=/Sites/cold/bin/cold --baseUrl=https://apps.library.caltech.edu/cold
+ExecStart=/Sites/cold/bin/cold_reports /Sites/cold/cold_reports.yaml
 Type=simple
 Restart=always
 
 [Install]
 WantedBy=multi-user.target
-Alias=cold.service
-
-
+Alias=cold_reports.service
 

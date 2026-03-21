@@ -82,9 +82,9 @@ if (import.meta.main) {
   await Deno.mkdir(modules_path, { mode: 0o775, recursive: true });
   let transpileFiles = [
     "client_api.ts",
-    "directory_client.ts",
     "orcid_api.ts",
-    //    "rdm_review_queue.ts",
+    "directory_client.ts",
+    "rdm_review_queue.ts",
   ];
   let ok: boolean = await transpileToJavaScript(transpileFiles, modules_path);
   if (

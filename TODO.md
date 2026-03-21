@@ -5,14 +5,21 @@ Action items
 bug
 ---
 
+- [X] Description field is not needed in the harvested content from RDM review queue
+- [X] funders field is not needed in the harvested content from RDM review queue
 
 next
 ----
 
-- [ ] Figure a useful way to snapshot the RDM Review queue tables and load into a dataset collection
+- [X] Figure a useful way to snapshot the RDM Review queue tables and load into a dataset collection
   - [X] harvest submitted status requests
-  - [ ] harvest accepted status requests
+  - [X] harvest accepted status requests
 - [ ] Create a Web UI to search the review queue collection
+  - [X] Figure out how to make searches bookmark-able
+  - [X] Figure out how to map search to various queries of rdm_review_queue.ds
+  - [X] Implemented retrieve JSON array results
+  - [ ] Format output for HTMLL display
+  - [ ] Figure out CSV download option for search results
 - [ ] Create a set of status reports for the review queue, historical reports should include "accepted" status as well as "submitted" status requests
 - [X] Need to produce the Groups YAML vocabulary for CaltechAUTHORS
 - [X] Add directoryLookup() call on submit of people_edit

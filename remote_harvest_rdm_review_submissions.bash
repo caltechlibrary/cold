@@ -168,12 +168,10 @@ cat <<SQL_QUERY >"${RDM_DBNAME}_review_submissions.sql"
         'link', concat('${RDM_URL}/records/', rdm_records_metadata.json->>'id'),
         'status', request_metadata.json->>'status',
         'title', request_metadata.json->'title',
-        'description', rdm_records_metadata.json->'metadata'->'description',
         'publisher', rdm_records_metadata.json->'metadata'->>'publisher',
         'publication_date', rdm_records_metadata.json->'metadata'->>'publication_date',
         'custom_fields', rdm_records_metadata.json->'custom_fields',
         'creators', rdm_records_metadata.json->'metadata'->'creators',
-        'funding', rdm_records_metadata.json->'metadata'->'funding',
         'submitted_by', username,
         'created', request_metadata.created::date,
         'updated', request_metadata.updated::date

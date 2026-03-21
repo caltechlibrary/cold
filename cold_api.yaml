@@ -352,12 +352,58 @@ collections:
         select src
         from rdm_review_queue
         order by updated desc
+
       # Search the JSON object for a user provided value
       search: |
         select src
         from rdm_review_queue
         where src like ?
         order by updated desc
+
+      # search by name
+      by_name: |
+        select src
+        from rdm_review_queue
+        where exists (
+            select 1
+            from json_each(src, '$.creators')
+            where json_extract(value, '$.person_or_org.name') like ?
+        )
+
+      # search by clpid
+      by_clpid: |
+        SELECT src
+        FROM rdm_review_queue
+        WHERE EXISTS (
+            SELECT 1
+            FROM json_each(src, '$.creators') AS creator
+            JOIN json_each(creator.value, '$.person_or_org.identifiers') AS identifier
+            WHERE json_extract(identifier.value, '$.scheme') = 'clpid'
+              AND json_extract(identifier.value, '$.identifier') = ?
+        )
+
+      # search by orcid
+      by_orcid: |
+        SELECT src
+        FROM rdm_review_queue
+        WHERE EXISTS (
+            SELECT 1
+            FROM json_each(src, '$.creators') AS creator
+            JOIN json_each(creator.value, '$.person_or_org.identifiers') AS identifier
+            WHERE json_extract(identifier.value, '$.scheme') = 'orcid'
+              AND json_extract(identifier.value, '$.identifier') = ?
+        )
+
+      # search by group name
+      by_clgid: |
+        SELECT src
+        FROM rdm_review_queue
+        WHERE EXISTS (
+            SELECT 1
+            FROM json_each(src, '$.custom_fields."caltech:groups"')
+            WHERE json_extract(value, '$.id') = ?
+        )
+
     keys: true
     read: true
     # datasetd requires create,update permissions for support queries
