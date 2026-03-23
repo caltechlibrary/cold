@@ -121,7 +121,15 @@
     const query = q.indexOf("*") > -1 ? q.replace(/\*/g, "%") : q;
     try {
       const results = await this.fetchResults(q_name, query);
-      this.resultSection.innerHTML = this.renderResults(q_name, query_label, q, results);
+      this.resultSection.innerHTML = `${results.length}  items found, ${query_label} <em>"${q}"</em>`;
+      if (results.length > 0) {
+        const tableText = formatJsonAsHtmlTable(results);
+        const csvText = formatJsonAsCSV(results);
+        const download = csvToDownloadElements(csvText, q_name + ".csv");
+        this.resultSection.appendChild(download);
+        this.resultSection.appendChild(document.createElement("p"));
+        this.resultSection.insertAdjacentHTML("beforeend", tableText);
+      }
     } catch (error) {
       this.resultSection.innerHTML = `Error: ${error}`;
     }
@@ -142,29 +150,27 @@
     }
     return await response.json();
   }
-  renderResults(q_name, query_label, q, results) {
-    // Customize this method to render your results as HTML
-    const tableText = formatJsonToHtmlTable(results);
-    return `${results.length}  items found for ${query_label} <em>"${q}"</em><p>${tableText}`; //<pre>${JSON.stringify(results, null, 2)}</pre>`;
-  }
 }
-function formatJsonToHtmlTable(items) {
+function normalizeItem(item) {
+  let groups = "";
+  let journal_title = "";
+  item.custom_fields["caltech:groups"] === undefined ? item.groups = "" : item.groups = item.custom_fields["caltech:groups"].map((g)=>g.id).join("; ");
+  item.custom_fields["journal:journal"] === undefined ? item.journal_title = "" : item.journal_title = item.custom_fields["journal:journal"].title;
+}
+function formatJsonAsHtmlTable(items) {
   const tableRows = items.map((item)=>{
-    let groups = "";
-    let journal_title = "";
-    item.custom_fields["caltech:groups"] === undefined ? "" : groups = item.custom_fields["caltech:groups"].map((g)=>g.id).join("; ");
-    item.custom_fields["journal:journal"] === undefined ? "" : journal_title = item.custom_fields["journal:journal"].title;
+    normalizeItem(item);
     return `
             <tr>
                 <td><a href="${item.link}">${item.rdmid}</a></td>
                 <td>${item.status}</td>
                 <td>${item.title}</td>
                 <td>${item.publisher}</td>
-                <td>${journal_title}</td>
+                <td>${item.journal_title}</td>
                 <td>${item.publication_date}</td>
                 <td>${item.created}</td>
                 <td>${item.submitted_by}</td>
-                <td>${groups}</td>
+                <td>${item.groups}</td>
             </tr>
         `;
   }).join("");
@@ -188,4 +194,45 @@ function formatJsonToHtmlTable(items) {
             </tbody>
         </table>
     `;
+}
+function formatJsonAsCSV(items) {
+  // Generate CSV content
+  const csvHeader = "RDMID,Link,Status,Title,Publisher,Journal Title,Publication Date,Created Date,Submitted By,Caltech Groups";
+  const csvRows = items.map((item)=>{
+    normalizeItem(item);
+    return `"${item.rdmid}","${item.link.replace(/"/g, '""')}","${item.status}","${item.title.replace(/"/g, '""')}","${item.publisher.replace(/"/g, '""')}","${item.journal_title.replace(/"/g, '""')}","${item.publication_date}","${item.created}","${item.submitted_by}","${item.groups.replace(/"/g, '""')}"`;
+  }).join("\n");
+  const csv = `${csvHeader}\n${csvRows}`;
+  return csv;
+}
+function csvToDownloadElements(csvContent, fileName = "data.csv") {
+  // Create a data element to hold the CSV content
+  const container = document.createElement("span");
+  const dataElement = document.createElement("data");
+  dataElement.setAttribute("data-csv", csvContent);
+  // Create a button element
+  const button = document.createElement("button");
+  button.textContent = "Download CSV";
+  // Add click event to trigger download
+  button.addEventListener("click", ()=>{
+    // Create a Blob with the CSV content
+    const blob = new Blob([
+      csvContent
+    ], {
+      type: "text/csv;charset=utf-8;"
+    });
+    // Create a temporary anchor element
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", fileName);
+    link.style.visibility = "hidden";
+    // Append to the body, trigger click, and then remove
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  });
+  container.appendChild(button);
+  container.appendChild(dataElement);
+  return container;
 }
