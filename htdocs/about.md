@@ -32,7 +32,7 @@ maintainer:
     id: https://orcid.org/0000-0003-0900-6903
 
 repository_code: https://github.com/caltechlibrary/cold
-version: 0.0.37
+version: 0.0.37b
 license_url: https://caltechlibrary.github.io/cold/LICENSE
 operating_system:
   - Linux
@@ -58,7 +58,7 @@ date_released: 2026-03-23
 About this software
 ===================
 
-## cold 0.0.37
+## cold 0.0.37b
 
 - Add RDM Review queue support to COLD
 

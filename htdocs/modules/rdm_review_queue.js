@@ -157,12 +157,12 @@ function normalizeItem(item) {
   item.custom_fields["caltech:groups"] === undefined ? item.groups = "" : item.groups = item.custom_fields["caltech:groups"].map((g)=>g.id).join("; ");
   item.custom_fields["journal:journal"] === undefined ? item.journal_title = "" : item.journal_title = item.custom_fields["journal:journal"].title;
   [
-    'status',
-    'link',
-    'publisher'
+    "status",
+    "link",
+    "publisher"
   ].forEach(function(key) {
     if (item[key] === undefined || item[key] === null) {
-      item[key] = '';
+      item[key] = "";
     }
   });
 }
