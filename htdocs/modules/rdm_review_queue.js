@@ -116,12 +116,12 @@
     const selectedOption = this.querySelect.options[this.querySelect.selectedIndex];
     let query_label;
     selectedOption === undefined || selectedOption.innerText === undefined ? query_label = "" : query_label = selectedOption.innerText;
-    this.resultSection.innerHTML = `Searching ${query_label} for <em>${q}</em> <span id="spinner">👓</span>`;
+    this.resultSection.innerHTML = `Searching ${query_label} for <em>"${q}"</em> <span id="spinner">👓</span>`;
     // Convert wild card to SQL wild card
     const query = q.indexOf("*") > -1 ? q.replace(/\*/g, "%") : q;
     try {
       const results = await this.fetchResults(q_name, query);
-      this.resultSection.innerHTML = this.renderResults(results);
+      this.resultSection.innerHTML = this.renderResults(q_name, query_label, q, results);
     } catch (error) {
       this.resultSection.innerHTML = `Error: ${error}`;
     }
@@ -132,17 +132,60 @@
     url.search = new URLSearchParams({
       q: q
     });
-    console.log(`DEBUG POST datasetd query end point ${url}, payload ${JSON.stringify({
-      q: q
-    })}`);
-    const response = await fetch(url);
+    /* console.log(
+      `DEBUG POST datasetd query end point ${url}, payload ${
+        JSON.stringify({ q: q })
+      }`,
+      ); */ const response = await fetch(url);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     return await response.json();
   }
-  renderResults(results) {
+  renderResults(q_name, query_label, q, results) {
     // Customize this method to render your results as HTML
-    return `${results.length} items found<p><pre>${JSON.stringify(results, null, 2)}</pre>`;
+    const tableText = formatJsonToHtmlTable(results);
+    return `${results.length}  items found for ${query_label} <em>"${q}"</em><p>${tableText}`; //<pre>${JSON.stringify(results, null, 2)}</pre>`;
   }
+}
+function formatJsonToHtmlTable(items) {
+  const tableRows = items.map((item)=>{
+    let groups = "";
+    let journal_title = "";
+    item.custom_fields["caltech:groups"] === undefined ? "" : groups = item.custom_fields["caltech:groups"].map((g)=>g.id).join("; ");
+    item.custom_fields["journal:journal"] === undefined ? "" : journal_title = item.custom_fields["journal:journal"].title;
+    return `
+            <tr>
+                <td><a href="${item.link}">${item.rdmid}</a></td>
+                <td>${item.status}</td>
+                <td>${item.title}</td>
+                <td>${item.publisher}</td>
+                <td>${journal_title}</td>
+                <td>${item.publication_date}</td>
+                <td>${item.created}</td>
+                <td>${item.submitted_by}</td>
+                <td>${groups}</td>
+            </tr>
+        `;
+  }).join("");
+  return `
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>RDMID</th>
+                    <th>Status</th>
+                    <th>Title</th>
+                    <th>Publisher</th>
+                    <th>Journal Title</th>
+                    <th>Publication Date</th>
+                    <th>Created Date</th>
+                    <th>Submitted By</th>
+                    <th>Caltech Groups</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${tableRows}
+            </tbody>
+        </table>
+    `;
 }

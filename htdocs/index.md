@@ -23,3 +23,4 @@ It also lets you manage lists of subjects, issn mappings to cannonical names and
 ## Tools
 
 - [Reports](./reports)
+- [Review Queue](./rdm_review_queue.html)

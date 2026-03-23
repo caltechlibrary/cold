@@ -138,14 +138,19 @@ export class RdmReviewQueueUI {
       ? query_label = ""
       : query_label = selectedOption.innerText;
     this.resultSection.innerHTML =
-      `Searching ${query_label} for <em>${q}</em> <span id="spinner">👓</span>`;
+      `Searching ${query_label} for <em>"${q}"</em> <span id="spinner">👓</span>`;
 
     // Convert wild card to SQL wild card
     const query = q.indexOf("*") > -1 ? q.replace(/\*/g, "%") : q;
 
     try {
       const results = await this.fetchResults(q_name, query);
-      this.resultSection.innerHTML = this.renderResults(results);
+      this.resultSection.innerHTML = this.renderResults(
+        q_name,
+        query_label,
+        q,
+        results,
+      );
     } catch (error) {
       this.resultSection.innerHTML = `Error: ${error}`;
     }
@@ -154,12 +159,12 @@ export class RdmReviewQueueUI {
   private async fetchResults(q_name: string, q: string): Promise<any> {
     const url = new URL(this.baseUrl);
     url.pathname = `${this.basePath}api/${this.cName}/${q_name}/q`;
-    url.search = new URLSearchParams({q: q});
-    console.log(
+    url.search = new URLSearchParams({ q: q });
+    /* console.log(
       `DEBUG POST datasetd query end point ${url}, payload ${
         JSON.stringify({ q: q })
       }`,
-    );
+      ); */
     const response = await fetch(url);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -167,8 +172,96 @@ export class RdmReviewQueueUI {
     return await response.json();
   }
 
-  private renderResults(results: any): string {
+  private renderResults(
+    q_name: string,
+    query_label: string,
+    q: string,
+    results: any,
+  ): string {
     // Customize this method to render your results as HTML
-    return `${results.length} items found<p><pre>${JSON.stringify(results, null, 2)}</pre>`;
+    const tableText: string = formatJsonToHtmlTable(results);
+    return `${results.length}  items found for ${query_label} <em>"${q}"</em><p>${tableText}`; //<pre>${JSON.stringify(results, null, 2)}</pre>`;
   }
+}
+
+interface Creator {
+  person_or_org: {
+    family_name: string;
+    given_name: string;
+    name: string;
+  };
+  affiliations: Array<{ id: string }>;
+}
+
+interface CustomFields {
+  "caltech:groups": Array<{ id: string }>;
+  "caltech:publication_status": Array<{ id: string }>;
+  "journal:journal": {
+    title: string;
+    issn?: string;
+    issue?: string;
+    pages?: string;
+    volume?: string;
+  };
+}
+
+interface Item {
+  rdmid: string;
+  link: string;
+  status: string;
+  title: string;
+  publisher: string;
+  custom_fields: CustomFields;
+  publication_date: string;
+  created: string;
+  submitted_by: string;
+}
+
+function formatJsonToHtmlTable(items: Item[]): string {
+  const tableRows = items.map((item) => {
+    let groups: string = "";
+    let journal_title: string = "";
+    (item.custom_fields["caltech:groups"] === undefined)
+      ? ""
+      : groups = item.custom_fields["caltech:groups"].map((g) => g.id).join(
+        "; ",
+      );
+    (item.custom_fields["journal:journal"] === undefined)
+      ? ""
+      : journal_title = item.custom_fields["journal:journal"].title;
+    return `
+            <tr>
+                <td><a href="${item.link}">${item.rdmid}</a></td>
+                <td>${item.status}</td>
+                <td>${item.title}</td>
+                <td>${item.publisher}</td>
+                <td>${journal_title}</td>
+                <td>${item.publication_date}</td>
+                <td>${item.created}</td>
+                <td>${item.submitted_by}</td>
+                <td>${groups}</td>
+            </tr>
+        `;
+  }).join("");
+
+  return `
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>RDMID</th>
+                    <th>Status</th>
+                    <th>Title</th>
+                    <th>Publisher</th>
+                    <th>Journal Title</th>
+                    <th>Publication Date</th>
+                    <th>Created Date</th>
+                    <th>Submitted By</th>
+                    <th>Caltech Groups</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${tableRows}
+            </tbody>
+        </table>
+    `;
 }
