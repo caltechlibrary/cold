@@ -221,6 +221,11 @@ function normalizeItem(item: Item) {
   (item.custom_fields["journal:journal"] === undefined)
     ? item.journal_title = ""
     : item.journal_title = item.custom_fields["journal:journal"].title;
+  [ 'status', 'link', 'publisher' ].forEach(function (key: string) {
+      if (item[key] === undefined || item[key] === null) {
+          item[key] = '';
+      }
+  });
 }
 
 function formatJsonAsHtmlTable(items: Item[]): string {
