@@ -64,6 +64,7 @@ export class RdmReviewQueueUI {
         <option value="review_queue_by_clpid" title="review queue by clpid">by clpid</option>
         <option value="review_queue_by_orcid" title"review queue by orcid">by orcid</option>
         <option value="review_queue_by_clgid" title="review queue by clgid">by clgid (group identifier)</option>
+        <option value="review_queue_mentions" title="review queue search by @tag">by @tags</option>
       </optgroup>
       <hr />
       <optgroup label="All Requests">
@@ -72,7 +73,7 @@ export class RdmReviewQueueUI {
         <option value="by_orcid" title="all requests by orcid">by orcid</option>
         <option value="by_clgid" title="all requests by clgid">by clgid (group identifier)</option>
       </optgroup>
-    </select> <input id="q" name="q" type="search" placeholder="use '*' as a wild card" value="" size="30">
+    </select> <input id="q" name="q" type="search" placeholder="use '*' as a wild card with names and *@tag* for tags" value="" size="30">
     <input type="submit" value="🔎">
     <input type="reset" value="❌">
 </form><p><section class="rdm-review-queue-search-results" id="rdm-review-queue-results"></section>`;

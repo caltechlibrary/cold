@@ -54,6 +54,7 @@
         <option value="review_queue_by_clpid" title="review queue by clpid">by clpid</option>
         <option value="review_queue_by_orcid" title"review queue by orcid">by orcid</option>
         <option value="review_queue_by_clgid" title="review queue by clgid">by clgid (group identifier)</option>
+        <option value="review_queue_mentions" title="review queue search by @tag">by @tags</option>
       </optgroup>
       <hr />
       <optgroup label="All Requests">

@@ -448,6 +448,17 @@ collections:
         )
         AND src->>'status' = 'submitted'
 
+      # review queue mentions
+      review_queue_mentions: |
+        SELECT src
+        FROM rdm_review_queue
+        WHERE src->>'status' = 'submitted'
+          AND EXISTS (
+            SELECT 1
+            FROM json_each(src, '$.comments_with_mentions')
+            WHERE json_extract(value, '$.content') LIKE ?
+        )
+
     keys: true
     read: true
     # datasetd requires create,update permissions for support queries
