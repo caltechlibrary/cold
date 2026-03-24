@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>COLD Public API</title>
+    <link rel="stylesheet" href="/css/site.css">
+	<link rel="stylesheet" href="/css/webform.css">
+    <link rel="stylesheet" href="/css/spinner.css">
+</head>
+<body>
+<header>
+<a href="http://library.caltech.edu" title="link to Caltech Library Homepage"><img src="/assets/liblogo.gif" alt="Caltech Library logo"></a>
+</header>
+<nav>
+<ul>
+  <li><a href="/" title="return home">Home</a></li>
+  <li><a href="./" title="return to dashboard">Dashboard</a></li>
+  <li><a href="https://github.com/caltechlibrary/cold/issues">Report a problem</a></li>
+  <li><a href="./about.html">About</a></li>
+</ul>
+</nav>
+<section>
+
+<h1>Report Description</h1>
+<blockquote>
+<p>We're beginning to get many reports and the names start to be confusing. This list described the reports in more details grouped by functionality.</p>
+</blockquote>
+<h2>General Collection CSV reports</h2>
+<ul>
+<li><strong>Generate People CSV File</strong>
+<ul>
+<li>(people.csv) This reports renders our CaltechPEOPLE collection as a CSV file suitable for import into LibreOffice, Excel or for use with Jupyter Notebooks</li>
+</ul>
+</li>
+<li><strong>Generate Groups CSV File</strong></li>
+<li>(groups.csv) This report renders out CaltechGROUPS collection as a CSV file suitable for import into LibreOffice, Excel or for use with Jupyter Notebooks</li>
+<li><strong>Generate a Division People CSV</strong>
+<ul>
+<li>(division_people.csv) This generates a people list using the Caltech directory reported division affiliation</li>
+</ul>
+</li>
+<li><strong>Generate People Membership CSV</strong>
+<ul>
+<li>(people_membership.csv) This generates a report of people with membership in CaltechGROUPS. Each affiliation gets its own row in the CSV file.</li>
+</ul>
+</li>
+<li><strong>Gernerate Division People Crosswalk CSV</strong>
+<ul>
+<li>(division_people_crosswalk.csv) this report is a crosswalk of people affiliation restricted to clgid starting with &quot;Division-*&quot;</li>
+</ul>
+</li>
+<li><strong>Generate Group People Crosswalk</strong>
+<ul>
+<li>(group_people_crosswalk.csv) this report is a crosswalk of people and their group affiliation. It is similar to &quot;Generate People Membership CSV&quot;, slightly different columns</li>
+</ul>
+</li>
+<li><strong>Generate People Identifier CSV</strong>
+<ul>
+<li>(people_identifier_[DATE_STAMP].csv) This report lists all identifiers from CaltechPEOPLE collection by person (example clpid, orcid plus, thesis committee id, thesis advisor id)</li>
+</ul>
+</li>
+</ul>
+<h2>RDM Review Queue and Requests</h2>
+<ul>
+<li><strong>Generate Authors' Review Queue CSV file</strong>
+<ul>
+<li>(authors_review_queue.csv) This is a report of things currently in the review queue based on metadata in the request metadata table and drafts metadata table</li>
+</ul>
+</li>
+<li><strong>Generate Author's Submission CSV file</strong>
+<ul>
+<li>(authors_submissions.csv) This is a report on all requests (both submitted and accepted) from the request metadata table, drafts metadata table and records metadata table.</li>
+</ul>
+</li>
+</ul>
+<h2>RDM Vocabularies</h2>
+<blockquote>
+<p>These reports produce YAML files. These are used by RDM for controlled vocabularies.</p>
+</blockquote>
+<ul>
+<li><strong>Generate Journals Vocabulary</strong>
+<ul>
+<li>(journal_vocabulary.yaml) The preferred journal names we used in our IR</li>
+</ul>
+</li>
+<li><strong>Generate Groups Vocabulary</strong>
+<ul>
+<li>(group_vocabulary.yaml) This is the controlled of Groups defined in COLD used by RDM</li>
+</ul>
+</li>
+<li><strong>Generate People Vocabulary</strong>
+<ul>
+<li>(people_vocabulary.yaml) This is the controlled list of People defined in COLD used by RDM</li>
+</ul>
+</li>
+<li><strong>Generate Thesis Options Vocabulary</strong>
+<ul>
+<li>(thesis_option_vocabulary.yaml) This generates a Thesis option vocabulary. Currently used to implement EPrints' list of Thesis options but will be used with RDM eventually</li>
+</ul>
+</li>
+</ul>
+
+
+</section>
+<footer>
+<span>&copy; 2026 <a href="https://www.library.caltech.edu/copyright">Caltech Library</a></span>
+<address>1200 E California Blvd, Mail Code 2-32, Pasadena, CA 91125-3200</address>
+<span><a href="mailto:library@caltech.edu">Email Us</a></span>
+<span>Phone: <a href="tel:+1-626-395-3405">(626)395-3405</a></span>
+</footer>
+<code><pre></pre></code>
+</body>
+</html>

@@ -58,10 +58,20 @@ export class RdmReviewQueueUI {
     // Build the search form and results box
     const formHTML: string = `<form method="get">
     <label set="query_name">Search</label> <select name="q_name" id="q_name">
-      <option value="by_name">by name</option>
-      <option value="by_clpid">by clpid</option>
-      <option value="by_orcid">by orcid</option>
-      <option value="by_clgid">by clgid (group identifier)</option>
+      <hr />
+      <optgroup label="Review Queue Only">
+        <option value="review_queue_by_name" title="review queue by name">by name</option>
+        <option value="review_queue_by_clpid" title="review queue by clpid">by clpid</option>
+        <option value="review_queue_by_orcid" title"review queue by orcid">by orcid</option>
+        <option value="review_queue_by_clgid" title="review queue by clgid">by clgid (group identifier)</option>
+      </optgroup>
+      <hr />
+      <optgroup label="All Requests">
+        <option value="by_name" title="all requests by name">by name</option>
+        <option value="by_clpid" title="all requests by clpid">by clpid</option>
+        <option value="by_orcid" title="all requests by orcid">by orcid</option>
+        <option value="by_clgid" title="all requests by clgid">by clgid (group identifier)</option>
+      </optgroup>
     </select> <input id="q" name="q" type="search" placeholder="use '*' as a wild card" value="" size="30">
     <input type="submit" value="🔎">
     <input type="reset" value="❌">
@@ -78,8 +88,8 @@ export class RdmReviewQueueUI {
     const u = URL.parse(window.location.href);
     const params = u.searchParams;
     const q_name = params.get("q_name") || "";
-    const q = params.get("q") || "";
-    console.log(`DEBUG from URL, q_name: "${q_name}", q: "${q}"`);
+    const q = params.get("q").trim() || "";
+    //console.log(`DEBUG from URL, q_name: "${q_name}", q: "${q}"`);
     this.setSelectOption(q_name);
     if (q !== "") {
       this.queryInput.value = q;
@@ -93,7 +103,7 @@ export class RdmReviewQueueUI {
       (e) => {
         e.preventDefault();
         const q_name = this.querySelect.value;
-        const q = this.queryInput.value;
+        const q = this.queryInput.value.trim();
         // Update the URL
         this.updateURL(q_name, q);
         // Now setup the query
@@ -137,6 +147,11 @@ export class RdmReviewQueueUI {
     (selectedOption === undefined || selectedOption.innerText === undefined)
       ? query_label = ""
       : query_label = selectedOption.innerText;
+    if (q_name.startsWith("review_queue")) {
+      query_label = `review queue ${query_label}`;
+    } else {
+      query_label = `all requests ${query_label}`;
+    }
     this.resultSection.innerHTML =
       `Searching ${query_label} for <em>"${q}"</em> <span id="spinner">👓</span>`;
 
@@ -220,7 +235,7 @@ function normalizeItem(item: Item) {
     );
   (item.custom_fields["journal:journal"] === undefined)
     ? item.journal_title = ""
-    : item.journal_title = item.custom_fields["journal:journal"].title;
+    : item.journal_title = item.custom_fields["journal:journal"].title || "";
   ["status", "link", "publisher"].forEach(function (key: string) {
     if (item[key] === undefined || item[key] === null) {
       item[key] = "";
@@ -233,7 +248,7 @@ function formatJsonAsHtmlTable(items: Item[]): string {
     normalizeItem(item);
     return `
             <tr>
-                <td><a href="${item.link}">${item.rdmid}</a></td>
+                <td><a href="${item.link}" target="_blank">${item.rdmid}</a></td>
                 <td>${item.status}</td>
                 <td>${item.title}</td>
                 <td>${item.publisher}</td>

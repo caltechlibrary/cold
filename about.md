@@ -32,7 +32,7 @@ maintainer:
     id: https://orcid.org/0000-0003-0900-6903
 
 repository_code: https://github.com/caltechlibrary/cold
-version: 0.0.37b
+version: 0.0.38
 license_url: https://caltechlibrary.github.io/cold/LICENSE
 operating_system:
   - Linux
@@ -52,15 +52,20 @@ keywords:
   - objects
   - controlled vocabulary
 
-date_released: 2026-03-23
+date_released: 2026-03-24
 ---
 
 About this software
 ===================
 
-## cold 0.0.37b
+## cold 0.0.38
 
-- Add RDM Review queue support to COLD
+- improved data validation when rendering review queue content client side
+- added counts to number of members in a group display
+- in review queue search the name is now trimmed before submission to avoid false negatives becaused a space slipped in
+- review queue now has two sets of searches, one is review queue and one set is whole requests table (submitted and accepted)
+- pull down list of reports and review search now have titles for each option
+- added help page for reports page to detail what each report does
 
 ### Authors
 

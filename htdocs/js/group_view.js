@@ -1,5 +1,6 @@
 import { ClientAPI } from "../modules/client_api.js";
 
+
 const clientAPI = new ClientAPI();
 
 function getClgidFromPath() {
@@ -16,6 +17,7 @@ document.addEventListener("DOMContentLoaded", async function (event) {
 
   groupMembersElem.innerHTML = ''; // Clear the element so we can populate it.
   if (objList.length > 0) {
+  	groupMembersElem.insertAdjacentHTML('beforeend', `<p>(${objList.length} people)<p>`);
     for (const obj of objList) {
       const clpid = obj.clpid,
         name = `${obj.family_name}, ${obj.given_name}`,
@@ -31,7 +33,7 @@ document.addEventListener("DOMContentLoaded", async function (event) {
   }
 
   if (alternativeElem !== undefined && alternativeElem !== null) {
-	  const names = alternativeElem.innerHTML.split(/\n/g);
+	const names = alternativeElem.innerHTML.split(/\n/g);
     if (names.length > 0) {
       const ul = document.createElement('ul');
       ul.style = "list-style-type: none";
@@ -40,7 +42,6 @@ document.addEventListener("DOMContentLoaded", async function (event) {
         elem.innerHTML = name;
         ul.appendChild(elem);
       }
-      alternativeElem.innerHTML = '';
       alternativeElem.appendChild(ul);
     }
   }

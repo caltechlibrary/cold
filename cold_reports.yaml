@@ -60,3 +60,8 @@ reports:
     basename: authors_submissions
     append_datestamp: false
     content_type: text/csv
+  run_authors_review_queue_csv:
+    cmd: ./run_authors_review_queue_csv.bash
+    basename: authors_review_queue
+    append_datestamp: false
+    content_type: text/csv

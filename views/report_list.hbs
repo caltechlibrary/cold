@@ -18,18 +18,30 @@
 <div>
 <label set="report_name">Report</label>
 <select name="report_name" id="report_name">
-  <option value="run_people_csv">Generate People CSV File</option>
-  <option value="run_groups_csv">Generate Groups CSV File</option>
-  <option value="run_authors_submissions_csv">Generate Authors' Submissions CSV File</option>
-  <option value="run_division_people_crosswalk_csv">Generate Division People Crosswalk CSV</option>
-  <option value="run_group_people_crosswalk_csv">Generate Group People Crosswalk CSV</option>
-  <option value="run_people_identifier_csv">Generate People Identifier CSV</option>
-  <option value="run_division_people_csv">Generate a Division People CSV</option>
-  <option value="run_people_membership_csv">Generate a People Membership CSV</option>
-  <option value="journal_vocabulary">Generate Journals Vocabulary</option>
-  <option value="thesis_option_vocabulary">Generate Thesis Option Vocabulary</option>
-  <option value="group_vocabulary">Generate Groups Vocabulary</option>
-  <option value="people_vocabulary">Generate People Vocabulary</option>
+  <hr />
+  <optgroup label="CSV reports">
+    <option value="run_people_csv" title="This is a dump of the People collection">Generate People CSV File</option>
+    <option value="run_groups_csv" title="This is a dump of the Groups collection">Generate Groups CSV File</option>
+    <option value="run_people_identifier_csv" title="This CSV file holds both people names and identifiers">Generate People Identifier CSV</option>
+    <option value="run_division_people_csv" title="This report is based on content from campus directory">Generate a Division People CSV</option>
+    <option value="run_people_membership_csv" title="This report shows library assigned group membership">Generate a People Membership CSV</option>
+    <option value="run_division_people_crosswalk_csv" title="This report crosswalks people and the campus directory division info">Generate Division People Crosswalk CSV</option>
+    <option value="run_group_people_crosswalk_csv" title="This report crosswalks people in groups">Generate Group People Crosswalk CSV</option>
+  </optgroup>
+
+  <hr />
+  <optgroup label="Review Queue reports">
+    <option value="run_authors_review_queue_csv" title="This is a report from only the review queue requests">Generate Authors' Review Queue CSV File</option>
+    <option value="run_authors_submissions_csv" title="This is a report from the both subbmitted and accepted requests">Generate Authors' Submissions CSV File</option>
+  </optgroup>
+
+  <hr />
+  <optgroup label="RDM Vocabularies">
+    <option value="journal_vocabulary">Generate Journals Vocabulary</option>
+    <option value="thesis_option_vocabulary" title="Generate Thesis options">Generate Thesis Option Vocabulary</option>
+    <option value="group_vocabulary" title="Generate RDM groups vocabulary">Generate Groups Vocabulary</option>
+    <option value="people_vocabulary" title="Generate RDM people vocabulary">Generate People Vocabulary</option>
+  </optgroup>
 </select>
 <label set="emails">Email notification(s)</label>
 <input type="text" id="emails" name="emails" placeholder="rsdoiel@caltech.edu" />
@@ -42,6 +54,8 @@
 -->
 
 </form>
+<p>
+(see <a href="report_descriptions.html" title="A detailed list of report names and function">Report Descriptions</a> for details.)
 </section>
 <hr>
 <section>

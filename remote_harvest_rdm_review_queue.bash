@@ -159,34 +159,43 @@ echo "CONTAINER_ID -> ${CONTAINER_ID}"
 
 # SQL query (your provided query)
 cat <<SQL_QUERY >"${RDM_DBNAME}_review_queue.sql"
-  SELECT
-    json_build_object(
-      'key', request_metadata.json->'topic'->>'record',
-      'object', json_build_object(
-        'rdmid', rdm_drafts_metadata.json->>'id',
-        'uuid', request_metadata.id,
-        'link', concat('${RDM_URL}/me/requests/', request_metadata.id),
-        'status', request_metadata.json->>'status',
-        'title', request_metadata.json->'title',
-        'publisher', rdm_drafts_metadata.json->'metadata'->>'publisher',
-        'publication_date', rdm_drafts_metadata.json->'metadata'->>'publication_date',
-        'custom_fields', rdm_drafts_metadata.json->'custom_fields',
-        'creators', rdm_drafts_metadata.json->'metadata'->'creators',
-        'submitted_by', username,
-        'created', request_metadata.created::date,
-        'updated', request_metadata.updated::date
-    )) AS obj
-  FROM
-    request_metadata
-    LEFT JOIN accounts_user ON (request_metadata.json->'created_by'->>'user'::text = accounts_user.id::text)
-    LEFT JOIN rdm_drafts_metadata ON (request_metadata.json->'topic'->>'record' = rdm_drafts_metadata.json->>'id')
-  WHERE
-    request_metadata.json->'receiver'->>'community' = 'aedd135f-227e-4fdf-9476-5b3fd011bac6'
-    AND request_metadata.json->>'type' = 'community-submission'
-    AND request_metadata.json->>'status' = 'submitted'
-  ORDER BY
-    request_metadata.updated DESC;
-
+SELECT
+  json_build_object(
+    'key', request_metadata.json->'topic'->>'record',
+    'object', json_build_object(
+      'rdmid', rdm_drafts_metadata.json->>'id',
+      'uuid', request_metadata.id,
+      'link', concat('${RDM_URL}/me/requests/', request_metadata.id),
+      'status', request_metadata.json->>'status',
+      'title', request_metadata.json->'title',
+      'publisher', rdm_drafts_metadata.json->'metadata'->>'publisher',
+      'publication_date', rdm_drafts_metadata.json->'metadata'->>'publication_date',
+      'custom_fields', rdm_drafts_metadata.json->'custom_fields',
+      'creators', rdm_drafts_metadata.json->'metadata'->'creators',
+      'submitted_by', username,
+      'created', request_metadata.created::date,
+      'updated', request_metadata.updated::date,
+      'comments_with_mentions', (
+        SELECT json_agg(json_build_object(
+          'content', re.json->'payload'->>'content',
+          'created', re.created
+        ))
+        FROM request_events re
+        WHERE re.request_id = request_metadata.id
+          AND re.json->'payload'->>'content' ~ '@[a-zA-Z0-9_-]+'
+      )
+    )
+  ) AS obj
+FROM
+  request_metadata
+  LEFT JOIN accounts_user ON (request_metadata.json->'created_by'->>'user'::text = accounts_user.id::text)
+  LEFT JOIN rdm_drafts_metadata ON (request_metadata.json->'topic'->>'record' = rdm_drafts_metadata.json->>'id')
+WHERE
+  request_metadata.json->'receiver'->>'community' = 'aedd135f-227e-4fdf-9476-5b3fd011bac6'
+  AND request_metadata.json->>'type' = 'community-submission'
+  AND request_metadata.json->>'status' = 'submitted'
+ORDER BY
+  request_metadata.updated DESC;
 SQL_QUERY
 
 cat <<CMD >docker_cmd_review_queue.bash
