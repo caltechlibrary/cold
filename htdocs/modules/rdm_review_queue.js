@@ -57,11 +57,11 @@
         <option value="review_queue_mentions" title="review queue search by @tag">by @tags</option>
       </optgroup>
       <hr />
-      <optgroup label="All Requests">
-        <option value="by_name" title="all requests by name">by name</option>
-        <option value="by_clpid" title="all requests by clpid">by clpid</option>
-        <option value="by_orcid" title="all requests by orcid">by orcid</option>
-        <option value="by_clgid" title="all requests by clgid">by clgid (group identifier)</option>
+      <optgroup label="All Records">
+        <option value="by_name" title="all records by name">by name</option>
+        <option value="by_clpid" title="all records by clpid">by clpid</option>
+        <option value="by_orcid" title="all records by orcid">by orcid</option>
+        <option value="by_clgid" title="all records by clgid">by clgid (group identifier)</option>
       </optgroup>
     </select> <input id="q" name="q" type="search"
                   placeholder="use '*' as a wild card with names and @tag for at tags" value="" size="40"
@@ -132,7 +132,7 @@
     if (q_name.startsWith("review_queue")) {
       query_label = `review queue ${query_label}`;
     } else {
-      query_label = `all requests ${query_label}`;
+      query_label = `all records ${query_label}`;
     }
     this.resultSection.innerHTML = `Searching ${query_label} for <em>"${q}"</em> <span id="spinner">👓</span>`;
     // Convert wild card to SQL wild card

@@ -1,8 +1,8 @@
 ---
-title: Search RDM review queue
+title: Search RDM Records
 ---
 
-# Search RDM Review Queue
+# Search RDM Records
 
 <div id="search">Loading search form... </div>
 

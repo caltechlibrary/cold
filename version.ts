@@ -1,8 +1,8 @@
 // cold version and license information.
 
-export const version: string = '0.0.38c',
+export const version: string = '0.0.38e',
 releaseDate: string = '2026-03-25',
-releaseHash: string = '08d4f15',
+releaseHash: string = '1912c65',
 licenseText: string = `
 
 Copyright (c) 2024, Caltech
