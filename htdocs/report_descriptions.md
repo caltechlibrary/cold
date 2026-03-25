@@ -25,12 +25,12 @@ pubDate: 2026-03-24
   - (people_identifier_[DATE_STAMP].csv) This report lists all identifiers from CaltechPEOPLE collection by person (example clpid, orcid plus, thesis committee id, thesis advisor id)
 
 
-## RDM Review Queue and Records
+## RDM Records and Review Queue
 
-- __Generate Authors' Review Queue CSV file__
-  - (authors_review_queue.csv) This is a report of things currently in the review queue based on metadata in the request metadata table and drafts metadata table
 - __Generate Author's Records CSV file__
   - (authors_records.csv) This is a report on all records from the request metadata, drafts metadata and records metadata tables.
+- __Generate Authors' Review Queue CSV file__
+  - (authors_review_queue.csv) This is a report of things currently in the review queue based on metadata in the request metadata table and drafts metadata table
 
 ## RDM Vocabularies
 
