@@ -9,10 +9,10 @@
 <li><a href="../" title="return to dashboard">Dashboard</a></li>
 <li><a href="./" title="return to group list">People</a></li>
 <li><a href="{{people.clpid}}?view=edit">Edit {{people.clpid}}</a></li>
-<li><a href="../rdm_review_queue.html?q_name=review_queue_by_clpid&q={{people.clpid}}" title="look up by clpid">Review Queue</a></li>
-{{#if people.orcid }}<li><a href="../rdm_review_queue.html?q_name=review_queue_by_orcid&q={{people.orcid}}">Review by ORCID</a></li>{{/if}}
-<li><a href="../rdm_review_queue.html?q_name=by_clpid&q={{people.clpid}}" title="lookup by clpid">Requests Queue</a></li>
-{{#if people.orcid }}<li><a href="../rdm_review_queue.html?q_name=by_orcid&q={{people.orcid}}">Requests by ORCID</a></li>{{/if}}
+<li><a href="../rdm_review_queue.html?q_name=review_queue_by_clpid&q={{people.clpid}}" title="review queue search by clpid">Review {{people.clpid}}</a></li>
+{{#if people.orcid }}<li><a href="../rdm_review_queue.html?q_name=review_queue_by_orcid&q={{people.orcid}}" title="review queue search by ORCID">Review {{people.orcid}}</a></li>{{/if}}
+<li><a href="../rdm_review_queue.html?q_name=by_clpid&q={{people.clpid}}" title="lookup by clpid" title="requests search by clpid">Requests {{people.clpid}}</a></li>
+{{#if people.orcid }}<li><a href="../rdm_review_queue.html?q_name=by_orcid&q={{people.orcid}}" title="requests search by orcid">Requests {{people.orcid}}</a></li>{{/if}}
 </ul>
 </nav>
 <section>
