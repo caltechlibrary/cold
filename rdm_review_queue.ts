@@ -157,7 +157,12 @@ export class RdmReviewQueueUI {
       `Searching ${query_label} for <em>"${q}"</em> <span id="spinner">👓</span>`;
 
     // Convert wild card to SQL wild card
-    const query = q.indexOf("*") > -1 ? q.replace(/\*/g, "%") : q;
+    let query = q.indexOf("*") > -1 ? q.replace(/\*/g, "%") : q;
+    // Handle special case of at tag queries
+    if (q_name === 'review_queue_mentions') {
+      query = `%${query}%`;
+      console.log(`DEBUG updated query to ${query}`);
+    }
 
     try {
       const results = await this.fetchResults(q_name, query);

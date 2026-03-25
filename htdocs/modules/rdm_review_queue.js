@@ -63,7 +63,7 @@
         <option value="by_orcid" title="all requests by orcid">by orcid</option>
         <option value="by_clgid" title="all requests by clgid">by clgid (group identifier)</option>
       </optgroup>
-    </select> <input id="q" name="q" type="search" placeholder="use '*' as a wild card" value="" size="30">
+    </select> <input id="q" name="q" type="search" placeholder="use '*' as a wild card with names and *@tag* for tags" value="" size="30">
     <input type="submit" value="🔎">
     <input type="reset" value="❌">
 </form><p><section class="rdm-review-queue-search-results" id="rdm-review-queue-results"></section>`;
@@ -134,7 +134,12 @@
     }
     this.resultSection.innerHTML = `Searching ${query_label} for <em>"${q}"</em> <span id="spinner">👓</span>`;
     // Convert wild card to SQL wild card
-    const query = q.indexOf("*") > -1 ? q.replace(/\*/g, "%") : q;
+    let query = q.indexOf("*") > -1 ? q.replace(/\*/g, "%") : q;
+    // Handle special case of at tag queries
+    if (q_name === 'review_queue_mentions') {
+      query = `%${query}%`;
+      console.log(`DEBUG updated query to ${query}`);
+    }
     try {
       const results = await this.fetchResults(q_name, query);
       this.resultSection.innerHTML = `${results.length}  items found, ${query_label} <em>"${q}"</em>`;
