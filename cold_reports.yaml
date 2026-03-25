@@ -55,9 +55,9 @@ reports:
     basename: thesis_option_vocabulary
     append_datestamp: false
     content_type: application/yaml
-  run_authors_submissions_csv:
-    cmd: ./run_authors_submissions_csv.bash
-    basename: authors_submissions
+  run_authors_records_csv:
+    cmd: ./run_authors_records_csv.bash
+    basename: authors_records
     append_datestamp: false
     content_type: text/csv
   run_authors_review_queue_csv:
