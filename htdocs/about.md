@@ -32,7 +32,7 @@ maintainer:
     id: https://orcid.org/0000-0003-0900-6903
 
 repository_code: https://github.com/caltechlibrary/cold
-version: 0.0.38
+version: 0.0.38b
 license_url: https://caltechlibrary.github.io/cold/LICENSE
 operating_system:
   - Linux
@@ -58,7 +58,7 @@ date_released: 2026-03-25
 About this software
 ===================
 
-## cold 0.0.38
+## cold 0.0.38b
 
 - improved data validation when rendering review queue content client side
 - added counts to number of members in a group display

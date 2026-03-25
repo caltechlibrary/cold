@@ -162,7 +162,7 @@ export class RdmReviewQueueUI {
     let query = q.indexOf("*") > -1 ? q.replace(/\*/g, "%") : q;
     // Handle special case of at tag queries
     if (q_name === "review_queue_mentions") {
-      if (! query.startsWith("@")) {
+      if (!query.startsWith("@")) {
         query = `@${query}`;
       }
       query = `%${query}%`;
