@@ -136,7 +136,7 @@
     // Convert wild card to SQL wild card
     let query = q.indexOf("*") > -1 ? q.replace(/\*/g, "%") : q;
     // Handle special case of at tag queries
-    if (q_name === 'review_queue_mentions') {
+    if (q_name === "review_queue_mentions") {
       query = `%${query}%`;
       console.log(`DEBUG updated query to ${query}`);
     }

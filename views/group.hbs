@@ -9,6 +9,9 @@
 <li><a href="../" title="return to dashboard">Dashboard</a></li>
 <li><a href="./" title="return to group list">Groups</a></li>
 <li><a href="{{group.clgid}}?view=edit">Edit {{group.clgid}}</a></li>
+<li><a href="../rdm_review_queue.html?q_name=review_queue_by_clgid&q={{group.clgid}}">Review Queue</a></li>
+<li><a href="../rdm_review_queue.html?q_name=by_clgid&q={{group.clgid}}">Requests Queue</a></li>
+
 </ul>
 </nav>
 <section>
@@ -51,6 +54,7 @@
 {{#if group.updated}}<span class="updated">updated: {{group.updated}}</span>{{/if}}
 </div>
 <p><ul id="group-members" class="group-members-list"></ul></p>
+
 </section>
 {{>footer}}
 <script type="module" src="../js/group_view.js"></script>

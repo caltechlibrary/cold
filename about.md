@@ -52,7 +52,7 @@ keywords:
   - objects
   - controlled vocabulary
 
-date_released: 2026-03-24
+date_released: 2026-03-25
 ---
 
 About this software
