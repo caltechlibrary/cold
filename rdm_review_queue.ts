@@ -73,7 +73,9 @@ export class RdmReviewQueueUI {
         <option value="by_orcid" title="all requests by orcid">by orcid</option>
         <option value="by_clgid" title="all requests by clgid">by clgid (group identifier)</option>
       </optgroup>
-    </select> <input id="q" name="q" type="search" placeholder="use '*' as a wild card with names and *@tag* for tags" value="" size="30">
+    </select> <input id="q" name="q" type="search"
+                  placeholder="use '*' as a wild card with names and @tag for at tags" value="" size="40"
+                  title="use '*' as a wild card with names and @tag for at tags">
     <input type="submit" value="🔎">
     <input type="reset" value="❌">
 </form><p><section class="rdm-review-queue-search-results" id="rdm-review-queue-results"></section>`;
