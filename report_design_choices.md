@@ -105,4 +105,26 @@ run_collaborator_report:
   content_type: application/vnd.ms-excel
 ~~~
 
-The inputs will be passed to the cmd as parameters after they have been validated. The function name needs to be defined in the runner. This requires modifying the RunnerInterface to include both the report_map and a validator map.
+The inputs is used to validate any parameters passed into the reports queue by the report request handler. There are actually three times validation is important. 
+
+1. In the Web UI to prevent a user to requesting a report without sufficient information (prevent the user from wasting their time)
+2. In the middleware that processes the report request (so we don't queue anything unnecessarily)
+3. In the runner the parameters passed to the runner must still match the input expectation and be validate
+4. The report itself needs to also take responsibility to do sanity checking if it will accept inputs (paramaters).
+
+The first validation happens browser side and is maybe as simple as a regexp in the input field (or browser side validation via metadatatools TypeScript package).  This step is as easy as mocking up an HTML page and including appropriate CSS and JavaScript to submit the form.
+
+Steps two and three happen in server side TypeScript programs. The middle way, cold.ts, needs to validate inputs as a mater of course.  Prior version (<= v0.0.38) only validated the report name and id (against the values stored in cold_reports.yaml). With parameterized reports the report needs to validate any form parameters received an integrate them into the report request object stored in the dataset collection reports.ds.  The runner will again validate the inputs described in the cold_reports.yaml against parameters (query parameters or form fields and value) in the report request object. If that checks out OK then the report can be run.
+
+Why is this validation important?  The reports in COLD are implemented as scripts and browsers. They run at the privilage of the report runner service.  This is where the fourth layer of security needs to be layered in. The report runner can read the file system, call various programs and that is both it's convienence in implementation and its weakness from a security point of view. **The report runner is only the next to last check before processes get launched**. The report needs to be responsibly implemented to prevent adverse side effects too.
+
+The ring defenses are pretty standard security practice. Allowing parameterized reports increasing the stakes with injected attackes via the parameters. Vetting can't be left to the browser, the middleware, the runner alone.
+
+Writing a safe parameterized report. There are some rules that the developer will need to enforce.
+
+1. Vet and validate the inputs to the reports (example parameters passed over the command line, only allow parameters to be passed via the command line)
+2. The parameters passed should never change the flow of processes launched they should only provide values that ultimately applied in a SQL query
+3. Any file system names in a report output need to be independently derived from data in being processed and not directly form input.
+4. Since the report runner will eventually write output the the rpt directory in the htdocs root, the pathing of any generated filenames must be vetted and sanity checked
+
+Clear separation of concerns are important at each circle of defense. Single sign-on of the production systems is the first circle of defense. Each hande off forms another layer of defense, sign-on, middleware, report service, report runner, the report itself. This increases the burden on the person writing parameterized reports. The report itself also needs to enforce sanitiy checking and gaurd against abuse. Security practice is best at all levels.

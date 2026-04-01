@@ -111,9 +111,10 @@ export class CollaboratorReportUI {
         `Enter clpid and press ⚙️`;
       return;
     }
+    // Make sure clpid is known
 
     // FIXME: Need to make sure clpid is valid before submitting to middleware for re-validation and report queuing
     this.resultSection.innerHTML =
-      `Validate "${clpid}" Not implemented yet! <em>"${clpid}"</em>, Report queue for "${clpid}" not implemented yet! <span id="spinner">⚙️</span>`;
+      `Validate "${clpid}" Not implemented yet! <em>"${clpid}"</em>, Report queue for "${clpid}" not implemented yet!`; // <span id="spinner">⚙️</span>`;
   }
 }

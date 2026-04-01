@@ -45,6 +45,7 @@ export interface ReportInterface {
   id: string;
   report_name: string;
   options: string[];
+  inputs: InputInterface[];
   emails: string;
   requested: string;
   updated: string;
@@ -60,6 +61,7 @@ export class Report implements ReportInterface {
   id: string = "";
   report_name: string = "";
   options: string[] = [];
+  inputs: InputInterface[] = [];
   emails: string = "";
   requested: string = "";
   updated: string = "";
@@ -79,6 +81,7 @@ export class Report implements ReportInterface {
 
     this.report_name = report_name;
     this.options = "options" in o ? o.options as unknown[] as string[] : [];
+    this.inputs = "inputs" in o ? o.inputs as unknown[] as InputInterface[] : [];
     this.emails = "emails" in o ? `${o.emails}` : ``;
     const now = new Date();
     const expire_in_days = 7;
@@ -98,6 +101,7 @@ export class Report implements ReportInterface {
       id: this.id,
       report_name: this.report_name,
       options: this.options,
+      inputs: this.inputs,
       emails: this.emails,
       requested: this.requested,
       updated: this.updated,
@@ -184,13 +188,13 @@ async function handleReportsList(
  * handleReportRequest implements report request.
  *
  * @param {Request} req holds the request to a report to be run
- * @param {debug: boolean, htdocs: string} options holds options passed from
+ * @param {debug: boolean, htdocs: string, inputs?: InputsInterface[]} options holds options passed from
  * handleReport.
  * @returns {Promise<Response>}
  */
 async function handleReportRequest(
   req: Request,
-  options: { debug: boolean; htdocs: string },
+  options: { debug: boolean; htdocs: string, inputs?: InputsInterface[] },
 ): Promise<Response> {
   if (req.body !== null) {
     // Request a report to be run
@@ -199,6 +203,8 @@ async function handleReportRequest(
     const rpt = new Report();
     const ok = await rpt.request_report(obj);
     if (ok) {
+      console.log(`DEBUG rpt -> ${JSON.stringify(rpt.asObject())}`);
+      console.log(`DEBUG formDataToObject -> ${JSON.stringify(obj)}`);
       // We want to create the record and return success. If the record
       // has already been created then we should distriguish that error from
       // other types of error.
@@ -304,7 +310,7 @@ class Runnable implements RunnableInterface {
   basename: string;
   // List of inputs holds a list of Input identifiers and their validator method names
   inputs: Inputs[];
-  // Prefix with takes a field name defined in the Inputs and uses that as a prefix for the report name
+  // Prefix with takes a field name's value defined in the Inputs and uses that as a prefix for the report name
   prefix_with: string;
   append_datestamp: boolean;
   content_type: string;
@@ -340,7 +346,7 @@ class Runnable implements RunnableInterface {
     //console.log(`Running: ${this.cmd}`);
     let txt: string;
     try {
-      // FIXME: if parameters are going to be passed need to handle that case after they have been validated
+      // FIXME: if inputs are defined then they need to be validated before forming the command sequence to execute
       txt = await $`${this.cmd}`.text();
     } catch (err) {
       txt = "error://" + err;
@@ -375,11 +381,14 @@ class Runnable implements RunnableInterface {
         break;
     }
     console.log("INFO: file extension set to ", ext, this.content_type);
+    if (this.prefix_with !== undefined && this.prefix_with !== "") {
+      filename = `${this.prefix_with}_${this.basename}`;
+    }
     if (this.append_datestamp) {
       let datestamp = (new Date()).toJSON().substring(0, 10);
-      filename = `${this.basename}_${datestamp}${ext}`;
+      filename = `${filename}_${datestamp}${ext}`;
     } else {
-      filename = `${this.basename}${ext}`;
+      filename = `${filename}${ext}`;
     }
     console.log("INFO: filename should be", filename);
 
@@ -417,8 +426,8 @@ class Runner implements RunnerInterface {
         }
         this.report_map[k] = new Runnable(
           v.cmd,
-          v.inputs,
           v.basename,
+          v.inputs,
           v.prefix_with,
           v.append_datestamp,
           v.content_type,
@@ -447,6 +456,7 @@ async function process_request(
     );
     Deno.exit(1);
   }
+  //FIXME: Need to evaluate if inputs are defined then valiate inputs before processing the requested report
   const link = await cmd.run([]);
   if (link === undefined || link === "") {
     request.link = "not link returned from report";
@@ -479,9 +489,9 @@ async function servicing_requests(runner: Runner): Promise<void> {
   if (requests.length > 0) {
     for (let request of requests) {
       let report_name = request.report_name;
-      let cmd = runner.report_map[report_name];
-      if (cmd !== undefined) {
-        if (!await process_request(cmd, request.id, request)) {
+      let runnable = runner.report_map[report_name];
+      if (runnable !== undefined) {
+        if (!await process_request(runnable, request.id, request)) {
           console.log(
             `ERROR: processing request ${request}, ${
               JSON.stringify(request)
