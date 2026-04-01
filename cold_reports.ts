@@ -270,15 +270,15 @@ async function handleReportRequest(
 }
 
 interface InputInterface {
-  identifier: string
-  validate_with: string
-  required: boolean
+  identifier: string;
+  validate_with: string;
+  required: boolean;
 }
 
 class Inputs implements InputInterface {
-  private identifier: string
-  private validate_with: string
-  private required: boolean
+  private identifier: string;
+  private validate_with: string;
+  private required: boolean;
 }
 
 interface RunnableInterface {
@@ -325,7 +325,7 @@ class Runnable implements RunnableInterface {
     this.link = "";
     this.basename = basename;
     this.inputs = inputs;
-    this.prefix_with: prefix_with
+    this.prefix_with = prefix_with;
     this.append_datestamp = append_datestamp;
     this.content_type = content_type;
   }
@@ -367,9 +367,9 @@ class Runnable implements RunnableInterface {
       case "application/yaml":
         ext = ".yaml";
         break;
-        case "application/vnd.ms-excel":
-          ext = ".xlsx";
-          break;
+      case "application/vnd.ms-excel":
+        ext = ".xlsx";
+        break;
       default:
         ext = "";
         break;
