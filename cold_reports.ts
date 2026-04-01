@@ -269,28 +269,53 @@ async function handleReportRequest(
   });
 }
 
+interface InputInterface {
+  identifier: string
+  validate_with: string
+  required: boolean
+}
+
+class Inputs implements InputInterface {
+  private identifier: string
+  private validate_with: string
+  private required: boolean
+}
+
 interface RunnableInterface {
   cmd: string;
   options: string[];
   basename: string;
-  content_type: string;
+  // List of inputs holds a list of Input identifiers and their validator method names
+  inputs: Inputs[];
+  prefix_with: string;
   append_datestamp: boolean;
+  content_type: string;
   final_status: string;
   link: string;
+  // List of inputs holds a list of Input identifiers and their validator method names
+  inputs: Inputs[];
+  // Prefix with takes a field name defined in the Inputs and uses that as a prefix for the report name
+  prefix_with: string;
 }
 
 class Runnable implements RunnableInterface {
   cmd: string;
   options: string[];
   basename: string;
-  content_type: string;
+  // List of inputs holds a list of Input identifiers and their validator method names
+  inputs: Inputs[];
+  // Prefix with takes a field name defined in the Inputs and uses that as a prefix for the report name
+  prefix_with: string;
   append_datestamp: boolean;
+  content_type: string;
   final_status: string;
   link: string;
 
   constructor(
     cmd: string,
     basename: string,
+    inputs: Inputs[],
+    prefix_with: string,
     append_datestamp: boolean,
     content_type: string,
   ) {
@@ -299,6 +324,8 @@ class Runnable implements RunnableInterface {
     this.final_status = "";
     this.link = "";
     this.basename = basename;
+    this.inputs = inputs;
+    this.prefix_with: prefix_with
     this.append_datestamp = append_datestamp;
     this.content_type = content_type;
   }
@@ -307,10 +334,13 @@ class Runnable implements RunnableInterface {
   // The report program is expected to return a link written to standard out on success. Otherwise return an
   // empty string or short error message using the protocol `error://`.
   async run(options: string[]): Promise<string> {
+    //FIXME: I need to validate the inputs if they are defined
+
     //FIXME: Need to execute command line program and capture result link or error message from standard out then hand it back.
     //console.log(`Running: ${this.cmd}`);
     let txt: string;
     try {
+      // FIXME: if parameters are going to be passed need to handle that case after they have been validated
       txt = await $`${this.cmd}`.text();
     } catch (err) {
       txt = "error://" + err;
@@ -318,6 +348,8 @@ class Runnable implements RunnableInterface {
 
     // the URL would be returned by the runner when final desitantion is available.
     let filename: string = this.basename;
+
+    // FIXME: See if I need at add a prefix
     let ext: string = ".txt";
     switch (this.content_type) {
       case "text/plain":
@@ -335,6 +367,9 @@ class Runnable implements RunnableInterface {
       case "application/yaml":
         ext = ".yaml";
         break;
+        case "application/vnd.ms-excel":
+          ext = ".xlsx";
+          break;
       default:
         ext = "";
         break;
@@ -382,7 +417,9 @@ class Runner implements RunnerInterface {
         }
         this.report_map[k] = new Runnable(
           v.cmd,
+          v.inputs,
           v.basename,
+          v.prefix_with,
           v.append_datestamp,
           v.content_type,
         );

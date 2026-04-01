@@ -44,3 +44,10 @@ pubDate: 2026-03-24
   - (people_vocabulary.yaml) This is the controlled list of People defined in COLD used by RDM
 - __Generate Thesis Options Vocabulary__
   - (thesis_option_vocabulary.yaml) This generates a Thesis option vocabulary. Currently used to implement EPrints' list of Thesis options but will be used with RDM eventually
+
+## Mediated Reports
+
+> These are reports librarians run for the Caltech community
+
+- __Collaborator Report__
+  - This is choice will take you to a collaborator_report.html web page where you can type in the clpid and make the request.

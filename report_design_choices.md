@@ -5,7 +5,6 @@ Once the report request is made a record is created in the reports.ds collection
 
 The system is deliberately simple. This is to keep it maintainable, easy for everyone to understand (developers and the people who request reports). Most importantly it needs to be easy to maintain. Report systems tend towards complexity so it is vital that the initial system be as simple as possible but still accomodate both quick reports and those which may take hours to complete.
 
-
 The report request process is integrated into the COLD UI. That UI lists the requests and includes a form to making a new request. When the report runner picks up a request several things need to happen.
 
 - report status should show that the report request is being processed
@@ -82,3 +81,28 @@ I've written a prototype in TypeScript compiled with Deno.   Creating webservice
   - if adding a new report you need to update the template
   - define the new report in cold_reports.yaml
   - the cold_reports service needs to be restarted
+
+## Requested updates for parameterized reports
+
+Integrating the collaborator reports requires that the reports system can handle parameters that will be passed by the runner to the scripts the implement the reports. It is incredibly import to validate inputs before the runner hands them off the OS to be run.  That requires modification to runner to include identifying any field identifiers expect, a validation method and whether or not the field is required.
+
+Parameterized reports should never accept free text. I think parameters used should be restricted to explicit identifiers held in a collection, e.g. clpid, orcid, clgid, ror. The identifiers can be checked to make sure they exist before queuing the report to be run.
+
+In the cold_report.ts I have added a new Interface called InputInterface this has three fields, identifier is the string holding the identifier name, validate_with holds a function name that will execute the validation server side, required is a boolean if true then report will be aborted if the input is not found in the request (not in the submitted form data).
+
+Here's an example of the COLD reports definition of the collaborator report.
+
+~~~yaml
+run_collaborator_report:
+  cmd: ./run_collaborator_report.bash
+  inputs:
+    - id: clpid
+      validate_with: is_clpid
+      required: true
+  basename: nsf_collaborator_report
+  prefix_with: clpid
+  append_datestamp: false
+  content_type: application/vnd.ms-excel
+~~~
+
+The inputs will be passed to the cmd as parameters after they have been validated. The function name needs to be defined in the runner. This requires modifying the RunnerInterface to include both the report_map and a validator map.

@@ -65,3 +65,13 @@ reports:
     basename: authors_review_queue
     append_datestamp: false
     content_type: text/csv
+  run_collaborator_report:
+    cmd: ./run_collaborator_report.bash
+    inputs:
+      - id: clpid
+        validate_with: is_clpid
+        required: true
+    basename: nsf_collaborator_report
+    prefix_with: clpid
+    append_datestamp: false
+    content_type: application/vnd.ms-excel
