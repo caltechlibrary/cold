@@ -84,7 +84,6 @@ if (import.meta.main) {
     "client_api.ts",
     "orcid_api.ts",
     "directory_client.ts",
-    "rdm_review_queue.ts",
   ];
   let ok: boolean = await transpileToJavaScript(transpileFiles, modules_path);
   if (

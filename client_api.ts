@@ -13,6 +13,41 @@ export class ClientAPI {
     (baseUrl === undefined) ? "" : this.baseUrl = baseUrl;
   }
 
+  async getStringList(
+    c_name: string,
+    query_name: string,
+    params?: URLSearchParams,
+
+  ): Promise<string[]> {
+    const base_url = `${this.baseUrl}/api/${c_name}/${query_name}`;
+    let uri: string = base_url;
+    let resp: Response;
+    if (params !== undefined) {
+      uri = `${base_url}?${params}`;
+    }
+    try {
+      resp = await fetch(uri, {
+        headers: { "Content-Type": "application/json" },
+        method: "GET",
+      });
+    } catch (err) {
+      return [];
+    }
+    if (resp.ok) {
+      const src = await resp.text();
+      if (src !== undefined && src !== "") {
+        let l: string[] = [];
+        try {
+          l = JSON.parse(src);
+        } catch (err) {
+          return [];
+        }
+        return l;
+      }
+    }
+    return [];
+  }
+
   async getList(
     c_name: string,
     query_name: string,

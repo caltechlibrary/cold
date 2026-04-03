@@ -4,6 +4,37 @@ var ClientAPI = class {
   constructor(baseUrl) {
     baseUrl === void 0 ? "" : this.baseUrl = baseUrl;
   }
+  async getStringList(c_name, query_name, params) {
+    const base_url = `${this.baseUrl}/api/${c_name}/${query_name}`;
+    let uri = base_url;
+    let resp;
+    if (params !== void 0) {
+      uri = `${base_url}?${params}`;
+    }
+    try {
+      resp = await fetch(uri, {
+        headers: {
+          "Content-Type": "application/json"
+        },
+        method: "GET"
+      });
+    } catch (err) {
+      return [];
+    }
+    if (resp.ok) {
+      const src = await resp.text();
+      if (src !== void 0 && src !== "") {
+        let l = [];
+        try {
+          l = JSON.parse(src);
+        } catch (err) {
+          return [];
+        }
+        return l;
+      }
+    }
+    return [];
+  }
   async getList(c_name, query_name, params) {
     const base_url = `${this.baseUrl}/api/${c_name}/${query_name}`;
     let uri = base_url;

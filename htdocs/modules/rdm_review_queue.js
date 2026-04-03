@@ -1,51 +1,149 @@
-/**
- * rdm_review_queue.ts provides the browser side JavaScript for interacting with the rdm_review_queue.ds via dataset collection JSON API.
- *
- * The module provides a Web Component that encapsulates both the query form and the results. The SQL queries are provided in the YAML
- * configuration for cold as prepared statements. The component is responsible for selecting the related defined query and sending the
- * expected prarameters for that query. Results will be an HTML view of the author's submissions report contrained by the query.
- *
- * - search by author name
- * - search by clpid
- * - search by orcid
- * - search by group name
- * - search by clgid
- *
- * The query should be able to be constrained to items with a "submitted" or "accepted" status
- *
- * example of how I want this code to work when available to a web page.
- *
- * ~~~HTML
- * <div id="search"></div>
- * <script>
- * import RdmReviewQueueUI from "./modules/rdm_review_queue.js";
- * // RdmReviewQueueUI configuration variables
- * const u = URL.parse(window.location.href);
- * const basePath = u.pathname.replace(/rdm_review_queue.html$/g, '');
- * consts searchElement = document.getElementById("search");
- *
- * window.addEventListener('DOMContentLoaded', (event) => {
- *   // Embed the form
- *   const rdmReviewQueueUI = new RdmReviewQueueUI({
- *      basePath: basePath,
- *      searchElement: searchElement
- *   });
- * });
- * </script>
- * ~~~
- */ export class RdmReviewQueueUI {
+// client_api.ts
+var ClientAPI = class {
+  baseUrl = "../";
+  constructor(baseUrl) {
+    baseUrl === void 0 ? "" : this.baseUrl = baseUrl;
+  }
+  async getStringList(c_name, query_name, params) {
+    const base_url = `${this.baseUrl}/api/${c_name}/${query_name}`;
+    let uri = base_url;
+    let resp;
+    if (params !== void 0) {
+      uri = `${base_url}?${params}`;
+    }
+    try {
+      resp = await fetch(uri, {
+        headers: {
+          "Content-Type": "application/json"
+        },
+        method: "GET"
+      });
+    } catch (err) {
+      return [];
+    }
+    if (resp.ok) {
+      const src = await resp.text();
+      if (src !== void 0 && src !== "") {
+        let l = [];
+        try {
+          l = JSON.parse(src);
+        } catch (err) {
+          return [];
+        }
+        return l;
+      }
+    }
+    return [];
+  }
+  async getList(c_name, query_name, params) {
+    const base_url = `${this.baseUrl}/api/${c_name}/${query_name}`;
+    let uri = base_url;
+    let resp;
+    if (params !== void 0) {
+      uri = `${base_url}?${params}`;
+    }
+    try {
+      resp = await fetch(uri, {
+        headers: {
+          "Content-Type": "application/json"
+        },
+        method: "GET"
+      });
+    } catch (err) {
+      return [];
+    }
+    if (resp.ok) {
+      const src = await resp.text();
+      if (src !== void 0 && src !== "") {
+        let l = [];
+        try {
+          l = JSON.parse(src);
+        } catch (err) {
+          return [];
+        }
+        return l;
+      }
+    }
+    return [];
+  }
+  /**
+   * getGroupsList returns an array of clgid and group names.  If list can't be retrieved
+   * then an empty list is return.
+   * @returns an array of objects consisting of clgid and group name.
+   */
+  async getGroupsList() {
+    const c_name = "groups";
+    const query_name = "group_names";
+    return await this.getList(c_name, query_name);
+  }
+  /**
+   * getPeopleList returns an array of clpid and group names.  If list can't be retrieved
+   * then an empty list is return.
+   * @returns an array of objects consisting of clgid and group name.
+   */
+  async getPeopleList() {
+    const c_name = "people";
+    const query_name = "people_names";
+    return await this.getList(c_name, query_name);
+  }
+  async lookupGroupName(name) {
+    const c_name = "groups.ds";
+    const query_name = "lookup_name";
+    let params = new URLSearchParams();
+    params.append("q", name);
+    return await this.getList(c_name, query_name, params);
+  }
+  async lookupGroupMembership(clgid) {
+    const c_name = "people.ds";
+    const query_name = "lookup_clgid";
+    let params = new URLSearchParams();
+    params.append("q", clgid);
+    return await this.getList(c_name, query_name, params);
+  }
+  async getROR(ror) {
+    const c_name = "ror.ds";
+    const query_name = "get_ror";
+    let params = new URLSearchParams();
+    params.append("q", ror);
+    return await this.getList(c_name, query_name, params);
+  }
+  async lookupRORByName(funder_name) {
+    const c_name = "ror.ds";
+    const query_name = "lookup_ror_by_name";
+    let params = new URLSearchParams();
+    params.append("q", funder_name);
+    return await this.getList(c_name, query_name, params);
+  }
+  async lookupRORByAcronym(acronym) {
+    const c_name = "ror.ds";
+    const query_name = "lookup_ror_by_acronym";
+    let params = new URLSearchParams();
+    params.append("q", acronym);
+    return await this.getList(c_name, query_name, params);
+  }
+};
+
+// rdm_review_queue.ts
+var RdmReviewQueueUI = class {
   cName = "rdm_review_queue.ds";
   searchElement;
   querySelect;
   queryInput;
-  baseUrl = "";
+  buttonSubmit;
+  buttonClear;
+  resultSection;
+  baseUrl;
   basePath = "";
-  constructor(options){
-    options.cName === undefined ? "rdm_review_queue.ds" : this.cName = options.cName;
-    this.searchElement = options.searchElement;
+  clientAPI;
+  // This adds auto complete for clpid and clgid reports
+  autocompleteResults = [];
+  selectedReportType = null;
+  constructor(options) {
+    options.cName === void 0 ? "rdm_review_queue.ds" : this.cName = options.cName;
+    typeof options.searchElement === "string" ? this.searchElement = document.getElementById(options.searchElement) : this.searchElement = options.searchElement;
     this.baseUrl = new URL(options.baseUrl);
     this.basePath = this.baseUrl.pathname;
-    // Build the search form and results box
+    this.clientAPI = new ClientAPI(this.baseUrl.toString());
     const formHTML = `<form method="get">
     <label set="query_name">Search</label> <select name="q_name" id="q_name">
       <hr />
@@ -64,24 +162,23 @@
         <option value="by_clgid" title="all records by clgid">by clgid (group identifier)</option>
       </optgroup>
     </select> <input id="q" name="q" type="search"
+                  list="autocomplete-container"
                   placeholder="use '*' as a wild card with names and @tag for at tags" value="" size="40"
                   title="use '*' as a wild card with names and @tag for at tags">
-    <input type="submit" value="🔎">
-    <input type="reset" value="❌">
+    <input type="submit" value="\u{1F50E}">
+    <input type="reset" value="\u274C">
+    <datalist id="autocomplete-container"></datalist>
 </form><p><section class="rdm-review-queue-search-results" id="rdm-review-queue-results"></section>`;
-    // set CSS classes as needed for what's hidden or visible
     this.searchElement.innerHTML = formHTML;
     this.querySelect = this.searchElement.querySelector("select");
     this.queryInput = this.searchElement.querySelector("input[type=search]");
     this.buttonSubmit = this.searchElement.querySelector("input[type=submit]");
     this.buttonClear = this.searchElement.querySelector("input[type=reset]");
     this.resultSection = this.searchElement.querySelector("section");
-    // Map in query parameters from the URL.
     const u = URL.parse(window.location.href);
     const params = u.searchParams;
-    const q_name = params.get("q_name") || "";
-    const q = params.get("q").trim() || "";
-    //console.log(`DEBUG from URL, q_name: "${q_name}", q: "${q}"`);
+    const q_name = params.get("q_name") ?? "";
+    const q = params.get("q") ?? "";
     this.setSelectOption(q_name);
     if (q !== "") {
       this.queryInput.value = q;
@@ -89,112 +186,215 @@
     if (q_name !== "") {
       this.setupQuery(q_name, q);
     }
-    // Attach event listener for form submission
-    this.searchElement.querySelector("form").addEventListener("submit", (e)=>{
+    this.searchElement.querySelector("form").addEventListener("submit", (e) => {
       e.preventDefault();
-      const q_name = this.querySelect.value;
-      const q = this.queryInput.value.trim();
-      // Update the URL
-      this.updateURL(q_name, q);
-      // Now setup the query
-      this.setupQuery(q_name, q);
+      const q_name2 = this.querySelect.value;
+      const q2 = this.queryInput.value.trim();
+      this.updateURL(q_name2, q2);
+      this.setupQuery(q_name2, q2);
     });
-    // Attach event listener for reset button
-    this.buttonClear.addEventListener("click", ()=>{
-      this.resultSection.innerText = `select search type, enter search term and press 🔎`;
+    this.buttonClear.addEventListener("click", () => {
+      this.resultSection.innerText = `select search type, enter search term and press \u{1F50E}`;
     });
+    this.querySelect.addEventListener("change", (e) => this.onReportTypeChange(e));
+  }
+  async get_all_clpid() {
+    return this.clientAPI.getStringList("people.ds", "get_all_clpid");
+  }
+  async get_all_clgid() {
+    return this.clientAPI.getStringList("groups.ds", "get_all_clgid");
+  }
+  // fetchAutocompleteResults supports auto complete with clpid and clgid
+  async fetchAutocompleteResults(reportType) {
+    switch (reportType) {
+      case "review_queue_by_clpid":
+        return await this.get_all_clpid();
+      case "by_clpid":
+        return await this.get_all_clpid();
+      case "review_queue_by_clgid":
+        return await this.get_all_clgid();
+      case "by_clgid":
+        return await this.get_all_clgid();
+      default:
+        return [];
+    }
+  }
+  // Handle report selection change
+  async onReportTypeChange(event) {
+    const selectElement = event.target;
+    this.selectedReportType = selectElement.value;
+    if (this.selectedReportType) {
+      this.autocompleteResults = await this.fetchAutocompleteResults(this.selectedReportType);
+      this.renderAutocompleteOptions();
+    }
+  }
+  // renderAutocompleteOptions this populates the autocomplete for clpid or clgid, otherwise
+  // it set the autocomplete data element to empty.
+  renderAutocompleteOptions() {
+    const dataListElement = document.getElementById("autocomplete-container");
+    if (!dataListElement) return;
+    dataListElement.innerHTML = "";
+    for (let val of this.autocompleteResults) {
+      const optElem = document.createElement("option");
+      optElem.value = val;
+      dataListElement.appendChild(optElem);
+    }
+    ;
   }
   updateURL(q_name, q) {
     const newUrl = new URL(window.location.href);
     newUrl.search = new URLSearchParams({
-      q_name: q_name,
-      q: q
-    });
-    // Update the URL in the address bar
+      q_name,
+      q
+    }).toString();
     window.history.pushState({}, "", newUrl);
   }
   setSelectOption(q_name) {
     if (q_name !== "") {
-      Array.from(this.querySelect).forEach((option)=>{
+      Array.from(this.querySelect).forEach((option) => {
         option.removeAttribute("selected");
       });
       this.querySelect.value = q_name;
     }
   }
+  genDownloadName(q_name, q, ext) {
+    switch (q_name) {
+      case "by_name":
+        return `${stripNonAlphanumericUTF8(q)}_${q_name}${ext}`;
+      case "review_queue_by_name":
+        return `${stripNonAlphanumericUTF8(q)}_${q_name}${ext}`;
+      case "review_queue_mentions":
+        return `at_${stripNonAlphanumericUTF8(q)}_${q_name}${ext}`;
+      default:
+        return `${q}_${q_name}${ext}`;
+    }
+  }
   async setupQuery(q_name, q) {
     if (q_name === "" || q === "") {
-      this.resultSection.innerText = `select search type, enter search term and press 🔎`;
+      this.resultSection.innerText = `select search type, enter search term and press \u{1F50E}`;
+      return;
+    }
+    console.log(`DEBUG q_name -> ${q_name}, q ? '${q}'`);
+    if (q_name === "by_name" && q === "*") {
+      console.log("DEBUG query by name is wild card only");
+      this.resultSection.innerText = `Cannot do a wild card only search for ${q_name}, enter new search term and press \u{1F50E}`;
       return;
     }
     const selectedOption = this.querySelect.options[this.querySelect.selectedIndex];
     let query_label;
-    selectedOption === undefined || selectedOption.innerText === undefined ? query_label = "" : query_label = selectedOption.innerText;
+    selectedOption === void 0 || selectedOption.innerText === void 0 ? query_label = "" : query_label = selectedOption.innerText;
     if (q_name.startsWith("review_queue")) {
       query_label = `review queue ${query_label}`;
     } else {
       query_label = `all records ${query_label}`;
     }
-    this.resultSection.innerHTML = `Searching ${query_label} for <em>"${q}"</em> <span id="spinner">👓</span>`;
-    // Convert wild card to SQL wild card
+    this.resultSection.innerHTML = `Searching ${query_label} for <em>"${q}"</em> <span id="spinner">\u{1F453}</span>`;
     let query = q.indexOf("*") > -1 ? q.replace(/\*/g, "%") : q;
-    // Handle special case of at tag queries
     if (q_name === "review_queue_mentions") {
       if (!query.startsWith("@")) {
         query = `@${query}`;
       }
       query = `%${query}%`;
-    //console.log(`DEBUG updated query to ${query}`);
     }
     try {
       const results = await this.fetchResults(q_name, query);
       this.resultSection.innerHTML = `${results.length}  items found, ${query_label} <em>"${q}"</em>`;
       if (results.length > 0) {
-        const tableText = formatJsonAsHtmlTable(results);
-        const csvText = formatJsonAsCSV(results);
-        const download = csvToDownloadElements(csvText, q_name + ".csv");
+        const tableText = formatJsonAsHtmlTable(q_name, query, results);
+        const csvText = formatJsonAsCSV(q_name, query, results);
+        const downloadName = this.genDownloadName(q_name, query, ".csv");
+        const download = csvToDownloadElements(csvText, downloadName);
         this.resultSection.appendChild(download);
         this.resultSection.appendChild(document.createElement("p"));
         this.resultSection.insertAdjacentHTML("beforeend", tableText);
       }
     } catch (error) {
-      this.resultSection.innerHTML = `Error: ${error}`;
+      this.resultSection.innerHTML = `Error: ${q_name}(${query}) ${error}`;
     }
   }
   async fetchResults(q_name, q) {
     const url = new URL(this.baseUrl);
     url.pathname = `${this.basePath}api/${this.cName}/${q_name}/q`;
     url.search = new URLSearchParams({
-      q: q
-    });
-    /* console.log(
-      `DEBUG POST datasetd query end point ${url}, payload ${
-        JSON.stringify({ q: q })
-      }`,
-      ); */ const response = await fetch(url);
+      q
+    }).toString();
+    const response = await fetch(url);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     return await response.json();
   }
+};
+function extractOrcidForClpid(items, targetClpid) {
+  for (const item of items) {
+    const identifiers = item.person_or_org.identifiers || [];
+    const clpidObj = identifiers.find((id) => id.scheme === "clpid");
+    const orcidObj = identifiers.find((id) => id.scheme === "orcid");
+    if (clpidObj && clpidObj.identifier === targetClpid) {
+      return orcidObj?.identifier || "";
+    }
+  }
+  return "";
 }
-function normalizeItem(item) {
+function extractClpidForOrcid(items, targetOrcid) {
+  for (const item of items) {
+    const identifiers = item.person_or_org.identifiers || [];
+    const orcidObj = identifiers.find((id) => id.scheme === "orcid");
+    const clpidObj = identifiers.find((id) => id.scheme === "clpid");
+    if (orcidObj && orcidObj.identifier === targetOrcid) {
+      return clpidObj?.identifier || "";
+    }
+  }
+  return "";
+}
+function extractAndSortMentions(comments) {
+  if (!comments) {
+    return [];
+  }
+  const mentions = comments.flatMap((comment) => (
+    // Match all @mentions (including Unicode letters/numbers)
+    [
+      ...comment.content.matchAll(/@[\p{L}\p{N}_]+/gu)
+    ].map((match) => match[0])
+  ));
+  return [
+    ...new Set(mentions)
+  ].sort();
+}
+function normalizeItem(q_name, q, item) {
   let groups = "";
   let journal_title = "";
-  item.custom_fields["caltech:groups"] === undefined ? item.groups = "" : item.groups = item.custom_fields["caltech:groups"].map((g)=>g.id).join("; ");
-  item.custom_fields["journal:journal"] === undefined ? item.journal_title = "" : item.journal_title = item.custom_fields["journal:journal"].title || "";
+  item.custom_fields["caltech:groups"] === void 0 ? item.groups = "" : item.groups = item.custom_fields["caltech:groups"].map((g) => g.id).join("; ");
+  item.custom_fields["journal:journal"] === void 0 ? item.journal_title = "" : item.journal_title = item.custom_fields["journal:journal"].title || "";
+  item.comments_with_mentions === void 0 ? item.tags = "" : item.tags = extractAndSortMentions(item.comments_with_mentions).join(", ");
+  switch (q_name) {
+    case "by_clpid":
+    case "review_queue_by_clpid":
+      item.query_clpid = q;
+      item.query_orcid = item.creators === void 0 ? "" : extractOrcidForClpid(item.creators, q);
+      break;
+    case "by_orcid":
+    case "review_queue_by_orcid":
+      item.query_orcid = q;
+      item.query_clpid = item.creators === void 0 ? "" : extractClpidForOrcid(item.creators, q);
+      break;
+    default:
+      item.query_clpid = "";
+      item.query_orcid = "";
+  }
   [
     "status",
     "link",
     "publisher"
   ].forEach(function(key) {
-    if (item[key] === undefined || item[key] === null) {
+    if (key in item && (item[key] === void 0 || item[key] === null)) {
       item[key] = "";
     }
   });
 }
-function formatJsonAsHtmlTable(items) {
-  const tableRows = items.map((item)=>{
-    normalizeItem(item);
+function formatJsonAsHtmlTable(q_name, q, items) {
+  const tableRows = items.map((item) => {
+    normalizeItem(q_name, q, item);
     return `
             <tr>
                 <td><a href="${item.link}" target="_blank">${item.rdmid}</a></td>
@@ -203,6 +403,7 @@ function formatJsonAsHtmlTable(items) {
                 <td>${item.publisher}</td>
                 <td>${item.journal_title}</td>
                 <td>${item.publication_date}</td>
+                <td>${item.tags}</td>
                 <td>${item.created}</td>
                 <td>${item.submitted_by}</td>
                 <td>${item.groups}</td>
@@ -219,6 +420,7 @@ function formatJsonAsHtmlTable(items) {
                     <th>Publisher</th>
                     <th>Journal Title</th>
                     <th>Publication Date</th>
+                    <th>Tags</th>
                     <th>Created Date</th>
                     <th>Submitted By</th>
                     <th>Caltech Groups</th>
@@ -230,39 +432,49 @@ function formatJsonAsHtmlTable(items) {
         </table>
     `;
 }
-function formatJsonAsCSV(items) {
-  // Generate CSV content
-  const csvHeader = "RDMID,Link,Status,Title,Publisher,Journal Title,Publication Date,Created Date,Submitted By,Caltech Groups";
-  const csvRows = items.map((item)=>{
-    normalizeItem(item);
-    return `"${item.rdmid}","${item.link.replace(/"/g, '""')}","${item.status}","${item.title.replace(/"/g, '""')}","${item.publisher.replace(/"/g, '""')}","${item.journal_title.replace(/"/g, '""')}","${item.publication_date}","${item.created}","${item.submitted_by}","${item.groups.replace(/"/g, '""')}"`;
-  }).join("\n");
-  const csv = `${csvHeader}\n${csvRows}`;
+function formatJsonAsCSV(q_name, q, items) {
+  let csvHeader = "";
+  let csvRows = "";
+  switch (q_name) {
+    case "by_clpid":
+    case "review_queue_by_clpid":
+    case "by_orcid":
+    case "review_queue_by_orcid":
+      csvHeader = "Query,found clpid,found orcid,Tags,RDMID,Link,Status,Title,Publisher,Journal Title,Publication Date,Created Date,Submitted By,Caltech Groups";
+      csvRows = items.map((item) => {
+        normalizeItem(q_name, q, item);
+        return `"${q}","${item.query_clpid}","${item.query_orcid}","${item.tags}","${item.rdmid}","${item.link.replace(/"/g, '""')}","${item.status}","${item.title.replace(/"/g, '""')}","${item.publisher.replace(/"/g, '""')}","${item.journal_title.replace(/"/g, '""')}","${item.publication_date}","${item.created}","${item.submitted_by}","${item.groups.replace(/"/g, '""')}"`;
+      }).join("\n");
+      break;
+    default:
+      csvHeader = "Query,Tags,RDMID,Link,Status,Title,Publisher,Journal Title,Publication Date,Created Date,Submitted By,Caltech Groups";
+      csvRows = items.map((item) => {
+        normalizeItem(q_name, q, item);
+        return `"${q}","${item.tags}","${item.rdmid}","${item.link.replace(/"/g, '""')}","${item.status}","${item.title.replace(/"/g, '""')}","${item.publisher.replace(/"/g, '""')}","${item.journal_title.replace(/"/g, '""')}","${item.publication_date}","${item.created}","${item.submitted_by}","${item.groups.replace(/"/g, '""')}"`;
+      }).join("\n");
+      break;
+  }
+  const csv = `${csvHeader}
+${csvRows}`;
   return csv;
 }
 function csvToDownloadElements(csvContent, fileName = "data.csv") {
-  // Create a data element to hold the CSV content
   const container = document.createElement("span");
   const dataElement = document.createElement("data");
   dataElement.setAttribute("data-csv", csvContent);
-  // Create a button element
   const button = document.createElement("button");
   button.textContent = "Download CSV";
-  // Add click event to trigger download
-  button.addEventListener("click", ()=>{
-    // Create a Blob with the CSV content
+  button.addEventListener("click", () => {
     const blob = new Blob([
       csvContent
     ], {
       type: "text/csv;charset=utf-8;"
     });
-    // Create a temporary anchor element
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
     link.setAttribute("href", url);
     link.setAttribute("download", fileName);
     link.style.visibility = "hidden";
-    // Append to the body, trigger click, and then remove
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -271,3 +483,9 @@ function csvToDownloadElements(csvContent, fileName = "data.csv") {
   container.appendChild(dataElement);
   return container;
 }
+function stripNonAlphanumericUTF8(input) {
+  return input.replace(/[^\p{L}\p{N}]/gu, "");
+}
+export {
+  RdmReviewQueueUI
+};

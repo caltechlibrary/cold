@@ -34,17 +34,27 @@
  * </script>
  * ~~~
  */
+
+import { ClientAPI } from './client_api.ts';
+
 export class RdmReviewQueueUI {
   private cName: string = "rdm_review_queue.ds";
-  private searchElement: HTMLInputElement;
-  private querySelect: HTMLInputElement;
+  private searchElement: HTMLSelectElement;
+  private querySelect: HTMLSelectElement;
   private queryInput: HTMLInputElement;
-  private baseUrl: string = "";
+  private buttonSubmit: HTMLInputElement;
+  private buttonClear: HTMLInputElement;
+  private resultSection: HTMLElement;
+  private baseUrl: URL;
   private basePath: string = "";
+  private clientAPI: ClientAPI;
+  // This adds auto complete for clpid and clgid reports
+  private autocompleteResults: string[] = [];
+  private selectedReportType: string | null = null;
 
   constructor(
     options: {
-      searchElement: HTMLElement | string;
+      searchElement: HTMLSelectElement | string;
       baseUrl: URL;
       cName?: string;
     },
@@ -52,9 +62,13 @@ export class RdmReviewQueueUI {
     (options.cName === undefined)
       ? "rdm_review_queue.ds"
       : this.cName = options.cName;
-    this.searchElement = options.searchElement;
+    (typeof options.searchElement === 'string')
+      ? this.searchElement = document.getElementById(options.searchElement)! as unknown as HTMLSelectElement
+      : this.searchElement = options.searchElement
     this.baseUrl = new URL(options.baseUrl);
     this.basePath = this.baseUrl.pathname;
+    this.clientAPI = new ClientAPI(this.baseUrl.toString());
+
     // Build the search form and results box
     const formHTML: string = `<form method="get">
     <label set="query_name">Search</label> <select name="q_name" id="q_name">
@@ -74,25 +88,27 @@ export class RdmReviewQueueUI {
         <option value="by_clgid" title="all records by clgid">by clgid (group identifier)</option>
       </optgroup>
     </select> <input id="q" name="q" type="search"
+                  list="autocomplete-container"
                   placeholder="use '*' as a wild card with names and @tag for at tags" value="" size="40"
                   title="use '*' as a wild card with names and @tag for at tags">
     <input type="submit" value="🔎">
     <input type="reset" value="❌">
+    <datalist id="autocomplete-container"></datalist>
 </form><p><section class="rdm-review-queue-search-results" id="rdm-review-queue-results"></section>`;
 
     // set CSS classes as needed for what's hidden or visible
     this.searchElement.innerHTML = formHTML;
-    this.querySelect = this.searchElement.querySelector("select");
-    this.queryInput = this.searchElement.querySelector("input[type=search]");
-    this.buttonSubmit = this.searchElement.querySelector("input[type=submit]");
-    this.buttonClear = this.searchElement.querySelector("input[type=reset]");
-    this.resultSection = this.searchElement.querySelector("section");
+    this.querySelect = this.searchElement.querySelector("select")!;
+    this.queryInput = this.searchElement.querySelector("input[type=search]")!;
+    this.buttonSubmit = this.searchElement.querySelector("input[type=submit]")!;
+    this.buttonClear = this.searchElement.querySelector("input[type=reset]")!;
+    this.resultSection = this.searchElement.querySelector("section")!;
     // Map in query parameters from the URL.
-    const u = URL.parse(window.location.href);
+    const u = URL.parse(window.location.href)!;
     const params = u.searchParams;
-    const q_name = params.get("q_name") || "";
-    const q = params.get("q").trim() || "";
-    //console.log(`DEBUG from URL, q_name: "${q_name}", q: "${q}"`);
+    const q_name: string = params.get("q_name") ?? "";
+    const q: string = params.get("q") ?? "";
+    //console.log(`DEBUG from URL(${window.location.href}) -> ${typeof params} -> ${params}, q_name: "${q_name}", q: "${q}"`);
     this.setSelectOption(q_name);
     if (q !== "") {
       this.queryInput.value = q;
@@ -119,11 +135,67 @@ export class RdmReviewQueueUI {
       this.resultSection.innerText =
         `select search type, enter search term and press 🔎`;
     });
+
+    // Add event handlers for query selection
+    this.querySelect.addEventListener('change', (e) => this.onReportTypeChange(e));
+  }
+
+  private async get_all_clpid(): Promise<string[]> {
+    //console.log(`DEBUG clientAPI call getStringList('people.ds', 'get_all_clpid');`);
+    return this.clientAPI.getStringList('people.ds', 'get_all_clpid');
+  }
+
+  private async get_all_clgid(): Promise<string[]> {
+    //console.log(`DEBUG clientAPI call getStringList('groups.ds', 'get_all_clgid');`);
+    return this.clientAPI.getStringList('groups.ds', 'get_all_clgid');
+  }
+
+  // fetchAutocompleteResults supports auto complete with clpid and clgid
+  private async fetchAutocompleteResults(reportType: string): Promise<string[]> {
+    switch (reportType) {
+      case 'review_queue_by_clpid':
+        return await this.get_all_clpid();
+      case 'by_clpid':
+        return await this.get_all_clpid();
+      case 'review_queue_by_clgid':
+        return await this.get_all_clgid();
+      case 'by_clgid':
+        return await this.get_all_clgid();
+      default:
+        return [];
+    }
+  }
+
+  // Handle report selection change
+  public async onReportTypeChange(event: Event): Promise<void> {
+    const selectElement = event.target as HTMLSelectElement;
+    this.selectedReportType = selectElement.value;
+
+    if (this.selectedReportType) {
+      this.autocompleteResults = await this.fetchAutocompleteResults(this.selectedReportType);
+      // Update the UI to show autocomplete options
+      this.renderAutocompleteOptions();
+    }
+  }
+
+  // renderAutocompleteOptions this populates the autocomplete for clpid or clgid, otherwise
+  // it set the autocomplete data element to empty.
+  private renderAutocompleteOptions(): void {
+    const dataListElement: HTMLDataListElement = document.getElementById('autocomplete-container') as unknown as HTMLDataListElement;
+    if (!dataListElement) return;
+
+    dataListElement.innerHTML = '';
+    for (let val of this.autocompleteResults) {
+      const optElem = document.createElement('option');
+      optElem.value = val;
+      //console.log(`DEBUG optElem -> ${optElem.outerHTML}`);
+      dataListElement.appendChild(optElem);
+    };
   }
 
   private updateURL(q_name: string, q: string) {
     const newUrl = new URL(window.location.href);
-    newUrl.search = new URLSearchParams({ q_name: q_name, q: q });
+    newUrl.search = new URLSearchParams({ q_name: q_name, q: q }).toString();
     // Update the URL in the address bar
     window.history.pushState({}, "", newUrl);
   }
@@ -137,13 +209,32 @@ export class RdmReviewQueueUI {
     }
   }
 
+  private genDownloadName(q_name: string, q: string, ext: string): string {
+    switch (q_name) {
+      case "by_name":
+        return `${stripNonAlphanumericUTF8(q)}_${q_name}${ext}`;
+      case "review_queue_by_name":
+        return `${stripNonAlphanumericUTF8(q)}_${q_name}${ext}`;
+      case "review_queue_mentions":
+        return `at_${stripNonAlphanumericUTF8(q)}_${q_name}${ext}`;
+      default:
+        return `${q}_${q_name}${ext}`;
+    }
+  }
+
   private async setupQuery(q_name: string, q: string): Promise<void> {
     if (q_name === "" || q === "") {
       this.resultSection.innerText =
         `select search type, enter search term and press 🔎`;
       return;
     }
-
+    console.log(`DEBUG q_name -> ${q_name}, q ? '${q}'`);
+    if (q_name === 'by_name' && q === '*') {
+      console.log("DEBUG query by name is wild card only");
+      this.resultSection.innerText =
+        `Cannot do a wild card only search for ${q_name}, enter new search term and press 🔎`;
+      return;
+    }
     const selectedOption =
       this.querySelect.options[this.querySelect.selectedIndex];
     let query_label: string;
@@ -160,6 +251,7 @@ export class RdmReviewQueueUI {
 
     // Convert wild card to SQL wild card
     let query = q.indexOf("*") > -1 ? q.replace(/\*/g, "%") : q;
+
     // Handle special case of at tag queries
     if (q_name === "review_queue_mentions") {
       if (!query.startsWith("@")) {
@@ -174,22 +266,23 @@ export class RdmReviewQueueUI {
       this.resultSection.innerHTML =
         `${results.length}  items found, ${query_label} <em>"${q}"</em>`;
       if (results.length > 0) {
-        const tableText: string = formatJsonAsHtmlTable(results);
-        const csvText: string = formatJsonAsCSV(results);
-        const download = csvToDownloadElements(csvText, q_name + ".csv");
+        const tableText: string = formatJsonAsHtmlTable(q_name, query, results);
+        const csvText: string = formatJsonAsCSV(q_name, query, results);
+        const downloadName = this.genDownloadName(q_name, query, ".csv");
+        const download = csvToDownloadElements(csvText, downloadName);
         this.resultSection.appendChild(download);
         this.resultSection.appendChild(document.createElement("p"));
         this.resultSection.insertAdjacentHTML("beforeend", tableText);
       }
     } catch (error) {
-      this.resultSection.innerHTML = `Error: ${error}`;
+      this.resultSection.innerHTML = `Error: ${q_name}(${query}) ${error}`;
     }
   }
 
   private async fetchResults(q_name: string, q: string): Promise<any> {
     const url = new URL(this.baseUrl);
     url.pathname = `${this.basePath}api/${this.cName}/${q_name}/q`;
-    url.search = new URLSearchParams({ q: q });
+    url.search = new URLSearchParams({ q: q }).toString();
     /* console.log(
       `DEBUG POST datasetd query end point ${url}, payload ${
         JSON.stringify({ q: q })
@@ -231,32 +324,117 @@ interface Item {
   title: string;
   publisher: string;
   custom_fields: CustomFields;
+  creators: Array<{
+      person_or_org: {
+          identifiers?: Array<{ identifier: string; scheme: string }>;
+      };
+  }>;
+  comments_with_mentions: {content: string, created: string}[];
+  groups: string;
+  tags: string;
+  query_clpid: string;
+  query_orcid: string;
+  journal_title: string;
   publication_date: string;
   created: string;
   submitted_by: string;
 }
 
-function normalizeItem(item: Item) {
-  let groups: string = "";
-  let journal_title: string = "";
+function extractOrcidForClpid(
+    items: Array<{
+        person_or_org: {
+            identifiers?: Array<{ identifier: string; scheme: string }>;
+        };
+    }>,
+    targetClpid: string
+): string {
+    for (const item of items) {
+        const identifiers = item.person_or_org.identifiers || [];
+        const clpidObj = identifiers.find(id => id.scheme === "clpid");
+        const orcidObj = identifiers.find(id => id.scheme === "orcid");
+
+        if (clpidObj && clpidObj.identifier === targetClpid) {
+            return orcidObj?.identifier || "";
+        }
+    }
+    return "";
+}
+
+function extractClpidForOrcid(
+    items: Array<{
+        person_or_org: {
+            identifiers?: Array<{ identifier: string; scheme: string }>;
+        };
+    }>,
+    targetOrcid: string
+): string {
+    for (const item of items) {
+        const identifiers = item.person_or_org.identifiers || [];
+        const orcidObj = identifiers.find(id => id.scheme === "orcid");
+        const clpidObj = identifiers.find(id => id.scheme === "clpid");
+
+        if (orcidObj && orcidObj.identifier === targetOrcid) {
+            return clpidObj?.identifier || "";
+        }
+    }
+    return "";
+}
+
+function extractAndSortMentions(comments: Array<{ content: string; created: string }>): string[] {
+    if (!comments) {
+        return [];
+    }
+
+    // Extract all @mentions from each content
+    const mentions = comments
+        .flatMap(comment =>
+            // Match all @mentions (including Unicode letters/numbers)
+            [...comment.content.matchAll(/@[\p{L}\p{N}_]+/gu)]
+                .map(match => match[0])
+        );
+
+    // Remove duplicates, sort, and return
+    return [...new Set(mentions)].sort();
+}
+
+function normalizeItem(q_name: string, q: string, item: Item) {
+  let groups: string = '';
+  let journal_title: string = '';
+  //console.log(`DEBUG item to normalize -> ${JSON.stringify(item.creators)}`);
   (item.custom_fields["caltech:groups"] === undefined)
-    ? item.groups = ""
-    : item.groups = item.custom_fields["caltech:groups"].map((g) => g.id).join(
-      "; ",
-    );
+    ? item.groups = ''
+    : item.groups = item.custom_fields["caltech:groups"].map((g) => g.id).join("; ");
   (item.custom_fields["journal:journal"] === undefined)
-    ? item.journal_title = ""
-    : item.journal_title = item.custom_fields["journal:journal"].title || "";
+    ? item.journal_title = ''
+    : item.journal_title = item.custom_fields["journal:journal"].title || '';
+  (item.comments_with_mentions === undefined)
+  ? item.tags = ''
+  : item.tags = extractAndSortMentions(item.comments_with_mentions).join(", ");
+  switch (q_name) {
+    case "by_clpid":
+    case "review_queue_by_clpid":
+      item.query_clpid = q;
+      item.query_orcid = (item.creators === undefined) ? '' : extractOrcidForClpid(item.creators, q);
+      break;
+    case "by_orcid":
+    case "review_queue_by_orcid":
+      item.query_orcid = q;
+      item.query_clpid = (item.creators === undefined) ? '' : extractClpidForOrcid(item.creators, q);
+      break;
+    default:
+      item.query_clpid = '';
+      item.query_orcid = '';
+  }
   ["status", "link", "publisher"].forEach(function (key: string) {
-    if (item[key] === undefined || item[key] === null) {
-      item[key] = "";
+    if (key in item && (item[key as keyof Item] === undefined || item[key as keyof Item] === null)) {
+      item[key as keyof Item] = '' as any; // or cast to the correct type
     }
   });
 }
 
-function formatJsonAsHtmlTable(items: Item[]): string {
+function formatJsonAsHtmlTable(q_name: string, q: string, items: Item[]): string {
   const tableRows = items.map((item) => {
-    normalizeItem(item);
+    normalizeItem(q_name, q, item);
     return `
             <tr>
                 <td><a href="${item.link}" target="_blank">${item.rdmid}</a></td>
@@ -265,6 +443,7 @@ function formatJsonAsHtmlTable(items: Item[]): string {
                 <td>${item.publisher}</td>
                 <td>${item.journal_title}</td>
                 <td>${item.publication_date}</td>
+                <td>${item.tags}</td>
                 <td>${item.created}</td>
                 <td>${item.submitted_by}</td>
                 <td>${item.groups}</td>
@@ -282,6 +461,7 @@ function formatJsonAsHtmlTable(items: Item[]): string {
                     <th>Publisher</th>
                     <th>Journal Title</th>
                     <th>Publication Date</th>
+                    <th>Tags</th>
                     <th>Created Date</th>
                     <th>Submitted By</th>
                     <th>Caltech Groups</th>
@@ -294,22 +474,46 @@ function formatJsonAsHtmlTable(items: Item[]): string {
     `;
 }
 
-function formatJsonAsCSV(items: Item[]): string {
-  // Generate CSV content
-  const csvHeader =
-    "RDMID,Link,Status,Title,Publisher,Journal Title,Publication Date,Created Date,Submitted By,Caltech Groups";
-  const csvRows = items.map((item) => {
-    normalizeItem(item);
-    return `"${item.rdmid}","${
-      item.link.replace(/"/g, '""')
-    }","${item.status}","${item.title.replace(/"/g, '""')}","${
-      item.publisher.replace(/"/g, '""')
-    }","${
-      item.journal_title.replace(/"/g, '""')
-    }","${item.publication_date}","${item.created}","${item.submitted_by}","${
-      item.groups.replace(/"/g, '""')
-    }"`;
-  }).join("\n");
+function formatJsonAsCSV(q_name:string, q: string, items: Item[]): string {
+  let csvHeader:string = '';
+  let csvRows: string = '';
+  switch (q_name) {
+    case "by_clpid":
+    case "review_queue_by_clpid":
+    case "by_orcid":
+    case "review_queue_by_orcid":
+      csvHeader = "Query,found clpid,found orcid,Tags,RDMID,Link,Status,Title,Publisher,Journal Title,Publication Date,Created Date,Submitted By,Caltech Groups";
+      // Generate CSV content
+      csvRows = items.map((item) => {
+        normalizeItem(q_name, q, item);
+        return `"${q}","${item.query_clpid}","${item.query_orcid}","${item.tags}","${item.rdmid}","${
+          item.link.replace(/"/g, '""')
+        }","${item.status}","${item.title.replace(/"/g, '""')}","${
+          item.publisher.replace(/"/g, '""')
+        }","${
+          item.journal_title.replace(/"/g, '""')
+        }","${item.publication_date}","${item.created}","${item.submitted_by}","${
+          item.groups.replace(/"/g, '""')
+        }"`;
+      }).join("\n");
+      break;
+    default:
+      csvHeader = "Query,Tags,RDMID,Link,Status,Title,Publisher,Journal Title,Publication Date,Created Date,Submitted By,Caltech Groups";
+      // Generate CSV content
+      csvRows = items.map((item) => {
+        normalizeItem(q_name, q, item);
+        return `"${q}","${item.tags}","${item.rdmid}","${
+          item.link.replace(/"/g, '""')
+        }","${item.status}","${item.title.replace(/"/g, '""')}","${
+          item.publisher.replace(/"/g, '""')
+        }","${
+          item.journal_title.replace(/"/g, '""')
+        }","${item.publication_date}","${item.created}","${item.submitted_by}","${
+          item.groups.replace(/"/g, '""')
+        }"`;
+      }).join("\n");
+      break;
+  }
   const csv = `${csvHeader}\n${csvRows}`;
   return csv;
 }
@@ -347,4 +551,9 @@ function csvToDownloadElements(
   container.appendChild(button);
   container.appendChild(dataElement);
   return container;
+}
+
+function stripNonAlphanumericUTF8(input: string): string {
+  // Matches any character that is not a Unicode letter or number
+  return input.replace(/[^\p{L}\p{N}]/gu, '');
 }

@@ -514,7 +514,7 @@
       "jsr:@std/path@^1.1.4",
       "jsr:@std/uuid@^1.1.0",
       "jsr:@std/yaml@^1.0.12",
-      "jsr:@zip-js/zip-js@^2.8.26"
+      "jsr:@zip-js/zip-js@^2.8.24"
     ]
   }
 }
