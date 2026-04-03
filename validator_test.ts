@@ -1,9 +1,9 @@
-import * as clids from './clids.ts';
+import * as validator from './validator.ts';
 import { assertStrictEquals } from '@std/assert';
 
-Deno.test('test clpid', () => {
+Deno.test('test clpid validator', () => {
   for (let clpid of validClpids) {
-    let result = clids.isValidClpid(clpid)
+    let result = validator.isValidClpid(clpid)
 		assertStrictEquals(result, true, `expected isValidClpid(${clpid}) to return true, failed test, got ${result}`);
 	}
 });
@@ -9037,4 +9037,3 @@ const validClpids = [
 	"Çataltepe-Zehra-Kök",
 	"Ćaćić-Branimir-Josip"
 ];
-

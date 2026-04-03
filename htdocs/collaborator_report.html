@@ -22,9 +22,11 @@
 <section>
 
 <h1>Collaborator Report</h1>
+<p>FIXME: The collabor report needs a auto complete for the clpid. This can be done with an input element typed to a data list element avoiding allot of JavaScript. Need to update this via the form builder. That means to display the form I will see how long it takes to get a list of people.ds keys from the API. Hopefully it is fast enough.</p>
 <div id="collaborator_report"></div>
 <p><noscript>JavaScript required for the collaborator report</noscript></p>
 <script type="module">
+  import { ClientAPI } from "./modules/client_api.js";
   import { CollaboratorReportUI } from "./modules/collaborator_report.js";
   const baseUrl = URL.parse(window.location.href);
   baseUrl.pathname = baseUrl.pathname.replace(/collaborator_report.html$/g, '');
@@ -33,7 +35,8 @@
   window.addEventListener('DOMContentLoaded', (event) => {
     const CollaboratorReprotUI = new CollaboratorReportUI({
         baseUrl: baseUrl,
-        reportElement: reportElement
+        reportElement: reportElement,
+        clientAPI: new ClientAPI(baseUrl)
     });
   });
 </script>

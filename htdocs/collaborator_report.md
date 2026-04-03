@@ -11,6 +11,7 @@ FIXME: The collabor report needs a auto complete for the clpid. This can be done
 <noscript>JavaScript required for the collaborator report</noscript>
 
 <script type="module">
+  import { ClientAPI } from "./modules/client_api.js";
   import { CollaboratorReportUI } from "./modules/collaborator_report.js";
   const baseUrl = URL.parse(window.location.href);
   baseUrl.pathname = baseUrl.pathname.replace(/collaborator_report.html$/g, '');
@@ -19,7 +20,8 @@ FIXME: The collabor report needs a auto complete for the clpid. This can be done
   window.addEventListener('DOMContentLoaded', (event) => {
     const CollaboratorReprotUI = new CollaboratorReportUI({
         baseUrl: baseUrl,
-        reportElement: reportElement
+        reportElement: reportElement,
+        clientAPI: new ClientAPI(baseUrl)
     });
   });
 </script>

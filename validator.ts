@@ -1,5 +1,6 @@
 /**
- * clids.ts holds validation function for COLD's internal identifiers.
+ * validator.ts holds validation functions for COLD's parameterized report requests.
+ * It is implemented so that it can be used by server side in cold_reports.ts and browser side in htdocs/modules/validator.js.
  */
 
 export function isValidClpid(clpid: string): boolean {

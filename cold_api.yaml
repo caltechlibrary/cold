@@ -145,6 +145,17 @@ collections:
             flattened_data
         ORDER BY
             clgid, clpid;
+      # Get a list of all clpid as string for autocomplete
+      get_all_clpid: |
+        select src->'clpid'
+        from people
+        order by src->>'clpid'
+
+      # Look up person by clpid
+      validate_clpid: |
+        select json_object('clpid', src->'clpid')
+        from people
+        where json_extract(src, '$.clpid') = ?
       # What follows are object level permissions
       lookup_clgid: |
         select json_object(
@@ -180,7 +191,7 @@ collections:
                     where (json_each.value like ?)
               )
         order by src->>'name' asc;
-      lookup_name_or_clgid:
+      lookup_name_or_clgid: |
         select json_object('clgid', src->'clgid', 'group_name', src->'name')
         from groups
         where (src->>'name' like ?) or
@@ -191,6 +202,12 @@ collections:
                     where (json_each.value like ?)
               )
         order by src->>'name' asc;
+      # Get a list of clgid as strings for autocomplete
+      get_all_clgid: |
+        select src->'clgid'
+        from group
+        order by src->>'clgid'
+
     # What follows are object level permissions
     keys: true
     create: true

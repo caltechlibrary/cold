@@ -56,7 +56,6 @@
     "jsr:@std/uuid@^1.1.0": "1.1.0",
     "jsr:@std/yaml@^1.0.12": "1.0.12",
     "jsr:@std/yaml@^1.0.5": "1.0.12",
-    "jsr:@zip-js/zip-js@^2.8.24": "2.8.24",
     "npm:@types/node@*": "22.10.5",
     "npm:handlebars@4.7.7": "4.7.7"
   },
@@ -296,9 +295,6 @@
     },
     "@std/yaml@1.0.12": {
       "integrity": "7deabca4545bcedd07c5f69ea53acea71b8b4c67562f224e17b90d75944cb20c"
-    },
-    "@zip-js/zip-js@2.8.24": {
-      "integrity": "3e5744893e2b08f82ec3706ffad05398ee03ab2628457d805e449efda354994b"
     }
   },
   "npm": {
@@ -518,7 +514,7 @@
       "jsr:@std/path@^1.1.4",
       "jsr:@std/uuid@^1.1.0",
       "jsr:@std/yaml@^1.0.12",
-      "jsr:@zip-js/zip-js@^2.8.24"
+      "jsr:@zip-js/zip-js@^2.8.26"
     ]
   }
 }

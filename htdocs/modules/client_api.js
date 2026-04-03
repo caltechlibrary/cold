@@ -1,18 +1,14 @@
-/**
- * client_api.ts provides the browser side API for interactive dataset API via the COLD web service.
- * That in turn wraps the datasetd JSON API via ts_dataset.ts.
- */ /**
- * ClientAPI wraps the browser facing web service and handles retrieving information about peoples, groups, etc.
- */ export class ClientAPI {
+// client_api.ts
+var ClientAPI = class {
   baseUrl = "../";
-  constructor(baseUrl){
-    baseUrl === undefined ? "" : this.baseUrl = baseUrl;
+  constructor(baseUrl) {
+    baseUrl === void 0 ? "" : this.baseUrl = baseUrl;
   }
   async getList(c_name, query_name, params) {
     const base_url = `${this.baseUrl}/api/${c_name}/${query_name}`;
     let uri = base_url;
     let resp;
-    if (params !== undefined) {
+    if (params !== void 0) {
       uri = `${base_url}?${params}`;
     }
     try {
@@ -27,7 +23,7 @@
     }
     if (resp.ok) {
       const src = await resp.text();
-      if (src !== undefined && src !== "") {
+      if (src !== void 0 && src !== "") {
         let l = [];
         try {
           l = JSON.parse(src);
@@ -43,7 +39,8 @@
    * getGroupsList returns an array of clgid and group names.  If list can't be retrieved
    * then an empty list is return.
    * @returns an array of objects consisting of clgid and group name.
-   */ async getGroupsList() {
+   */
+  async getGroupsList() {
     const c_name = "groups";
     const query_name = "group_names";
     return await this.getList(c_name, query_name);
@@ -52,7 +49,8 @@
    * getPeopleList returns an array of clpid and group names.  If list can't be retrieved
    * then an empty list is return.
    * @returns an array of objects consisting of clgid and group name.
-   */ async getPeopleList() {
+   */
+  async getPeopleList() {
     const c_name = "people";
     const query_name = "people_names";
     return await this.getList(c_name, query_name);
@@ -62,8 +60,6 @@
     const query_name = "lookup_name";
     let params = new URLSearchParams();
     params.append("q", name);
-    //params.append("clgid", name);
-    //params.append("alternative", name);
     return await this.getList(c_name, query_name, params);
   }
   async lookupGroupMembership(clgid) {
@@ -94,4 +90,7 @@
     params.append("q", acronym);
     return await this.getList(c_name, query_name, params);
   }
-}
+};
+export {
+  ClientAPI
+};

@@ -90,7 +90,7 @@
   ],
   "runtimePlatform": "- Deno 2.2",
   "softwareRequirements": [
-    "Deno >= 2.7.5",
+    "Deno >= 2.7.11",
     "Dataset = 2.3.4",
     "CMTools >= 0.0.40"
   ],
