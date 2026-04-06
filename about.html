@@ -25,7 +25,7 @@
 </nav>
 <section>
 <h1 id="about-this-software">About this software</h1>
-<h2 id="cold-0.0.38e">cold 0.0.38e</h2>
+<h2 id="cold-0.0.39">cold 0.0.39</h2>
 <ul>
 <li>improved data validation when rendering review queue content client
 side</li>
@@ -38,6 +38,15 @@ one set is whole requests table (submitted and accepted)</li>
 option</li>
 <li>added help page for reports page to detail what each report
 does</li>
+<li>added autocomplete for clpid and clgid in review queue</li>
+<li>restricted by name search in review queue from “*” only queries
+(must include at least one letter), this avoids timeout issues for 100K+
+objects</li>
+<li>added <span class="citation" data-cites="tag">@tag</span> column in
+review outputs</li>
+<li>added search term column in CSV downloads from review queue</li>
+<li>added clpid/orcid columns in the CSV download of clpid views</li>
+<li>improved default name for CSV download of review queue items</li>
 </ul>
 <h3 id="authors">Authors</h3>
 <ul>

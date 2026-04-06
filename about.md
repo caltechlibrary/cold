@@ -32,7 +32,7 @@ maintainer:
     id: https://orcid.org/0000-0003-0900-6903
 
 repository_code: https://github.com/caltechlibrary/cold
-version: 0.0.38e
+version: 0.0.39
 license_url: https://caltechlibrary.github.io/cold/LICENSE
 operating_system:
   - Linux
@@ -52,13 +52,13 @@ keywords:
   - objects
   - controlled vocabulary
 
-date_released: 2026-03-25
+date_released: 2026-04-06
 ---
 
 About this software
 ===================
 
-## cold 0.0.38e
+## cold 0.0.39
 
 - improved data validation when rendering review queue content client side
 - added counts to number of members in a group display
@@ -66,6 +66,12 @@ About this software
 - review queue now has two sets of searches, one is review queue and one set is whole requests table (submitted and accepted)
 - pull down list of reports and review search now have titles for each option
 - added help page for reports page to detail what each report does
+- added autocomplete for clpid and clgid in review queue
+- restricted by name search in review queue from "*" only queries (must include at least one letter), this avoids timeout issues for 100K+ objects
+- added @tag column in review outputs
+- added search term column in CSV downloads from review queue
+- added clpid/orcid columns in the CSV download of clpid views
+- improved default name for CSV download of review queue items
 
 ### Authors
 

@@ -282,8 +282,8 @@ interface InputsInterface {
 }
 
 class Inputs implements InputsInterface {
-  identifier: string = '';
-  validate_with: string = '';
+  identifier: string = "";
+  validate_with: string = "";
   required: boolean = false;
 }
 
