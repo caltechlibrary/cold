@@ -60,10 +60,8 @@ async function directoryUpdateRecord(evt) {
     if (resp.ok) {
       // Since we're fetching from the proxied API we will get JSON back.
       const src = await resp.text();
-      //console.log("DEBUG src", src);
       if (src !== undefined && src !== "") {
         const obj = JSON.parse(src);
-        //console.log(`DEBUG directory data -> ${obj}`);
         updateRecord(obj);
         spinnerElem === null ? "" : spinnerElem.style.display = "none";
       }

@@ -343,9 +343,6 @@ async function handlePostGroups(
   if (req.body !== null) {
     const form = await req.formData();
     let obj: { [key: string]: any } = formDataToObject(form);
-    console.log(
-      `DEBUG form data after converting to object -> ${JSON.stringify(obj)}`,
-    );
     if (!("clgid" in obj)) {
       console.log("clgid missing", obj);
       return new Response(`missing group identifier`, {
@@ -355,20 +352,19 @@ async function handlePostGroups(
     }
     if (options.debug) {
       console.log(
-        `DEBUG form object -> %c${JSON.stringify(obj, null, 2)}`,
+        `debugging form object -> %c${JSON.stringify(obj, null, 2)}`,
         YELLOW,
       );
     }
-    if (obj.alternative !== undefined) {
+    if (obj.alternative !== undefined && options.debug) {
       console.log(
-        `DEBUG form object.object.alternative -> %c${
+        `debugging form object.object.alternative -> %c${
           JSON.stringify(obj.alternative, null, 2)
         }`,
         YELLOW,
       );
     }
     if (isCreateObject) {
-      console.log("DEBUG detected create request");
       clgid = obj.clgid as unknown as string;
     }
     if (obj.clgid !== clgid) {

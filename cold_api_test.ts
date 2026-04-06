@@ -87,10 +87,10 @@ async function main() {
     } else {
       const decoder = new TextDecoder();
       let text: string[] = [];
-      for await (const chunk of Deno.stdin.readable) {
+      for await (const chunk of Deno.stdin.readable as unknown as AsyncIterable<Uint8Array>) {
         text.push(decoder.decode(chunk));
       }
-      data = JSON.parse(text.join('\n')); 
+      data = JSON.parse(text.join('\n'));
     }
   }
   if (api_path.startsWith("keys") || api_path.startsWith("object/")) {

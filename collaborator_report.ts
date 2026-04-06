@@ -79,9 +79,9 @@ export class CollaboratorReportUI {
     // it is fast enough.
 
     (options.cName === undefined) ? "reports.ds" : this.cName = options.cName;
-    this.reportElement = typeof options.reportElement === 'string'
-        ? document.getElementById(options.reportElement)!
-        : options.reportElement;;
+    this.reportElement = typeof options.reportElement === "string"
+      ? document.getElementById(options.reportElement)!
+      : options.reportElement;
     this.baseUrl = new URL(options.baseUrl);
     this.basePath = this.baseUrl.pathname;
     this.clientAPI = options.clientAPI;
@@ -99,7 +99,6 @@ export class CollaboratorReportUI {
     let clpid = params.get("clpid") || "";
     clpid = clpid.trim();
     this.populateAutocomplete();
-    //console.log(`DEBUG from URL, clpid: "${clpid}"`);
     if (clpid !== "") {
       this.clpidElement.value = clpid;
       this.setupReport(clpid);
@@ -124,15 +123,17 @@ export class CollaboratorReportUI {
   }
 
   private async populateAutocomplete() {
-    const peopleList = await this.clientAPI.getList('people.ds', 'get_all_clpid');
-    //console.log(`DEBUG peopleList -> ${JSON.stringify(peopleList)}`);
-    const dataListElement: HTMLDataListElement = document.getElementById('clpid-list');
-    //console.log(`DEBUG dataListElement -> ${dataListElement}`);
+    const peopleList = await this.clientAPI.getList(
+      "people.ds",
+      "get_all_clpid",
+    );
+    const dataListElement: HTMLDataListElement = document.getElementById(
+      "clpid-list",
+    );
     if (dataListElement !== undefined && dataListElement != null) {
       for (let clpid of peopleList) {
-        let optElem = document.createElement('option');
+        let optElem = document.createElement("option");
         optElem.value = clpid;
-        console.log(`DEBUG optElem -> ${optElem.outerHTML}`);
         dataListElement.appendChild(optElem);
       }
     }
@@ -146,27 +147,36 @@ export class CollaboratorReportUI {
   }
 
   private async isValidClpid(clpid: string): Promise<boolean> {
-    let result: {[key: string]: any}[] = await this.clientAPI.getList('people.ds', 'validate_clpid', new URLSearchParams({'clpid': clpid}));
-    //console.log(`DEBUG client validate_clpid, ${JSON.stringify(result)} -> length ${result.length} -> typeof ${typeof result[0].clpid} -> '${result[0].clpid}' -> matched? ${result[0].clpid == clpid}`);
-    if ((result === undefined) || (result.length !== 1) || (result[0].clpid !== clpid)) {
+    let result: { [key: string]: any }[] = await this.clientAPI.getList(
+      "people.ds",
+      "validate_clpid",
+      new URLSearchParams({ "clpid": clpid }),
+    );
+    if (
+      (result === undefined) || (result.length !== 1) ||
+      (result[0].clpid !== clpid)
+    ) {
       return false;
     }
     return true;
   }
 
-  private async postReportRequest(report_name: string, clpid: string, emails?: string): Promise<Response> {
-    const postUrl = '../records';
+  private async postReportRequest(
+    report_name: string,
+    clpid: string,
+    emails?: string,
+  ): Promise<Response> {
+    const postUrl = "../records";
     const formData = new URLSearchParams();
-    formData.append('report_name', report_name);
-    formData.append('clpid', clpid);
-    formData.append('emails', emails);
-    console.log(`DEBUG formData -> ${formData.toString()}`);
+    formData.append("report_name", report_name);
+    formData.append("clpid", clpid);
+    formData.append("emails", emails);
     const defaultHeaders = {
-        'Content-Type': 'application/x-www-form-urlencoded',
+      "Content-Type": "application/x-www-form-urlencoded",
     };
 
     const response = await fetch(postUrl, {
-      method: 'POST',
+      method: "POST",
       headers: defaultHeaders,
       body: formData.toString(),
     });
@@ -184,20 +194,25 @@ export class CollaboratorReportUI {
       return;
     }
     // Make sure clpid is known, then send a post to the middleware.
-    if (! await this.isValidClpid(clpid)) {
+    if (!await this.isValidClpid(clpid)) {
       this.resultSection.innerHTML =
         `<em>Invalid clpid '${clpid}'</em>, enter clpid and press ⚙️`;
       return;
     }
     // FIXME: We have a valid clpid, let's submit the request to the reports queue for processing.
-    let resp = await this.postReportRequest('run_collaborator_report', clpid, '');
+    let resp = await this.postReportRequest(
+      "run_collaborator_report",
+      clpid,
+      "",
+    );
     if (resp.ok) {
       this.resultSection.innerHTML =
         `The collaborator report for "${clpid}" is queued`;
     } else {
       this.resultSection.innerHTML =
-        `There was a problem submitting the collaborator report for "${clpid}", ${JSON.stringify(resp)}`;
-
+        `There was a problem submitting the collaborator report for "${clpid}", ${
+          JSON.stringify(resp)
+        }`;
     }
   }
 }

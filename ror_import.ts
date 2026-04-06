@@ -47,7 +47,6 @@ async function retrieveTextFromZipFile(
     return undefined;
   }
   const columns = targetFileEntry.split(" ");
-  //console.log(`DEBUG columns of entry -> ${JSON.stringify(columns, null, 2)}`);
 
   const targetFile = columns[columns.length - 1];
   console.log(`Retrieving data from ${targetFile} in ${zipFilePath}`);

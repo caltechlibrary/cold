@@ -50,8 +50,8 @@ export function ColdReadWriteHandler(
   const pathname = new URL(req.url).pathname;
   const htdocs: string = path.normalize(options.htdocs);
 
-  if (options.debug) console.log("DEBUG request", req);
-  if (options.debug) console.log("DEBUG options", options);
+  if (options.debug) console.log("debugging request", req);
+  if (options.debug) console.log("debugging options", options);
   // Handle the various dataset collections management pages.
   if (pathname.startsWith("/people")) {
     return handlePeople(req, options);
@@ -86,7 +86,8 @@ export function ColdReadWriteHandler(
   }
   if (options.debug) {
     console.log(
-      "DEBUG: Handle the request for a static files or assets -> " + pathname,
+      "debugging: Handle the request for a static files or assets -> " +
+        pathname,
     );
   }
   // NOTE: If there isn't a specific handler implemented then assume you're

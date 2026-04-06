@@ -236,9 +236,6 @@ async function handlePostFunders(
   if (req.body !== null) {
     const form = await req.formData();
     let obj = formDataToObject(form);
-    console.log(
-      `DEBUG form data after converting to object -> ${JSON.stringify(obj)}`,
-    );
     if (!("clfid" in obj)) {
       console.log("clfid missing", obj);
       return new Response(`missing funder identifier`, {
@@ -248,7 +245,6 @@ async function handlePostFunders(
     }
     if ("acronyms" in obj) {
       const acronymData = csv.parse(obj.acronyms as unknown as string);
-      //console.log(`DEBUG acronyms data type ${typeof(data)} -> ${JSON.stringify(data)}`);
       // Need to extract the single column into an array
       let acronyms: string[] = [];
       for (const row of acronymData) {
@@ -265,7 +261,6 @@ async function handlePostFunders(
       obj.grant_numbers = grant_numbers;
     }
     if (isCreateObject) {
-      console.log("DEBUG detected create request");
       clfid = obj.clfid as unknown as string;
     }
     if (obj.clfid !== clfid) {

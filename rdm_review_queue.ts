@@ -35,7 +35,7 @@
  * ~~~
  */
 
-import { ClientAPI } from './client_api.ts';
+import { ClientAPI } from "./client_api.ts";
 
 export class RdmReviewQueueUI {
   private cName: string = "rdm_review_queue.ds";
@@ -62,9 +62,11 @@ export class RdmReviewQueueUI {
     (options.cName === undefined)
       ? "rdm_review_queue.ds"
       : this.cName = options.cName;
-    (typeof options.searchElement === 'string')
-      ? this.searchElement = document.getElementById(options.searchElement)! as unknown as HTMLSelectElement
-      : this.searchElement = options.searchElement
+    (typeof options.searchElement === "string")
+      ? this.searchElement = document.getElementById(
+        options.searchElement,
+      )! as unknown as HTMLSelectElement
+      : this.searchElement = options.searchElement;
     this.baseUrl = new URL(options.baseUrl);
     this.basePath = this.baseUrl.pathname;
     this.clientAPI = new ClientAPI(this.baseUrl.toString());
@@ -108,7 +110,6 @@ export class RdmReviewQueueUI {
     const params = u.searchParams;
     const q_name: string = params.get("q_name") ?? "";
     const q: string = params.get("q") ?? "";
-    //console.log(`DEBUG from URL(${window.location.href}) -> ${typeof params} -> ${params}, q_name: "${q_name}", q: "${q}"`);
     this.setSelectOption(q_name);
     if (q !== "") {
       this.queryInput.value = q;
@@ -137,29 +138,32 @@ export class RdmReviewQueueUI {
     });
 
     // Add event handlers for query selection
-    this.querySelect.addEventListener('change', (e) => this.onReportTypeChange(e));
+    this.querySelect.addEventListener(
+      "change",
+      (e) => this.onReportTypeChange(e),
+    );
   }
 
   private async get_all_clpid(): Promise<string[]> {
-    //console.log(`DEBUG clientAPI call getStringList('people.ds', 'get_all_clpid');`);
-    return this.clientAPI.getStringList('people.ds', 'get_all_clpid');
+    return this.clientAPI.getStringList("people.ds", "get_all_clpid");
   }
 
   private async get_all_clgid(): Promise<string[]> {
-    //console.log(`DEBUG clientAPI call getStringList('groups.ds', 'get_all_clgid');`);
-    return this.clientAPI.getStringList('groups.ds', 'get_all_clgid');
+    return this.clientAPI.getStringList("groups.ds", "get_all_clgid");
   }
 
   // fetchAutocompleteResults supports auto complete with clpid and clgid
-  private async fetchAutocompleteResults(reportType: string): Promise<string[]> {
+  private async fetchAutocompleteResults(
+    reportType: string,
+  ): Promise<string[]> {
     switch (reportType) {
-      case 'review_queue_by_clpid':
+      case "review_queue_by_clpid":
         return await this.get_all_clpid();
-      case 'by_clpid':
+      case "by_clpid":
         return await this.get_all_clpid();
-      case 'review_queue_by_clgid':
+      case "review_queue_by_clgid":
         return await this.get_all_clgid();
-      case 'by_clgid':
+      case "by_clgid":
         return await this.get_all_clgid();
       default:
         return [];
@@ -172,7 +176,9 @@ export class RdmReviewQueueUI {
     this.selectedReportType = selectElement.value;
 
     if (this.selectedReportType) {
-      this.autocompleteResults = await this.fetchAutocompleteResults(this.selectedReportType);
+      this.autocompleteResults = await this.fetchAutocompleteResults(
+        this.selectedReportType,
+      );
       // Update the UI to show autocomplete options
       this.renderAutocompleteOptions();
     }
@@ -181,16 +187,17 @@ export class RdmReviewQueueUI {
   // renderAutocompleteOptions this populates the autocomplete for clpid or clgid, otherwise
   // it set the autocomplete data element to empty.
   private renderAutocompleteOptions(): void {
-    const dataListElement: HTMLDataListElement = document.getElementById('autocomplete-container') as unknown as HTMLDataListElement;
+    const dataListElement: HTMLDataListElement = document.getElementById(
+      "autocomplete-container",
+    ) as unknown as HTMLDataListElement;
     if (!dataListElement) return;
 
-    dataListElement.innerHTML = '';
+    dataListElement.innerHTML = "";
     for (let val of this.autocompleteResults) {
-      const optElem = document.createElement('option');
+      const optElem = document.createElement("option");
       optElem.value = val;
-      //console.log(`DEBUG optElem -> ${optElem.outerHTML}`);
       dataListElement.appendChild(optElem);
-    };
+    }
   }
 
   private updateURL(q_name: string, q: string) {
@@ -228,9 +235,7 @@ export class RdmReviewQueueUI {
         `select search type, enter search term and press 🔎`;
       return;
     }
-    console.log(`DEBUG q_name -> ${q_name}, q ? '${q}'`);
-    if (q_name === 'by_name' && q === '*') {
-      console.log("DEBUG query by name is wild card only");
+    if (q_name === "by_name" && q === "*") {
       this.resultSection.innerText =
         `Cannot do a wild card only search for ${q_name}, enter new search term and press 🔎`;
       return;
@@ -258,7 +263,6 @@ export class RdmReviewQueueUI {
         query = `@${query}`;
       }
       query = `%${query}%`;
-      //console.log(`DEBUG updated query to ${query}`);
     }
 
     try {
@@ -283,11 +287,6 @@ export class RdmReviewQueueUI {
     const url = new URL(this.baseUrl);
     url.pathname = `${this.basePath}api/${this.cName}/${q_name}/q`;
     url.search = new URLSearchParams({ q: q }).toString();
-    /* console.log(
-      `DEBUG POST datasetd query end point ${url}, payload ${
-        JSON.stringify({ q: q })
-      }`,
-      ); */
     const response = await fetch(url);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -325,11 +324,11 @@ interface Item {
   publisher: string;
   custom_fields: CustomFields;
   creators: Array<{
-      person_or_org: {
-          identifiers?: Array<{ identifier: string; scheme: string }>;
-      };
+    person_or_org: {
+      identifiers?: Array<{ identifier: string; scheme: string }>;
+    };
   }>;
-  comments_with_mentions: {content: string, created: string}[];
+  comments_with_mentions: { content: string; created: string }[];
   groups: string;
   tags: string;
   query_clpid: string;
@@ -341,98 +340,115 @@ interface Item {
 }
 
 function extractOrcidForClpid(
-    items: Array<{
-        person_or_org: {
-            identifiers?: Array<{ identifier: string; scheme: string }>;
-        };
-    }>,
-    targetClpid: string
+  items: Array<{
+    person_or_org: {
+      identifiers?: Array<{ identifier: string; scheme: string }>;
+    };
+  }>,
+  targetClpid: string,
 ): string {
-    for (const item of items) {
-        const identifiers = item.person_or_org.identifiers || [];
-        const clpidObj = identifiers.find(id => id.scheme === "clpid");
-        const orcidObj = identifiers.find(id => id.scheme === "orcid");
+  for (const item of items) {
+    const identifiers = item.person_or_org.identifiers || [];
+    const clpidObj = identifiers.find((id) => id.scheme === "clpid");
+    const orcidObj = identifiers.find((id) => id.scheme === "orcid");
 
-        if (clpidObj && clpidObj.identifier === targetClpid) {
-            return orcidObj?.identifier || "";
-        }
+    if (clpidObj && clpidObj.identifier === targetClpid) {
+      return orcidObj?.identifier || "";
     }
-    return "";
+  }
+  return "";
 }
 
 function extractClpidForOrcid(
-    items: Array<{
-        person_or_org: {
-            identifiers?: Array<{ identifier: string; scheme: string }>;
-        };
-    }>,
-    targetOrcid: string
+  items: Array<{
+    person_or_org: {
+      identifiers?: Array<{ identifier: string; scheme: string }>;
+    };
+  }>,
+  targetOrcid: string,
 ): string {
-    for (const item of items) {
-        const identifiers = item.person_or_org.identifiers || [];
-        const orcidObj = identifiers.find(id => id.scheme === "orcid");
-        const clpidObj = identifiers.find(id => id.scheme === "clpid");
+  for (const item of items) {
+    const identifiers = item.person_or_org.identifiers || [];
+    const orcidObj = identifiers.find((id) => id.scheme === "orcid");
+    const clpidObj = identifiers.find((id) => id.scheme === "clpid");
 
-        if (orcidObj && orcidObj.identifier === targetOrcid) {
-            return clpidObj?.identifier || "";
-        }
+    if (orcidObj && orcidObj.identifier === targetOrcid) {
+      return clpidObj?.identifier || "";
     }
-    return "";
+  }
+  return "";
 }
 
-function extractAndSortMentions(comments: Array<{ content: string; created: string }>): string[] {
-    if (!comments) {
-        return [];
-    }
+function extractAndSortMentions(
+  comments: Array<{ content: string; created: string }>,
+): string[] {
+  if (!comments) {
+    return [];
+  }
 
-    // Extract all @mentions from each content
-    const mentions = comments
-        .flatMap(comment =>
-            // Match all @mentions (including Unicode letters/numbers)
-            [...comment.content.matchAll(/@[\p{L}\p{N}_]+/gu)]
-                .map(match => match[0])
-        );
+  // Extract all @mentions from each content
+  const mentions = comments
+    .flatMap((comment) =>
+      // Match all @mentions (including Unicode letters/numbers)
+      [...comment.content.matchAll(/@[\p{L}\p{N}_]+/gu)]
+        .map((match) => match[0])
+    );
 
-    // Remove duplicates, sort, and return
-    return [...new Set(mentions)].sort();
+  // Remove duplicates, sort, and return
+  return [...new Set(mentions)].sort();
 }
 
 function normalizeItem(q_name: string, q: string, item: Item) {
-  let groups: string = '';
-  let journal_title: string = '';
-  //console.log(`DEBUG item to normalize -> ${JSON.stringify(item.creators)}`);
+  let groups: string = "";
+  let journal_title: string = "";
   (item.custom_fields["caltech:groups"] === undefined)
-    ? item.groups = ''
-    : item.groups = item.custom_fields["caltech:groups"].map((g) => g.id).join("; ");
+    ? item.groups = ""
+    : item.groups = item.custom_fields["caltech:groups"].map((g) => g.id).join(
+      "; ",
+    );
   (item.custom_fields["journal:journal"] === undefined)
-    ? item.journal_title = ''
-    : item.journal_title = item.custom_fields["journal:journal"].title || '';
+    ? item.journal_title = ""
+    : item.journal_title = item.custom_fields["journal:journal"].title || "";
   (item.comments_with_mentions === undefined)
-  ? item.tags = ''
-  : item.tags = extractAndSortMentions(item.comments_with_mentions).join(", ");
+    ? item.tags = ""
+    : item.tags = extractAndSortMentions(item.comments_with_mentions).join(
+      ", ",
+    );
   switch (q_name) {
     case "by_clpid":
     case "review_queue_by_clpid":
       item.query_clpid = q;
-      item.query_orcid = (item.creators === undefined) ? '' : extractOrcidForClpid(item.creators, q);
+      item.query_orcid = (item.creators === undefined)
+        ? ""
+        : extractOrcidForClpid(item.creators, q);
       break;
     case "by_orcid":
     case "review_queue_by_orcid":
       item.query_orcid = q;
-      item.query_clpid = (item.creators === undefined) ? '' : extractClpidForOrcid(item.creators, q);
+      item.query_clpid = (item.creators === undefined)
+        ? ""
+        : extractClpidForOrcid(item.creators, q);
       break;
     default:
-      item.query_clpid = '';
-      item.query_orcid = '';
+      item.query_clpid = "";
+      item.query_orcid = "";
   }
   ["status", "link", "publisher"].forEach(function (key: string) {
-    if (key in item && (item[key as keyof Item] === undefined || item[key as keyof Item] === null)) {
-      item[key as keyof Item] = '' as any; // or cast to the correct type
+    if (
+      key in item &&
+      (item[key as keyof Item] === undefined ||
+        item[key as keyof Item] === null)
+    ) {
+      item[key as keyof Item] = "" as any; // or cast to the correct type
     }
   });
 }
 
-function formatJsonAsHtmlTable(q_name: string, q: string, items: Item[]): string {
+function formatJsonAsHtmlTable(
+  q_name: string,
+  q: string,
+  items: Item[],
+): string {
   const tableRows = items.map((item) => {
     normalizeItem(q_name, q, item);
     return `
@@ -474,15 +490,16 @@ function formatJsonAsHtmlTable(q_name: string, q: string, items: Item[]): string
     `;
 }
 
-function formatJsonAsCSV(q_name:string, q: string, items: Item[]): string {
-  let csvHeader:string = '';
-  let csvRows: string = '';
+function formatJsonAsCSV(q_name: string, q: string, items: Item[]): string {
+  let csvHeader: string = "";
+  let csvRows: string = "";
   switch (q_name) {
     case "by_clpid":
     case "review_queue_by_clpid":
     case "by_orcid":
     case "review_queue_by_orcid":
-      csvHeader = "Query,found clpid,found orcid,Tags,RDMID,Link,Status,Title,Publisher,Journal Title,Publication Date,Created Date,Submitted By,Caltech Groups";
+      csvHeader =
+        "Query,found clpid,found orcid,Tags,RDMID,Link,Status,Title,Publisher,Journal Title,Publication Date,Created Date,Submitted By,Caltech Groups";
       // Generate CSV content
       csvRows = items.map((item) => {
         normalizeItem(q_name, q, item);
@@ -498,7 +515,8 @@ function formatJsonAsCSV(q_name:string, q: string, items: Item[]): string {
       }).join("\n");
       break;
     default:
-      csvHeader = "Query,Tags,RDMID,Link,Status,Title,Publisher,Journal Title,Publication Date,Created Date,Submitted By,Caltech Groups";
+      csvHeader =
+        "Query,Tags,RDMID,Link,Status,Title,Publisher,Journal Title,Publication Date,Created Date,Submitted By,Caltech Groups";
       // Generate CSV content
       csvRows = items.map((item) => {
         normalizeItem(q_name, q, item);
@@ -555,5 +573,5 @@ function csvToDownloadElements(
 
 function stripNonAlphanumericUTF8(input: string): string {
   // Matches any character that is not a Unicode letter or number
-  return input.replace(/[^\p{L}\p{N}]/gu, '');
+  return input.replace(/[^\p{L}\p{N}]/gu, "");
 }

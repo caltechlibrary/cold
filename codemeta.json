@@ -53,8 +53,8 @@
     }
   ],
   "dateCreated": "2023-12-12",
-  "dateModified": "2026-03-25",
-  "datePublished": "2026-03-25",
+  "dateModified": "2026-04-06",
+  "datePublished": "2026-04-06",
   "description": "Caltech Library maintains a list of people, groups and funders and their related identifiers. For many years these were managed using a spreadsheets. That has become cumbersome. **COLD** manages data as JSON objects in [dataset](https://github.com/caltechlibrary/dataset) collections.\n\n**COLD** is implemented as three web web services\n\n- cold web UI\n- cold JSON API (provided by datasetd)\n- cold reports (the report request system)\n\nReports are implemented as a set of programs or bash scripts.\n\nTypeScript+Deno is used to implement the web UI and report system.\nThe JSON API is provided by Dataset's datasetd.\nAccess control is provided by the front end web server integrated with Shibboleth.",
   "funder": [
     {
@@ -98,9 +98,10 @@
     "GNU Make",
     "Pandoc 3.1"
   ],
-  "version": "0.0.38e",
+  "version": "0.0.39",
   "developmentStatus": "active",
   "issueTracker": "https://github.com/caltechlibrary/cold/issues",
   "downloadUrl": "https://github.com/caltechlibrary/cold/release/latest",
-  "releaseNotes": "- improved data validation when rendering review queue content client side\n- added counts to number of members in a group display\n- in review queue search the name is now trimmed before submission to avoid false negatives becaused a space slipped in\n- review queue now has two sets of searches, one is review queue and one set is whole requests table (submitted and accepted)\n- pull down list of reports and review search now have titles for each option\n- added help page for reports page to detail what each report does"
+  "releaseNotes": "- improved data validation when rendering review queue content client side\n- added counts to number of members in a group display\n- in review queue search the name is now trimmed before submission to avoid false negatives becaused a space slipped in\n- review queue now has two sets of searches, one is review queue and one set is whole requests table (submitted and accepted)\n- pull down list of reports and review search now have titles for each option\n- added help page for reports page to detail what each report does\n- added autocomplete for clpid and clgid in review queue\n- restricted by name search in review queue from \"*\" only queries (must include at least one letter), this avoids timeout issues for 100K+ objects\n- added @tag column in review outputs\n- added search term column in CSV downloads from review queue\n- added clpid/orcid columns in the CSV download of clpid views\n- improved default name for CSV download of review queue items",
+  "copyrightYear": 2026
 }

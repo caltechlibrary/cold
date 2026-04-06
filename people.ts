@@ -228,10 +228,6 @@ export class People implements PeopleInterface {
     if (row.hasOwnProperty("internal_notes")) {
       this.internal_notes = row.internal_notes;
     }
-    // console.log(
-    //   `DEBUG name: ${this.family_name}, ${this.given_name} this.clpid ${this.clpid} this.caltech (${typeof this
-    //     .caltech}): ${this.caltech}`,
-    // );
     if (this.caltech) {
       this.ror = "https://ror.org/05dxps055";
     }
@@ -240,7 +236,6 @@ export class People implements PeopleInterface {
       this.include_in_feeds = true;
     }
     */
-    // console.log(`DEBUG   -> this.ror (${typeof this.ror}): ${this.ror}`);
     return true;
   }
 
@@ -487,7 +482,6 @@ async function handleGetPeople(
   if (tmpl === "people_list") {
     /* display a list of people */
     const people_list = await ds.query("people_names", [], {});
-    //console.log(`DEBUG people_list (people_names) -> ${people_list}`);
     if (people_list !== undefined) {
       return renderPage(tmpl, {
         base_url: baseUrl,
@@ -533,11 +527,6 @@ async function handlePostPeople(
   if (req.body !== null) {
     const form = await req.formData();
     let obj = formDataToObject(form);
-    /*
-    console.log(
-      `DEBUG form data after converting to object -> ${JSON.stringify(obj)}`,
-    );
-    */
     if (!("clpid" in obj)) {
       console.log("clpid missing", obj);
       return new Response(`missing people identifier`, {
@@ -546,7 +535,6 @@ async function handlePostPeople(
       });
     }
     if (isCreateObject) {
-      //console.log("DEBUG detected create request");
       clpid = obj.clpid as unknown as string;
     }
     if (obj.clpid !== clpid) {

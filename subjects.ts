@@ -202,9 +202,6 @@ async function handlePostSubjects(
   if (req.body !== null) {
     const form = await req.formData();
     let obj = formDataToObject(form);
-    console.log(
-      `DEBUG form data after converting to object -> ${JSON.stringify(obj)}`,
-    );
     if (!("clsid" in obj)) {
       console.log("clsid missing", obj);
       return new Response(`missing subject identifier`, {
@@ -213,7 +210,6 @@ async function handlePostSubjects(
       });
     }
     if (isCreateObject) {
-      console.log("DEBUG detected create request");
       clsid = obj.clsid as unknown as string;
     }
     if (obj.clsid !== clsid) {

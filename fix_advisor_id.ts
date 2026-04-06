@@ -69,7 +69,6 @@ async function setAdvisorIds(
         let advisors_id: string = "";
         if (sheet[i].hasOwnProperty("advisor_id")) {
           advisors_id = sheet[i].advisor_id;
-          console.log(`DEBUG found advisors_id ${advisors_id} for ${clpid}`);
           if (advisors_id !== undefined && advisors_id !== "") {
             obj.advisors_id = advisors_id;
             const ok = await ds.update(clpid, obj);

@@ -122,7 +122,7 @@ export class Journal implements JournalInterface {
  */
 export function formDataToJournal(form: FormData): object {
   const obj: { [k: string]: string | string[] | boolean } = {};
-  for (const v of form.entries()) {
+  for (const v of (form as any).entries()) {
     const key: string = v[0];
     if (key !== "submit") {
       const val: any = v[1];
@@ -206,7 +206,7 @@ async function handleGetJournals(
   /* parse the URL */
   const url = new URL(req.url);
   const issn = pathIdentifier(req.url);
-  console.log(`DEBUG issn -> ${issn}`);
+
   const params = url.searchParams;
   let view = params.get("view");
   let tmpl = "journal_list";
@@ -274,9 +274,6 @@ async function handlePostJournals(
   if (req.body !== null) {
     const form = await req.formData();
     let obj = formDataToJournal(form);
-    console.log(
-      `DEBUG form data after converting to object -> ${JSON.stringify(obj)}`,
-    );
     if (!("issn" in obj)) {
       console.log("issn missing", obj);
       return new Response(`missing issn identifier`, {
@@ -285,7 +282,6 @@ async function handlePostJournals(
       });
     }
     if (isCreateObject) {
-      console.log("DEBUG detected create request");
       issn = obj.issn as unknown as string;
     }
     if (obj.issn !== issn) {

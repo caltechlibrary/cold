@@ -102,7 +102,6 @@ async function caltechDirectorySync(
   let records_processed = 0;
   let imss_lookup_failures = [];
   for (let person of people) {
-    //console.log("DEBUG including person", person);
     if (person.caltech === 1) {
       const data = await directoryLookup(person.imss_uid);
       if (data !== undefined) {

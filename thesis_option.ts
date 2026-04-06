@@ -88,7 +88,7 @@ export class ThesisOption implements ThesisOptionInterface {
  */
 export function formDataToThesisOption(form: FormData): object {
   const obj: { [k: string]: string | string[] | boolean } = {};
-  for (const v of form.entries()) {
+  for (const v of (form as any).entries()) {
     const key: string = v[0];
     if (key !== "submit") {
       const val: any = v[1];
@@ -230,9 +230,6 @@ async function handlePostThesisOption(
   if (req.body !== null) {
     const form = await req.formData();
     let obj = formDataToThesisOption(form);
-    console.log(
-      `DEBUG form data after converting to object -> ${JSON.stringify(obj)}`,
-    );
     if (!("option_id" in obj)) {
       console.log("option_id missing", obj);
       return new Response(`missing thesis option identifier`, {
@@ -241,7 +238,6 @@ async function handlePostThesisOption(
       });
     }
     if (isCreateObject) {
-      console.log("DEBUG detected create request");
       option_id = obj.option_id as unknown as string;
     }
     if (obj.option_id !== option_id) {

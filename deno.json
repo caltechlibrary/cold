@@ -58,5 +58,8 @@
     "@std/uuid": "jsr:@std/uuid@^1.1.0",
     "@std/yaml": "jsr:@std/yaml@^1.0.12",
     "@zip-js/zip-js": "jsr:@zip-js/zip-js@^2.8.26"
+  },
+  "compilerOptions": {
+    "lib": ["deno.ns", "dom", "esnext"]
   }
 }

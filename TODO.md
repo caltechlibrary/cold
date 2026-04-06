@@ -14,13 +14,13 @@ next
 - [X] Figure a useful way to snapshot the RDM Review queue tables and load into a dataset collection
   - [X] harvest submitted status requests
   - [X] harvest accepted status requests
-- [ ] Create a Web UI to search the review queue collection
+- [X] Create a Web UI to search the review queue collection
   - [X] Figure out how to make searches bookmark-able
   - [X] Figure out how to map search to various queries of rdm_review_queue.ds
   - [X] Implemented retrieve JSON array results
-  - [ ] Format output for HTMLL display
-  - [ ] Figure out CSV download option for search results
-- [ ] Create a set of status reports for the review queue, historical reports should include "accepted" status as well as "submitted" status requests
+  - [X] Format output for HTMLL display
+  - [X] Figure out CSV download option for search results
+- [X] Create a set of status reports for the review queue, historical reports should include "accepted" status as well as "submitted" status requests
 - [X] Need to produce the Groups YAML vocabulary for CaltechAUTHORS
 - [X] Add directoryLookup() call on submit of people_edit
 - [X] Make sure `author_id` and `thesis_id` continue to be mapped on reloading data from CSV file, if a person has an "clpid" and only are alumni then that should go into the `thesis_id` field.

@@ -21,7 +21,6 @@ const ds = new Dataset(apiPort, "groups.ds");
  * toRDMObject() returns an abbreviated object that maps to RDM's vocabularies
  */
 function toRDMObject(obj: { [key: string]: any }): Object {
-  //console.log(`DEBUG item : ${JSON.stringify(obj)}`);
   return {
     id: obj.clgid,
     title: {

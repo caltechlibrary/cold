@@ -17,7 +17,6 @@ export class ClientAPI {
     c_name: string,
     query_name: string,
     params?: URLSearchParams,
-
   ): Promise<string[]> {
     const base_url = `${this.baseUrl}/api/${c_name}/${query_name}`;
     let uri: string = base_url;

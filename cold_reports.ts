@@ -45,7 +45,7 @@ export interface ReportInterface {
   id: string;
   report_name: string;
   options: string[];
-  inputs: InputInterface[];
+  inputs: InputsInterface[];
   emails: string;
   requested: string;
   updated: string;
@@ -61,7 +61,7 @@ export class Report implements ReportInterface {
   id: string = "";
   report_name: string = "";
   options: string[] = [];
-  inputs: InputInterface[] = [];
+  inputs: InputsInterface[] = [];
   emails: string = "";
   requested: string = "";
   updated: string = "";
@@ -81,7 +81,9 @@ export class Report implements ReportInterface {
 
     this.report_name = report_name;
     this.options = "options" in o ? o.options as unknown[] as string[] : [];
-    this.inputs = "inputs" in o ? o.inputs as unknown[] as InputInterface[] : [];
+    this.inputs = "inputs" in o
+      ? o.inputs as unknown[] as InputsInterface[]
+      : [];
     this.emails = "emails" in o ? `${o.emails}` : ``;
     const now = new Date();
     const expire_in_days = 7;
@@ -194,7 +196,7 @@ async function handleReportsList(
  */
 async function handleReportRequest(
   req: Request,
-  options: { debug: boolean; htdocs: string, inputs?: InputsInterface[] },
+  options: { debug: boolean; htdocs: string; inputs?: InputsInterface[] },
 ): Promise<Response> {
   if (req.body !== null) {
     // Request a report to be run
@@ -203,8 +205,6 @@ async function handleReportRequest(
     const rpt = new Report();
     const ok = await rpt.request_report(obj);
     if (ok) {
-      console.log(`DEBUG rpt -> ${JSON.stringify(rpt.asObject())}`);
-      console.log(`DEBUG formDataToObject -> ${JSON.stringify(obj)}`);
       // We want to create the record and return success. If the record
       // has already been created then we should distriguish that error from
       // other types of error.
@@ -275,25 +275,22 @@ async function handleReportRequest(
   });
 }
 
-interface InputInterface {
+interface InputsInterface {
   identifier: string;
   validate_with: string;
   required: boolean;
 }
 
-class Inputs implements InputInterface {
-  private identifier: string;
-  private validate_with: string;
-  private required: boolean;
+class Inputs implements InputsInterface {
+  identifier: string = '';
+  validate_with: string = '';
+  required: boolean = false;
 }
 
 interface RunnableInterface {
   cmd: string;
   options: string[];
   basename: string;
-  // List of inputs holds a list of Input identifiers and their validator method names
-  inputs: Inputs[];
-  prefix_with: string;
   append_datestamp: boolean;
   content_type: string;
   final_status: string;

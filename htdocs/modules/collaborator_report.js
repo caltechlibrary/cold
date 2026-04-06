@@ -33,7 +33,6 @@ var CollaboratorReportUI = class {
 `;
     options.cName === void 0 ? "reports.ds" : this.cName = options.cName;
     this.reportElement = typeof options.reportElement === "string" ? document.getElementById(options.reportElement) : options.reportElement;
-    ;
     this.baseUrl = new URL(options.baseUrl);
     this.basePath = this.baseUrl.pathname;
     this.clientAPI = options.clientAPI;
@@ -68,7 +67,6 @@ var CollaboratorReportUI = class {
       for (let clpid of peopleList) {
         let optElem = document.createElement("option");
         optElem.value = clpid;
-        console.log(`DEBUG optElem -> ${optElem.outerHTML}`);
         dataListElement.appendChild(optElem);
       }
     }
@@ -95,7 +93,6 @@ var CollaboratorReportUI = class {
     formData.append("report_name", report_name);
     formData.append("clpid", clpid);
     formData.append("emails", emails);
-    console.log(`DEBUG formData -> ${formData.toString()}`);
     const defaultHeaders = {
       "Content-Type": "application/x-www-form-urlencoded"
     };

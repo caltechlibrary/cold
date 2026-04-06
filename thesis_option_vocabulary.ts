@@ -36,8 +36,6 @@ async function thesis_option_vocabulary() {
   if (thesis_option_list !== undefined) {
     for (let item of thesis_option_list) {
       l.push(toRDMObject(item));
-      //        l.push({"id": item.thesis_option, "title": { "en": item.name});
-      //        console.log(`DEBUG item ${item}`);
     }
   }
   console.log(yaml.stringify(l));

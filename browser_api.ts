@@ -31,15 +31,15 @@ export async function handleBrowserAPI(
   }
   let ds = new DatasetApiClient(apiPort, apiReq.c_name);
   // NOTE: We have more than FIXME: Need to pass in the parameter value(s)
-  let qObj: {[key: string]: string} = {};
-  let body: string = '';
+  let qObj: { [key: string]: string } = {};
+  let body: string = "";
   let pList: string[] = [];
-  if (apiReq.query_name === 'lookup_clgid') {
+  if (apiReq.query_name === "lookup_clgid") {
     body = JSON.stringify({ name: apiReq.q, alternative: apiReq.q });
     pList = ["name", "alternative"];
   } else {
     for (let k of Object.keys(apiReq)) {
-      if (k !== 'query_name' && k !== 'c_name') {
+      if (k !== "query_name" && k !== "c_name") {
         if (apiReq.hasOwnProperty(k)) {
           // handle special case for alternative name search ..., pre-paramaterized requests
           const v = apiReq[k];
@@ -50,18 +50,9 @@ export async function handleBrowserAPI(
     }
     body = JSON.stringify(qObj);
   }
-  console.log(
-    `DEBUG (apiReq -> ${JSON.stringify(apiReq)}) executing ds.query("${apiReq.query_name}", ${JSON.stringify(pList)}, body) doing a POST of body -> ${body}`,
-  );
   let resp = await ds.query(apiReq.query_name, pList, body);
   if (resp.ok) {
-    console.log(
-      `DEBUG resp -> ok ? ${resp.ok}`,
-    );
     let data = await resp.json();
-    console.log(
-      `DEBUG data from response -> ${typeof data} -> ${JSON.stringify(data)}`,
-    );
     return renderJSON(data, 200);
   }
   return renderJSON({

@@ -386,7 +386,7 @@ collections:
             from json_each(src, '$.creators')
             where json_extract(value, '$.person_or_org.name') like ?
         )
-        order by create desc
+        order by created desc
 
 
       review_queue_by_name: |
@@ -398,7 +398,7 @@ collections:
             where json_extract(value, '$.person_or_org.name') like ?
         )
         AND src->>'status' = 'submitted'
-        order by create desc
+        order by created desc
 
       # search by clpid
       by_clpid: |
@@ -411,7 +411,7 @@ collections:
             WHERE json_extract(identifier.value, '$.scheme') = 'clpid'
               AND json_extract(identifier.value, '$.identifier') = ?
         )
-        order by create desc
+        order by created desc
 
       review_queue_by_clpid: |
         SELECT src
@@ -424,7 +424,7 @@ collections:
               AND json_extract(identifier.value, '$.identifier') = ?
         )
         AND src->>'status' = 'submitted'
-        order by create desc
+        order by created desc
 
       # search by orcid
       by_orcid: |
@@ -437,7 +437,7 @@ collections:
             WHERE json_extract(identifier.value, '$.scheme') = 'orcid'
               AND json_extract(identifier.value, '$.identifier') = ?
         )
-        order by create desc
+        order by created desc
 
       review_queue_by_orcid: |
         SELECT src
@@ -450,7 +450,7 @@ collections:
               AND json_extract(identifier.value, '$.identifier') = ?
         )
         AND src->>'status' = 'submitted'
-        order by create desc
+        order by created desc
 
       # search by group clgid
       by_clgid: |
@@ -461,7 +461,7 @@ collections:
             FROM json_each(src, '$.custom_fields."caltech:groups"')
             WHERE json_extract(value, '$.id') = ?
         )
-        order by create desc
+        order by created desc
 
       review_queue_by_clgid: |
         SELECT src
@@ -472,7 +472,7 @@ collections:
             WHERE json_extract(value, '$.id') = ?
         )
         AND src->>'status' = 'submitted'
-        order by create desc
+        order by created desc
 
       # review queue mentions
       review_queue_mentions: |
@@ -484,7 +484,7 @@ collections:
             FROM json_each(src, '$.comments_with_mentions')
             WHERE json_extract(value, '$.content') LIKE ?
         )
-        order by create desc
+        order by created desc
 
     keys: true
     read: true

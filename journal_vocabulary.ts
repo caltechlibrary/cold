@@ -36,8 +36,6 @@ async function journal_vocabulary() {
   if (journal_list !== undefined) {
     for (let item of journal_list) {
       l.push(toRDMObject(item));
-      //        l.push({"id": item.issn, "title": { "en": item.name});
-      //        console.log(`DEBUG item ${item}`);
     }
   }
   console.log(yaml.stringify(l));

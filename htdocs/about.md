@@ -120,7 +120,7 @@ Access control is provided by the front end web server integrated with Shibbolet
 
 ### Software Requirements
 
-- Deno >= 2.7.5
+- Deno >= 2.7.11
 - Dataset = 2.3.4
 - CMTools >= 0.0.40
 

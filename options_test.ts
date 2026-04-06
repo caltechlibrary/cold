@@ -42,7 +42,6 @@ Deno.test("testOptionsObject", () => {
   op.stringVar("url", "", "set URL");
   op.numberVar("retry", 1, "set retries");
   op.parse(argv);
-  //console.log("DEBUG op -> ", op)
   assertStrictEquals(op.options.help, true);
   assertStrictEquals(op.options.url, "http://localhost:3030");
   assertStrictEquals(op.options.retry, 7);
@@ -52,7 +51,7 @@ Deno.test("testOptionsObject", () => {
   op.stringVar("url", "", "set URL");
   op.numberVar("retry", 1, "set retries");
   op.parse(argv.slice(1, argv.length));
-  //console.log("DEBUG op -> ", op)
+
   assertStrictEquals(op.options.help, false);
   assertStrictEquals(op.options.url, "http://localhost:3030");
   assertStrictEquals(op.options.retry, 7);

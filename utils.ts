@@ -67,7 +67,7 @@ export function apiPathParse(uri: string): { [key: string]: string } {
 
   // Handle none coliding query string parameters.
   let params = new URLSearchParams(u.search);
-  for (const key of params.keys()) {
+  for (const key of (params as any).keys()) {
     if (["c_name", "query_name"].indexOf(key) === -1) {
       const val = params.get(key);
       if (val !== null) {
@@ -97,9 +97,8 @@ export function formDataToObject(form: FormData): object {
   const obj: {
     [k: string]: string | { group_name: string; clgid: string }[] | boolean;
   } = {};
-  for (const v of form.entries()) {
+  for (const v of (form as any).entries()) {
     const key: string = v[0];
-    //console.log(`DEBUG formDataToObject processing key -> ${key} -> v -> ${v}`);
     if (key !== "submit") {
       const val: any = v[1];
       if (val === "true" || val === "on") {
@@ -194,7 +193,6 @@ async function updatePeopleWithGroupInfo(
       person.groups.push(row);
     }
   }
-  //console.log(`DEBUG person.orcid -> ${person.orcid}`);
   if (await dsPeople.update(clpid, person.asObject()) === false) {
     return `failed to update ${clpid} in people.ds`;
   }
@@ -261,7 +259,6 @@ export async function loadDivisionPeopleCSV(
           ERROR_COLOR,
         );
         groups.push({ group_name: division, clgid: "" });
-        Deno.exit(1); // DEBUG
       }
     }
     let j = 0;

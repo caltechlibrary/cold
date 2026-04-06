@@ -239,7 +239,6 @@ var RdmReviewQueueUI = class {
       optElem.value = val;
       dataListElement.appendChild(optElem);
     }
-    ;
   }
   updateURL(q_name, q) {
     const newUrl = new URL(window.location.href);
@@ -274,9 +273,7 @@ var RdmReviewQueueUI = class {
       this.resultSection.innerText = `select search type, enter search term and press \u{1F50E}`;
       return;
     }
-    console.log(`DEBUG q_name -> ${q_name}, q ? '${q}'`);
     if (q_name === "by_name" && q === "*") {
-      console.log("DEBUG query by name is wild card only");
       this.resultSection.innerText = `Cannot do a wild card only search for ${q_name}, enter new search term and press \u{1F50E}`;
       return;
     }

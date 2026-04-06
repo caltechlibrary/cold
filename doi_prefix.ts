@@ -199,9 +199,6 @@ async function handlePostDOIPrefix(
   if (req.body !== null) {
     const form = await req.formData();
     let obj = formDataToObject(form);
-    console.log(
-      `DEBUG form data after converting to object -> ${JSON.stringify(obj)}`,
-    );
     if (!("doi_prefix" in obj)) {
       console.log("doi_prefix missing", obj);
       return new Response(`missing doi_prefix identifier`, {
@@ -210,7 +207,6 @@ async function handlePostDOIPrefix(
       });
     }
     if (isCreateObject) {
-      console.log("DEBUG detected create request");
       doi_prefix = obj.doi_prefix as unknown as string;
     }
     if (obj.doi_prefix !== doi_prefix) {

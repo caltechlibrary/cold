@@ -159,6 +159,100 @@ programs like,
 <li>the cold_reports service needs to be restarted</li>
 </ul></li>
 </ul>
+<h2 id="requested-updates-for-parameterized-reports">Requested updates
+for parameterized reports</h2>
+<p>Integrating the collaborator reports requires that the reports system
+can handle parameters that will be passed by the runner to the scripts
+the implement the reports. It is incredibly import to validate inputs
+before the runner hands them off the OS to be run. That requires
+modification to runner to include identifying any field identifiers
+expect, a validation method and whether or not the field is
+required.</p>
+<p>Parameterized reports should never accept free text. I think
+parameters used should be restricted to explicit identifiers held in a
+collection, e.g. clpid, orcid, clgid, ror. The identifiers can be
+checked to make sure they exist before queuing the report to be run.</p>
+<p>In the cold_report.ts I have added a new Interface called
+InputInterface this has three fields, identifier is the string holding
+the identifier name, validate_with holds a function name that will
+execute the validation server side, required is a boolean if true then
+report will be aborted if the input is not found in the request (not in
+the submitted form data).</p>
+<p>Here’s an example of the COLD reports definition of the collaborator
+report.</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">run_collaborator_report</span><span class="kw">:</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">cmd</span><span class="kw">:</span><span class="at"> ./run_collaborator_report.bash</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">inputs</span><span class="kw">:</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> </span><span class="fu">id</span><span class="kw">:</span><span class="at"> clpid</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">validate_with</span><span class="kw">:</span><span class="at"> is_clpid</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">required</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">basename</span><span class="kw">:</span><span class="at"> nsf_collaborator_report</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">prefix_with</span><span class="kw">:</span><span class="at"> clpid</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">append_datestamp</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">content_type</span><span class="kw">:</span><span class="at"> application/vnd.ms-excel</span></span></code></pre></div>
+<p>The inputs is used to validate any parameters passed into the reports
+queue by the report request handler. There are actually three times
+validation is important.</p>
+<ol type="1">
+<li>In the Web UI to prevent a user to requesting a report without
+sufficient information (prevent the user from wasting their time)</li>
+<li>In the middleware that processes the report request (so we don’t
+queue anything unnecessarily)</li>
+<li>In the runner the parameters passed to the runner must still match
+the input expectation and be validate</li>
+<li>The report itself needs to also take responsibility to do sanity
+checking if it will accept inputs (paramaters).</li>
+</ol>
+<p>The first validation happens browser side and is maybe as simple as a
+regexp in the input field (or browser side validation via metadatatools
+TypeScript package). This step is as easy as mocking up an HTML page and
+including appropriate CSS and JavaScript to submit the form.</p>
+<p>Steps two and three happen in server side TypeScript programs. The
+middle way, cold.ts, needs to validate inputs as a mater of course.
+Prior version (&lt;= v0.0.38) only validated the report name and id
+(against the values stored in cold_reports.yaml). With parameterized
+reports the report needs to validate any form parameters received an
+integrate them into the report request object stored in the dataset
+collection reports.ds. The runner will again validate the inputs
+described in the cold_reports.yaml against parameters (query parameters
+or form fields and value) in the report request object. If that checks
+out OK then the report can be run.</p>
+<p>Why is this validation important? The reports in COLD are implemented
+as scripts and browsers. They run at the privilage of the report runner
+service. This is where the fourth layer of security needs to be layered
+in. The report runner can read the file system, call various programs
+and that is both it’s convienence in implementation and its weakness
+from a security point of view. <strong>The report runner is only the
+next to last check before processes get launched</strong>. The report
+needs to be responsibly implemented to prevent adverse side effects
+too.</p>
+<p>The ring defenses are pretty standard security practice. Allowing
+parameterized reports increasing the stakes with injected attackes via
+the parameters. Vetting can’t be left to the browser, the middleware,
+the runner alone.</p>
+<p>Writing a safe parameterized report. There are some rules that the
+developer will need to enforce.</p>
+<ol type="1">
+<li>Vet and validate the inputs to the reports (example parameters
+passed over the command line, only allow parameters to be passed via the
+command line)</li>
+<li>The parameters passed should never change the flow of processes
+launched they should only provide values that ultimately applied in a
+SQL query</li>
+<li>Any file system names in a report output need to be independently
+derived from data in being processed and not directly form input.</li>
+<li>Since the report runner will eventually write output the the rpt
+directory in the htdocs root, the pathing of any generated filenames
+must be vetted and sanity checked</li>
+</ol>
+<p>Clear separation of concerns are important at each circle of defense.
+Single sign-on of the production systems is the first circle of defense.
+Each hande off forms another layer of defense, sign-on, middleware,
+report service, report runner, the report itself. This increases the
+burden on the person writing parameterized reports. The report itself
+also needs to enforce sanitiy checking and gaurd against abuse. Security
+practice is best at all levels.</p>
 </section>
 <footer-global></footer-global>
 </body>
