@@ -82,13 +82,46 @@ I've written a prototype in TypeScript compiled with Deno.   Creating webservice
   - define the new report in cold_reports.yaml
   - the cold_reports service needs to be restarted
 
-## Requested updates for parameterized reports
+## Requested updates for parameterized reports, April 2026
 
-Integrating the collaborator reports requires that the reports system can handle parameters that will be passed by the runner to the scripts the implement the reports. It is incredibly import to validate inputs before the runner hands them off the OS to be run.  That requires modification to runner to include identifying any field identifiers expect, a validation method and whether or not the field is required.
+Integrating the collaborator reports requires the reports system to support parameterized reports. What does the reports system need to do to safely hand off paremeters to processes that might be privileged (example a report that is implemented as a Bash script running via the web user). You need to define the parameters in the reports system configuration for the SQL query along with a means of validating the input.
 
-Parameterized reports should never accept free text. I think parameters used should be restricted to explicit identifiers held in a collection, e.g. clpid, orcid, clgid, ror. The identifiers can be checked to make sure they exist before queuing the report to be run.
+### Validation approaches
 
-In the cold_report.ts I have added a new Interface called InputInterface this has three fields, identifier is the string holding the identifier name, validate_with holds a function name that will execute the validation server side, required is a boolean if true then report will be aborted if the input is not found in the request (not in the submitted form data).
+A good first step would be to build-in support to validate the inputs defined as HTML5 input elements and textarea. This would be the most basic approach. It would be a nice to have the option of a custom validation method too though that will raise the complexity.  The web service provided by dataset has a feature issue for something like this. Right now it needs to be handle at the middleware level (cold and cold_api). Ideally it should happen again inside the report runner before executing the report and passing the inputs as parameters.
+
+### First steps
+
+The collaborator report interface has been implemented as a simple web page where a TypeScript defined form is injected and used to implement the user interface. This uses Deno's bundle ability to transform the TypeScript into JavaScript along with included TypeScript modules client client_api.ts used to integrate with cold_api.
+
+The cold.ts (cold middleware) uses the exports from browser_api.ts to vet things before sending them to the cold_api which is implemented using datasetd. browser_api.ts needs to be modified to support the parameterized report request and needs to know about the cold_api.yaml configuration holding the inputs array defining how to interpret and vet the inputs submitted from the web form.
+Both the inputs definition and the parameters need to be embedded in the reports.ds object that queues reports requests.
+
+### Second steps
+
+The report runner needs to be smarter before it runs the command associated with the requested report.  It inputs are defined then it will need to re-vet them before handing of to the sub process spawned to execute the report.
+
+### Layers of defense
+
+We are defending three vectors of problems, user error, programmer error and mischief. User error can be addressed browser side and poses a lower risk. Mitigation efforts can be taken against a programming mistake up to calling the report executable. Programmers need to be resposible in implementing the reports (example if they write code that erases everything that's on them, similar if it hands back privilleged informaiton that too is on them). Mischief should be addressed at each stage. COLD runs behind shibboleth which provides authentication, user id is used for authorization (access to cold, everyone has the same privilege once they have access). Validating the inputs again in the cold middleware is the next line of defense, similarly we can validate before calling the report executable.
+
+### Validating inputs
+
+There is limited developer time available to implement the parameterized reports (though this technique will be reused in the Thesis Management System which shares COLD's architecture). I think there are could levels of validation that can be provided.
+
+1. Valdiate based on HTML5 input element types (this aligns with what is being transmitted and could be built-in to the middleware and runner using a single TypeScript module)
+2. A hybrid, HTML5 input elements types plus text area and the identifier validation provided by metadata tools
+3. Custom validation methods (more complex but more refined, would let us target specific library data needs)
+
+The minimum validation approach is one, two could be quickly added. Three is tricky and will make the cold codebase more brittle. One and two have a high potential for reuse.
+
+## Notes
+
+It is incredibly import to validate inputs before the runner hands them off to the OS to be run. My nightmare is a report is launched that then is hijack to compromise the operating system itself.  The browser needs to vet, the middleware needs to vet, the report runner needs to vet and the code in the report executable should again vet the inputs in some way. No level in the chain of execution should assume things are safe!
+
+Parameterized reports should never accept free text. If the report is written in Bash then we can use the metadata tools module to build simple command line validator programs to vet inputs. You can also call out to a python script (example idutils package) or awk. If the report is implemented as a Python program then inputs can again be vetted there.
+
+In the cold_report.ts I have added a new Interface called InputsInterface this has three fields. `identifier` is the string holding the identifier name. `type` holds an HTML5 input type or an identifier type defined in metadatatools. The first field indicates if this is a required parameter. If true the report request should be rejected if it is not provided.  Any parameters passed without a definition should be rejected in the middleware. Any parameters passed without a definition should be discarded by the report runner. Only defined parameters are allowed to be processed.
 
 Here's an example of the COLD reports definition of the collaborator report.
 
@@ -97,15 +130,17 @@ run_collaborator_report:
   cmd: ./run_collaborator_report.bash
   inputs:
     - id: clpid
-      validate_with: is_clpid
+      type: clpid
+      required: true
+    - id: file_prefix
+      type: text
       required: true
   basename: nsf_collaborator_report
-  prefix_with: clpid
   append_datestamp: false
   content_type: application/vnd.ms-excel
 ~~~
 
-The inputs is used to validate any parameters passed into the reports queue by the report request handler. There are actually three times validation is important. 
+The inputs is used to validate any parameters passed into the reports queue by the report request handler. There are four times validation is critically important. 
 
 1. In the Web UI to prevent a user to requesting a report without sufficient information (prevent the user from wasting their time)
 2. In the middleware that processes the report request (so we don't queue anything unnecessarily)

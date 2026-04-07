@@ -174,7 +174,7 @@ export class CollaboratorReportUI {
     const defaultHeaders = {
       "Content-Type": "application/x-www-form-urlencoded",
     };
-
+    console.log(`DEBUG posting ${postUrl}, ${defaultHeaders.toString()} ${formData.toString()}`);
     const response = await fetch(postUrl, {
       method: "POST",
       headers: defaultHeaders,
@@ -182,7 +182,7 @@ export class CollaboratorReportUI {
     });
 
     if (!response.ok) {
-      console.log(`HTTP error! status: ${response.status}`);
+      console.log(`HTTP error! status: ${response.status} ${postUrl}`);
     }
 
     return response;

@@ -138,9 +138,11 @@ export async function handleReports(
   options: { debug: boolean; htdocs: string },
 ): Promise<Response> {
   if (req.method === "GET") {
+    console.log(`DEBUG: calling handleReportList(req, ${options})`);
     return await handleReportsList(req, options);
   }
   if (req.method === "POST") {
+    console.log(`DEBUG: calling handleReportRequest(req, ${options})`);
     return await handleReportRequest(req, options);
   }
   const body = `<html>${req.method} not supported</html>`;
@@ -204,6 +206,7 @@ async function handleReportRequest(
     let obj = formDataToObject(form);
     const rpt = new Report();
     const ok = await rpt.request_report(obj);
+    console.log(`DEBUG: Requesting ${rpt.report_name} <- ${ok}`);
     if (ok) {
       // We want to create the record and return success. If the record
       // has already been created then we should distriguish that error from
@@ -444,15 +447,16 @@ async function process_request(
   // I want a copy of the object passed in so that response doesn't .
   request.status = "processing";
   request.updated = (new Date()).toJSON();
-  console.log("INFO: updated request object to processing", request);
+  console.log(`INFO: updated request object to processing ${request.report_name}`);
   if (await ds.update(request.id, request)) {
-    console.log("INFO: launching request", request);
+    console.log(`INFO: launching request ${request.report_name} ${request.id}`);
   } else {
     console.log(
       `ERROR: updated of request ${request} failed, aborting request runner`,
     );
     Deno.exit(1);
   }
+  console.log(`INFO: running command ${cmd.cmd} ${cmd.options}`);
   //FIXME: Need to evaluate if inputs are defined then valiate inputs before processing the requested report
   const link = await cmd.run([]);
   if (link === undefined || link === "") {
@@ -481,13 +485,14 @@ async function process_request(
 
 // servicing_requests checks the reports table, gets a list of pending requests, invokes process_request
 async function servicing_requests(runner: Runner): Promise<void> {
-  console.log("INFO: entered servicing_requests with Runner", runner);
+  //console.log("INFO: entered servicing_requests");
   let requests = await ds.query("next_request", [], {}) as Report[];
   if (requests.length > 0) {
     for (let request of requests) {
       let report_name = request.report_name;
       let runnable = runner.report_map[report_name];
       if (runnable !== undefined) {
+        (report_name !== undefined && report_name !== "") ? console.log(`INFO: Processing requests for ${report_name}`) : '';
         if (!await process_request(runnable, request.id, request)) {
           console.log(
             `ERROR: processing request ${request}, ${
@@ -495,6 +500,8 @@ async function servicing_requests(runner: Runner): Promise<void> {
             } failed, aborting request runner`,
           );
           Deno.exit(1);
+        } else {
+          (report_name !== undefined && report_name !== "") ? console.log(`INFO: Process completed for ${report_name}`) : '';
         }
       } else {
         request.status = "aborting, unknown report";
@@ -526,7 +533,7 @@ async function report_runner(config_yaml: string): Promise<number> {
     return 1;
   }
   await servicing_requests(runner);
-  console.log("INFO: caught up on requests");
+  //console.log("INFO: caught up on requests");
   return 0;
 }
 
