@@ -84,10 +84,10 @@ export class RdmReviewQueueUI {
       </optgroup>
       <hr />
       <optgroup label="All Records">
-        <option value="by_name" title="all records by name">by name</option>
-        <option value="by_clpid" title="all records by clpid">by clpid</option>
-        <option value="by_orcid" title="all records by orcid">by orcid</option>
-        <option value="by_clgid" title="all records by clgid">by clgid (group identifier)</option>
+        <option value="by_name" title="all records by name">all records by name</option>
+        <option value="by_clpid" title="all records by clpid">all records by clpid</option>
+        <option value="by_orcid" title="all records by orcid">all records by orcid</option>
+        <option value="by_clgid" title="all records by clgid">all records by clgid (group identifier)</option>
       </optgroup>
     </select> <input id="q" name="q" type="search"
                   list="autocomplete-container"
