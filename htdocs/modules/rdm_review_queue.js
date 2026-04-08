@@ -4,8 +4,15 @@ var ClientAPI = class {
   constructor(baseUrl) {
     baseUrl === void 0 ? "" : this.baseUrl = baseUrl;
   }
+  joinUrlPath(baseUrl, path) {
+    const url = typeof baseUrl === "string" ? new URL(baseUrl) : baseUrl;
+    const normalizedPath = path.replace(/^\/+/, "");
+    const combinedPath = `${url.pathname}/${normalizedPath}`.replace(/\/\/+/g, "/");
+    const newUrl = new URL(url.origin + combinedPath);
+    return newUrl.toString();
+  }
   async getStringList(c_name, query_name, params) {
-    const base_url = `${this.baseUrl}/api/${c_name}/${query_name}`;
+    const base_url = this.joinUrlPath(this.baseUrl, `/api/${c_name}/${query_name}`);
     let uri = base_url;
     let resp;
     if (params !== void 0) {
@@ -36,7 +43,7 @@ var ClientAPI = class {
     return [];
   }
   async getList(c_name, query_name, params) {
-    const base_url = `${this.baseUrl}/api/${c_name}/${query_name}`;
+    const base_url = this.joinUrlPath(this.baseUrl, `/api/${c_name}/${query_name}`);
     let uri = base_url;
     let resp;
     if (params !== void 0) {

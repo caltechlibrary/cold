@@ -69,9 +69,8 @@ reports:
     cmd: ./run_collaborator_report.bash
     inputs:
       - id: clpid
-        validate_with: is_clpid
+        type: text
         required: true
-    basename: nsf_collaborator_report
-    prefix_with: clpid
+    basename: "{{clpid}}_nsf_collaborator_report"
     append_datestamp: false
     content_type: application/vnd.ms-excel

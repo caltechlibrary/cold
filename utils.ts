@@ -89,6 +89,10 @@ export function timeStamp(dt: Date): string {
 
 /**
  * formDataToObject turn the form data into a simple object.
+ * NOTE: It does not validate the form fields! It does normalize
+ * boolean values. It transforms CSV data held in the textarea
+ * for fields named "groups" into a list of groups.
+ * It also update the "updated" field's value or create one if missing.
  *
  * @param {FormData} form data the form object to process
  * @returns {Object}
@@ -120,13 +124,6 @@ export function formDataToObject(form: FormData): object {
             obj.groups.push({ "group_name": group_name, "clgid": clgid });
           }
         }
-        /*
-        for (const grp of val.split("\n")) {
-          if (grp.trim() !== "") {
-            obj[key].push(grp.trim());
-          }
-        }
-        */
       }
     }
   }

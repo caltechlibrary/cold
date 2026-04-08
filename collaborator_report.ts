@@ -166,7 +166,7 @@ export class CollaboratorReportUI {
     clpid: string,
     emails?: string,
   ): Promise<Response> {
-    const postUrl = "../records";
+    const postUrl = "../reports";
     const formData = new URLSearchParams();
     formData.append("report_name", report_name);
     formData.append("clpid", clpid);
@@ -207,7 +207,7 @@ export class CollaboratorReportUI {
     );
     if (resp.ok) {
       this.resultSection.innerHTML =
-        `The collaborator report for "${clpid}" is queued`;
+        `The collaborator report for "${clpid}" is <a href="./reports" title="return to reports page for pickup">queued</a>`;
     } else {
       this.resultSection.innerHTML =
         `There was a problem submitting the collaborator report for "${clpid}", ${

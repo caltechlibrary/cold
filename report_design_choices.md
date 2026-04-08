@@ -3,7 +3,7 @@ COLD has a report request service with a web user interface.  To generate a repo
 
 Once the report request is made a record is created in the reports.ds collection. The report runner is expected to check that collection and run requested reports keeping the records updated as the report running processes proceeds. The final step is to either return an error message of why the request failed or return the status of "available" with a link to where the report can be viewed or downloaded.
 
-The system is deliberately simple. This is to keep it maintainable, easy for everyone to understand (developers and the people who request reports). Most importantly it needs to be easy to maintain. Report systems tend towards complexity so it is vital that the initial system be as simple as possible but still accomodate both quick reports and those which may take hours to complete.
+The system is deliberately simple. This is to keep it maintainable, easy for everyone to understand (developers and the people who request reports). Importantly it needs to be easy to maintain. Report systems tend towards complexity so it is vital that the initial system be as simple as possible but still accomodate both quick reports and those which may take hours to complete.
 
 The report request process is integrated into the COLD UI. That UI lists the requests and includes a form to making a new request. When the report runner picks up a request several things need to happen.
 
@@ -13,9 +13,9 @@ The report request process is integrated into the COLD UI. That UI lists the req
 If the request is valid then several things need to happen.
 
 - the report definition needs to be retrieved (probably from memory)
-- the designated script/program needs to be run
+- the designated script/program needs to be run (with parameters as of v0.0.40)
 - the output of the script/program (stdout) needs to be read and streamed into a report document at the location specified by the report definition
-- as the report executes output should be written to the web tree (e.g. htdocs/reports) and a link generated
+- as the report executes output should be written to the web tree (e.g. `htdocs/rpt`) and a link generated
 - if their is a problem the report process should terminal and the request updated with the status of error and message
 - if the report executes successfully the request record should be updated wiht the status of "available" and the link
 - if there are email(s) associated with the request a message needs to be sent out with the report name, final status and link if available or error message if not
@@ -30,10 +30,10 @@ Originally I was thinking that this should be the responsibility of the report s
 
 My current view is a report request would look something like this.
 
-```
+```json
 {
     "id": "6fec5fbf-5368-5d11-95c7-e2534752e3a5",
-    "report_name": "generate_people_csv",
+    "report_name": "run_collaborator_report",
     "email": "rsdoiel@caltech.edu,tmorrell@caltech.edu",
     "requested": "2024-10-25T19:37:44.169Z",
     "status": "requested",
@@ -42,64 +42,63 @@ My current view is a report request would look something like this.
 }
 ```
 
-The report definition should look more like this.
+The report definition could look more like this.
 
+```yaml
+run_collaborator_report:
+  cmd: ./run_collaborator_report.bash
+  inputs:
+    - id: clpid
+      validate_with: is_clpid
+      required: true
+  basename: "{{clpid}}_nsf_collaborator_report"
+  append_datestamp: false
+  content_type: application/vnd.ms-excel
 ```
-{
-    "report_name": "generate_people_csv",
-    "cmd": "./rpt_people_csv.bash",
-    "write_url": "s3://feeds.library.caltech.edu/people",
-    "link_url": "https://feeds.library.caltech.edu/people",
-    "basename": "people.csv",
-    "content_type": "text/csv",
-    "append_timestamp": false,
-    "options": []
-}
-```
 
-The runner would check the report requests, take the requested information and validated it against the predefined reports.  It would run the report capturing the output then write it to "write_base" appending the basename, optional timestamp and an file extension associated with the mime type (e.g ".csv" for a "text/csv"). I'm thinking aboutsupporting two storage protocols. They would be "file://", "s3://".
+The runner checks `reports.ds` for report requests, takes the requested information and validates it against the predefined reports in `cold_reports.yaml`.  It runs the report capturing the output. The output is streamed to `htdocs/rpt/{{report_name}}`. `{{report_name}}` is formed from the `basename`, `content_type` and `append_datestamp` fields in the report definition. The `content_type` sets the file extension used while the `basename` functions as a curly bracket template for the report name. In this example if the collaborator report is made and the `clpid` value was `Doiel-R-S`, then the `basename` would resolve to `Doiel-R-S_nsf_collaborator_report`, since the Excel format is expressed in the content type attribute the filename extension will be xlsx. Current implementation assumes we're storing the report locally in the COLD directory website. This makes sense as the report contents remains protected by the same mechanisms as COLD itself.
 
-I considered writing directory to G-Drive since their is a practice of doing that manually.  Google Drive API is problematic.  Google changes API pretty frequently. Any time they make a change I will likely need to update or modify my code. Given my experience with the Google Sheet's API I feel this is an unnecessary burden. In princple it maybe possible to mount Google Drive as a FUSE file system but even that looks pretty tedious to maintain over the long run.
-
-The NAS can be mounted easily to our data processing system. The staff requesting reports has access to that. For static websites like feeds, the S3 protocol is sufficient to easily distributed public oriented reports (e.g. people.csv, gorups.csv).
-
-The problem is the NAS might be mounted in different ways on each person's computer. So a "file:///" link isn't viable. While writing to "file//datawork.library.caltech.edu/Sites/feeds_v1.6/htdocs/people/people.csv" makes sense to the software it doen't result in a clickable link for our end user. While writing to an S3 bucket can have a direct mapping to a URLs the NAS doesn't fit that situation.
-
-Example "file://datawork.library.caltech.edu/Sites/feeds_v1.6/htdocs/people/people.csv" while eventually it'll get to "https://feeds.library.caltech.edu/people/people.csv" that isn't helpful when an end user wants a current, clickable link to see the report right at the point of creation.
-
-
-I've written a prototype in TypeScript compiled with Deno.   Creating webservices that take advantage of concurrency is more convoluted in TypeScript (e.g. need to use service workers) than Go.  The report runner server should run as a systemd service. It is easy to implement a sequencial report runner in TypeScript but since reports can sometimes take hours to complete this isn't ideal. Taking advantage of concurrency in TypeScript means using service works. Given that case it makes more sense in writing the report runner in Go and taking advantage of Go's maturity in concurrency and as a service platform.
+COLD and its report system are in production now. The report runner (cold_report) is a service that operates along side the COLD middleware (cold) and Dataset API (cold_api). These are controlled by the systemd services on the host Linux server. The middleware and access is controlled by Apache2+Shibboleth.
 
 ## Current implementation
 
 - cold_reports runs a service monitoring the contents of reports.ds collection
 - the reports that are authorized to run are defined in cold_reports.yaml
-- the program that runs the report are currently Bash wrapping runable programs like,
-  - `bin/group_vocabulary`
-  - `bin/journal_vocabulary`
+- the report excuting programs are mostly Bash scripts
+  - Bash scripts may leverage other programs
+    - `dsquery`
+    - `bin/group_vocabulary`
+    - `bin/journal_vocabulary`
+    - `../collaborator_reports/authors_nsf_table4.py`
 - the Reports web UI is defined in the template, `views/report_list.hbs`
   - if adding a new report you need to update the template
   - define the new report in cold_reports.yaml
+  - if the report includes parameters then you need to write a web form and add it to the `htdocs` directory
   - the cold_reports service needs to be restarted
 
-## Requested updates for parameterized reports, April 2026
+### Implementation
 
-Integrating the collaborator reports requires the reports system to support parameterized reports. What does the reports system need to do to safely hand off paremeters to processes that might be privileged (example a report that is implemented as a Bash script running via the web user). You need to define the parameters in the reports system configuration for the SQL query along with a means of validating the input.
+The reports system has a web UI that submits a request to the COLD middelware. The `browser_api.ts` contains the details for the middleware to prepare requests to the backend JSON API web service implemented via Dataset. The COLD middleware is responsible for getting the report request into the Dataset collection `reports.ds`. The COLD report runner checks `reports.ds` and fetches the next waiting request. It setups up to run the port updating the report object in `reports.ds` and executing the requested report defined in `cold_reports.yaml`.
+
+The scripts that run the reports usually leverage other programs (or Python scripts) to complete the request. They have full access to the COLD backend via `dsquery` as well as any other resource that can access programatically (example Python programs, curl, other cli).
+
+The definition of the report in `cold_reports.yaml` determines the reports name which is stored in `htdocs/rpt` and then available within the COLD Web UI.
+
+## Parameterized reports, April 2026
+
+In April the collaborator reports was migrated from GitHub action process to COLD. Integrating the collaborator reports requires the reports system to support parameterized reports. The `clpid` is required to know which collaboorators to report on. What does the reports system need to do to safely hand off paremeters? The `cold_reports.yaml` definition needs to include a list of expected parameters including their type information. This is then used to vet the paremeters before envoking the program that generates the report content.
 
 ### Validation approaches
 
-A good first step would be to build-in support to validate the inputs defined as HTML5 input elements and textarea. This would be the most basic approach. It would be a nice to have the option of a custom validation method too though that will raise the complexity.  The web service provided by dataset has a feature issue for something like this. Right now it needs to be handle at the middleware level (cold and cold_api). Ideally it should happen again inside the report runner before executing the report and passing the inputs as parameters.
+A good first step would be to provide built-in support to validate the inputs defined as HTML5 textarea, select and input elements. These are the types expected in the webform making the requests. Ideally validation is done each time a parameter is passed from one stage of processing to another.
 
-### First steps
+### Use Case: Collaborator Reports
 
-The collaborator report interface has been implemented as a simple web page where a TypeScript defined form is injected and used to implement the user interface. This uses Deno's bundle ability to transform the TypeScript into JavaScript along with included TypeScript modules client client_api.ts used to integrate with cold_api.
+The collaborator report interface has been implemented as a simple web page. A TypeScript clas defines form is injected into the report request page. The TypeScript is processed into JavaScript using Deno's bundle ability. The allows for integration with other TypeScript classes like `client_api.ts` and could allow for inclusion with `metadatatools.ts` for identifier validation browser side.
 
-The cold.ts (cold middleware) uses the exports from browser_api.ts to vet things before sending them to the cold_api which is implemented using datasetd. browser_api.ts needs to be modified to support the parameterized report request and needs to know about the cold_api.yaml configuration holding the inputs array defining how to interpret and vet the inputs submitted from the web form.
-Both the inputs definition and the parameters need to be embedded in the reports.ds object that queues reports requests.
+The TypeScript module, `cold.ts` (cold middleware), uses the exports from `browser_api.ts` to vet things inside the middleware before sending them onto the cold_api. The `cold_api` is a JSON API run by Dataset's web service. Integration of parameterized reports involved enhancing `browser_api.ts` to include parameter handling and validation as wells as modifying the report runner defined in `cold_reports.ts`. The `reports.ds` collection serves as the communication mechanism between the COLD middleware and reports runner.
 
-### Second steps
-
-The report runner needs to be smarter before it runs the command associated with the requested report.  It inputs are defined then it will need to re-vet them before handing of to the sub process spawned to execute the report.
+`cold_reports.ts` was enhanced to support the new `inputs` attribute in the report definition and template behavior of the revised `basename` attribute.
 
 ### Layers of defense
 
@@ -113,7 +112,47 @@ There is limited developer time available to implement the parameterized reports
 2. A hybrid, HTML5 input elements types plus text area and the identifier validation provided by metadata tools
 3. Custom validation methods (more complex but more refined, would let us target specific library data needs)
 
-The minimum validation approach is one, two could be quickly added. Three is tricky and will make the cold codebase more brittle. One and two have a high potential for reuse.
+The first two validation approaches are easy to implement quickly. Three is tricky and is not planned at this stage of development. Three's big disadvantage is the it will make the reports system brittle. At the present their are clear lines of separation between scripts implementing reports, the report runner and the COLD middleware passing on requests to `reports.ds`.
+
+### The problem of naming reports
+
+Once you have parameterized reports that will be picked via the COLD website (rpt subdiectory) you need a predictable way to name the report. Originally all reports had preset names. The basename attribute in the report definition mapped directly to the basename used on the file system. The content type determined the file extension. Reports were written to `htdocs/rpt`. That is how the reports system in COLD worked through release 0.0.39. It worked remarkably well.
+
+With parameterized reports their needs to be a flexible but predictable naming convension. In COLD v0.0.40 this has been done by treating the `basename` not as a fixed filename but rather as a name template. By inclosing an input variable name in the double curly brackets it can be used as part of the rendered basename. While simple this enhances the flexibility of how reports are named. It gives us predictability when determining where to write output and what the link (URL) will be to retrieve the report when completed.
+
+That behavior in defined in the `Runnable` object class in `cold_reports.ts`. That is also where the reports configure before running. That includes a basename to apply to the executable report's standard out before writing it to the reports directory and forming the link (URL) to point at the report. This works well for unparameterized reports. The reports get updated and replace previous versions. If the report definition includes the append datestamp option then the name will be formed with a datestamp to destinguish when the report was made. This breaks down with parameterized reports.  In the collaborator report use case I need to have the report name reflect who (which clpid) the report is for, otherwise one collaborator reports with overwite each other.
+
+There are several points where the name is really important
+
+1. What the basename of the report will be so a link can be calculated
+2. What link to display when the report has completed (or send in an email if email notifcation is requested)
+3. Where to write the report output of the report (assume the report executable's standard holds the reports contents)
+
+The script generating the report content could easily take over duties of writing content to the `htdocs/rpt` directory. This would not require a significant change in the reports module. It is how we handle reports that are queue then run on separate machines.  There still needs to be a linkage back into the reports queue object to indicate what the link to the report is.
+
+It is desirable to minimize the interactions between the report executable and the report runner as this presents the most flexibility in how report construction is implemented. The report executable should not know about the report runner. How then is the report name reflected in the reports queue object after completion?
+
+The approach being taken is to presume the report name is passed as all or part of a valiable used in the parameterized report. The configuration for the basename value defined in the cold_reports.yaml file is treated as a handlebars like template. Then the basename is formed by passing the __validated__ parameters and a simple substitution can take place.  This at makes the assumption that the parameters (which are strings at the point of validation) is non-empty. To enforce this the parameters that can be used as part of the filename must be a required field.
+
+Here's an example of the YAML used to configure the collaborator report.
+
+~~~yaml
+run_collaborator_report:
+  cmd: ./run_collaborator_report.bash
+  inputs:
+    - id: clpid
+      type: clpid
+      required: true
+  basename: "{{clpid}}_nsf_collaborator_report"
+  append_datestamp: false
+  content_type: application/vnd.ms-excel
+~~~
+
+This keeps the linkage between the report excetuable largely separate. The `clpid` value will be vetted by the browser, by the middleware and again by the report runner[^1]. The `clpid` is required so will be non-empty (or the report will be aborted). It should be safe to pass that value to the script `run_collaborator_report.bash`.
+
+Other than exit code and error messages (prefixed with `error://` in the output of `run_collaborator_report.bash`) the report interacts minimally with the report runner (the standard output can be used as the contents of the report and written to by the current formation of the basename attribute).  The report configuration only sees the addition of the inputs attribute and the enhanced behavior of resolving the basename if the `{{` and `}}` are present.
+
+[^1]: Ideally again inside the Bash script ./run_collaborator_report.bash and the Python script it runs.
 
 ## Notes
 

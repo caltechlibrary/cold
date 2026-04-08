@@ -88,7 +88,7 @@ var CollaboratorReportUI = class {
     return true;
   }
   async postReportRequest(report_name, clpid, emails) {
-    const postUrl = "../records";
+    const postUrl = "../reports";
     const formData = new URLSearchParams();
     formData.append("report_name", report_name);
     formData.append("clpid", clpid);
@@ -118,7 +118,7 @@ var CollaboratorReportUI = class {
     }
     let resp = await this.postReportRequest("run_collaborator_report", clpid, "");
     if (resp.ok) {
-      this.resultSection.innerHTML = `The collaborator report for "${clpid}" is queued`;
+      this.resultSection.innerHTML = `The collaborator report for "${clpid}" is <a href="./reports" title="return to reports page for pickup">queued</a>`;
     } else {
       this.resultSection.innerHTML = `There was a problem submitting the collaborator report for "${clpid}", ${JSON.stringify(resp)}`;
     }
