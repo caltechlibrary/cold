@@ -163,10 +163,10 @@ var RdmReviewQueueUI = class {
       </optgroup>
       <hr />
       <optgroup label="All Records">
-        <option value="by_name" title="all records by name">by name</option>
-        <option value="by_clpid" title="all records by clpid">by clpid</option>
-        <option value="by_orcid" title="all records by orcid">by orcid</option>
-        <option value="by_clgid" title="all records by clgid">by clgid (group identifier)</option>
+        <option value="by_name" title="all records by name">all records by name</option>
+        <option value="by_clpid" title="all records by clpid">all records by clpid</option>
+        <option value="by_orcid" title="all records by orcid">all records by orcid</option>
+        <option value="by_clgid" title="all records by clgid">all records by clgid (group identifier)</option>
       </optgroup>
     </select> <input id="q" name="q" type="search"
                   list="autocomplete-container"
@@ -266,8 +266,14 @@ var RdmReviewQueueUI = class {
   genDownloadName(q_name, q, ext) {
     switch (q_name) {
       case "by_name":
+        if (q === "*") {
+          return `all_records_${q_name}${ext}`;
+        }
         return `${stripNonAlphanumericUTF8(q)}_${q_name}${ext}`;
       case "review_queue_by_name":
+        if (q === "*") {
+          return `all_{q_name}${ext}`;
+        }
         return `${stripNonAlphanumericUTF8(q)}_${q_name}${ext}`;
       case "review_queue_mentions":
         return `at_${stripNonAlphanumericUTF8(q)}_${q_name}${ext}`;
@@ -281,7 +287,7 @@ var RdmReviewQueueUI = class {
       return;
     }
     if (q_name === "by_name" && q === "*") {
-      this.resultSection.innerText = `Cannot do a wild card only search for ${q_name}, enter new search term and press \u{1F50E}`;
+      this.resultSection.innerText = `Cannot complete search for all record by name using '${q}', too many results, enter revised search term and press \u{1F50E}`;
       return;
     }
     const selectedOption = this.querySelect.options[this.querySelect.selectedIndex];
@@ -452,9 +458,13 @@ function formatJsonAsCSV(q_name, q, items) {
       break;
     default:
       csvHeader = "Query,Tags,RDMID,Link,Status,Title,Publisher,Journal Title,Publication Date,Created Date,Submitted By,Caltech Groups";
+      let q_normal = q;
+      if (q.indexOf("%") > -1) {
+        q_normal = q.replace(/%/g, "*");
+      }
       csvRows = items.map((item) => {
         normalizeItem(q_name, q, item);
-        return `"${q}","${item.tags}","${item.rdmid}","${item.link.replace(/"/g, '""')}","${item.status}","${item.title.replace(/"/g, '""')}","${item.publisher.replace(/"/g, '""')}","${item.journal_title.replace(/"/g, '""')}","${item.publication_date}","${item.created}","${item.submitted_by}","${item.groups.replace(/"/g, '""')}"`;
+        return `"${q_normal}","${item.tags}","${item.rdmid}","${item.link.replace(/"/g, '""')}","${item.status}","${item.title.replace(/"/g, '""')}","${item.publisher.replace(/"/g, '""')}","${item.journal_title.replace(/"/g, '""')}","${item.publication_date}","${item.created}","${item.submitted_by}","${item.groups.replace(/"/g, '""')}"`;
       }).join("\n");
       break;
   }

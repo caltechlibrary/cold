@@ -84,10 +84,10 @@ export class RdmReviewQueueUI {
       </optgroup>
       <hr />
       <optgroup label="All Records">
-        <option value="by_name" title="all records by name">by name</option>
-        <option value="by_clpid" title="all records by clpid">by clpid</option>
-        <option value="by_orcid" title="all records by orcid">by orcid</option>
-        <option value="by_clgid" title="all records by clgid">by clgid (group identifier)</option>
+        <option value="by_name" title="all records by name">all records by name</option>
+        <option value="by_clpid" title="all records by clpid">all records by clpid</option>
+        <option value="by_orcid" title="all records by orcid">all records by orcid</option>
+        <option value="by_clgid" title="all records by clgid">all records by clgid (group identifier)</option>
       </optgroup>
     </select> <input id="q" name="q" type="search"
                   list="autocomplete-container"
@@ -219,8 +219,14 @@ export class RdmReviewQueueUI {
   private genDownloadName(q_name: string, q: string, ext: string): string {
     switch (q_name) {
       case "by_name":
+        if (q === '*') {
+          return `all_records_${q_name}${ext}`;
+        }
         return `${stripNonAlphanumericUTF8(q)}_${q_name}${ext}`;
       case "review_queue_by_name":
+        if (q === '*') {
+          return `all_{q_name}${ext}`;
+        }
         return `${stripNonAlphanumericUTF8(q)}_${q_name}${ext}`;
       case "review_queue_mentions":
         return `at_${stripNonAlphanumericUTF8(q)}_${q_name}${ext}`;
@@ -237,7 +243,7 @@ export class RdmReviewQueueUI {
     }
     if (q_name === "by_name" && q === "*") {
       this.resultSection.innerText =
-        `Cannot do a wild card only search for ${q_name}, enter new search term and press 🔎`;
+        `Cannot complete search for all record by name using '${q}', too many results, enter revised search term and press 🔎`;
       return;
     }
     const selectedOption =
@@ -493,6 +499,7 @@ function formatJsonAsHtmlTable(
 function formatJsonAsCSV(q_name: string, q: string, items: Item[]): string {
   let csvHeader: string = "";
   let csvRows: string = "";
+  
   switch (q_name) {
     case "by_clpid":
     case "review_queue_by_clpid":
@@ -517,10 +524,15 @@ function formatJsonAsCSV(q_name: string, q: string, items: Item[]): string {
     default:
       csvHeader =
         "Query,Tags,RDMID,Link,Status,Title,Publisher,Journal Title,Publication Date,Created Date,Submitted By,Caltech Groups";
+      // convert q wild card back from SQL '%' to '*'
+      let q_normal:string = q;
+      if (q.indexOf('%') > -1) {
+          q_normal = q.replace(/%/g, '*');
+      }
       // Generate CSV content
       csvRows = items.map((item) => {
         normalizeItem(q_name, q, item);
-        return `"${q}","${item.tags}","${item.rdmid}","${
+        return `"${q_normal}","${item.tags}","${item.rdmid}","${
           item.link.replace(/"/g, '""')
         }","${item.status}","${item.title.replace(/"/g, '""')}","${
           item.publisher.replace(/"/g, '""')
