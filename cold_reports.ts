@@ -101,6 +101,7 @@ export class Report implements ReportInterface {
     if (cfg.reports !== undefined) {
       for (const [k, v] of Object.entries(cfg.reports)) {
         if (k === report_name) {
+          // FIXME: Before assignment I should validate against type.
           this.inputs = v.inputs;
           return true;
         }
@@ -111,11 +112,11 @@ export class Report implements ReportInterface {
 
   // merge_inputs takes an object holding key/value pairs (like from our form) and updates the value
   // of the input is it matches the form's pair.
-  merge_inputs(formObject: Record<string,string>): void {
+  merge_inputs(formObject: Record<string, string>): void {
     this.inputs = this.inputs.map((obj) => {
       for (let k in formObject) {
         if (k === obj.id) {
-          obj.value = '';
+          obj.value = "";
           obj.value = formObject[k];
           break;
         }
@@ -145,7 +146,7 @@ export class Report implements ReportInterface {
     if (await this.get_report_inputs(this.report_name)) {
       if (this.inputs !== undefined) {
         console.log(`DEBUG o (${typeof o}) -> ${JSON.stringify(o)}`);
-        this.merge_inputs(o as Record<string,string>);
+        this.merge_inputs(o as Record<string, string>);
       }
     } else {
       this.inputs = [];
@@ -207,11 +208,9 @@ export async function handleReports(
   options: { debug: boolean; htdocs: string },
 ): Promise<Response> {
   if (req.method === "GET") {
-    console.log(`DEBUG: calling handleReportList(req, ${options})`);
     return await handleReportsList(req, options);
   }
   if (req.method === "POST") {
-    console.log(`DEBUG: calling handleReportRequest(req, ${options})`);
     return await handleReportRequest(req, options);
   }
   const body = `<html>${req.method} not supported</html>`;
@@ -366,6 +365,7 @@ class Inputs implements InputsInterface {
 }
 
 interface RunnableInterface {
+  report_name: string;
   cmd: string;
   options: string[];
   basename: string;
@@ -373,52 +373,96 @@ interface RunnableInterface {
   content_type: string;
   final_status: string;
   link: string;
-  // List of inputs holds an ordered list of Input identifiers, type and required status
+  // List of inputs holds an ordered list of Input id, type, required and value
   inputs: Inputs[];
 }
 
 class Runnable implements RunnableInterface {
+  report_name: string;
   cmd: string;
   options: string[];
   basename: string;
-  // List of inputs holds a list of Input identifiers and their validator method names
-  inputs: Inputs[];
   append_datestamp: boolean;
   content_type: string;
   final_status: string;
   link: string;
+  // List of inputs holds a list of Input id, type, required and value
+  inputs: Inputs[];
 
   constructor(
+    report_name: string,
     cmd: string,
     basename: string,
     inputs: Inputs[],
     append_datestamp: boolean,
     content_type: string,
   ) {
+    this.report_name = report_name;
     this.cmd = cmd;
-    this.options = [];
-    this.final_status = "";
-    this.link = "";
     this.basename = basename;
     this.inputs = inputs;
     this.append_datestamp = append_datestamp;
     this.content_type = content_type;
+    this.options = [];
+    this.final_status = "";
+    this.link = "";
+  }
+
+  filenameTemplate(template: string, inputs: Inputs[]): string {
+    // Replace each placeholder in the template with the corresponding input value
+    return template.replace(/\{\{(\w+)\}\}/g, (_, key) => {
+      console.log(`DEBUG replacing ${key} with an input.value if found, otherwise key name wrapped in _`);
+      const input = inputs.find((input) => input.id === key);
+      return input ? input.value : `_${key}_`;
+    });
   }
 
   // Run executables the program implementing the report. It's calling out to the operating system to run it.
   // The report program is expected to return a link written to standard out on success. Otherwise return an
   // empty string or short error message using the protocol `error://`.
   async run(options: string[]): Promise<string> {
-    //FIXME: I need to validate the inputs if they are defined
-    console.log(`DEBUG what is held in options? ${JSON.stringify(options)}`);
     //FIXME: Need to execute command line program and capture result link or error message from standard out then hand it back.
-    console.log(`Running: ${this.cmd}`);
+    console.log(`Running: ${this.cmd}, inputs ${JSON.stringify(this.inputs)}`);
+    /*
     let txt: string;
     try {
       // FIXME: if inputs are defined then they need to be validated before forming the command sequence to execute
       txt = await $`${this.cmd}`.text();
     } catch (err) {
       txt = "error://" + err;
+    }
+    */
+    let txt: string;
+    try {
+      // Validate inputs if they exist
+      if (this.inputs && this.inputs.length > 0) {
+        // Example: Ensure inputs are strings and escape them if needed
+        const validatedInputs: string[] = this.inputs.map((input) => {
+          if (typeof input.value !== "string") {
+            throw new Error(`All command line parameters must be strings for ${this.report_name} -> ${JSON.stringify(input)} <-- ${JSON.stringify(this.inputs)}`);
+          }
+          return input.value;
+        });
+        console.log(`DEBUG validatedInputs -> ${validatedInputs}`);
+
+        // Construct the command with parameters
+        // Use Deno's Command API for safer parameter handling
+        const cmd = new Deno.Command(this.cmd, {
+          args: validatedInputs,
+        });
+        const { stdout, stderr } = await cmd.output();
+
+        if (stderr.length > 0) {
+          throw new Error(new TextDecoder().decode(stderr));
+        }
+
+        txt = new TextDecoder().decode(stdout);
+      } else {
+        // Fallback: execute without parameters
+        txt = await $`${this.cmd}`.text();
+      }
+    } catch (err: unknown) {
+      txt = "error://" + String(err);
     }
 
     // the URL would be returned by the runner when final desitantion is available.
@@ -427,8 +471,10 @@ class Runnable implements RunnableInterface {
     if (this.inputs.length > 0 && filename.indexOf("{{") > -1) {
       // We have a templated filename that needs to be updated.
       // Build a map between the inputs name and the options passed in report request.
-      console.log(`FIXME: need to render the template here`);
-      return "error://basename templates not implemented yet";
+      //console.log(`FIXME: need to render the template here`);
+      //return "error://basename templates not implemented yet";
+      filename = this.filenameTemplate(this.basename, this.inputs);
+      //console.log(`DEBUG filename set to" "${filename}" after filenameTemplate( "${this.basename}", "${JSON.stringify(this.inputs)}" )`;
     }
     // FIXME: See if I need at add a prefix
     let ext: string = ".txt";
@@ -497,6 +543,7 @@ class Runner implements RunnerInterface {
           continue;
         }
         this.report_map[k] = new Runnable(
+          k,
           v.cmd,
           v.basename,
           v.inputs,
@@ -506,6 +553,25 @@ class Runner implements RunnerInterface {
       }
     }
   }
+}
+
+function resolveCommandInputs(cmdInputs: Inputs[], reqInputs: Inputs[]) : Inputs[] {
+  let inputs: Inputs[] = [];
+  let empty: Inputs = new Inputs();
+  for (let i = 0; i < cmdInputs.length; i++) {
+    // Make sure these match then add it to the inputs array, if not add an empty input element
+    if ((cmdInputs[i].id === reqInputs[i].id) &&
+      (cmdInputs[i].type === reqInputs[i].type)) {
+        inputs.push(reqInputs[i]);
+    } else {
+        // Push an empty
+        empty.id = cmdInputs[i].id;
+        empty.type = cmdInputs[i].type;
+        empty.value = '';
+        inputs.push(empty);
+    }
+  }
+  return inputs;
 }
 
 // process_request is responsible updating report queue, assembling and making the request, and updating the report request object
@@ -518,6 +584,10 @@ async function process_request(
   // I want a copy of the object passed in so that response doesn't .
   request.status = "processing";
   request.updated = (new Date()).toJSON();
+  if (request.inputs !== undefined) {
+    cmd.inputs = resolveCommandInputs(cmd.inputs, request.inputs);
+    console.log(`DEBUG resolved command inputs -> ${JSON.stringify(cmd.inputs)}`);
+  }
   console.log(
     `INFO: updated request object to processing ${request.report_name}`,
   );
@@ -562,11 +632,16 @@ async function servicing_requests(runner: Runner): Promise<void> {
   let requests = await ds.query("next_request", [], {}) as Report[];
   if (requests.length > 0) {
     for (let request of requests) {
+      console.log(`DEBUG report request to process -> ${JSON.stringify(request)}`);
       let report_name = request.report_name;
       let runnable = runner.report_map[report_name];
       if (runnable !== undefined) {
         (report_name !== undefined && report_name !== "")
-          ? console.log(`INFO: Processing requests for ${report_name}`)
+          ? console.log(
+            `INFO: Processing requests for ${report_name} ${
+              JSON.stringify(request)
+            }`,
+          )
           : "";
         if (!await process_request(runnable, request.id, request)) {
           console.log(
@@ -584,6 +659,7 @@ async function servicing_requests(runner: Runner): Promise<void> {
         request.status = "aborting, unknown report";
         request.link = "";
         request.updated = (new Date()).toJSON();
+        console.log(`DEBUG aborting request ${JSON.stringify(request)}`);
         if (!await ds.update(request.id, request)) {
           console.log(
             `ERROR: updated of request error ${request} failed, aborting request runner`,

@@ -301,6 +301,7 @@ collections:
       next_request: |
         select json_object('id', src->'id', 'link', src->'link', 'content_type', src->'content_type',
           'report_name', src->'report_name', 'emails', src->'emails', 'status', src->'status',
+          'inputs', src->'inputs',
           'requested', src->'requested', 'updated', src->'updated') as src
         from reports
         where src->>'status' = 'requested'

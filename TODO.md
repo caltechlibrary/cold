@@ -10,7 +10,7 @@ bug
 - [X] The pulldown list needs to indicate if you're looking at all records or review queue
 - [X] Wild Card wording for all records by name needs clearer English (a search for all records with "*" has too many results, try adding some letters for the name and use the wild card).
 - [X] Downloaded CSV files for by name (all records and review queue) display wild card as SQL '%' instead of '*'
-
+- [ ] A report that writes directly to htdocs/rpt (collaborator report) should not standard out overwrite the generated file.
 
 next
 ----
