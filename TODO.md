@@ -15,6 +15,12 @@ bug
 next
 ----
 
+- [ ] Revisit the prototype collaborator report page, see if I can folder it back into the main reports page's web form
+- [ ] Revisit Tom's Python collaborator report to confirm to the COLD reports expectation OR allow reports to skip standard output
+  - [ ] Decided if it makes sense render to CSV instead of Excel
+  - [ ] Figure out how to fold that report directly into COLD's source code base rather than rely on relative directories to run it
+    - [ ] Look at reports page and decide if there is an easy way to swith form elements based on the selected reports, example I could at clpid, clgid and hide the ones not used
+- [ ] COLD needs a ROADMAP document to guide development as cold's needs seem ambigious
 - [X] Figure a useful way to snapshot the RDM Review queue tables and load into a dataset collection
   - [X] harvest submitted status requests
   - [X] harvest accepted status requests
@@ -33,25 +39,24 @@ next
 - [ ] When Caltech is checked active the ROR should populate with https://ror.org/05dxps055 (client side code)
 - [X] Add "internal_notes" property to people object, group object and issn (journals) object
 - [ ] Write reports
-  - [ ] Prototype a reports request system in COLD
-    - [ ] Report request and availability UI
-    - [ ] Report runner (run on data processing system not apps)
-  - [ ] need a report that finds Caltech People ID that do not math CaltechAUTHORS author_id
-  - [ ] need a report that identifies what advisor_id and committee_ids from thesis have no matching clpid
+  - [ ] Funders
+  - [X] Prototype a reports request system in COLD
+    - [X] Report request and availability UI
+    - [X] Report runner (run on data processing system not apps)
+  - [X] need a report that finds Caltech People ID that do not math CaltechAUTHORS author_id
+  - [X] need a report that identifies what advisor_id and committee_ids from thesis have no matching clpid
   - [X] People (should be written to feeds)
   - [X] Group  (should be written to feeds)
-  - [ ] RDM vocabulary files report (should be written to feeds)
-  - [ ] Funders
-- [ ] Write push of CSV files to datawork for inclusion in feeds (implemented but commented out in feeds fetch db script)
-- [ ] Add button to pull in current directory data
-- [ ] Write data flow document for cold people and group data indicating we're using public data from the directory as authorative and where publish the group and people data to in feeds
-- [ ] cold needs a ROADMAP document to guide development as cold's needs seem ambigious
+  - [X] RDM vocabulary files report (should be written to feeds)
+- [X] Write push of CSV files to datawork for inclusion in feeds (implemented but commented out in feeds fetch db script)
+- [X] Add button to pull in current directory data
+- [X] Write data flow document for cold people and group data indicating we're using public data from the directory as authorative and where publish the group and people data to in feeds
 - [ ] Implement client/server validation for objects and attributes in dataset
- - [ ] Implement validation in datasetd based on models
- - [ ] People
- - [ ] Groups
- - [ ] Funder
- - [ ] Vocabularies
+ - [ ] Implement validation in datasetd based on models, coming in dataset v3 or late minor release v2
+ - [X] People
+ - [X] Groups
+ - [X] Funder
+ - [x] Vocabularies
 
 
 Someday, maybe
