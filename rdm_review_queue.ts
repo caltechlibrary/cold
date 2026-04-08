@@ -237,7 +237,7 @@ export class RdmReviewQueueUI {
     }
     if (q_name === "by_name" && q === "*") {
       this.resultSection.innerText =
-        `Cannot do a wild card only search for ${q_name}, enter new search term and press 🔎`;
+        `Cannot complete search for all record by name using '${q}', too many results, enter revised search term and press 🔎`;
       return;
     }
     const selectedOption =

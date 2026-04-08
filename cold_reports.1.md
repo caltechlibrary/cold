@@ -1,4 +1,4 @@
-%cold_reports(1) user manual | 0.0.39 c87fdf6
+%cold_reports(1) user manual | 0.0.39 ea23956
 % R. S.Doiel
 % 2026-04-06
     

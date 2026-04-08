@@ -274,7 +274,7 @@ var RdmReviewQueueUI = class {
       return;
     }
     if (q_name === "by_name" && q === "*") {
-      this.resultSection.innerText = `Cannot do a wild card only search for ${q_name}, enter new search term and press \u{1F50E}`;
+      this.resultSection.innerText = `Cannot complete search for all record by name using '${q}', too many results, enter revised search term and press \u{1F50E}`;
       return;
     }
     const selectedOption = this.querySelect.options[this.querySelect.selectedIndex];
