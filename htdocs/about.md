@@ -32,7 +32,7 @@ maintainer:
     id: https://orcid.org/0000-0003-0900-6903
 
 repository_code: https://github.com/caltechlibrary/cold
-version: 0.0.39b
+version: 0.0.39c
 license_url: https://caltechlibrary.github.io/cold/LICENSE
 operating_system:
   - Linux
@@ -58,9 +58,9 @@ date_released: 2026-04-09
 About this software
 ===================
 
-## cold 0.0.39b
+## cold 0.0.39c
 
-- incorporates some production fixes, issues #99, #98, #97, #96 and #95
+- clean up text in the collaborator_report.html page we'll use for testing collaborator report integration
 
 ### Authors
 
