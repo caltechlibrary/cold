@@ -34,10 +34,10 @@ of why the request failed or return the status of “available” with a
 link to where the report can be viewed or downloaded.</p>
 <p>The system is deliberately simple. This is to keep it maintainable,
 easy for everyone to understand (developers and the people who request
-reports). Most importantly it needs to be easy to maintain. Report
-systems tend towards complexity so it is vital that the initial system
-be as simple as possible but still accomodate both quick reports and
-those which may take hours to complete.</p>
+reports). Importantly it needs to be easy to maintain. Report systems
+tend towards complexity so it is vital that the initial system be as
+simple as possible but still accomodate both quick reports and those
+which may take hours to complete.</p>
 <p>The report request process is integrated into the COLD UI. That UI
 lists the requests and includes a form to making a new request. When the
 report runner picks up a request several things need to happen.</p>
@@ -51,12 +51,13 @@ an error returned and the request processed close</li>
 <ul>
 <li>the report definition needs to be retrieved (probably from
 memory)</li>
-<li>the designated script/program needs to be run</li>
+<li>the designated script/program needs to be run (with parameters as of
+v0.0.40)</li>
 <li>the output of the script/program (stdout) needs to be read and
 streamed into a report document at the location specified by the report
 definition</li>
 <li>as the report executes output should be written to the web tree
-(e.g. htdocs/reports) and a link generated</li>
+(e.g. <code>htdocs/rpt</code>) and a link generated</li>
 <li>if their is a problem the report process should terminal and the
 request updated with the status of error and message</li>
 <li>if the report executes successfully the request record should be
@@ -80,120 +81,291 @@ G-Drive I think the runner should be responsible for the final place the
 report resides.</p>
 <p>My current view is a report request would look something like
 this.</p>
-<pre><code>{
-    &quot;id&quot;: &quot;6fec5fbf-5368-5d11-95c7-e2534752e3a5&quot;,
-    &quot;report_name&quot;: &quot;generate_people_csv&quot;,
-    &quot;email&quot;: &quot;rsdoiel@caltech.edu,tmorrell@caltech.edu&quot;,
-    &quot;requested&quot;: &quot;2024-10-25T19:37:44.169Z&quot;,
-    &quot;status&quot;: &quot;requested&quot;,
-    &quot;link&quot;: &quot;&quot;,
-    &quot;updated&quot;: &quot;2024-10-25T19:37:44.169Z&quot;
-}</code></pre>
-<p>The report definition should look more like this.</p>
-<pre><code>{
-    &quot;report_name&quot;: &quot;generate_people_csv&quot;,
-    &quot;cmd&quot;: &quot;./rpt_people_csv.bash&quot;,
-    &quot;write_url&quot;: &quot;s3://feeds.library.caltech.edu/people&quot;,
-    &quot;link_url&quot;: &quot;https://feeds.library.caltech.edu/people&quot;,
-    &quot;basename&quot;: &quot;people.csv&quot;,
-    &quot;content_type&quot;: &quot;text/csv&quot;,
-    &quot;append_timestamp&quot;: false,
-    &quot;options&quot;: []
-}</code></pre>
-<p>The runner would check the report requests, take the requested
-information and validated it against the predefined reports. It would
-run the report capturing the output then write it to “write_base”
-appending the basename, optional timestamp and an file extension
-associated with the mime type (e.g “.csv” for a “text/csv”). I’m
-thinking aboutsupporting two storage protocols. They would be “file://”,
-“s3://”.</p>
-<p>I considered writing directory to G-Drive since their is a practice
-of doing that manually. Google Drive API is problematic. Google changes
-API pretty frequently. Any time they make a change I will likely need to
-update or modify my code. Given my experience with the Google Sheet’s
-API I feel this is an unnecessary burden. In princple it maybe possible
-to mount Google Drive as a FUSE file system but even that looks pretty
-tedious to maintain over the long run.</p>
-<p>The NAS can be mounted easily to our data processing system. The
-staff requesting reports has access to that. For static websites like
-feeds, the S3 protocol is sufficient to easily distributed public
-oriented reports (e.g. people.csv, gorups.csv).</p>
-<p>The problem is the NAS might be mounted in different ways on each
-person’s computer. So a “file:///” link isn’t viable. While writing to
-“file//datawork.library.caltech.edu/Sites/feeds_v1.6/htdocs/people/people.csv”
-makes sense to the software it doen’t result in a clickable link for our
-end user. While writing to an S3 bucket can have a direct mapping to a
-URLs the NAS doesn’t fit that situation.</p>
-<p>Example
-“file://datawork.library.caltech.edu/Sites/feeds_v1.6/htdocs/people/people.csv”
-while eventually it’ll get to
-“https://feeds.library.caltech.edu/people/people.csv” that isn’t helpful
-when an end user wants a current, clickable link to see the report right
-at the point of creation.</p>
-<p>I’ve written a prototype in TypeScript compiled with Deno. Creating
-webservices that take advantage of concurrency is more convoluted in
-TypeScript (e.g. need to use service workers) than Go. The report runner
-server should run as a systemd service. It is easy to implement a
-sequencial report runner in TypeScript but since reports can sometimes
-take hours to complete this isn’t ideal. Taking advantage of concurrency
-in TypeScript means using service works. Given that case it makes more
-sense in writing the report runner in Go and taking advantage of Go’s
-maturity in concurrency and as a service platform.</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;id&quot;</span><span class="fu">:</span> <span class="st">&quot;6fec5fbf-5368-5d11-95c7-e2534752e3a5&quot;</span><span class="fu">,</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;report_name&quot;</span><span class="fu">:</span> <span class="st">&quot;run_collaborator_report&quot;</span><span class="fu">,</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;email&quot;</span><span class="fu">:</span> <span class="st">&quot;rsdoiel@caltech.edu,tmorrell@caltech.edu&quot;</span><span class="fu">,</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;requested&quot;</span><span class="fu">:</span> <span class="st">&quot;2024-10-25T19:37:44.169Z&quot;</span><span class="fu">,</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;status&quot;</span><span class="fu">:</span> <span class="st">&quot;requested&quot;</span><span class="fu">,</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;link&quot;</span><span class="fu">:</span> <span class="st">&quot;&quot;</span><span class="fu">,</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;updated&quot;</span><span class="fu">:</span> <span class="st">&quot;2024-10-25T19:37:44.169Z&quot;</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<p>The report definition could look more like this.</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">run_collaborator_report</span><span class="kw">:</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">cmd</span><span class="kw">:</span><span class="at"> ./run_collaborator_report.bash</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">inputs</span><span class="kw">:</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> </span><span class="fu">id</span><span class="kw">:</span><span class="at"> clpid</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">validate_with</span><span class="kw">:</span><span class="at"> is_clpid</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">required</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">basename</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;{{clpid}}_nsf_collaborator_report&quot;</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">append_datestamp</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">content_type</span><span class="kw">:</span><span class="at"> application/vnd.ms-excel</span></span></code></pre></div>
+<p>The runner checks <code>reports.ds</code> for report requests, takes
+the requested information and validates it against the predefined
+reports in <code>cold_reports.yaml</code>. It runs the report capturing
+the output. The output is streamed to
+<code>htdocs/rpt/{{report_name}}</code>. <code>{{report_name}}</code> is
+formed from the <code>basename</code>, <code>content_type</code> and
+<code>append_datestamp</code> fields in the report definition. The
+<code>content_type</code> sets the file extension used while the
+<code>basename</code> functions as a curly bracket template for the
+report name. In this example if the collaborator report is made and the
+<code>clpid</code> value was <code>Doiel-R-S</code>, then the
+<code>basename</code> would resolve to
+<code>Doiel-R-S_nsf_collaborator_report</code>, since the Excel format
+is expressed in the content type attribute the filename extension will
+be xlsx. Current implementation assumes we’re storing the report locally
+in the COLD directory website. This makes sense as the report contents
+remains protected by the same mechanisms as COLD itself.</p>
+<p>COLD and its report system are in production now. The report runner
+(cold_report) is a service that operates along side the COLD middleware
+(cold) and Dataset API (cold_api). These are controlled by the systemd
+services on the host Linux server. The middleware and access is
+controlled by Apache2+Shibboleth.</p>
 <h2 id="current-implementation">Current implementation</h2>
 <ul>
 <li>cold_reports runs a service monitoring the contents of reports.ds
 collection</li>
 <li>the reports that are authorized to run are defined in
 cold_reports.yaml</li>
-<li>the program that runs the report are currently Bash wrapping runable
-programs like,
+<li>the report excuting programs are mostly Bash scripts
 <ul>
+<li>Bash scripts may leverage other programs
+<ul>
+<li><code>dsquery</code></li>
 <li><code>bin/group_vocabulary</code></li>
 <li><code>bin/journal_vocabulary</code></li>
+<li><code>../collaborator_reports/authors_nsf_table4.py</code></li>
+</ul></li>
 </ul></li>
 <li>the Reports web UI is defined in the template,
 <code>views/report_list.hbs</code>
 <ul>
 <li>if adding a new report you need to update the template</li>
 <li>define the new report in cold_reports.yaml</li>
+<li>if the report includes parameters then you need to write a web form
+and add it to the <code>htdocs</code> directory</li>
 <li>the cold_reports service needs to be restarted</li>
 </ul></li>
 </ul>
-<h2 id="requested-updates-for-parameterized-reports">Requested updates
-for parameterized reports</h2>
-<p>Integrating the collaborator reports requires that the reports system
-can handle parameters that will be passed by the runner to the scripts
-the implement the reports. It is incredibly import to validate inputs
-before the runner hands them off the OS to be run. That requires
-modification to runner to include identifying any field identifiers
-expect, a validation method and whether or not the field is
-required.</p>
-<p>Parameterized reports should never accept free text. I think
-parameters used should be restricted to explicit identifiers held in a
-collection, e.g. clpid, orcid, clgid, ror. The identifiers can be
-checked to make sure they exist before queuing the report to be run.</p>
-<p>In the cold_report.ts I have added a new Interface called
-InputInterface this has three fields, identifier is the string holding
-the identifier name, validate_with holds a function name that will
-execute the validation server side, required is a boolean if true then
-report will be aborted if the input is not found in the request (not in
-the submitted form data).</p>
-<p>Here’s an example of the COLD reports definition of the collaborator
+<h3 id="implementation">Implementation</h3>
+<p>The reports system has a web UI that submits a request to the COLD
+middelware. The <code>browser_api.ts</code> contains the details for the
+middleware to prepare requests to the backend JSON API web service
+implemented via Dataset. The COLD middleware is responsible for getting
+the report request into the Dataset collection <code>reports.ds</code>.
+The COLD report runner checks <code>reports.ds</code> and fetches the
+next waiting request. It setups up to run the port updating the report
+object in <code>reports.ds</code> and executing the requested report
+defined in <code>cold_reports.yaml</code>.</p>
+<p>The scripts that run the reports usually leverage other programs (or
+Python scripts) to complete the request. They have full access to the
+COLD backend via <code>dsquery</code> as well as any other resource that
+can access programatically (example Python programs, curl, other
+cli).</p>
+<p>The definition of the report in <code>cold_reports.yaml</code>
+determines the reports name which is stored in <code>htdocs/rpt</code>
+and then available within the COLD Web UI.</p>
+<h2 id="parameterized-reports-april-2026">Parameterized reports, April
+2026</h2>
+<p>In April the collaborator reports was migrated from GitHub action
+process to COLD. Integrating the collaborator reports requires the
+reports system to support parameterized reports. The <code>clpid</code>
+is required to know which collaboorators to report on. What does the
+reports system need to do to safely hand off paremeters? The
+<code>cold_reports.yaml</code> definition needs to include a list of
+expected parameters including their type information. This is then used
+to vet the paremeters before envoking the program that generates the
+report content.</p>
+<h3 id="validation-approaches">Validation approaches</h3>
+<p>A good first step would be to provide built-in support to validate
+the inputs defined as HTML5 textarea, select and input elements. These
+are the types expected in the webform making the requests. Ideally
+validation is done each time a parameter is passed from one stage of
+processing to another.</p>
+<h3 id="use-case-collaborator-reports">Use Case: Collaborator
+Reports</h3>
+<p>The collaborator report interface has been implemented as a simple
+web page. A TypeScript clas defines form is injected into the report
+request page. The TypeScript is processed into JavaScript using Deno’s
+bundle ability. The allows for integration with other TypeScript classes
+like <code>client_api.ts</code> and could allow for inclusion with
+<code>metadatatools.ts</code> for identifier validation browser
+side.</p>
+<p>The TypeScript module, <code>cold.ts</code> (cold middleware), uses
+the exports from <code>browser_api.ts</code> to vet things inside the
+middleware before sending them onto the cold_api. The
+<code>cold_api</code> is a JSON API run by Dataset’s web service.
+Integration of parameterized reports involved enhancing
+<code>browser_api.ts</code> to include parameter handling and validation
+as wells as modifying the report runner defined in
+<code>cold_reports.ts</code>. The <code>reports.ds</code> collection
+serves as the communication mechanism between the COLD middleware and
+reports runner.</p>
+<p><code>cold_reports.ts</code> was enhanced to support the new
+<code>inputs</code> attribute in the report definition and template
+behavior of the revised <code>basename</code> attribute.</p>
+<h3 id="layers-of-defense">Layers of defense</h3>
+<p>We are defending three vectors of problems, user error, programmer
+error and mischief. User error can be addressed browser side and poses a
+lower risk. Mitigation efforts can be taken against a programming
+mistake up to calling the report executable. Programmers need to be
+resposible in implementing the reports (example if they write code that
+erases everything that’s on them, similar if it hands back privilleged
+informaiton that too is on them). Mischief should be addressed at each
+stage. COLD runs behind shibboleth which provides authentication, user
+id is used for authorization (access to cold, everyone has the same
+privilege once they have access). Validating the inputs again in the
+cold middleware is the next line of defense, similarly we can validate
+before calling the report executable.</p>
+<h3 id="validating-inputs">Validating inputs</h3>
+<p>There is limited developer time available to implement the
+parameterized reports (though this technique will be reused in the
+Thesis Management System which shares COLD’s architecture). I think
+there are could levels of validation that can be provided.</p>
+<ol type="1">
+<li>Valdiate based on HTML5 input element types (this aligns with what
+is being transmitted and could be built-in to the middleware and runner
+using a single TypeScript module)</li>
+<li>A hybrid, HTML5 input elements types plus text area and the
+identifier validation provided by metadata tools</li>
+<li>Custom validation methods (more complex but more refined, would let
+us target specific library data needs)</li>
+</ol>
+<p>The first two validation approaches are easy to implement quickly.
+Three is tricky and is not planned at this stage of development. Three’s
+big disadvantage is the it will make the reports system brittle. At the
+present their are clear lines of separation between scripts implementing
+reports, the report runner and the COLD middleware passing on requests
+to <code>reports.ds</code>.</p>
+<h3 id="the-problem-of-naming-reports">The problem of naming
+reports</h3>
+<p>Once you have parameterized reports that will be picked via the COLD
+website (rpt subdiectory) you need a predictable way to name the report.
+Originally all reports had preset names. The basename attribute in the
+report definition mapped directly to the basename used on the file
+system. The content type determined the file extension. Reports were
+written to <code>htdocs/rpt</code>. That is how the reports system in
+COLD worked through release 0.0.39. It worked remarkably well.</p>
+<p>With parameterized reports their needs to be a flexible but
+predictable naming convension. In COLD v0.0.40 this has been done by
+treating the <code>basename</code> not as a fixed filename but rather as
+a name template. By inclosing an input variable name in the double curly
+brackets it can be used as part of the rendered basename. While simple
+this enhances the flexibility of how reports are named. It gives us
+predictability when determining where to write output and what the link
+(URL) will be to retrieve the report when completed.</p>
+<p>That behavior in defined in the <code>Runnable</code> object class in
+<code>cold_reports.ts</code>. That is also where the reports configure
+before running. That includes a basename to apply to the executable
+report’s standard out before writing it to the reports directory and
+forming the link (URL) to point at the report. This works well for
+unparameterized reports. The reports get updated and replace previous
+versions. If the report definition includes the append datestamp option
+then the name will be formed with a datestamp to destinguish when the
+report was made. This breaks down with parameterized reports. In the
+collaborator report use case I need to have the report name reflect who
+(which clpid) the report is for, otherwise one collaborator reports with
+overwite each other.</p>
+<p>There are several points where the name is really important</p>
+<ol type="1">
+<li>What the basename of the report will be so a link can be
+calculated</li>
+<li>What link to display when the report has completed (or send in an
+email if email notifcation is requested)</li>
+<li>Where to write the report output of the report (assume the report
+executable’s standard holds the reports contents)</li>
+</ol>
+<p>The script generating the report content could easily take over
+duties of writing content to the <code>htdocs/rpt</code> directory. This
+would not require a significant change in the reports module. It is how
+we handle reports that are queue then run on separate machines. There
+still needs to be a linkage back into the reports queue object to
+indicate what the link to the report is.</p>
+<p>It is desirable to minimize the interactions between the report
+executable and the report runner as this presents the most flexibility
+in how report construction is implemented. The report executable should
+not know about the report runner. How then is the report name reflected
+in the reports queue object after completion?</p>
+<p>The approach being taken is to presume the report name is passed as
+all or part of a valiable used in the parameterized report. The
+configuration for the basename value defined in the cold_reports.yaml
+file is treated as a handlebars like template. Then the basename is
+formed by passing the <strong>validated</strong> parameters and a simple
+substitution can take place. This at makes the assumption that the
+parameters (which are strings at the point of validation) is non-empty.
+To enforce this the parameters that can be used as part of the filename
+must be a required field.</p>
+<p>Here’s an example of the YAML used to configure the collaborator
 report.</p>
 <div class="sourceCode" id="cb3"><pre
 class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">run_collaborator_report</span><span class="kw">:</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">cmd</span><span class="kw">:</span><span class="at"> ./run_collaborator_report.bash</span></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">inputs</span><span class="kw">:</span></span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> </span><span class="fu">id</span><span class="kw">:</span><span class="at"> clpid</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">validate_with</span><span class="kw">:</span><span class="at"> is_clpid</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">type</span><span class="kw">:</span><span class="at"> clpid</span></span>
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">required</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">basename</span><span class="kw">:</span><span class="at"> nsf_collaborator_report</span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">prefix_with</span><span class="kw">:</span><span class="at"> clpid</span></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">append_datestamp</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">content_type</span><span class="kw">:</span><span class="at"> application/vnd.ms-excel</span></span></code></pre></div>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">basename</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;{{clpid}}_nsf_collaborator_report&quot;</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">append_datestamp</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">content_type</span><span class="kw">:</span><span class="at"> application/vnd.ms-excel</span></span></code></pre></div>
+<p>This keeps the linkage between the report excetuable largely
+separate. The <code>clpid</code> value will be vetted by the browser, by
+the middleware and again by the report runner<a href="#fn1"
+class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>.
+The <code>clpid</code> is required so will be non-empty (or the report
+will be aborted). It should be safe to pass that value to the script
+<code>run_collaborator_report.bash</code>.</p>
+<p>Other than exit code and error messages (prefixed with
+<code>error://</code> in the output of
+<code>run_collaborator_report.bash</code>) the report interacts
+minimally with the report runner (the standard output can be used as the
+contents of the report and written to by the current formation of the
+basename attribute). The report configuration only sees the addition of
+the inputs attribute and the enhanced behavior of resolving the basename
+if the <code>{{</code> and <code>}}</code> are present.</p>
+<h2 id="notes">Notes</h2>
+<p>It is incredibly import to validate inputs before the runner hands
+them off to the OS to be run. My nightmare is a report is launched that
+then is hijack to compromise the operating system itself. The browser
+needs to vet, the middleware needs to vet, the report runner needs to
+vet and the code in the report executable should again vet the inputs in
+some way. No level in the chain of execution should assume things are
+safe!</p>
+<p>Parameterized reports should never accept free text. If the report is
+written in Bash then we can use the metadata tools module to build
+simple command line validator programs to vet inputs. You can also call
+out to a python script (example idutils package) or awk. If the report
+is implemented as a Python program then inputs can again be vetted
+there.</p>
+<p>In the cold_report.ts I have added a new Interface called
+InputsInterface this has three fields. <code>identifier</code> is the
+string holding the identifier name. <code>type</code> holds an HTML5
+input type or an identifier type defined in metadatatools. The first
+field indicates if this is a required parameter. If true the report
+request should be rejected if it is not provided. Any parameters passed
+without a definition should be rejected in the middleware. Any
+parameters passed without a definition should be discarded by the report
+runner. Only defined parameters are allowed to be processed.</p>
+<p>Here’s an example of the COLD reports definition of the collaborator
+report.</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">run_collaborator_report</span><span class="kw">:</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">cmd</span><span class="kw">:</span><span class="at"> ./run_collaborator_report.bash</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">inputs</span><span class="kw">:</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> </span><span class="fu">id</span><span class="kw">:</span><span class="at"> clpid</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">type</span><span class="kw">:</span><span class="at"> clpid</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">required</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> </span><span class="fu">id</span><span class="kw">:</span><span class="at"> file_prefix</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">type</span><span class="kw">:</span><span class="at"> text</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">required</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">basename</span><span class="kw">:</span><span class="at"> nsf_collaborator_report</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">append_datestamp</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">content_type</span><span class="kw">:</span><span class="at"> application/vnd.ms-excel</span></span></code></pre></div>
 <p>The inputs is used to validate any parameters passed into the reports
-queue by the report request handler. There are actually three times
-validation is important.</p>
+queue by the report request handler. There are four times validation is
+critically important.</p>
 <ol type="1">
 <li>In the Web UI to prevent a user to requesting a report without
 sufficient information (prevent the user from wasting their time)</li>
@@ -253,6 +425,15 @@ report service, report runner, the report itself. This increases the
 burden on the person writing parameterized reports. The report itself
 also needs to enforce sanitiy checking and gaurd against abuse. Security
 practice is best at all levels.</p>
+<section id="footnotes" class="footnotes footnotes-end-of-document"
+role="doc-endnotes">
+<hr />
+<ol>
+<li id="fn1"><p>Ideally again inside the Bash script
+./run_collaborator_report.bash and the Python script it runs.<a
+href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section>
 </section>
 <footer-global></footer-global>
 </body>

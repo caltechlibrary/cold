@@ -399,7 +399,10 @@ function extractClpidByName(
   for (const item of items) {
     const identifiers = item.person_or_org.identifiers || [];
     const clpidObj = identifiers.find((id) => id.scheme === "clpid");
-    if (clpidObj !== undefined && item.person_or_org.name !== undefined && re.test(item.person_or_org.name)) {
+    if (
+      clpidObj !== undefined && item.person_or_org.name !== undefined &&
+      re.test(item.person_or_org.name)
+    ) {
       clpidList.push(clpidObj.identifier);
     }
   }
@@ -420,7 +423,10 @@ function extractOrcidByName(
   for (const item of items) {
     const identifiers = item.person_or_org.identifiers || [];
     const orcidObj = identifiers.find((id) => id.scheme === "orcid");
-    if (orcidObj !== undefined && item.person_or_org.name !== undefined && re.test(item.person_or_org.name)) {
+    if (
+      orcidObj !== undefined && item.person_or_org.name !== undefined &&
+      re.test(item.person_or_org.name)
+    ) {
       orcidList.push(orcidObj.identifier);
     }
   }
@@ -561,8 +567,8 @@ function formatJsonAsCSV(q_name: string, q: string, items: Item[]): string {
     case "review_queue_by_clpid":
     case "by_orcid":
     case "review_queue_by_orcid":
-  	case "by_name":
-  	case "review_queue_by_name":
+    case "by_name":
+    case "review_queue_by_name":
       csvHeader =
         "Query,found clpid,found orcid,Tags,RDMID,Link,Status,Title,Publisher,Journal Title,Publication Date,Created Date,Submitted By,Caltech Groups";
       // Generate CSV content

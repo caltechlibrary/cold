@@ -31,9 +31,45 @@
 needed in the harvested content from RDM review queue</label></li>
 <li><label><input type="checkbox" checked="" />funders field is not
 needed in the harvested content from RDM review queue</label></li>
+<li><label><input type="checkbox" checked="" />The pulldown list needs
+to indicate if you’re looking at all records or review
+queue</label></li>
+<li><label><input type="checkbox" checked="" />Wild Card wording for all
+records by name needs clearer English (a search for all records with “*”
+has too many results, try adding some letters for the name and use the
+wild card).</label></li>
+<li><label><input type="checkbox" checked="" />Downloaded CSV files for
+by name (all records and review queue) display wild card as SQL ‘%’
+instead of ’*’</label></li>
+<li><label><input type="checkbox" checked="" />A report that writes
+directly to htdocs/rpt (collaborator report) should not standard out
+overwrite the generated file.</label></li>
 </ul>
 <h2 id="next">next</h2>
 <ul class="task-list">
+<li><label><input type="checkbox" />Revisit the prototype collaborator
+report page, see if I can folder it back into the main reports page’s
+web form</label>
+<ul class="task-list">
+<li><label><input type="checkbox" />Figure out how to fold that report
+directly into COLD’s source code base rather than rely on relative
+directories to run it</label>
+<ul class="task-list">
+<li><label><input type="checkbox" />Look at reports page and decide if
+there is an easy way to swith form elements based on the selected
+reports, example I could at clpid, clgid and hide the ones not
+used</label></li>
+</ul></li>
+</ul></li>
+<li><label><input type="checkbox" />COLD needs a ROADMAP document to
+guide development as cold’s needs seem ambigious</label></li>
+<li><label><input type="checkbox" checked="" />Revisit Tom’s Python
+collaborator report to confirm to the COLD reports expectation OR allow
+reports to skip standard output</label>
+<ul class="task-list">
+<li><label><input type="checkbox" checked="" />Decided if it makes sense
+render to CSV instead of Excel</label></li>
+</ul></li>
 <li><label><input type="checkbox" checked="" />Figure a useful way to
 snapshot the RDM Review queue tables and load into a dataset
 collection</label>
@@ -82,46 +118,45 @@ property to people object, group object and issn (journals)
 object</label></li>
 <li><label><input type="checkbox" />Write reports</label>
 <ul class="task-list">
-<li><label><input type="checkbox" />Prototype a reports request system
-in COLD</label>
+<li><label><input type="checkbox" />Funders</label></li>
+<li><label><input type="checkbox" checked="" />Prototype a reports
+request system in COLD</label>
 <ul class="task-list">
-<li><label><input type="checkbox" />Report request and availability
-UI</label></li>
-<li><label><input type="checkbox" />Report runner (run on data
-processing system not apps)</label></li>
+<li><label><input type="checkbox" checked="" />Report request and
+availability UI</label></li>
+<li><label><input type="checkbox" checked="" />Report runner (run on
+data processing system not apps)</label></li>
 </ul></li>
-<li><label><input type="checkbox" />need a report that finds Caltech
-People ID that do not math CaltechAUTHORS author_id</label></li>
-<li><label><input type="checkbox" />need a report that identifies what
-advisor_id and committee_ids from thesis have no matching
-clpid</label></li>
+<li><label><input type="checkbox" checked="" />need a report that finds
+Caltech People ID that do not math CaltechAUTHORS author_id</label></li>
+<li><label><input type="checkbox" checked="" />need a report that
+identifies what advisor_id and committee_ids from thesis have no
+matching clpid</label></li>
 <li><label><input type="checkbox" checked="" />People (should be written
 to feeds)</label></li>
 <li><label><input type="checkbox" checked="" />Group (should be written
 to feeds)</label></li>
-<li><label><input type="checkbox" />RDM vocabulary files report (should
-be written to feeds)</label></li>
-<li><label><input type="checkbox" />Funders</label></li>
+<li><label><input type="checkbox" checked="" />RDM vocabulary files
+report (should be written to feeds)</label></li>
 </ul></li>
-<li><label><input type="checkbox" />Write push of CSV files to datawork
-for inclusion in feeds (implemented but commented out in feeds fetch db
-script)</label></li>
-<li><label><input type="checkbox" />Add button to pull in current
-directory data</label></li>
-<li><label><input type="checkbox" />Write data flow document for cold
-people and group data indicating we’re using public data from the
-directory as authorative and where publish the group and people data to
-in feeds</label></li>
-<li><label><input type="checkbox" />cold needs a ROADMAP document to
-guide development as cold’s needs seem ambigious</label></li>
+<li><label><input type="checkbox" checked="" />Write push of CSV files
+to datawork for inclusion in feeds (implemented but commented out in
+feeds fetch db script)</label></li>
+<li><label><input type="checkbox" checked="" />Add button to pull in
+current directory data</label></li>
+<li><label><input type="checkbox" checked="" />Write data flow document
+for cold people and group data indicating we’re using public data from
+the directory as authorative and where publish the group and people data
+to in feeds</label></li>
 <li><label><input type="checkbox" />Implement client/server validation
 for objects and attributes in dataset</label></li>
 <li><label><input type="checkbox" />Implement validation in datasetd
-based on models</label></li>
-<li><label><input type="checkbox" />People</label></li>
-<li><label><input type="checkbox" />Groups</label></li>
-<li><label><input type="checkbox" />Funder</label></li>
-<li><label><input type="checkbox" />Vocabularies</label></li>
+based on models, coming in dataset v3 or late minor release
+v2</label></li>
+<li><label><input type="checkbox" checked="" />People</label></li>
+<li><label><input type="checkbox" checked="" />Groups</label></li>
+<li><label><input type="checkbox" checked="" />Funder</label></li>
+<li><label><input type="checkbox" checked="" />Vocabularies</label></li>
 </ul>
 <h2 id="someday-maybe">Someday, maybe</h2>
 <ul class="task-list">
