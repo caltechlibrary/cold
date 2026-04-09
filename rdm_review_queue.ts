@@ -345,7 +345,7 @@ interface Item {
   submitted_by: string;
 }
 
-function extractOrcidForClpid(
+function extractOrcidByClpid(
   items: Array<{
     person_or_org: {
       identifiers?: Array<{ identifier: string; scheme: string }>;
@@ -365,7 +365,7 @@ function extractOrcidForClpid(
   return "";
 }
 
-function extractClpidForOrcid(
+function extractClpidByOrcid(
   items: Array<{
     person_or_org: {
       identifiers?: Array<{ identifier: string; scheme: string }>;
@@ -383,6 +383,48 @@ function extractClpidForOrcid(
     }
   }
   return "";
+}
+
+function extractClpidByName(
+  items: Array<{
+    person_or_org: {
+      name?: string;
+      identifiers?: Array<{ identifier: string; scheme: string }>;
+    };
+  }>,
+  q_name: string,
+): string {
+  const clpidList: string[] = [];
+  const re: RegExp = new RegExp(q_name);
+  for (const item of items) {
+    const identifiers = item.person_or_org.identifiers || [];
+    const clpidObj = identifiers.find((id) => id.scheme === "clpid");
+    if (clpidObj !== undefined && item.person_or_org.name !== undefined && re.test(item.person_or_org.name)) {
+      clpidList.push(clpidObj.identifier);
+    }
+  }
+  return clpidList.join(", ");
+}
+
+function extractOrcidByName(
+  items: Array<{
+    person_or_org: {
+      name?: string;
+      identifiers?: Array<{ identifier: string; scheme: string }>;
+    };
+  }>,
+  q_name: string,
+): string {
+  const orcidList: string[] = [];
+  const re: RegExp = new RegExp(q_name);
+  for (const item of items) {
+    const identifiers = item.person_or_org.identifiers || [];
+    const orcidObj = identifiers.find((id) => id.scheme === "orcid");
+    if (orcidObj !== undefined && item.person_or_org.name !== undefined && re.test(item.person_or_org.name)) {
+      orcidList.push(orcidObj.identifier);
+    }
+  }
+  return orcidList.join(", ");
 }
 
 function extractAndSortMentions(
@@ -426,14 +468,23 @@ function normalizeItem(q_name: string, q: string, item: Item) {
       item.query_clpid = q;
       item.query_orcid = (item.creators === undefined)
         ? ""
-        : extractOrcidForClpid(item.creators, q);
+        : extractOrcidByClpid(item.creators, q);
       break;
     case "by_orcid":
     case "review_queue_by_orcid":
-      item.query_orcid = q;
       item.query_clpid = (item.creators === undefined)
         ? ""
-        : extractClpidForOrcid(item.creators, q);
+        : extractClpidByOrcid(item.creators, q);
+      item.query_orcid = q;
+      break;
+    case "by_name":
+    case "review_queue_by_name":
+      item.query_clpid = (item.creators === undefined)
+        ? ""
+        : extractClpidByName(item.creators, q);
+      item.query_orcid = (item.creators === undefined)
+        ? ""
+        : extractOrcidByName(item.creators, q);
       break;
     default:
       item.query_clpid = "";
@@ -500,17 +551,24 @@ function formatJsonAsCSV(q_name: string, q: string, items: Item[]): string {
   let csvHeader: string = "";
   let csvRows: string = "";
 
+  let q_normal: string = q;
+  if (q.indexOf("%") > -1) {
+    q_normal = q.replace(/%/g, "*");
+  }
+
   switch (q_name) {
     case "by_clpid":
     case "review_queue_by_clpid":
     case "by_orcid":
     case "review_queue_by_orcid":
+  	case "by_name":
+  	case "review_queue_by_name":
       csvHeader =
         "Query,found clpid,found orcid,Tags,RDMID,Link,Status,Title,Publisher,Journal Title,Publication Date,Created Date,Submitted By,Caltech Groups";
       // Generate CSV content
       csvRows = items.map((item) => {
-        normalizeItem(q_name, q, item);
-        return `"${q}","${item.query_clpid}","${item.query_orcid}","${item.tags}","${item.rdmid}","${
+        normalizeItem(q_name, q_normal, item);
+        return `"${q_normal}","${item.query_clpid}","${item.query_orcid}","${item.tags}","${item.rdmid}","${
           item.link.replace(/"/g, '""')
         }","${item.status}","${item.title.replace(/"/g, '""')}","${
           item.publisher.replace(/"/g, '""')
@@ -525,13 +583,9 @@ function formatJsonAsCSV(q_name: string, q: string, items: Item[]): string {
       csvHeader =
         "Query,Tags,RDMID,Link,Status,Title,Publisher,Journal Title,Publication Date,Created Date,Submitted By,Caltech Groups";
       // convert q wild card back from SQL '%' to '*'
-      let q_normal: string = q;
-      if (q.indexOf("%") > -1) {
-        q_normal = q.replace(/%/g, "*");
-      }
       // Generate CSV content
       csvRows = items.map((item) => {
-        normalizeItem(q_name, q, item);
+        normalizeItem(q_name, q_normal, item);
         return `"${q_normal}","${item.tags}","${item.rdmid}","${
           item.link.replace(/"/g, '""')
         }","${item.status}","${item.title.replace(/"/g, '""')}","${

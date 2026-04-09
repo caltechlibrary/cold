@@ -335,7 +335,7 @@ var RdmReviewQueueUI = class {
     return await response.json();
   }
 };
-function extractOrcidForClpid(items, targetClpid) {
+function extractOrcidByClpid(items, targetClpid) {
   for (const item of items) {
     const identifiers = item.person_or_org.identifiers || [];
     const clpidObj = identifiers.find((id) => id.scheme === "clpid");
@@ -346,7 +346,7 @@ function extractOrcidForClpid(items, targetClpid) {
   }
   return "";
 }
-function extractClpidForOrcid(items, targetOrcid) {
+function extractClpidByOrcid(items, targetOrcid) {
   for (const item of items) {
     const identifiers = item.person_or_org.identifiers || [];
     const orcidObj = identifiers.find((id) => id.scheme === "orcid");
@@ -356,6 +356,33 @@ function extractClpidForOrcid(items, targetOrcid) {
     }
   }
   return "";
+}
+function extractClpidByName(items, q_name) {
+  console.log(`DEBUG q_name: ${q_name}, items -> ${JSON.stringify(items, null, 2)}`);
+  const clpidList = [];
+  const re = new RegExp(q_name);
+  for (const item of items) {
+    const identifiers = item.person_or_org.identifiers || [];
+    const clpidObj = identifiers.find((id) => id.scheme === "clpid");
+    if (clpidObj !== void 0 && item.person_or_org.name !== void 0 && re.test(item.person_or_org.name)) {
+      console.log(`DEBUG found ${clpidObj} using ${q_name}`);
+      clpidList.push(clpidObj.identifier);
+    }
+  }
+  return clpidList.join(", ");
+}
+function extractOrcidByName(items, q_name) {
+  const orcidList = [];
+  const re = new RegExp(q_name);
+  for (const item of items) {
+    const identifiers = item.person_or_org.identifiers || [];
+    const orcidObj = identifiers.find((id) => id.scheme === "orcid");
+    if (orcidObj !== void 0 && item.person_or_org.name !== void 0 && re.test(item.person_or_org.name)) {
+      console.log(`DEBUG found ${orcidObj} using ${q_name}`);
+      orcidList.push(orcidObj.identifier);
+    }
+  }
+  return orcidList.join(", ");
 }
 function extractAndSortMentions(comments) {
   if (!comments) {
@@ -381,12 +408,18 @@ function normalizeItem(q_name, q, item) {
     case "by_clpid":
     case "review_queue_by_clpid":
       item.query_clpid = q;
-      item.query_orcid = item.creators === void 0 ? "" : extractOrcidForClpid(item.creators, q);
+      item.query_orcid = item.creators === void 0 ? "" : extractOrcidByClpid(item.creators, q);
       break;
     case "by_orcid":
     case "review_queue_by_orcid":
+      item.query_clpid = item.creators === void 0 ? "" : extractClpidByOrcid(item.creators, q);
       item.query_orcid = q;
-      item.query_clpid = item.creators === void 0 ? "" : extractClpidForOrcid(item.creators, q);
+      break;
+    case "by_name":
+    case "review_queue_by_name":
+      const q_name1 = q.replace(/%/g, "*");
+      item.query_clpid = item.creators === void 0 ? "" : extractClpidByName(item.creators, q_name1);
+      item.query_orcid = item.creators === void 0 ? "" : extractOrcidByName(item.creators, q_name1);
       break;
     default:
       item.query_clpid = "";
@@ -450,6 +483,8 @@ function formatJsonAsCSV(q_name, q, items) {
     case "review_queue_by_clpid":
     case "by_orcid":
     case "review_queue_by_orcid":
+    case "by_name":
+    case "review_queue_by_name":
       csvHeader = "Query,found clpid,found orcid,Tags,RDMID,Link,Status,Title,Publisher,Journal Title,Publication Date,Created Date,Submitted By,Caltech Groups";
       csvRows = items.map((item) => {
         normalizeItem(q_name, q, item);
