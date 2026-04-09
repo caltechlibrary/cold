@@ -17,6 +17,7 @@
 - [thesis_option_vocabulary](thesis_option_vocabulary.1.md) (man page)
 - [group_vocabulary](group_vocabulary.1.md) (man page)
 - [people_vocabulary](people_vocabulary.1.md) (man page)
+- [generate_collaborator_rpt](generate_collaborator_rpt.1.md) (man page)
 - [ROR Integration](ror_integration.md)
     - [ror_import](ror_import.1.md) (man page)
 - [cold_api_test](cold_api_test.1.md) (man page)
@@ -24,4 +25,3 @@
 - [presentations](presentations/presentation1.md)
 - [changing keys and identifier](changing_keys_and_identifiers.md)
 - [RDM Review Queue integration](rdm_review_queue_integration.md)
-

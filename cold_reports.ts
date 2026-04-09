@@ -411,7 +411,9 @@ class Runnable implements RunnableInterface {
   filenameTemplate(template: string, inputs: Inputs[]): string {
     // Replace each placeholder in the template with the corresponding input value
     return template.replace(/\{\{(\w+)\}\}/g, (_, key) => {
-      console.log(`DEBUG replacing ${key} with an input.value if found, otherwise key name wrapped in _`);
+      console.log(
+        `DEBUG replacing ${key} with an input.value if found, otherwise key name wrapped in _`,
+      );
       const input = inputs.find((input) => input.id === key);
       return input ? input.value : `_${key}_`;
     });
@@ -439,7 +441,11 @@ class Runnable implements RunnableInterface {
         // Example: Ensure inputs are strings and escape them if needed
         const validatedInputs: string[] = this.inputs.map((input) => {
           if (typeof input.value !== "string") {
-            throw new Error(`All command line parameters must be strings for ${this.report_name} -> ${JSON.stringify(input)} <-- ${JSON.stringify(this.inputs)}`);
+            throw new Error(
+              `All command line parameters must be strings for ${this.report_name} -> ${
+                JSON.stringify(input)
+              } <-- ${JSON.stringify(this.inputs)}`,
+            );
           }
           return input.value;
         });
@@ -555,20 +561,25 @@ class Runner implements RunnerInterface {
   }
 }
 
-function resolveCommandInputs(cmdInputs: Inputs[], reqInputs: Inputs[]) : Inputs[] {
+function resolveCommandInputs(
+  cmdInputs: Inputs[],
+  reqInputs: Inputs[],
+): Inputs[] {
   let inputs: Inputs[] = [];
   let empty: Inputs = new Inputs();
   for (let i = 0; i < cmdInputs.length; i++) {
     // Make sure these match then add it to the inputs array, if not add an empty input element
-    if ((cmdInputs[i].id === reqInputs[i].id) &&
-      (cmdInputs[i].type === reqInputs[i].type)) {
-        inputs.push(reqInputs[i]);
+    if (
+      (cmdInputs[i].id === reqInputs[i].id) &&
+      (cmdInputs[i].type === reqInputs[i].type)
+    ) {
+      inputs.push(reqInputs[i]);
     } else {
-        // Push an empty
-        empty.id = cmdInputs[i].id;
-        empty.type = cmdInputs[i].type;
-        empty.value = '';
-        inputs.push(empty);
+      // Push an empty
+      empty.id = cmdInputs[i].id;
+      empty.type = cmdInputs[i].type;
+      empty.value = "";
+      inputs.push(empty);
     }
   }
   return inputs;
@@ -586,7 +597,9 @@ async function process_request(
   request.updated = (new Date()).toJSON();
   if (request.inputs !== undefined) {
     cmd.inputs = resolveCommandInputs(cmd.inputs, request.inputs);
-    console.log(`DEBUG resolved command inputs -> ${JSON.stringify(cmd.inputs)}`);
+    console.log(
+      `DEBUG resolved command inputs -> ${JSON.stringify(cmd.inputs)}`,
+    );
   }
   console.log(
     `INFO: updated request object to processing ${request.report_name}`,
@@ -632,7 +645,9 @@ async function servicing_requests(runner: Runner): Promise<void> {
   let requests = await ds.query("next_request", [], {}) as Report[];
   if (requests.length > 0) {
     for (let request of requests) {
-      console.log(`DEBUG report request to process -> ${JSON.stringify(request)}`);
+      console.log(
+        `DEBUG report request to process -> ${JSON.stringify(request)}`,
+      );
       let report_name = request.report_name;
       let runnable = runner.report_map[report_name];
       if (runnable !== undefined) {

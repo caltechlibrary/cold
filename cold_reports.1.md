@@ -1,17 +1,17 @@
-%cold_reports(1) user manual | 0.0.39 ea23956
+%cold_reports(1) user manual | 0.0.39 98233d0
 % R. S.Doiel
 % 2026-04-06
-    
+
 # NAME
-    
+
 cold_reports
-    
+
 # SYNOPSIS
-    
+
 cold_reports [OPTIONS] [REPORTS_YAML]
 
 # DESCRIPTION
-    
+
 cold_reports processes the report request queue. cold_reports is expected to validate
 the report request, launch the report. The report is responsible to writing it's output
 to standard out which is read by the cold_reports. cold_reports then renders the report
@@ -27,10 +27,10 @@ Two example reports are provided in the COLD repository. Both are written in Bas
 require that dataset's dsquery program are available.  The provided report examples
 are "run_people_csv.bash" and "run_groups_csv.bash".
 
-Reports can be written in any language supported by the host system or can be 
+Reports can be written in any language supported by the host system or can be
 compiled programs. The primary requirement is that they write their results to standard
 out so that the report runner can manage making the reports available via the COLD web app.
-    
+
 cold_reports is designed as daemon suitable to run under systemd or other service management
 system.  Logging is written to standard output. Included in the COLD repository is an example
 service file to use when deploying cold_reports.

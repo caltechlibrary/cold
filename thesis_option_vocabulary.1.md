@@ -1,15 +1,15 @@
-%thesis_option_vocabulary(1) user manual | 0.0.39  ea23956
+%thesis_option_vocabulary(1) user manual | 0.0.39  98233d0
 % R. S.Doiel
 % 2026-04-06
 
 # NAME
-    
+
 thesis_option_vocabulary
-    
+
 # SYNOPSIS
-    
+
 thesis_option_vocabulary [OPTIONS]
-    
+
 # DESCRIPTION
 
 thesis_option_vocabulary generates an RDM Thesis Option Vocabulary. It based on

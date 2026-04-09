@@ -76,7 +76,7 @@ export function ColdReadWriteHandler(
     return handleDOIPrefix(req, options);
   }
   if (pathname.startsWith("/reports")) {
-    console.log(`DEBUG calling handleReports(req, ${options})`)
+    console.log(`DEBUG calling handleReports(req, ${options})`);
     return handleReports(req, options);
   }
   if (pathname.startsWith("/directory_api")) {

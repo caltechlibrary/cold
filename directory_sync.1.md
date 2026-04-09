@@ -1,25 +1,25 @@
-%directory_sync(1) user manual | 0.0.39  ea23956
+%directory_sync(1) user manual | 0.0.39  98233d0
 % R. S.Doiel
 % 2026-04-06
 
 # NAME
-    
+
 directory_sync
-    
+
 # SYNOPSIS
-    
+
 directory_sync [OPTIONS]
-    
+
 # DESCRIPTION
-    
+
 directory_sync synchronizes the content between Caltech Directory and CaltechPEOPLE.
 It uses the COLD Admin API as well as the Caltech Directory website content as a
 data source.
-    
+
 Assuming COLD Admin is running on it's standard ports no configuration is needed.
-    
+
 directory_sync is suitable to run from a cronjob on the same machine which hosts COLD.
-    
+
 # OPTIONS
 
 help

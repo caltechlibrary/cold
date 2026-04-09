@@ -5,7 +5,7 @@ PROJECT = cold
 
 PACKAGE =  $(shell ls -1 *.ts | grep -v 'version.ts')
 
-PROGRAMS = cold cold_reports directory_sync journal_vocabulary group_vocabulary people_vocabulary division_people thesis_option_vocabulary ror_import cold_api_test
+PROGRAMS = cold cold_reports directory_sync journal_vocabulary group_vocabulary people_vocabulary division_people thesis_option_vocabulary ror_import cold_api_test generate_collaborator_rpt
 
 TS_MODS = cold.ts cold_reports.ts directory_sync.ts journal_vocabulary.ts group_vocabulary.ts people_vocabulary.ts thesis_option_vocabulary.ts ror_import.ts cold_api_test.ts
 
@@ -56,6 +56,7 @@ compile: check $(TS_MODS)
 	bin/thesis_option_vocabulary$(EXT) --help >thesis_option_vocabulary.1.md
 	bin/journal_vocabulary$(EXT) --help >journal_vocabulary.1.md
 	bin/division_people$(EXT) --help >division_people.1.md
+	bin/generate_collaborator_rpt$(EXT) --help >generate_collaborator_rpt.1.md
 
 check: $(TS_MODS)
 	deno task check

@@ -3,7 +3,6 @@
  * That in turn wraps the datasetd JSON API via ts_dataset.ts.
  */
 
-
 /**
  * ClientAPI wraps the browser facing web service and handles retrieving information about peoples, groups, etc.
  */
@@ -16,13 +15,16 @@ export class ClientAPI {
 
   joinUrlPath(baseUrl: string | URL, path: string): string {
     // Convert baseUrl to a URL object if it's a string
-    const url = typeof baseUrl === 'string' ? new URL(baseUrl) : baseUrl;
+    const url = typeof baseUrl === "string" ? new URL(baseUrl) : baseUrl;
 
     // Remove leading slashes from the path to avoid double slashes
-    const normalizedPath = path.replace(/^\/+/, '');
+    const normalizedPath = path.replace(/^\/+/, "");
 
     // Combine the base URL's pathname with the normalized path
-    const combinedPath = `${url.pathname}/${normalizedPath}`.replace(/\/\/+/g, '/');
+    const combinedPath = `${url.pathname}/${normalizedPath}`.replace(
+      /\/\/+/g,
+      "/",
+    );
 
     // Construct the new URL
     const newUrl = new URL(url.origin + combinedPath);
@@ -35,7 +37,10 @@ export class ClientAPI {
     query_name: string,
     params?: URLSearchParams,
   ): Promise<string[]> {
-    const base_url = this.joinUrlPath(this.baseUrl, `/api/${c_name}/${query_name}`);
+    const base_url = this.joinUrlPath(
+      this.baseUrl,
+      `/api/${c_name}/${query_name}`,
+    );
     let uri: string = base_url;
     let resp: Response;
     if (params !== undefined) {
@@ -69,7 +74,10 @@ export class ClientAPI {
     query_name: string,
     params?: URLSearchParams,
   ): Promise<{ [key: string]: any }[]> {
-    const base_url = this.joinUrlPath(this.baseUrl, `/api/${c_name}/${query_name}`);
+    const base_url = this.joinUrlPath(
+      this.baseUrl,
+      `/api/${c_name}/${query_name}`,
+    );
     let uri: string = base_url;
     let resp: Response;
     if (params !== undefined) {

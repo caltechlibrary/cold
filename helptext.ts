@@ -75,17 +75,17 @@ export const coldReportsHelpText =
   `%{app_name}(1) user manual | {version} {release_hash}
 % R. S.Doiel
 % {release_date}
-    
+
 # NAME
-    
+
 {app_name}
-    
+
 # SYNOPSIS
-    
+
 {app_name} [OPTIONS] [REPORTS_YAML]
 
 # DESCRIPTION
-    
+
 {app_name} processes the report request queue. {app_name} is expected to validate
 the report request, launch the report. The report is responsible to writing it's output
 to standard out which is read by the {app_name}. {app_name} then renders the report
@@ -101,10 +101,10 @@ Two example reports are provided in the COLD repository. Both are written in Bas
 require that dataset's dsquery program are available.  The provided report examples
 are "run_people_csv.bash" and "run_groups_csv.bash".
 
-Reports can be written in any language supported by the host system or can be 
+Reports can be written in any language supported by the host system or can be
 compiled programs. The primary requirement is that they write their results to standard
 out so that the report runner can manage making the reports available via the COLD web app.
-    
+
 {app_name} is designed as daemon suitable to run under systemd or other service management
 system.  Logging is written to standard output. Included in the COLD repository is an example
 service file to use when deploying {app_name}.
@@ -142,23 +142,23 @@ export const directorySyncHelpText =
 % {release_date}
 
 # NAME
-    
+
 {app_name}
-    
+
 # SYNOPSIS
-    
+
 {app_name} [OPTIONS]
-    
+
 # DESCRIPTION
-    
+
 {app_name} synchronizes the content between Caltech Directory and CaltechPEOPLE.
 It uses the COLD Admin API as well as the Caltech Directory website content as a
 data source.
-    
+
 Assuming COLD Admin is running on it's standard ports no configuration is needed.
-    
+
 {app_name} is suitable to run from a cronjob on the same machine which hosts COLD.
-    
+
 # OPTIONS
 
 help
@@ -197,13 +197,13 @@ export const journalVocabularyHelpText =
 % {release_date}
 
 # NAME
-    
+
 {app_name}
-    
+
 # SYNOPSIS
-    
+
 {app_name} [OPTIONS]
-    
+
 # DESCRIPTION
 
 {app_name} generates an RDM Vocabulary for Journals based on
@@ -242,13 +242,13 @@ export const thesisOptionVocabularyHelpText =
 % {release_date}
 
 # NAME
-    
+
 {app_name}
-    
+
 # SYNOPSIS
-    
+
 {app_name} [OPTIONS]
-    
+
 # DESCRIPTION
 
 {app_name} generates an RDM Thesis Option Vocabulary. It based on
@@ -287,20 +287,20 @@ export const groupVocabularyHelpText =
 % {release_date}
 
 # NAME
-    
+
 {app_name}
-    
+
 # SYNOPSIS
-    
+
 {app_name} [OPTIONS]
-    
+
 # DESCRIPTION
 
 {app_name} generates an RDM Vocabulary for Groups based on
 the dataset collection called "groups.ds".
 The dataset collection must be in the same directory where you
 run {app_name}.  It must have the "group_vocabulary" query defined
-in the "cold_api.yaml" file and the "cold_api" service running. 
+in the "cold_api.yaml" file and the "cold_api" service running.
 If all goes well {app_name} should exist with a zero status code.
 
 # OPTION
@@ -331,20 +331,20 @@ export const peopleVocabularyHelpText =
 % {release_date}
 
 # NAME
-    
+
 {app_name}
-    
+
 # SYNOPSIS
-    
+
 {app_name} [OPTIONS]
-    
+
 # DESCRIPTION
 
 {app_name} generates an RDM Vocabulary for People based on
 the dataset collection called "people.ds".
 The dataset collection must be in the same directory where you
 run {app_name}.  It must have the "people_vocabulary" query defined
-in the "cold_api.yaml" file and the "cold_api" service running. 
+in the "cold_api.yaml" file and the "cold_api" service running.
 If all goes well {app_name} should exist with a zero status code.
 
 # OPTION
@@ -445,7 +445,7 @@ export const rorImportHelpText =
 # DESCRIPTION
 
 {app_name} reads the contents of ROR_DUMP_ZIP_FILE and updates the
-ror.ds dataset collection. 
+ror.ds dataset collection.
 
 The ror.ds dataset collection must already exist.
 
@@ -534,5 +534,44 @@ Even though we are search for one value the parameters are each provided.
 
 ~~~
 {app_name} ror.ds post query/lookup_by_name_or_acronym/n/a '{"n":"NSF","a":"NSF"}'
+
+`;
+
+export const generateCollaboratorReportHelpText =
+  `%{app_name}(1) user manual | {version} {release_hash}
+% R. S.Doiel
+% {release_date}
+
+# NAME
+
+{app_name}
+
+# SYNOPSIS
+
+{app_name} CLPID [--record_id]
+
+# DESCRIPTION
+
+Given a CLPID generate a collaborator report as a CSV file suitable for NSF.
+
+# OPTION
+
+-h, --help
+: display help
+
+-l, --license
+: display license
+
+-v, --version
+: display version
+
+--record_id
+: Include the RDM record identifier for comparison
+
+# EXAMPLE
+
+~~~shell
+generate_collaborator_rpt Newman-D-K --record_id >Diane_Newman_Collaborators.csv
+~~~
 
 `;

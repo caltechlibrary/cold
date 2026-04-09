@@ -219,12 +219,12 @@ export class RdmReviewQueueUI {
   private genDownloadName(q_name: string, q: string, ext: string): string {
     switch (q_name) {
       case "by_name":
-        if (q === '*') {
+        if (q === "*") {
           return `all_records_${q_name}${ext}`;
         }
         return `${stripNonAlphanumericUTF8(q)}_${q_name}${ext}`;
       case "review_queue_by_name":
-        if (q === '*') {
+        if (q === "*") {
           return `all_{q_name}${ext}`;
         }
         return `${stripNonAlphanumericUTF8(q)}_${q_name}${ext}`;
@@ -499,7 +499,7 @@ function formatJsonAsHtmlTable(
 function formatJsonAsCSV(q_name: string, q: string, items: Item[]): string {
   let csvHeader: string = "";
   let csvRows: string = "";
-  
+
   switch (q_name) {
     case "by_clpid":
     case "review_queue_by_clpid":
@@ -525,9 +525,9 @@ function formatJsonAsCSV(q_name: string, q: string, items: Item[]): string {
       csvHeader =
         "Query,Tags,RDMID,Link,Status,Title,Publisher,Journal Title,Publication Date,Created Date,Submitted By,Caltech Groups";
       // convert q wild card back from SQL '%' to '*'
-      let q_normal:string = q;
-      if (q.indexOf('%') > -1) {
-          q_normal = q.replace(/%/g, '*');
+      let q_normal: string = q;
+      if (q.indexOf("%") > -1) {
+        q_normal = q.replace(/%/g, "*");
       }
       // Generate CSV content
       csvRows = items.map((item) => {
