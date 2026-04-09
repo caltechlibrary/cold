@@ -358,14 +358,12 @@ function extractClpidByOrcid(items, targetOrcid) {
   return "";
 }
 function extractClpidByName(items, q_name) {
-  console.log(`DEBUG q_name: ${q_name}, items -> ${JSON.stringify(items, null, 2)}`);
   const clpidList = [];
   const re = new RegExp(q_name);
   for (const item of items) {
     const identifiers = item.person_or_org.identifiers || [];
     const clpidObj = identifiers.find((id) => id.scheme === "clpid");
     if (clpidObj !== void 0 && item.person_or_org.name !== void 0 && re.test(item.person_or_org.name)) {
-      console.log(`DEBUG found ${clpidObj} using ${q_name}`);
       clpidList.push(clpidObj.identifier);
     }
   }
@@ -378,7 +376,6 @@ function extractOrcidByName(items, q_name) {
     const identifiers = item.person_or_org.identifiers || [];
     const orcidObj = identifiers.find((id) => id.scheme === "orcid");
     if (orcidObj !== void 0 && item.person_or_org.name !== void 0 && re.test(item.person_or_org.name)) {
-      console.log(`DEBUG found ${orcidObj} using ${q_name}`);
       orcidList.push(orcidObj.identifier);
     }
   }
@@ -417,9 +414,8 @@ function normalizeItem(q_name, q, item) {
       break;
     case "by_name":
     case "review_queue_by_name":
-      const q_name1 = q.replace(/%/g, "*");
-      item.query_clpid = item.creators === void 0 ? "" : extractClpidByName(item.creators, q_name1);
-      item.query_orcid = item.creators === void 0 ? "" : extractOrcidByName(item.creators, q_name1);
+      item.query_clpid = item.creators === void 0 ? "" : extractClpidByName(item.creators, q);
+      item.query_orcid = item.creators === void 0 ? "" : extractOrcidByName(item.creators, q);
       break;
     default:
       item.query_clpid = "";
@@ -478,6 +474,10 @@ function formatJsonAsHtmlTable(q_name, q, items) {
 function formatJsonAsCSV(q_name, q, items) {
   let csvHeader = "";
   let csvRows = "";
+  let q_normal = q;
+  if (q.indexOf("%") > -1) {
+    q_normal = q.replace(/%/g, "*");
+  }
   switch (q_name) {
     case "by_clpid":
     case "review_queue_by_clpid":
@@ -487,18 +487,14 @@ function formatJsonAsCSV(q_name, q, items) {
     case "review_queue_by_name":
       csvHeader = "Query,found clpid,found orcid,Tags,RDMID,Link,Status,Title,Publisher,Journal Title,Publication Date,Created Date,Submitted By,Caltech Groups";
       csvRows = items.map((item) => {
-        normalizeItem(q_name, q, item);
-        return `"${q}","${item.query_clpid}","${item.query_orcid}","${item.tags}","${item.rdmid}","${item.link.replace(/"/g, '""')}","${item.status}","${item.title.replace(/"/g, '""')}","${item.publisher.replace(/"/g, '""')}","${item.journal_title.replace(/"/g, '""')}","${item.publication_date}","${item.created}","${item.submitted_by}","${item.groups.replace(/"/g, '""')}"`;
+        normalizeItem(q_name, q_normal, item);
+        return `"${q_normal}","${item.query_clpid}","${item.query_orcid}","${item.tags}","${item.rdmid}","${item.link.replace(/"/g, '""')}","${item.status}","${item.title.replace(/"/g, '""')}","${item.publisher.replace(/"/g, '""')}","${item.journal_title.replace(/"/g, '""')}","${item.publication_date}","${item.created}","${item.submitted_by}","${item.groups.replace(/"/g, '""')}"`;
       }).join("\n");
       break;
     default:
       csvHeader = "Query,Tags,RDMID,Link,Status,Title,Publisher,Journal Title,Publication Date,Created Date,Submitted By,Caltech Groups";
-      let q_normal = q;
-      if (q.indexOf("%") > -1) {
-        q_normal = q.replace(/%/g, "*");
-      }
       csvRows = items.map((item) => {
-        normalizeItem(q_name, q, item);
+        normalizeItem(q_name, q_normal, item);
         return `"${q_normal}","${item.tags}","${item.rdmid}","${item.link.replace(/"/g, '""')}","${item.status}","${item.title.replace(/"/g, '""')}","${item.publisher.replace(/"/g, '""')}","${item.journal_title.replace(/"/g, '""')}","${item.publication_date}","${item.created}","${item.submitted_by}","${item.groups.replace(/"/g, '""')}"`;
       }).join("\n");
       break;
