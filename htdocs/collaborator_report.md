@@ -4,7 +4,7 @@ title: Collaborator Reports
 
 # Collaborator Report
 
-FIXME: The collabor report needs a auto complete for the clpid. This can be done with an input element typed to a data list element avoiding allot of JavaScript. Need to update this via the form builder. That means to display the form I will see how long it takes to get a list of people.ds keys from the API. Hopefully it is fast enough.
+FIXME: The collabor report needs a be integrated into the main reports list. This page will be removed when that is completed.
 
 <div id="collaborator_report"></div>
 

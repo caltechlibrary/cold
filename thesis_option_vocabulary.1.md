@@ -1,4 +1,4 @@
-%thesis_option_vocabulary(1) user manual | 0.0.39b  df53836
+%thesis_option_vocabulary(1) user manual | 0.0.39c  8bdba11
 % R. S.Doiel
 % 2026-04-09
 
