@@ -10,17 +10,17 @@ bug
 - [X] The pulldown list needs to indicate if you're looking at all records or review queue
 - [X] Wild Card wording for all records by name needs clearer English (a search for all records with "*" has too many results, try adding some letters for the name and use the wild card).
 - [X] Downloaded CSV files for by name (all records and review queue) display wild card as SQL '%' instead of '*'
-- [ ] A report that writes directly to htdocs/rpt (collaborator report) should not standard out overwrite the generated file.
+- [X] A report that writes directly to htdocs/rpt (collaborator report) should not standard out overwrite the generated file.
 
 next
 ----
 
 - [ ] Revisit the prototype collaborator report page, see if I can folder it back into the main reports page's web form
-- [ ] Revisit Tom's Python collaborator report to confirm to the COLD reports expectation OR allow reports to skip standard output
-  - [ ] Decided if it makes sense render to CSV instead of Excel
   - [ ] Figure out how to fold that report directly into COLD's source code base rather than rely on relative directories to run it
     - [ ] Look at reports page and decide if there is an easy way to swith form elements based on the selected reports, example I could at clpid, clgid and hide the ones not used
 - [ ] COLD needs a ROADMAP document to guide development as cold's needs seem ambigious
+- [X] Revisit Tom's Python collaborator report to confirm to the COLD reports expectation OR allow reports to skip standard output
+  - [X] Decided if it makes sense render to CSV instead of Excel
 - [X] Figure a useful way to snapshot the RDM Review queue tables and load into a dataset collection
   - [X] harvest submitted status requests
   - [X] harvest accepted status requests
