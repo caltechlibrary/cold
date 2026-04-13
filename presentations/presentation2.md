@@ -221,7 +221,7 @@ Changes made in one place propagate outward. Systems stay in sync without manual
 - Version 0.0.39c — active development, production pilot at Caltech Library
 - Immediate next: tighter RDM review queue snapshot frequency
 - Expanding parameterized reports (monthly and quarterly roll-ups)
-- Additional roll-up and citation reports by group and people
+- Roll out Collaborator reports to staff
 
 # Reference URLs
 
