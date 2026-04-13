@@ -133,7 +133,7 @@ This single authoritative record drives the people vocabulary in RDM, the author
 The Research Organization Registry (ROR) is the emerging standard for funder and organization identifiers.
 
 - Caltech Library imports the full ROR data dump locally into `ror.ds`
-- ROR releases updates every 4–6 weeks; we refresh our local copy in step
+- ROR releases updates every 4–6 weeks; we can refresh our local copy in step
 - Staff curating funder records can search by name or acronym against local ROR data — **fast, no external API dependency**
 - Matching ROR record is imported directly into the funder form
 
