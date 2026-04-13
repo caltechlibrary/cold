@@ -55,7 +55,7 @@ enhance capabilities by:</p>
 <ul>
 <li>Building lightweight services that sit alongside existing
 systems</li>
-<li>Using web APIs to exchange and enrich metadata</li>
+<li>Use web APIs to exchange and enrich metadata</li>
 <li>Keeping each service focused on one job it does well</li>
 </ul>
 <p>COLD is an example of this approach.</p>
@@ -71,9 +71,18 @@ groups</li>
 <li><strong>Journals</strong> — preferred titles used in our IR</li>
 <li><strong>Subjects</strong> and <strong>Thesis options</strong></li>
 </ul>
-<p>These records need to be consistent across multiple systems. Before
-COLD, they lived in spreadsheets — our people list had grown to
-<strong>32 columns and over 8,900 rows</strong>.</p>
+<p>These records need to be consistent across multiple systems.</p>
+</div>
+<div id="what-were-tracking" class="slide section level1">
+<h1>What we’re tracking</h1>
+<ul>
+<li>9027 people</li>
+<li>109 groups</li>
+<li>8 funders</li>
+<li>4813 journals</li>
+<li>1 subject</li>
+<li>99 thesis options</li>
+</ul>
 </div>
 <div id="cold-today" class="slide section level1">
 <h1>COLD today</h1>
@@ -108,19 +117,20 @@ records</li>
 <li>Look up funder information from the Research Organization Registry
 (ROR)</li>
 <li>Search and browse the RDM submission review queue</li>
-<li>Request reports — results arrive by email and are downloadable as
-CSV or YAML</li>
+<li>Request reports and be notified by email when they are ready</li>
 </ul>
 </div>
 <div id="how-cold-connects-to-other-systems"
 class="slide section level1">
 <h1>How COLD connects to other systems</h1>
-<pre><code>COLD ──→ InvenioRDM   controlled vocabularies (people, groups, journals, thesis options)
-COLD ──→ Feeds        people and group metadata for public-facing library pages
-COLD ──→ RDM reports  author reconciliation and review queue data
-COLD ←── RDM          review queue snapshots pulled in for staff search
+<p>Retrieves data:</p>
+<pre><code>COLD ←── RDM          review queue snapshots pulled in for staff search
 COLD ←── Caltech dir  directory sync keeps people records current
 COLD ←── ROR          funder data updated as ROR releases new dumps</code></pre>
+<p>Provides data:</p>
+<pre><code>COLD ──→ InvenioRDM   controlled vocabularies (people, groups, journals, thesis options)
+COLD ──→ Feeds        people and group metadata for public-facing library pages
+COLD ──→ RDM reports  author reconciliation and review queue data</code></pre>
 <p>No plugins. No modifications to repository software. Just APIs
 exchanging JSON.</p>
 </div>
@@ -187,8 +197,6 @@ memberships)</td>
 </tr>
 </tbody>
 </table>
-<p>All records are versioned — every change is preserved, nothing is
-deleted through the interface.</p>
 </div>
 <div id="people-records-the-richest-collection"
 class="slide section level1">
