@@ -180,7 +180,7 @@ These reports support the ongoing work of matching RDM submission authors agains
 
 Staff run reports. YAML files can installed and consumed by InvenioRDM as controlled vocabularies. COLD becomes the single place to update a name or identifier. The library doesn't 't require a developer to curate an RDM vocabulary.
 
-# Reports: comming soon, the NSF collaborator report
+# Reports: coming soon, the NSF collaborator report
 
 The **NSF Collaborator Report** is a mediated, parameterized report:
 
