@@ -38,5 +38,7 @@
   - [cold_reports.yaml deep dive](cold_reports_deep_dive.md)
 - [Adding a new report to COLD](adding_cold_reports.md)
 - [Implementing browser side features in COLD](adding_browser_features.md)
-- [Presentations](presentations/presentation1.md)
+- Presentations
+  - [COLD: curating objects with Deno, Dataset and SQLite3](presentations/presentation1.md) (SoCal Code4Lib, November 2024)
+  - [COLD: Managing Metadata Across Library Systems](presentations/presentation2.md) (April 2026)
 

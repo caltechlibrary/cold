@@ -1,0 +1,428 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <meta name="author" content="R. S. Doiel, rsdoiel@caltech.edu" />
+  <meta name="keywords" content="code4lib, microservice, SQLite3, Deno, TypeScript, Dataset, RDM, controlled
+vocabulary" />
+  <title>COLD: Managing Metadata Across Library Systems</title>
+  <style type="text/css">
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" type="text/css" media="screen, projection, print"
+    href="https://www.w3.org/Talks/Tools/Slidy2/styles/slidy.css" />
+  <script src="https://www.w3.org/Talks/Tools/Slidy2/scripts/slidy.js"
+    charset="utf-8" type="text/javascript"></script>
+</head>
+<body>
+<div class="slide titlepage">
+  <h1 class="title">COLD: Managing Metadata Across Library Systems</h1>
+  <p class="author">
+R. S. Doiel, <a href="mailto:rsdoiel@caltech.edu"
+class="email">rsdoiel@caltech.edu</a>
+  </p>
+  <p class="institute">
+<p>Caltech Library, Digital Library Development</p>
+  </p>
+  <p class="date">April 2026</p>
+</div>
+<div class="slide" id="TOC">
+
+</div>
+<div id="caltech-librarys-strategy-develop-at-the-edges"
+class="slide section level1">
+<h1>Caltech Library’s strategy: develop at the edges</h1>
+<p>Rather than modifying repository software or writing plugins, we
+enhance capabilities by:</p>
+<ul>
+<li>Building lightweight services that sit alongside existing
+systems</li>
+<li>Using web APIs to exchange and enrich metadata</li>
+<li>Keeping each service focused on one job it does well</li>
+</ul>
+<p>COLD is an example of this approach.</p>
+</div>
+<div id="the-problem-cold-solves" class="slide section level1">
+<h1>The problem COLD solves</h1>
+<p>Caltech Library maintains authoritative lists of:</p>
+<ul>
+<li><strong>People</strong> — Caltech researchers and staff</li>
+<li><strong>Groups</strong> — departments, labs, centers, research
+groups</li>
+<li><strong>Funders</strong> — funding organizations</li>
+<li><strong>Journals</strong> — preferred titles used in our IR</li>
+<li><strong>Subjects</strong> and <strong>Thesis options</strong></li>
+</ul>
+<p>These records need to be consistent across multiple systems. Before
+COLD, they lived in spreadsheets — our people list had grown to
+<strong>32 columns and over 8,900 rows</strong>.</p>
+</div>
+<div id="cold-today" class="slide section level1">
+<h1>COLD today</h1>
+<dl>
+<dt>COLD</dt>
+<dd>
+Controlled Object Lists with <a
+href="https://caltechlibrary.github.io/dataset">Dataset</a>
+</dd>
+</dl>
+<p>A web application for curating metadata objects and sharing them
+across library systems.</p>
+<p>Used for:</p>
+<ul>
+<li>Maintaining a single authoritative source for people, groups, and
+funders</li>
+<li>Feeding controlled vocabularies into InvenioRDM</li>
+<li>Powering <a href="https://feeds.library.caltech.edu"
+class="uri">https://feeds.library.caltech.edu</a></li>
+<li>Generating staff reports and institutional datasets</li>
+</ul>
+</div>
+<div id="what-library-staff-can-do-in-cold"
+class="slide section level1">
+<h1>What library staff can do in COLD</h1>
+<ul>
+<li>Create, edit and browse records for people, groups, funders,
+journals, subjects, and thesis options</li>
+<li>Look up Caltech directory information to pre-populate person
+records</li>
+<li>Resolve ORCID identifiers to fill in researcher metadata</li>
+<li>Look up funder information from the Research Organization Registry
+(ROR)</li>
+<li>Search and browse the RDM submission review queue</li>
+<li>Request reports — results arrive by email and are downloadable as
+CSV or YAML</li>
+</ul>
+</div>
+<div id="how-cold-connects-to-other-systems"
+class="slide section level1">
+<h1>How COLD connects to other systems</h1>
+<pre><code>COLD ──→ InvenioRDM   controlled vocabularies (people, groups, journals, thesis options)
+COLD ──→ Feeds        people and group metadata for public-facing library pages
+COLD ──→ RDM reports  author reconciliation and review queue data
+COLD ←── RDM          review queue snapshots pulled in for staff search
+COLD ←── Caltech dir  directory sync keeps people records current
+COLD ←── ROR          funder data updated as ROR releases new dumps</code></pre>
+<p>No plugins. No modifications to repository software. Just APIs
+exchanging JSON.</p>
+</div>
+<div id="the-three-services" class="slide section level1">
+<h1>The three services</h1>
+<p>COLD runs as three independent web services:</p>
+<ol style="list-style-type: decimal">
+<li><strong>cold</strong> — the web UI and middleware (handles all user
+interaction)</li>
+<li><strong>datasetd</strong> — the JSON API backend (data persistence
+via SQLite3)</li>
+<li><strong>cold_reports</strong> — the async report queue (runs
+scripts, delivers results)</li>
+</ol>
+<p>Access is controlled by Apache + Shibboleth in front — library staff
+log in with their campus single sign-on.</p>
+</div>
+<div id="what-cold-stores-the-collections" class="slide section level1">
+<h1>What COLD stores: the collections</h1>
+<table>
+<colgroup>
+<col width="50%" />
+<col width="50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Collection</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>people.ds</td>
+<td>Caltech researchers and staff (ORCID, ISNI, VIAF, group
+memberships)</td>
+</tr>
+<tr>
+<td>groups.ds</td>
+<td>Departments, labs, centers, research groups</td>
+</tr>
+<tr>
+<td>funders.ds</td>
+<td>Funding organizations with ROR identifiers</td>
+</tr>
+<tr>
+<td>journals.ds</td>
+<td>Preferred journal titles and ISSNs</td>
+</tr>
+<tr>
+<td>subjects.ds</td>
+<td>Subject classifications</td>
+</tr>
+<tr>
+<td>thesis_options.ds</td>
+<td>Degree program options</td>
+</tr>
+<tr>
+<td>ror.ds</td>
+<td>Local copy of Research Organization Registry</td>
+</tr>
+<tr>
+<td>rdm_review_queue.ds</td>
+<td>Snapshot of InvenioRDM submission review queue</td>
+</tr>
+</tbody>
+</table>
+<p>All records are versioned — every change is preserved, nothing is
+deleted through the interface.</p>
+</div>
+<div id="people-records-the-richest-collection"
+class="slide section level1">
+<h1>People records: the richest collection</h1>
+<p>A person record in COLD holds:</p>
+<ul>
+<li><strong>Identifiers</strong>: clpid, ORCID, ISNI, VIAF, thesis
+advisor ID, thesis committee ID, directory ID</li>
+<li><strong>Names</strong> and biography</li>
+<li><strong>Group memberships</strong> — links to groups.ds</li>
+<li><strong>Division affiliation</strong> from the Caltech
+directory</li>
+</ul>
+<p>This single authoritative record drives the people vocabulary in RDM,
+the author pages in Feeds, NSF collaborator reports, and directory
+sync.</p>
+</div>
+<div id="ror-integration-keeping-funders-current"
+class="slide section level1">
+<h1>ROR integration: keeping funders current</h1>
+<p>The Research Organization Registry (ROR) is the emerging standard for
+funder and organization identifiers.</p>
+<ul>
+<li>Caltech Library imports the full ROR data dump locally into
+<code>ror.ds</code></li>
+<li>ROR releases updates every 4–6 weeks; we refresh our local copy in
+step</li>
+<li>Staff curating funder records can search by name or acronym against
+local ROR data — <strong>fast, no external API dependency</strong></li>
+<li>Matching ROR record is imported directly into the funder form</li>
+</ul>
+</div>
+<div id="rdm-review-queue-bringing-the-queue-to-staff"
+class="slide section level1">
+<h1>RDM review queue: bringing the queue to staff</h1>
+<p>InvenioRDM’s submission review queue is now searchable inside
+COLD.</p>
+<ul>
+<li>Snapshots of the RDM request queue are pulled in periodically</li>
+<li>Staff can search by <strong>author name, ORCID, clpid, or group
+(clgid)</strong></li>
+<li>Search results display as a table and can be <strong>downloaded as
+CSV</strong></li>
+<li>Supports curator workflows without requiring direct database access
+to RDM</li>
+</ul>
+<p>This is the “develop at the edges” approach applied to an existing
+repository system.</p>
+</div>
+<div id="reports-csv-exports-for-library-operations"
+class="slide section level1">
+<h1>Reports: CSV exports for library operations</h1>
+<table>
+<colgroup>
+<col width="50%" />
+<col width="50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Report</th>
+<th>What it produces</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>People CSV</td>
+<td>Full CaltechPEOPLE export — usable in LibreOffice, Excel, or
+Jupyter</td>
+</tr>
+<tr>
+<td>Groups CSV</td>
+<td>Full CaltechGROUPS export</td>
+</tr>
+<tr>
+<td>Division People CSV</td>
+<td>People listed by Caltech directory division</td>
+</tr>
+<tr>
+<td>People Membership CSV</td>
+<td>One row per person-per-group membership</td>
+</tr>
+<tr>
+<td>Division People Crosswalk</td>
+<td>People crosswalk restricted to Division-level groups</td>
+</tr>
+<tr>
+<td>Group People Crosswalk</td>
+<td>People and all group affiliations</td>
+</tr>
+<tr>
+<td>People Identifier CSV</td>
+<td>All external identifiers per person — datestamped snapshot</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="reports-rdm-author-reconciliation"
+class="slide section level1">
+<h1>Reports: RDM author reconciliation</h1>
+<table>
+<colgroup>
+<col width="50%" />
+<col width="50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Report</th>
+<th>What it produces</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Author’s Records CSV</td>
+<td>All records from RDM request, drafts, and records metadata</td>
+</tr>
+<tr>
+<td>Authors’ Review Queue CSV</td>
+<td>Current items in the review queue for author reconciliation</td>
+</tr>
+</tbody>
+</table>
+<p>These reports support the ongoing work of matching RDM submission
+authors against COLD’s authoritative people records.</p>
+</div>
+<div id="reports-controlled-vocabularies-for-inveniordm"
+class="slide section level1">
+<h1>Reports: controlled vocabularies for InvenioRDM</h1>
+<table>
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Report</th>
+<th>Output</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Journals Vocabulary</td>
+<td>journal_vocabulary.yaml</td>
+<td>Preferred journal names loaded into RDM</td>
+</tr>
+<tr>
+<td>Groups Vocabulary</td>
+<td>group_vocabulary.yaml</td>
+<td>Caltech groups list loaded into RDM</td>
+</tr>
+<tr>
+<td>People Vocabulary</td>
+<td>people_vocabulary.yaml</td>
+<td>Authors vocabulary (with ORCID and affiliation)</td>
+</tr>
+<tr>
+<td>Thesis Options Vocabulary</td>
+<td>thesis_option_vocabulary.yaml</td>
+<td>Degree options for thesis submissions</td>
+</tr>
+</tbody>
+</table>
+<p>Staff run these reports; the resulting YAML files are consumed
+directly by InvenioRDM as controlled vocabularies. COLD becomes the
+single place to update a name or identifier — the vocabulary update
+flows out to RDM automatically on the next report run.</p>
+</div>
+<div id="reports-the-nsf-collaborator-report"
+class="slide section level1">
+<h1>Reports: the NSF collaborator report</h1>
+<p>The <strong>NSF Collaborator Report</strong> is a mediated,
+parameterized report:</p>
+<ol style="list-style-type: decimal">
+<li>A staff member enters a researcher’s <code>clpid</code></li>
+<li>COLD fetches that person’s publication co-author data from
+CaltechAUTHORS</li>
+<li>Formats the result as an NSF-style collaborator table</li>
+<li>Delivers a CSV file named
+<code>&lt;clpid&gt;_nsf_collaborator_report.csv</code></li>
+</ol>
+<p>A report that used to require manual spreadsheet assembly is now a
+self-service staff request.</p>
+</div>
+<div id="how-the-report-system-works" class="slide section level1">
+<h1>How the report system works</h1>
+<pre><code>Staff requests report in browser
+    → request queued in reports.ds
+    → cold_reports picks it up (FIFO, 10-second poll)
+    → runs the configured script
+    → output saved to the web server
+    → staff notified by email with a download link</code></pre>
+<p>Adding a new report requires writing a script and one YAML
+configuration entry — no changes to the middleware.</p>
+</div>
+<div id="the-benefit-one-place-many-systems"
+class="slide section level1">
+<h1>The benefit: one place, many systems</h1>
+<pre><code>Staff curates a person record in COLD
+    → People vocabulary updated → RDM gets the authoritative author list
+    → Feeds updated → public-facing researcher pages stay current
+    → Collaborator report reflects the latest publication data
+    → People CSV available for any downstream analysis</code></pre>
+<p>Changes made in one place propagate outward. Systems stay in sync
+without manual reconciliation across spreadsheets.</p>
+</div>
+<div id="status-and-whats-next" class="slide section level1">
+<h1>Status and what’s next</h1>
+<ul>
+<li>Version 0.0.39c — active development, production pilot at Caltech
+Library</li>
+<li>Immediate next: tighter RDM review queue snapshot frequency</li>
+<li>Expanding parameterized reports (monthly and quarterly
+roll-ups)</li>
+<li>Additional roll-up and citation reports by group and people</li>
+</ul>
+</div>
+<div id="reference-urls" class="slide section level1">
+<h1>Reference URLs</h1>
+<ul>
+<li>COLD, <a href="https://github.com/caltechlibrary/cold"
+class="uri">https://github.com/caltechlibrary/cold</a></li>
+<li>Caltech Library Feeds, <a href="https://feeds.library.caltech.edu"
+class="uri">https://feeds.library.caltech.edu</a></li>
+<li>Dataset (the JSON object manager underlying COLD), <a
+href="https://caltechlibrary.github.io/dataset"
+class="uri">https://caltechlibrary.github.io/dataset</a></li>
+<li>ROR (Research Organization Registry), <a href="https://ror.org"
+class="uri">https://ror.org</a></li>
+<li>InvenioRDM, <a href="https://inveniosoftware.org/products/rdm/"
+class="uri">https://inveniosoftware.org/products/rdm/</a></li>
+<li>Code4Lib, <a href="https://code4lib.org"
+class="uri">https://code4lib.org</a></li>
+</ul>
+</div>
+</body>
+</html>
