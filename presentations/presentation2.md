@@ -104,7 +104,7 @@ COLD runs as three independent web services:
 
 Access is controlled by Apache + Shibboleth in front — library staff log in with their campus single sign-on.
 
-# What COLD stores: the collections
+# What COLD stores
 
 | Collection | Purpose |
 |---|---|
@@ -117,7 +117,7 @@ Access is controlled by Apache + Shibboleth in front — library staff log in wi
 | ror.ds | Local copy of Research Organization Registry |
 | rdm_review_queue.ds | Snapshot of InvenioRDM submission review queue |
 
-# People records: the richest collection
+# People records, a richest collection
 
 A person record in COLD holds:
 
@@ -178,9 +178,9 @@ These reports support the ongoing work of matching RDM submission authors agains
 | People Vocabulary | people_vocabulary.yaml | Authors vocabulary (with ORCID and affiliation) |
 | Thesis Options Vocabulary | thesis_option_vocabulary.yaml | Degree options for thesis submissions |
 
-Staff run these reports; the resulting YAML files are consumed directly by InvenioRDM as controlled vocabularies. COLD becomes the single place to update a name or identifier — the vocabulary update flows out to RDM automatically on the next report run.
+Staff run reports. YAML files can installed and consumed by InvenioRDM as controlled vocabularies. COLD becomes the single place to update a name or identifier. The library doesn't 't require a developer to curate an RDM vocabulary.
 
-# Reports: the NSF collaborator report
+# Reports: comming soon, the NSF collaborator report
 
 The **NSF Collaborator Report** is a mediated, parameterized report:
 
@@ -230,4 +230,4 @@ Changes made in one place propagate outward. Systems stay in sync without manual
 - Dataset (the JSON object manager underlying COLD), <https://caltechlibrary.github.io/dataset>
 - ROR (Research Organization Registry), <https://ror.org>
 - InvenioRDM, <https://inveniosoftware.org/products/rdm/>
-- Code4Lib, <https://code4lib.org>
+
