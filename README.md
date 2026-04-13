@@ -18,12 +18,11 @@ Access control is provided by the front end web server integrated with Shibbolet
 
 ## Release Notes
 
-- version: 0.0.32
-- status: wip
-- released: 2025-05-16
+- version: 0.0.39c
+- status: active
+- released: 2026-04-09
 
-Improved Funder metadata schema. Start integration of ROR data for Funder metadata. Added &#x27;ror_import&#x27; to import a ROR data dump zipfile
-into &#x27;ror.ds&#x27; dataset collection.
+clean up text in the collaborator_report.html page we'll use for testing collaborator report integration
 
 
 ### Authors
@@ -43,25 +42,21 @@ into &#x27;ror.ds&#x27; dataset collection.
 
 ## Software Requirements
 
-- Deno >= 2.3.6
-- Dataset >= 2.2.7
-- CMTools >= 0.0.33
+- Deno >= 2.7.11
+- Dataset = 2.3.4
+- CMTools >= 0.0.40
 
 ### Software Suggestions
 
 - GNU Make
 - Pandoc 3.1
 
-#### Runtime platform
-
-**- Deno 2.2**
-
 ## Related resources
-
 
 - [Download](https://github.com/caltechlibrary/cold/release/latest)
 - [Getting Help, Reporting bugs](https://github.com/caltechlibrary/cold/issues)
 - [LICENSE](https://caltechlibrary.github.io/cold/LICENSE)
 - [Installation](INSTALL.md)
 - [About](about.md)
+
 

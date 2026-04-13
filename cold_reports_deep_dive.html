@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <title>cold</title>
+    <link rel="stylesheet" href="https://caltechlibrary.github.io/css/site.css">
+    <link rel="stylesheet" href="https://media.library.caltech.edu/cl-webcomponents/css/code-blocks.css">
+    <script type="module" src="https://media.library.caltech.edu/cl-webcomponents/copyToClipboard.js"></script>
+    <script type="module" src="https://media.library.caltech.edu/cl-webcomponents/footer-global.js"></script>
+</head>
+<body>
+<header>
+<a href="https://library.caltech.edu"><img src="https://media.library.caltech.edu/assets/caltechlibrary-logo.png" alt="Caltech Library logo"></a>
+</header>
+<nav>
+<ul>
+    <li><a href="/">Home</a></li>
+    <li><a href="index.html">README</a></li>
+    <li><a href="LICENSE">LICENSE</a></li>
+    <li><a href="INSTALL.html">INSTALL</a></li>
+    <li><a href="user_manual.html">User Manual</a></li>
+    <li><a href="about.html">About</a></li>
+    <li><a href="search.html">Search</a></li>
+    <li><a href="https://github.com/caltechlibrary/cold">GitHub</a></li>
+</ul>
+</nav>
+<section>
+<h1 id="cold_reports.yaml-deep-dive">cold_reports.yaml Deep Dive</h1>
+<p><code>cold_reports.yaml</code> is the configuration file for the
+<code>cold_reports</code> service (compiled from
+<code>cold_reports.ts</code>). It defines the catalogue of reports that
+COLD can generate: what shell command to run, how to name the output
+file, what MIME type to declare, and what user-supplied parameters (if
+any) the command requires.</p>
+<p>This file is read in two contexts:</p>
+<ol type="1">
+<li><strong>At startup</strong> by the <code>cold_reports</code>
+service, which builds an in-memory map of <code>Runnable</code> objects
+— one per report entry.</li>
+<li><strong>At request time</strong> by the middleware’s
+<code>handleReportRequest</code> function, which reads
+<code>cold_reports.yaml</code> directly to retrieve input definitions
+for the named report before creating the queue entry in
+<code>reports.ds</code>.</li>
+</ol>
+<hr />
+<h2 id="top-level-fields">Top-level fields</h2>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">report_directory</span><span class="kw">:</span><span class="at"> ./htdocs/rpt</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">reports</span><span class="kw">:</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">&lt;report_name&gt;</span><span class="kw">:</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="at">    ...</span></span></code></pre></div>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>report_directory</code></td>
+<td>string</td>
+<td>Directory where report output files are written. Currently
+<code>./htdocs/rpt</code>. The middleware also serves this path as
+static files, so a file at <code>htdocs/rpt/people.csv</code> is
+reachable at <code>/rpt/people.csv</code> in the browser.</td>
+</tr>
+<tr>
+<td><code>reports</code></td>
+<td>map</td>
+<td>Each key is a report name. The value is a report definition
+block.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Note:</strong> The <code>report_directory</code> value in
+<code>cold_reports.yaml</code> is not yet consumed by the
+<code>Runnable.run()</code> method — the output path
+<code>./htdocs/rpt</code> and the URL prefix <code>rpt</code> are
+currently hardcoded in <code>cold_reports.ts</code> at lines 520–522.
+The YAML field exists as a declaration of intent for a future fix.</p>
+<hr />
+<h2 id="report-definition-block">Report definition block</h2>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">&lt;report_name&gt;</span><span class="kw">:</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">cmd</span><span class="kw">:</span><span class="at"> ./run_something.bash</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">basename</span><span class="kw">:</span><span class="at"> something</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">append_datestamp</span><span class="kw">:</span><span class="at"> true|false</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">content_type</span><span class="kw">:</span><span class="at"> text/csv</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">inputs</span><span class="kw">:</span><span class="co">            # optional</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> </span><span class="fu">id</span><span class="kw">:</span><span class="at"> clpid</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">type</span><span class="kw">:</span><span class="at"> text</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">required</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span></code></pre></div>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Required</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>cmd</code></td>
+<td>string</td>
+<td>yes</td>
+<td>Path to the executable or script to run. Relative to the directory
+where <code>cold_reports</code> is started.</td>
+</tr>
+<tr>
+<td><code>basename</code></td>
+<td>string</td>
+<td>yes</td>
+<td>Base name for the output file, without extension. May contain
+<code>{{input_id}}</code> placeholders when <code>inputs</code> is
+defined.</td>
+</tr>
+<tr>
+<td><code>append_datestamp</code></td>
+<td>boolean</td>
+<td>yes</td>
+<td>If <code>true</code>, appends <code>_YYYY-MM-DD</code> to the output
+filename before the extension. Useful for archiving snapshots.</td>
+</tr>
+<tr>
+<td><code>content_type</code></td>
+<td>string</td>
+<td>yes</td>
+<td>MIME type of the output. Controls the file extension applied to the
+output.</td>
+</tr>
+<tr>
+<td><code>inputs</code></td>
+<td>list</td>
+<td>no</td>
+<td>Ordered list of user-supplied parameters. Each input is passed as a
+positional command-line argument to <code>cmd</code>.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="content_type-to-file-extension-mapping">content_type to file
+extension mapping</h3>
+<p>The <code>Runnable.run()</code> method in
+<code>cold_reports.ts</code> maps MIME types to extensions:</p>
+<table>
+<thead>
+<tr>
+<th>content_type</th>
+<th>Extension</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>text/plain</code></td>
+<td><code>.txt</code></td>
+</tr>
+<tr>
+<td><code>text/csv</code></td>
+<td><code>.csv</code></td>
+</tr>
+<tr>
+<td><code>application/json</code></td>
+<td><code>.json</code></td>
+</tr>
+<tr>
+<td><code>text/markdown</code></td>
+<td><code>.md</code></td>
+</tr>
+<tr>
+<td><code>application/yaml</code></td>
+<td><code>.yaml</code></td>
+</tr>
+<tr>
+<td><code>application/vnd.ms-excel</code></td>
+<td><code>.xlsx</code></td>
+</tr>
+<tr>
+<td>(anything else)</td>
+<td>`` (no extension)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="input-definition-fields">Input definition fields</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td>string</td>
+<td>The form field name and the command-line positional argument
+identifier. Also used as the <code>{{id}}</code> placeholder in
+<code>basename</code> templates.</td>
+</tr>
+<tr>
+<td><code>type</code></td>
+<td>string</td>
+<td>HTML input type (e.g., <code>"text"</code>). Used by the browser
+form to render the input widget.</td>
+</tr>
+<tr>
+<td><code>required</code></td>
+<td>boolean</td>
+<td>If <code>true</code>, the form enforces this field before
+submission.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="reports-catalogue">Reports catalogue</h2>
+<h3 id="run_people_csv">run_people_csv</h3>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cmd</span><span class="kw">:</span><span class="at"> ./run_people_csv.bash</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">basename</span><span class="kw">:</span><span class="at"> people</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">append_datestamp</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">content_type</span><span class="kw">:</span><span class="at"> text/csv</span></span></code></pre></div>
+<p>Runs <code>run_people_csv.bash</code>, which calls
+<code>dsquery</code> with a SQL statement against <code>people.ds</code>
+and outputs a full CSV export of all people records. Output:
+<code>htdocs/rpt/people.csv</code>.</p>
+<p>The SQL query used by <code>dsquery</code> in the bash script is a
+superset of the <code>people_csv</code> named query in
+<code>cold_api.yaml</code> — it includes additional fields like
+<code>snac</code>. When debugging column differences between the live
+API and the CSV export, compare the SQL in
+<code>run_people_csv.bash</code> against the <code>people_csv</code>
+query in <code>cold_api.yaml</code>.</p>
+<hr />
+<h3 id="run_groups_csv">run_groups_csv</h3>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cmd</span><span class="kw">:</span><span class="at"> ./run_groups_csv.bash</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">basename</span><span class="kw">:</span><span class="at"> groups</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">append_datestamp</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="fu">content_type</span><span class="kw">:</span><span class="at"> text/csv</span></span></code></pre></div>
+<p>Exports all group records from <code>groups.ds</code> as CSV. Output:
+<code>htdocs/rpt/groups.csv</code>.</p>
+<hr />
+<h3 id="run_division_people_csv">run_division_people_csv</h3>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cmd</span><span class="kw">:</span><span class="at"> ./run_division_people.bash</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">basename</span><span class="kw">:</span><span class="at"> division_people</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">append_datestamp</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="fu">content_type</span><span class="kw">:</span><span class="at"> text/csv</span></span></code></pre></div>
+<p>Produces a CSV with columns <code>division</code>,
+<code>clpid</code>, <code>orcid</code>, <code>family_name</code>,
+<code>given_name</code>, plus one column per additional group
+membership. This uses the <code>division_people</code> named query in
+<code>cold_api.yaml</code>. Output:
+<code>htdocs/rpt/division_people.csv</code>.</p>
+<hr />
+<h3 id="run_people_membership_csv">run_people_membership_csv</h3>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cmd</span><span class="kw">:</span><span class="at"> ./run_people_membership.bash</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">basename</span><span class="kw">:</span><span class="at"> people_membership</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="fu">append_datestamp</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="fu">content_type</span><span class="kw">:</span><span class="at"> text/csv</span></span></code></pre></div>
+<p>Produces a flattened CSV with one row per person-per-group
+membership, using the <code>people_membership</code> named query.
+Output: <code>htdocs/rpt/people_membership.csv</code>.</p>
+<hr />
+<h3
+id="run_group_people_crosswalk_csv">run_group_people_crosswalk_csv</h3>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cmd</span><span class="kw">:</span><span class="at"> ./run_group_people_crosswalk.bash</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">basename</span><span class="kw">:</span><span class="at"> group_people_crosswalk</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="fu">append_datestamp</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="fu">content_type</span><span class="kw">:</span><span class="at"> text/csv</span></span></code></pre></div>
+<p>Produces a crosswalk CSV mapping groups to people. Output:
+<code>htdocs/rpt/group_people_crosswalk.csv</code>.</p>
+<hr />
+<h3
+id="run_division_people_crosswalk_csv">run_division_people_crosswalk_csv</h3>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cmd</span><span class="kw">:</span><span class="at"> ./run_division_people_crosswalk.bash</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">basename</span><span class="kw">:</span><span class="at"> division_people_crosswalk</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="fu">append_datestamp</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="fu">content_type</span><span class="kw">:</span><span class="at"> text/csv</span></span></code></pre></div>
+<p>Produces a crosswalk CSV mapping divisions to people. Output:
+<code>htdocs/rpt/division_people_crosswalk.csv</code>.</p>
+<hr />
+<h3 id="run_people_identifier_csv">run_people_identifier_csv</h3>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cmd</span><span class="kw">:</span><span class="at"> ./run_people_identifier_csv.bash</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">basename</span><span class="kw">:</span><span class="at"> people_identifier</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="fu">append_datestamp</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="fu">content_type</span><span class="kw">:</span><span class="at"> text/csv</span></span></code></pre></div>
+<p>Exports people records focused on external identifiers (ORCID, ISNI,
+VIAF, etc.). <code>append_datestamp: true</code> means each run produces
+a dated file such as
+<code>htdocs/rpt/people_identifier_2026-04-09.csv</code>, preserving
+historical snapshots rather than overwriting.</p>
+<hr />
+<h3 id="journal_vocabulary">journal_vocabulary</h3>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cmd</span><span class="kw">:</span><span class="at"> ./run_journal_vocabulary.bash</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">basename</span><span class="kw">:</span><span class="at"> journal_vocabulary</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="fu">append_datestamp</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="fu">content_type</span><span class="kw">:</span><span class="at"> application/yaml</span></span></code></pre></div>
+<p>Generates a YAML vocabulary file for journals by running
+<code>bin/journal_vocabulary</code>, which calls the
+<code>journal_names</code> query on <code>journals.ds</code>. Output:
+<code>htdocs/rpt/journal_vocabulary.yaml</code>.</p>
+<hr />
+<h3 id="group_vocabulary">group_vocabulary</h3>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cmd</span><span class="kw">:</span><span class="at"> ./run_group_vocabulary.bash</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">basename</span><span class="kw">:</span><span class="at"> group_vocabulary</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="fu">append_datestamp</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="fu">content_type</span><span class="kw">:</span><span class="at"> application/yaml</span></span></code></pre></div>
+<p>Generates a YAML vocabulary file for groups by running
+<code>bin/group_vocabulary</code>. The bash script can also be called
+with the argument <code>push_to_cold</code> to enqueue itself via
+<code>POST /reports</code> instead of running directly — a useful
+pattern for automated vocabulary refreshes. Output:
+<code>htdocs/rpt/group_vocabulary.yaml</code>.</p>
+<hr />
+<h3 id="people_vocabulary">people_vocabulary</h3>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cmd</span><span class="kw">:</span><span class="at"> ./run_people_vocabulary.bash</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">basename</span><span class="kw">:</span><span class="at"> people_vocabulary</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="fu">append_datestamp</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="fu">content_type</span><span class="kw">:</span><span class="at"> application/yaml</span></span></code></pre></div>
+<p>Generates a YAML vocabulary file for people, using the
+<code>people_vocabulary</code> named query in
+<code>cold_api.yaml</code>. That query shapes each record for use in the
+authors vocabulary (identifiers, affiliations). Output:
+<code>htdocs/rpt/people_vocabulary.yaml</code>.</p>
+<hr />
+<h3 id="thesis_option_vocabulary">thesis_option_vocabulary</h3>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cmd</span><span class="kw">:</span><span class="at"> ./run_thesis_option_vocabulary.bash</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">basename</span><span class="kw">:</span><span class="at"> thesis_option_vocabulary</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="fu">append_datestamp</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="fu">content_type</span><span class="kw">:</span><span class="at"> application/yaml</span></span></code></pre></div>
+<p>Generates a YAML vocabulary file for thesis options. Output:
+<code>htdocs/rpt/thesis_option_vocabulary.yaml</code>.</p>
+<hr />
+<h3 id="run_authors_records_csv">run_authors_records_csv</h3>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cmd</span><span class="kw">:</span><span class="at"> ./run_authors_records_csv.bash</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">basename</span><span class="kw">:</span><span class="at"> authors_records</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="fu">append_datestamp</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="fu">content_type</span><span class="kw">:</span><span class="at"> text/csv</span></span></code></pre></div>
+<p>Exports author records for integration with other Caltech Library
+systems. Output: <code>htdocs/rpt/authors_records.csv</code>.</p>
+<hr />
+<h3 id="run_authors_review_queue_csv">run_authors_review_queue_csv</h3>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cmd</span><span class="kw">:</span><span class="at"> ./run_authors_review_queue_csv.bash</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">basename</span><span class="kw">:</span><span class="at"> authors_review_queue</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="fu">append_datestamp</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="fu">content_type</span><span class="kw">:</span><span class="at"> text/csv</span></span></code></pre></div>
+<p>Exports a CSV view of the RDM review queue for author reconciliation
+work. Output: <code>htdocs/rpt/authors_review_queue.csv</code>.</p>
+<hr />
+<h3 id="run_collaborator_report">run_collaborator_report</h3>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cmd</span><span class="kw">:</span><span class="at"> ./run_collaborator_report.bash</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">inputs</span><span class="kw">:</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">id</span><span class="kw">:</span><span class="at"> clpid</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">type</span><span class="kw">:</span><span class="at"> text</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">required</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="fu">basename</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;{{clpid}}_nsf_collaborator_report&quot;</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="fu">append_datestamp</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="fu">content_type</span><span class="kw">:</span><span class="at"> text/csv</span></span></code></pre></div>
+<p>This is the only parameterized report. It generates an NSF
+collaborator table for a specific person, identified by their
+<code>clpid</code>.</p>
+<p><strong><code>inputs</code>:</strong> A single required text field
+with <code>id: clpid</code>. The user supplies a <code>clpid</code>
+value in the browser form. That value is:</p>
+<ol type="1">
+<li>Stored in the <code>Report</code> object’s <code>inputs</code> list
+in <code>reports.ds</code></li>
+<li>Passed as a positional command-line argument (<code>$1</code>) to
+<code>run_collaborator_report.bash</code></li>
+<li>Substituted into the <code>basename</code> template via
+<code>{{clpid}}</code>, producing filenames like
+<code>Briney-Kristin-A_nsf_collaborator_report.csv</code></li>
+</ol>
+<p><strong>How <code>run_collaborator_report.bash</code> works:</strong>
+The script validates that the <code>clpid</code> exists in
+<code>people.ds</code> via <code>dataset read people.ds "$1"</code>,
+then calls <code>bin/generate_collaborator_rpt "$1" --record_ids</code>.
+That binary (compiled from <code>generate_collaborator_rpt.ts</code>)
+fetches the person’s publication records from the CaltechAUTHORS API and
+formats them as an NSF collaborator table.</p>
+<p><strong>Debugging this report:</strong> If the output file is not
+generated: 1. Check that <code>$1</code> (the clpid) exists in
+<code>people.ds</code>:
+<code>dataset read people.ds &lt;clpid&gt;</code> 2. Check that
+<code>bin/generate_collaborator_rpt</code> exists and is executable 3.
+Run <code>run_collaborator_report.bash &lt;clpid&gt;</code> directly
+from the COLD working directory to see stderr</p>
+<hr />
+<h2 id="the-runner-how-cold_reports.ts-processes-the-queue">The runner:
+how cold_reports.ts processes the queue</h2>
+<h3 id="startup">Startup</h3>
+<p><code>cold_reports</code> reads <code>cold_reports.yaml</code> at
+startup and builds a <code>Runner</code> object with a
+<code>report_map</code> dictionary. Each key is a report name; each
+value is a <code>Runnable</code> instance holding the command, basename,
+inputs schema, datestamp flag, and content type. The YAML file is not
+re-read while the service is running — restart <code>cold_reports</code>
+after any changes to <code>cold_reports.yaml</code>.</p>
+<h3 id="poll-loop">Poll loop</h3>
+<p><code>cold_reports</code> calls <code>servicing_requests()</code> on
+a 10-second interval:</p>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="pp">setInterval</span>(<span class="kw">async</span> () <span class="kw">=&gt;</span> { <span class="cf">await</span> <span class="fu">report_runner</span>(config_yaml)<span class="op">;</span> }<span class="op">,</span> <span class="dv">10000</span>)<span class="op">;</span></span></code></pre></div>
+<p><code>servicing_requests()</code> calls the <code>next_request</code>
+query on <code>reports.ds</code> (defined in
+<code>cold_api.yaml</code>). That query returns the oldest request with
+<code>status = "requested"</code>, ordered by <code>updated</code>
+ascending — a strict FIFO. Only one request is dequeued and processed
+per poll cycle.</p>
+<h3 id="request-processing-process_request">Request processing
+(<code>process_request</code>)</h3>
+<ol type="1">
+<li>Set <code>status = "processing"</code> and write to
+<code>reports.ds</code>.</li>
+<li>Resolve the command’s input schema against the values stored in the
+request’s <code>inputs</code> field using
+<code>resolveCommandInputs()</code>. This aligns inputs by position and
+type, substituting an empty value for any mismatch.</li>
+<li>Call <code>runnable.run([])</code>. This executes the shell command
+(with validated inputs as positional args if inputs exist, or with
+<code>$</code>-shell execution otherwise).</li>
+<li>The command’s stdout is captured and written to
+<code>htdocs/rpt/&lt;basename&gt;&lt;ext&gt;</code>. The URL path
+<code>rpt/&lt;filename&gt;</code> is returned as the
+<code>link</code>.</li>
+<li>If stdout contains <code>error://</code>, the status is set to
+<code>"error"</code> and the link holds the error string.</li>
+<li>If <code>emails</code> is non-empty, <code>send_email()</code> is
+called with the report name, status, and link.</li>
+<li>Write the final <code>status</code> and <code>link</code> to
+<code>reports.ds</code>.</li>
+</ol>
+<h3 id="command-execution-details">Command execution details</h3>
+<p>For parameterized reports (those with <code>inputs</code>),
+<code>Runnable.run()</code> uses <code>Deno.Command</code> with
+<code>args</code> set to the ordered list of input values. This avoids
+shell injection — inputs are passed as discrete arguments, not
+interpolated into a shell string.</p>
+<p>For non-parameterized reports, <code>run()</code> uses the
+<code>dax</code> <code>$</code> shell helper, which allows the command
+string to include shell features.</p>
+<hr />
+<h2 id="filename-templating">Filename templating</h2>
+<p>When <code>basename</code> contains <code>{{id}}</code> placeholders,
+<code>Runnable.filenameTemplate()</code> replaces each
+<code>{{id}}</code> with the corresponding input value. If no input with
+that <code>id</code> is found, the placeholder is replaced with
+<code>_id_</code>. This is used only by
+<code>run_collaborator_report</code>, which produces
+<code>&lt;clpid&gt;_nsf_collaborator_report.csv</code>.</p>
+<hr />
+<h2 id="adding-a-new-report">Adding a new report</h2>
+<h3 id="write-the-report-command">1. Write the report command</h3>
+<p>Create a shell script (e.g., <code>run_my_report.bash</code>) in the
+COLD working directory. The script should:</p>
+<ul>
+<li>Write its output to stdout</li>
+<li>Exit 0 on success, non-zero on failure</li>
+<li>Print a short error description to stderr on failure (the runner
+captures stderr and sets status to <code>"error"</code> if it is
+non-empty)</li>
+</ul>
+<p>For parameterized reports, accept inputs as positional arguments
+(<code>$1</code>, <code>$2</code>, …).</p>
+<h3 id="add-an-entry-to-cold_reports.yaml">2. Add an entry to
+cold_reports.yaml</h3>
+<div class="sourceCode" id="cb18"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">my_new_report</span><span class="kw">:</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">cmd</span><span class="kw">:</span><span class="at"> ./run_my_report.bash</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">basename</span><span class="kw">:</span><span class="at"> my_report_output</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">append_datestamp</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">content_type</span><span class="kw">:</span><span class="at"> text/csv</span></span></code></pre></div>
+<p>For a parameterized report:</p>
+<div class="sourceCode" id="cb19"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">my_parameterized_report</span><span class="kw">:</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">cmd</span><span class="kw">:</span><span class="at"> ./run_my_parameterized_report.bash</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">inputs</span><span class="kw">:</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> </span><span class="fu">id</span><span class="kw">:</span><span class="at"> some_id</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">type</span><span class="kw">:</span><span class="at"> text</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">required</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">basename</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;{{some_id}}_my_report&quot;</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">append_datestamp</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">content_type</span><span class="kw">:</span><span class="at"> text/csv</span></span></code></pre></div>
+<h3 id="expose-the-report-in-the-browser-form">3. Expose the report in
+the browser form</h3>
+<p>The browser report request form reads the list of available reports
+from the UI, not from <code>cold_reports.yaml</code> directly. Add the
+new report name and any input fields to the report request page in
+<code>htdocs/</code> so users can request it. The
+<code>report_name</code> submitted in the form POST must exactly match
+the key in <code>cold_reports.yaml</code>.</p>
+<h3 id="restart-cold_reports">4. Restart cold_reports</h3>
+<div class="sourceCode" id="cb20"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bin/cold_reports</span> cold_reports.yaml</span></code></pre></div>
+<p>The runner builds its <code>report_map</code> at startup. Changes to
+<code>cold_reports.yaml</code> are not picked up at runtime.</p>
+<hr />
+<h2 id="debugging-the-report-runner">Debugging the report runner</h2>
+<p><strong>Report stays in “requested” status:</strong> - Confirm
+<code>cold_reports</code> is running and its poll interval is firing.
+Check the service log for <code>INFO: entered servicing_requests</code>
+(if enabled) or <code>INFO: Processing requests for &lt;name&gt;</code>.
+- Confirm the <code>report_name</code> in the queue object exactly
+matches a key in <code>cold_reports.yaml</code>.</p>
+<p><strong>Report status is “aborting, unknown report”:</strong> - The
+<code>report_name</code> in <code>reports.ds</code> does not match any
+key in <code>cold_reports.yaml</code>. Either the report was mis-named
+in the request, or the entry is missing from
+<code>cold_reports.yaml</code>. Check with:
+<code>dataset read reports.ds &lt;uuid&gt;</code> and compare
+<code>report_name</code> against the YAML.</p>
+<p><strong>Report status is “error”:</strong> - The <code>link</code>
+field on the report object contains the error string (prefixed with
+<code>error://</code>). Read it:
+<code>dataset read reports.ds &lt;uuid&gt;</code> and inspect
+<code>link</code>. - Run the command script manually:
+<code>./run_my_report.bash [args]</code> and check exit code and
+stderr.</p>
+<p><strong>Output file is empty or malformed:</strong> - The command ran
+but wrote nothing meaningful to stdout. Run the command directly and
+inspect its output. - Check that the script is executable:
+<code>ls -l run_my_report.bash</code>.</p>
+<p><strong>Input values not passed correctly:</strong> - For
+parameterized reports, add <code>console.log</code> debug output in
+<code>cold_reports.ts</code> or check the existing
+<code>DEBUG resolved command inputs</code> log line. Confirm
+<code>resolveCommandInputs</code> is matching by <code>id</code> and
+<code>type</code>.</p>
+</section>
+<footer-global></footer-global>
+</body>
+</html>

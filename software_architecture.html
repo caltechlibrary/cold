@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <title>cold</title>
+    <link rel="stylesheet" href="https://caltechlibrary.github.io/css/site.css">
+    <link rel="stylesheet" href="https://media.library.caltech.edu/cl-webcomponents/css/code-blocks.css">
+    <script type="module" src="https://media.library.caltech.edu/cl-webcomponents/copyToClipboard.js"></script>
+    <script type="module" src="https://media.library.caltech.edu/cl-webcomponents/footer-global.js"></script>
+</head>
+<body>
+<header>
+<a href="https://library.caltech.edu"><img src="https://media.library.caltech.edu/assets/caltechlibrary-logo.png" alt="Caltech Library logo"></a>
+</header>
+<nav>
+<ul>
+    <li><a href="/">Home</a></li>
+    <li><a href="index.html">README</a></li>
+    <li><a href="LICENSE">LICENSE</a></li>
+    <li><a href="INSTALL.html">INSTALL</a></li>
+    <li><a href="user_manual.html">User Manual</a></li>
+    <li><a href="about.html">About</a></li>
+    <li><a href="search.html">Search</a></li>
+    <li><a href="https://github.com/caltechlibrary/cold">GitHub</a></li>
+</ul>
+</nav>
+<section>
+<h1 id="cold-controlled-object-list-and-dataset">COLD: Controlled Object
+List and Dataset</h1>
+<p>COLD is a web application that Caltech Library uses to manage
+controlled vocabularies and institutional records — primarily
+<strong>people</strong> (researchers), <strong>groups</strong>
+(departments, labs), <strong>funders</strong>,
+<strong>journals</strong>, <strong>subjects</strong>, and related
+identifiers. Think of it as an authoritative registry that other systems
+(like a research data management platform) can query for canonical
+information.</p>
+<hr />
+<h2 id="the-three-layer-architecture">The Three-Layer Architecture</h2>
+<p>The system is split into three independently running services:</p>
+<pre><code>Browser
+   ↓  (via Apache/Shibboleth for auth)
+[cold] on port 8111  ←→  [datasetd] on port 8112
+                               ↓
+                          SQLite (.ds collections)
+[cold_reports] on port 8113  (async report queue)</code></pre>
+<p><strong>1. The Frontend Web Server (Apache + Shibboleth)</strong> Not
+part of this repo, but it sits in front of everything. It handles single
+sign-on authentication and proxies requests to COLD’s services. In
+development you bypass this layer entirely.</p>
+<p><strong>2. <code>cold</code> — The Middleware (cold.ts)</strong> This
+is the heart of the application — a Deno/TypeScript HTTP server that: -
+Routes requests (e.g., <code>/people/*</code> → <code>people.ts</code>,
+<code>/groups/*</code> → <code>groups.ts</code>) - Validates form inputs
+- Renders HTML pages using Handlebars templates in <code>views/</code> -
+Serves static files from <code>htdocs/</code> - Exposes a read-only JSON
+API at <code>/api/*</code> for browser-side JavaScript</p>
+<p><strong>3. <code>datasetd</code> — The Backend
+(cold_api.yaml)</strong> <code>datasetd</code> is a separate program
+(from the <a
+href="https://github.com/caltechlibrary/dataset">dataset</a> project)
+that COLD does <em>not</em> own — it’s a dependency. You configure it
+with <code>cold_api.yaml</code>, which declares: - Which SQLite-backed
+collections exist (people.ds, groups.ds, etc.) - What SQL queries are
+available on each collection - Which CRUD endpoints are enabled</p>
+<p>The middleware talks to datasetd over HTTP (port 8112) using a simple
+JSON API. Datasetd handles all data persistence; COLD handles all
+business logic.</p>
+<hr />
+<h2 id="role-of-dataset-and-datasetd">Role of <code>dataset</code> and
+<code>datasetd</code></h2>
+<p>This is a critical distinction:</p>
+<ul>
+<li><strong>dataset</strong> is a Go library/tool for managing
+collections of JSON objects backed by SQLite. A “collection”
+(<code>.ds</code> directory) is essentially a database of JSON records
+with a defined schema.</li>
+<li><strong>datasetd</strong> is the web service wrapper around dataset
+— it exposes those collections as a JSON REST API.</li>
+<li>COLD uses datasetd as its <strong>data layer</strong>. The
+middleware never touches SQLite directly; it sends HTTP requests to
+datasetd and gets JSON back.</li>
+</ul>
+<p><code>cold_api.yaml</code> is where COLD tells datasetd how to
+behave: what endpoints to expose, what SQL queries to support, and where
+the collections live.</p>
+<hr />
+<h2 id="data-flow-adding-a-person-example">Data Flow: Adding a Person
+(Example)</h2>
+<ol type="1">
+<li>User fills out a form in the browser (<code>people_edit.hbs</code>
+template)</li>
+<li>Browser POSTs form data to <code>cold</code> (port 8111)</li>
+<li><code>cold.ts</code> routes it to <code>handlePeople()</code> in
+<code>people.ts</code></li>
+<li><code>people.ts</code> validates the data and constructs a JSON
+object</li>
+<li>It sends an HTTP PUT/POST to <code>datasetd</code> (port 8112)</li>
+<li><code>datasetd</code> persists the record to <code>people.ds/</code>
+(SQLite)</li>
+<li><code>cold</code> fetches the saved record and renders it with
+Handlebars</li>
+<li>Browser receives HTML showing the new/updated person</li>
+</ol>
+<hr />
+<h2 id="the-report-system">The Report System</h2>
+<p>A third service, <code>cold_reports</code>, handles async report
+generation: 1. A user requests a report via the UI 2. A request record
+is written to <code>reports.ds</code> 3. <code>cold_reports</code> polls
+the queue and runs the configured script (bash, TypeScript binary, SQL,
+etc.) 4. Output is saved to <code>htdocs/rpt/</code> 5. The report
+record is updated with a link, and an email is sent</p>
+<hr />
+<h2 id="browser-side-code">Browser-Side Code</h2>
+<p>TypeScript modules in the repo are <strong>transpiled</strong> into
+plain JavaScript and placed in <code>htdocs/modules/</code>. The browser
+loads these as standard ES modules — no bundler framework, no React,
+just vanilla JavaScript. The key modules are: -
+<code>client_api.js</code> — queries the read-only <code>/api/*</code>
+endpoint on <code>cold</code> - <code>directory_client.js</code> — looks
+up people in Caltech’s directory - <code>orcid_api.js</code> — resolves
+ORCID identifiers</p>
+<hr />
+<h2 id="key-files-to-start-with">Key Files to Start With</h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>cold.ts</code></td>
+<td>Main HTTP server and request router</td>
+</tr>
+<tr>
+<td><code>cold_api.yaml</code></td>
+<td>Configures the datasetd backend</td>
+</tr>
+<tr>
+<td><code>people.ts</code></td>
+<td>Typical example of a collection handler</td>
+</tr>
+<tr>
+<td><code>render.ts</code></td>
+<td>Handlebars template rendering</td>
+</tr>
+<tr>
+<td><code>views/people_list.hbs</code></td>
+<td>Typical Handlebars template</td>
+</tr>
+<tr>
+<td><code>cold_reports.ts</code></td>
+<td>Async report queue processor</td>
+</tr>
+<tr>
+<td><code>browser_api.ts</code></td>
+<td>Read-only JSON API for the browser</td>
+</tr>
+<tr>
+<td><code>deno.json</code></td>
+<td>Build tasks (transpile, compile, test, etc.)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="tech-stack-summary">Tech Stack Summary</h2>
+<ul>
+<li><strong>Runtime</strong>: Deno + TypeScript (compiled to native
+binaries for production)</li>
+<li><strong>Data storage</strong>: Dataset collections (SQLite under the
+hood), accessed via datasetd’s JSON API</li>
+<li><strong>Templating</strong>: Handlebars (<code>.hbs</code> files in
+<code>views/</code>)</li>
+<li><strong>Frontend</strong>: Vanilla HTML5/CSS/JS — no frameworks</li>
+<li><strong>Build tooling</strong>: <code>deno.json</code> tasks +
+<code>Makefile</code> + CMTools + Pandoc</li>
+</ul>
+</section>
+<footer-global></footer-global>
+</body>
+</html>

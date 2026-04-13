@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <title>cold</title>
+    <link rel="stylesheet" href="https://caltechlibrary.github.io/css/site.css">
+    <link rel="stylesheet" href="https://media.library.caltech.edu/cl-webcomponents/css/code-blocks.css">
+    <script type="module" src="https://media.library.caltech.edu/cl-webcomponents/copyToClipboard.js"></script>
+    <script type="module" src="https://media.library.caltech.edu/cl-webcomponents/footer-global.js"></script>
+</head>
+<body>
+<header>
+<a href="https://library.caltech.edu"><img src="https://media.library.caltech.edu/assets/caltechlibrary-logo.png" alt="Caltech Library logo"></a>
+</header>
+<nav>
+<ul>
+    <li><a href="/">Home</a></li>
+    <li><a href="index.html">README</a></li>
+    <li><a href="LICENSE">LICENSE</a></li>
+    <li><a href="INSTALL.html">INSTALL</a></li>
+    <li><a href="user_manual.html">User Manual</a></li>
+    <li><a href="about.html">About</a></li>
+    <li><a href="search.html">Search</a></li>
+    <li><a href="https://github.com/caltechlibrary/cold">GitHub</a></li>
+</ul>
+</nav>
+<section>
+<h1 id="adding-a-new-report-to-cold">Adding a New Report to COLD</h1>
+<p>This guide walks through everything required to add a new report to
+the COLD reports system. It covers both simple (non-parameterized)
+reports and parameterized reports that require user input, using the
+collaborator report as the worked example for the latter case.</p>
+<p>For background on the design intent and security model see
+<code>report_design_choices.md</code>. For a deep dive on the
+configuration files see <code>cold_api_deep_dive.md</code> and
+<code>cold_reports_deep_dive.md</code>.</p>
+<hr />
+<h2 id="overview-of-what-is-involved">Overview of what is involved</h2>
+<p>A report in COLD is the combination of:</p>
+<ol type="1">
+<li><strong>A shell script or program</strong> that writes its output to
+stdout.</li>
+<li><strong>An entry in <code>cold_reports.yaml</code></strong> that
+names the script, defines the output file naming, and (for parameterized
+reports) declares what inputs are expected.</li>
+<li><strong>An option in <code>views/report_list.hbs</code></strong> so
+users can select and request the report in the browser.</li>
+<li>For parameterized reports: <strong>browser-side validation</strong>
+via a TypeScript module or inline JavaScript in the template.</li>
+</ol>
+<p>You may also need a change to <code>cold_api.yaml</code> if your
+report relies on a new SQL query that does not yet exist.</p>
+<hr />
+<h2 id="step-1-decide-whether-cold_api.yaml-needs-to-change">Step 1 —
+Decide whether cold_api.yaml needs to change</h2>
+<p>Most reports call <code>dsquery</code> or <code>dataset</code>
+directly from their shell script, using SQL that is either embedded in
+the script or a companion <code>.sql</code> file. In that case
+<code>cold_api.yaml</code> does not need to change.</p>
+<p>You <strong>do</strong> need to add to <code>cold_api.yaml</code> if
+either of the following is true:</p>
+<ul>
+<li>Your report script calls the <code>datasetd</code> HTTP API (e.g.,
+<code>curl http://localhost:8112/api/...</code>) and it needs a named
+query that does not yet exist.</li>
+<li>Your report needs to read from a dataset collection that is not
+already declared in <code>cold_api.yaml</code>.</li>
+</ul>
+<p>If you do need a new named query, add it under the relevant
+collection in <code>cold_api.yaml</code>:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">-</span><span class="at"> </span><span class="fu">dataset</span><span class="kw">:</span><span class="at"> people.ds</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">query</span><span class="kw">:</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">    # existing queries ...</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">    my_new_query</span><span class="kw">: </span><span class="ch">|</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>      SELECT json_object(&#39;field&#39;, src-&gt;&#39;field&#39;) AS src</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>      FROM people</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>      WHERE src-&gt;&gt;&#39;some_field&#39; = ?</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>      ORDER BY src-&gt;&gt;&#39;field&#39;</span></code></pre></div>
+<p>Restart <code>datasetd</code> after any change to
+<code>cold_api.yaml</code>:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># In development</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">deno</span> task cold_api</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># In production — reload via systemd</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl restart cold_api</span></code></pre></div>
+<p>Test the new query directly before proceeding:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="st">&quot;http://localhost:8112/api/people.ds/_query/my_new_query&quot;</span> <span class="dt">\</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">-H</span> <span class="st">&quot;Content-Type: application/json&quot;</span> <span class="dt">\</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">-d</span> <span class="st">&#39;{&quot;param&quot;: &quot;value&quot;}&#39;</span></span></code></pre></div>
+<hr />
+<h2 id="step-2-write-the-report-script">Step 2 — Write the report
+script</h2>
+<p>Create a shell script in the COLD working directory. The convention
+is <code>run_&lt;report_name&gt;.bash</code>.</p>
+<h3 id="requirements-for-all-report-scripts">Requirements for all report
+scripts</h3>
+<ul>
+<li><strong>Write output to stdout.</strong> The runner reads stdout and
+writes it to <code>htdocs/rpt/&lt;filename&gt;</code>.</li>
+<li><strong>Write errors to stderr or prefix the error with
+<code>error://</code> on stdout.</strong> The runner checks for the
+<code>error://</code> prefix and sets the report status to
+<code>"error"</code> if found.</li>
+<li><strong>Exit 0 on success, non-zero on failure.</strong> A non-zero
+exit causes the runner to mark the report as failed.</li>
+<li><strong>Make the script executable:</strong>
+<code>chmod +x run_my_report.bash</code></li>
+</ul>
+<h3 id="simple-report-example">Simple report example</h3>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">dsquery</span> <span class="dt">\</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">-csv</span> <span class="st">&quot;col1,col2,col3&quot;</span> <span class="dt">\</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">-sql</span> my_report.sql <span class="dt">\</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  people.ds</span></code></pre></div>
+<p>For SQL embedded in the script:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="ex">dsquery</span> <span class="dt">\</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">-csv</span> <span class="st">&quot;family_name,given_name,orcid&quot;</span> <span class="dt">\</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  people.ds <span class="op">&lt;&lt;&#39;SQL&#39;</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="st">SELECT json_object(</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="st">  &#39;family_name&#39;, src-&gt;&#39;family_name&#39;,</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="st">  &#39;given_name&#39;,  src-&gt;&#39;given_name&#39;,</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="st">  &#39;orcid&#39;,       src-&gt;&#39;orcid&#39;</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="st">) AS src</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="st">FROM people</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="st">ORDER BY src-&gt;&gt;&#39;family_name&#39;, src-&gt;&gt;&#39;given_name&#39;</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="op">SQL</span></span></code></pre></div>
+<h3 id="parameterized-report-example">Parameterized report example</h3>
+<p>For parameterized reports, inputs are passed as positional
+command-line arguments (<code>$1</code>, <code>$2</code>, …). The script
+must validate each argument before using it.</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Validate $1 is a non-empty clpid that exists in people.ds</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="bu">[</span> <span class="st">&quot;</span><span class="va">$1</span><span class="st">&quot;</span> <span class="ot">=</span> <span class="st">&quot;&quot;</span> <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">echo</span> <span class="st">&quot;error://Missing clpid, aborting&quot;</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="bu">exit</span> 1</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="cf">fi</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="va">CLPID</span><span class="op">=</span><span class="st">&quot;</span><span class="va">$1</span><span class="st">&quot;</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Confirm the clpid exists before doing any work</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="ot">! </span><span class="ex">dataset</span> read people.ds <span class="st">&quot;</span><span class="va">${CLPID}</span><span class="st">&quot;</span> <span class="op">&gt;</span> /dev/null <span class="dv">2</span><span class="op">&gt;&amp;</span><span class="dv">1</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    <span class="bu">echo</span> <span class="st">&quot;error://Failed to find &#39;</span><span class="va">${CLPID}</span><span class="st">&#39; in people.ds&quot;</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    <span class="bu">exit</span> 1</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="cf">fi</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Run the report, writing output to stdout</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="ex">./bin/my_report_program</span> <span class="st">&quot;</span><span class="va">${CLPID}</span><span class="st">&quot;</span></span></code></pre></div>
+<p>See <code>run_collaborator_report.bash</code> for the actual
+collaborator report implementation. Notice it validates the
+<code>clpid</code> with <code>dataset read</code> before calling
+<code>bin/generate_collaborator_rpt</code>. The script is the last line
+of defence — do not skip the check.</p>
+<hr />
+<h2 id="step-3-add-an-entry-to-cold_reports.yaml">Step 3 — Add an entry
+to cold_reports.yaml</h2>
+<p>Open <code>cold_reports.yaml</code> and add your report under the
+<code>reports:</code> key. The key name is the <code>report_name</code>
+that users will submit in the request form. It must match exactly what
+the browser POSTs.</p>
+<h3 id="non-parameterized-report">Non-parameterized report</h3>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">run_my_report</span><span class="kw">:</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">cmd</span><span class="kw">:</span><span class="at"> ./run_my_report.bash</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">basename</span><span class="kw">:</span><span class="at"> my_report</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">append_datestamp</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">content_type</span><span class="kw">:</span><span class="at"> text/csv</span></span></code></pre></div>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Field</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>cmd</code></td>
+<td>Path to the script, relative to the COLD working directory.</td>
+</tr>
+<tr>
+<td><code>basename</code></td>
+<td>Base filename without extension. Output goes to
+<code>htdocs/rpt/&lt;basename&gt;&lt;ext&gt;</code>.</td>
+</tr>
+<tr>
+<td><code>append_datestamp</code></td>
+<td>Set to <code>true</code> to produce dated snapshots like
+<code>my_report_2026-04-13.csv</code> instead of overwriting the same
+file each time.</td>
+</tr>
+<tr>
+<td><code>content_type</code></td>
+<td>Determines the file extension: <code>text/csv</code> →
+<code>.csv</code>, <code>application/yaml</code> → <code>.yaml</code>,
+<code>application/vnd.ms-excel</code> → <code>.xlsx</code>,
+<code>text/plain</code> → <code>.txt</code>.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="parameterized-report">Parameterized report</h3>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">run_my_parameterized_report</span><span class="kw">:</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">cmd</span><span class="kw">:</span><span class="at"> ./run_my_parameterized_report.bash</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">inputs</span><span class="kw">:</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> </span><span class="fu">id</span><span class="kw">:</span><span class="at"> clpid</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">type</span><span class="kw">:</span><span class="at"> clpid</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">required</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">basename</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;{{clpid}}_my_report&quot;</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">append_datestamp</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">content_type</span><span class="kw">:</span><span class="at"> text/csv</span></span></code></pre></div>
+<p>The <code>inputs</code> list must be declared in the order they will
+be passed as command-line arguments to <code>cmd</code>. Each input
+has:</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Field</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td>The form field name and the <code>{{id}}</code> placeholder in
+<code>basename</code>.</td>
+</tr>
+<tr>
+<td><code>type</code></td>
+<td>HTML5 input type (<code>text</code>, <code>email</code>, etc.) or an
+identifier type from metadatatools (<code>clpid</code>,
+<code>orcid</code>). Used for validation in the middleware and
+runner.</td>
+</tr>
+<tr>
+<td><code>required</code></td>
+<td>If <code>true</code>, the runner rejects the request if this value
+is absent or empty.</td>
+</tr>
+</tbody>
+</table>
+<p>The <code>basename</code> may use <code>{{id}}</code> placeholders
+that are substituted with the validated input values at run time. In the
+example above, a request with <code>clpid = Doiel-R-S</code> produces
+output at <code>htdocs/rpt/Doiel-R-S_my_report.csv</code>.</p>
+<p><strong>Important:</strong> Any input used in <code>basename</code>
+must be <code>required: true</code>, otherwise the filename template
+cannot resolve and the output path will contain <code>_id_</code> as a
+placeholder.</p>
+<hr />
+<h2 id="step-4-add-the-report-to-viewsreport_list.hbs">Step 4 — Add the
+report to views/report_list.hbs</h2>
+<h3 id="non-parameterized-report-1">Non-parameterized report</h3>
+<p>Add an <code>&lt;option&gt;</code> element inside the appropriate
+<code>&lt;optgroup&gt;</code> in the
+<code>&lt;select name="report_name"&gt;</code> block. Choose the group
+that best describes your report, or add a new
+<code>&lt;optgroup&gt;</code> if needed.</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode html"><code class="sourceCode html"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">optgroup</span><span class="ot"> label</span><span class="op">=</span><span class="st">&quot;CSV reports&quot;</span><span class="dt">&gt;</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="co">&lt;!-- existing options ... --&gt;</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;</span><span class="kw">option</span><span class="ot"> value</span><span class="op">=</span><span class="st">&quot;run_my_report&quot;</span><span class="ot"> title</span><span class="op">=</span><span class="st">&quot;Description of what this report contains&quot;</span><span class="dt">&gt;</span>Generate My Report CSV<span class="dt">&lt;/</span><span class="kw">option</span><span class="dt">&gt;</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">optgroup</span><span class="dt">&gt;</span></span></code></pre></div>
+<p>The <code>value</code> attribute must exactly match the key you added
+in <code>cold_reports.yaml</code>.</p>
+<p>That is all for a simple report. No other template changes are needed
+— the form POSTs the selected <code>report_name</code> and an optional
+<code>emails</code> field, and the middleware handles the rest.</p>
+<h3 id="parameterized-report-two-approaches">Parameterized report — two
+approaches</h3>
+<p>Because the main <code>report_list.hbs</code> form is a single
+<code>&lt;select&gt;</code> with a submit button, you have two options
+for introducing report-specific input fields:</p>
+<p><strong>Option A — Inline parameter fields in report_list.hbs
+(recommended for simple inputs)</strong></p>
+<p>Show extra input fields when the parameterized report is selected,
+and hide them otherwise. This keeps everything on the existing reports
+page.</p>
+<p><strong>Option B — Separate standalone page (current collaborator
+report approach)</strong></p>
+<p>Create a dedicated HTML page and TypeScript module for the report.
+Link to it from <code>report_list.hbs</code>. This is what
+<code>collaborator_report.html</code> and
+<code>collaborator_report.ts</code> do today. It gives more room for a
+richer UI (autocomplete, validation feedback) but requires maintaining
+an additional file.</p>
+<p>The collaborator report is currently implemented as Option B and has
+a FIXME to eventually move to Option A. Choose Option A for new reports
+unless the browser-side interaction is significantly more complex than a
+single validated text input.</p>
+<hr />
+<h3 id="option-a-inline-parameter-fields-in-report_list.hbs">Option A —
+Inline parameter fields in report_list.hbs</h3>
+<p>The technique is to add hidden <code>&lt;div&gt;</code> elements for
+each parameterized report’s inputs and show/hide them using a
+<code>change</code> event listener on the
+<code>&lt;select&gt;</code>.</p>
+<p><strong>1. Add the option to the select (uncomment the collaborator
+example or add your own):</strong></p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode html"><code class="sourceCode html"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">optgroup</span><span class="ot"> label</span><span class="op">=</span><span class="st">&quot;Mediated reports&quot;</span><span class="dt">&gt;</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;</span><span class="kw">option</span><span class="ot"> value</span><span class="op">=</span><span class="st">&quot;run_my_parameterized_report&quot;</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="ot">          title</span><span class="op">=</span><span class="st">&quot;Run a parameterized report&quot;</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="ot">          data-inputs</span><span class="op">=</span><span class="st">&quot;my-report-inputs&quot;</span><span class="dt">&gt;</span>My Parameterized Report<span class="dt">&lt;/</span><span class="kw">option</span><span class="dt">&gt;</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">optgroup</span><span class="dt">&gt;</span></span></code></pre></div>
+<p>The <code>data-inputs</code> attribute names the <code>id</code> of
+the <code>&lt;div&gt;</code> holding this report’s parameter fields.</p>
+<p><strong>2. Add a hidden <code>&lt;div&gt;</code> for the report’s
+parameters, inside the <code>&lt;form&gt;</code> block, below the
+<code>&lt;select&gt;</code>:</strong></p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode html"><code class="sourceCode html"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> id</span><span class="op">=</span><span class="st">&quot;my-report-inputs&quot;</span><span class="ot"> class</span><span class="op">=</span><span class="st">&quot;report-inputs&quot;</span><span class="ot"> style</span><span class="op">=</span><span class="st">&quot;display:none&quot;</span><span class="dt">&gt;</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;</span><span class="kw">label</span><span class="ot"> for</span><span class="op">=</span><span class="st">&quot;my_param&quot;</span><span class="dt">&gt;</span>My Parameter<span class="dt">&lt;/</span><span class="kw">label</span><span class="dt">&gt;</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;</span><span class="kw">input</span><span class="ot"> type</span><span class="op">=</span><span class="st">&quot;text&quot;</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="ot">         id</span><span class="op">=</span><span class="st">&quot;my_param&quot;</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="ot">         name</span><span class="op">=</span><span class="st">&quot;my_param&quot;</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="ot">         placeholder</span><span class="op">=</span><span class="st">&quot;Enter value&quot;</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="ot">         autocomplete</span><span class="op">=</span><span class="st">&quot;off&quot;</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="ot">         disabled</span><span class="dt">&gt;</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;</span><span class="kw">small</span><span class="dt">&gt;</span>Description of what this parameter means.<span class="dt">&lt;/</span><span class="kw">small</span><span class="dt">&gt;</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span></code></pre></div>
+<p>Set the inputs <code>disabled</code> by default. The JavaScript below
+will enable them when the report is selected. A disabled input is not
+included in the form POST, which prevents unintended parameters from
+reaching the middleware.</p>
+<p><strong>3. Add a <code>&lt;script&gt;</code> block at the bottom of
+the <code>&lt;body&gt;</code> (before <code>{{&gt;footer}}</code>) to
+wire the show/hide logic:</strong></p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode html"><code class="sourceCode html"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">script</span><span class="dt">&gt;</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>(<span class="kw">function</span> () {</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> select <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">getElementById</span>(<span class="st">&#39;report_name&#39;</span>)<span class="op">;</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> allInputDivs <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">querySelectorAll</span>(<span class="st">&#39;.report-inputs&#39;</span>)<span class="op">;</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="kw">function</span> <span class="fu">updateInputVisibility</span>() {</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> chosen <span class="op">=</span> select<span class="op">.</span><span class="at">options</span>[select<span class="op">.</span><span class="at">selectedIndex</span>]<span class="op">;</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> targetId <span class="op">=</span> chosen<span class="op">.</span><span class="at">dataset</span><span class="op">.</span><span class="at">inputs</span> <span class="op">||</span> <span class="st">&#39;&#39;</span><span class="op">;</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    allInputDivs<span class="op">.</span><span class="fu">forEach</span>(<span class="kw">function</span> (div) {</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (div<span class="op">.</span><span class="at">id</span> <span class="op">===</span> targetId) {</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>        div<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">display</span> <span class="op">=</span> <span class="st">&#39;&#39;</span><span class="op">;</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>        div<span class="op">.</span><span class="fu">querySelectorAll</span>(<span class="st">&#39;input, select, textarea&#39;</span>)<span class="op">.</span><span class="fu">forEach</span>(<span class="kw">function</span> (el) {</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>          el<span class="op">.</span><span class="at">disabled</span> <span class="op">=</span> <span class="kw">false</span><span class="op">;</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>        })<span class="op">;</span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>      } <span class="cf">else</span> {</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>        div<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">display</span> <span class="op">=</span> <span class="st">&#39;none&#39;</span><span class="op">;</span></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>        div<span class="op">.</span><span class="fu">querySelectorAll</span>(<span class="st">&#39;input, select, textarea&#39;</span>)<span class="op">.</span><span class="fu">forEach</span>(<span class="kw">function</span> (el) {</span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>          el<span class="op">.</span><span class="at">disabled</span> <span class="op">=</span> <span class="kw">true</span><span class="op">;</span></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>        })<span class="op">;</span></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>    })<span class="op">;</span></span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>  select<span class="op">.</span><span class="fu">addEventListener</span>(<span class="st">&#39;change&#39;</span><span class="op">,</span> updateInputVisibility)<span class="op">;</span></span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Run once on page load in case the browser restores a selection.</span></span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">updateInputVisibility</span>()<span class="op">;</span></span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>}())<span class="op">;</span></span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">script</span><span class="dt">&gt;</span></span></code></pre></div>
+<p>This is vanilla JavaScript with no dependencies, consistent with
+COLD’s development philosophy.</p>
+<p><strong>4. Add browser-side validation before the form submits
+(optional but recommended):</strong></p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode html"><code class="sourceCode html"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">script</span><span class="dt">&gt;</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="bu">document</span><span class="op">.</span><span class="fu">getElementById</span>(<span class="st">&#39;report-request-form&#39;</span>)<span class="op">.</span><span class="fu">addEventListener</span>(<span class="st">&#39;submit&#39;</span><span class="op">,</span> <span class="kw">function</span> (e) {</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> reportName <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">getElementById</span>(<span class="st">&#39;report_name&#39;</span>)<span class="op">.</span><span class="at">value</span><span class="op">;</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (reportName <span class="op">===</span> <span class="st">&#39;run_my_parameterized_report&#39;</span>) {</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> param <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">getElementById</span>(<span class="st">&#39;my_param&#39;</span>)<span class="op">.</span><span class="at">value</span><span class="op">.</span><span class="fu">trim</span>()<span class="op">;</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (param <span class="op">===</span> <span class="st">&#39;&#39;</span>) {</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>      e<span class="op">.</span><span class="fu">preventDefault</span>()<span class="op">;</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>      <span class="fu">alert</span>(<span class="st">&#39;My Parameter is required for this report.&#39;</span>)<span class="op">;</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span><span class="op">;</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Add any identifier-format validation here (e.g. /^[A-Za-z]+-[A-Za-z]-[A-Za-z]$/.test(param))</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>})<span class="op">;</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">script</span><span class="dt">&gt;</span></span></code></pre></div>
+<hr />
+<h3
+id="option-b-separate-standalone-page-collaborator-report-pattern">Option
+B — Separate standalone page (collaborator report pattern)</h3>
+<p>This approach uses a dedicated HTML page and a TypeScript module. It
+is the current state of the collaborator report.</p>
+<p><strong>Files involved:</strong></p>
+<ul>
+<li><code>htdocs/collaborator_report.md</code> — Source Markdown page
+(rendered to HTML by Pandoc as part of the build)</li>
+<li><code>htdocs/collaborator_report.html</code> — Rendered HTML page
+served directly</li>
+<li><code>collaborator_report.ts</code> — TypeScript module for the
+browser-side UI</li>
+<li><code>htdocs/modules/collaborator_report.js</code> — Transpiled
+JavaScript (generated by <code>deno task htdocs</code>)</li>
+</ul>
+<p><strong>How the collaborator report browser UI works:</strong></p>
+<p><code>collaborator_report.ts</code> exports a
+<code>CollaboratorReportUI</code> class. When instantiated on the page
+it:</p>
+<ol type="1">
+<li>Renders a form with a <code>clpid</code> text input backed by a
+<code>&lt;datalist&gt;</code> for autocomplete.</li>
+<li>Calls <code>GET /api/people.ds/get_all_clpid</code> (via
+<code>ClientAPI</code>) to populate the autocomplete list.</li>
+<li>On form submit, validates the entered <code>clpid</code> against
+<code>GET /api/people.ds/validate_clpid?clpid=&lt;value&gt;</code>
+before sending anything.</li>
+<li>If valid, POSTs to <code>../reports</code> with
+<code>report_name=run_collaborator_report</code> and
+<code>clpid=&lt;value&gt;</code>. This is the same endpoint the
+<code>report_list.hbs</code> form uses.</li>
+</ol>
+<p>The page <code>collaborator_report.html</code> loads the module:</p>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode html"><code class="sourceCode html"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> id</span><span class="op">=</span><span class="st">&quot;collaborator_report&quot;</span><span class="dt">&gt;&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">noscript</span><span class="dt">&gt;</span>JavaScript required for the collaborator report<span class="dt">&lt;/</span><span class="kw">noscript</span><span class="dt">&gt;</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">script</span><span class="ot"> type=</span><span class="st">&quot;module&quot;</span><span class="dt">&gt;</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="im">import</span> { ClientAPI } <span class="im">from</span> <span class="st">&quot;./modules/client_api.js&quot;</span><span class="op">;</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  <span class="im">import</span> { CollaboratorReportUI } <span class="im">from</span> <span class="st">&quot;./modules/collaborator_report.js&quot;</span><span class="op">;</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> baseUrl <span class="op">=</span> URL<span class="op">.</span><span class="fu">parse</span>(<span class="bu">window</span><span class="op">.</span><span class="at">location</span><span class="op">.</span><span class="at">href</span>)<span class="op">;</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  baseUrl<span class="op">.</span><span class="at">pathname</span> <span class="op">=</span> baseUrl<span class="op">.</span><span class="at">pathname</span><span class="op">.</span><span class="fu">replace</span>(<span class="ss">/collaborator_report.html</span><span class="sc">$</span><span class="ss">/g</span><span class="op">,</span> <span class="st">&#39;&#39;</span>)<span class="op">;</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  baseUrl<span class="op">.</span><span class="at">search</span> <span class="op">=</span> <span class="st">&quot;&quot;</span><span class="op">;</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> reportElement <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">getElementById</span>(<span class="st">&quot;collaborator_report&quot;</span>)<span class="op">;</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>  <span class="bu">window</span><span class="op">.</span><span class="fu">addEventListener</span>(<span class="st">&#39;DOMContentLoaded&#39;</span><span class="op">,</span> (<span class="bu">event</span>) <span class="kw">=&gt;</span> {</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> ui <span class="op">=</span> <span class="kw">new</span> <span class="fu">CollaboratorReportUI</span>({</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>      <span class="dt">baseUrl</span><span class="op">:</span> baseUrl<span class="op">,</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>      <span class="dt">reportElement</span><span class="op">:</span> reportElement<span class="op">,</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>      <span class="dt">clientAPI</span><span class="op">:</span> <span class="kw">new</span> <span class="fu">ClientAPI</span>(baseUrl)</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>    })<span class="op">;</span></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>  })<span class="op">;</span></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">script</span><span class="dt">&gt;</span></span></code></pre></div>
+<p><strong>To add a new report using Option B:</strong></p>
+<ol type="1">
+<li>Create <code>my_report.ts</code> following the structure of
+<code>collaborator_report.ts</code>. Export a class that renders the
+form, validates inputs, and POSTs to <code>../reports</code>.</li>
+<li>Rebuild the browser modules: <code>deno task htdocs</code> (this
+bundles <code>my_report.ts</code> into
+<code>htdocs/modules/my_report.js</code>).</li>
+<li>Create <code>htdocs/my_report.html</code> or
+<code>htdocs/my_report.md</code> embedding a
+<code>&lt;div id="my_report"&gt;</code> and a
+<code>&lt;script type="module"&gt;</code> block that imports and
+instantiates your class.</li>
+<li>Add a link from <code>views/report_list.hbs</code> to
+<code>my_report.html</code> so users can find it.</li>
+</ol>
+<p><strong>When to use Option A vs Option B:</strong></p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th></th>
+<th>Option A (inline)</th>
+<th>Option B (separate page)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Input count</td>
+<td>1–2 simple fields</td>
+<td>Many fields or complex UI</td>
+</tr>
+<tr>
+<td>Validation</td>
+<td>Basic HTML5 / regexp</td>
+<td>Requires API lookups (e.g., validate clpid exists)</td>
+</tr>
+<tr>
+<td>Autocomplete</td>
+<td>Not needed</td>
+<td>Needed (datalist populated from API)</td>
+</tr>
+<tr>
+<td>JavaScript dependency</td>
+<td>None (vanilla JS)</td>
+<td>TypeScript module required</td>
+</tr>
+<tr>
+<td>Maintenance</td>
+<td>One file (<code>report_list.hbs</code>)</td>
+<td>Multiple files (<code>*.ts</code>, <code>*.html</code>,
+<code>*.js</code>)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="step-5-restart-cold_reports">Step 5 — Restart cold_reports</h2>
+<p>The <code>cold_reports</code> service reads
+<code>cold_reports.yaml</code> once at startup. Any changes to the file
+require a restart:</p>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># In development</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="ex">deno</span> task cold_reports</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="co"># In production</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl restart cold_reports</span></code></pre></div>
+<hr />
+<h2 id="step-6-test-the-new-report">Step 6 — Test the new report</h2>
+<ol type="1">
+<li>Open the COLD reports page in the browser.</li>
+<li>Select your new report (and fill in any parameters).</li>
+<li>Submit the request.</li>
+<li>Watch the reports table update — status should move from
+<code>requested</code> → <code>processing</code> →
+<code>completed</code>.</li>
+<li>Follow the link to confirm the output file looks correct.</li>
+</ol>
+<p>If the report stays in <code>requested</code> status, check that the
+<code>cold_reports</code> service is running and that the
+<code>report_name</code> submitted exactly matches the key in
+<code>cold_reports.yaml</code>.</p>
+<p>If the status goes to <code>error</code>, read the <code>link</code>
+field in the report queue object for the error message:</p>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="ex">dataset</span> keys reports.ds <span class="kw">|</span> <span class="fu">tail</span> <span class="at">-1</span>      <span class="co"># get the most recent UUID</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="ex">dataset</span> read reports.ds <span class="op">&lt;</span>uuid<span class="op">&gt;</span>          <span class="co"># inspect status and link</span></span></code></pre></div>
+<p>Then run the script directly to see its stderr:</p>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./run_my_report.bash</span> <span class="pp">[</span><span class="ss">args</span><span class="pp">]</span></span></code></pre></div>
+<hr />
+<h2 id="security-checklist-for-parameterized-reports">Security checklist
+for parameterized reports</h2>
+<p>Every new parameterized report must address these points. See
+<code>report_design_choices.md</code> for the full rationale.</p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Browser</strong>: The form
+validates that required fields are non-empty and that values conform to
+the expected format (regexp or API lookup) before
+submitting.</label></li>
+<li><label><input type="checkbox" /><strong>Middleware</strong>
+(<code>cold_reports.ts</code>): <code>handleReportRequest</code> reads
+<code>cold_reports.yaml</code> to get the input definitions, merges form
+values into the <code>Report</code> object, and rejects any parameter
+not declared in the <code>inputs</code> list.</label></li>
+<li><label><input type="checkbox" /><strong>Runner</strong>
+(<code>cold_reports.ts</code>, <code>resolveCommandInputs</code>):
+Inputs are matched by <code>id</code> and <code>type</code> before being
+passed to the command. Any mismatch substitutes an empty value. Only
+declared inputs are forwarded.</label></li>
+<li><label><input type="checkbox" /><strong>Script</strong>
+(<code>run_my_report.bash</code>): The script validates each
+<code>$1</code>, <code>$2</code>, … argument before using it. A missing
+or malformed argument prints <code>error://message</code> and exits
+non-zero.</label></li>
+<li><label><input type="checkbox" /><strong>Parameters are strings
+only</strong>: Inputs must never be used to construct a shell command in
+a way that allows injection. Pass values as positional arguments, not
+interpolated into a command string.</label></li>
+<li><label><input type="checkbox" /><strong>No free-text
+inputs</strong>: Use identifiers with a defined format (e.g.,
+<code>clpid</code>, <code>orcid</code>) or constrained
+<code>&lt;select&gt;</code> menus. Never accept arbitrary free text as
+an input to a parameterized report.</label></li>
+<li><label><input type="checkbox" /><strong>Filename safety</strong>: If
+the parameter contributes to the output filename (via
+<code>basename</code> template), confirm the value cannot traverse
+directories. The runner does not currently sanitise paths, so this is
+the script author’s responsibility.</label></li>
+</ul>
+<hr />
+<h2 id="quick-reference-files-to-change-for-each-report-type">Quick
+reference: files to change for each report type</h2>
+<h3 id="non-parameterized-report-2">Non-parameterized report</h3>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Change</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>run_&lt;name&gt;.bash</code></td>
+<td>Create the script</td>
+</tr>
+<tr>
+<td><code>cold_reports.yaml</code></td>
+<td>Add the report entry</td>
+</tr>
+<tr>
+<td><code>views/report_list.hbs</code></td>
+<td>Add <code>&lt;option&gt;</code> to the select</td>
+</tr>
+<tr>
+<td><code>cold_api.yaml</code></td>
+<td>Only if a new SQL query is needed</td>
+</tr>
+</tbody>
+</table>
+<p>Restart: <code>cold_reports</code> (and <code>datasetd</code> if
+<code>cold_api.yaml</code> changed).</p>
+<h3 id="parameterized-report-option-a-inline-form">Parameterized report
+— Option A (inline form)</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>File</th>
+<th>Change</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>run_&lt;name&gt;.bash</code></td>
+<td>Create the script, validate <code>$1</code>, <code>$2</code>, …</td>
+</tr>
+<tr>
+<td><code>cold_reports.yaml</code></td>
+<td>Add the report entry with <code>inputs:</code> list</td>
+</tr>
+<tr>
+<td><code>views/report_list.hbs</code></td>
+<td>Add <code>&lt;option&gt;</code> with <code>data-inputs</code>,
+hidden <code>&lt;div&gt;</code> with inputs, show/hide script, submit
+validation script</td>
+</tr>
+<tr>
+<td><code>cold_api.yaml</code></td>
+<td>Only if a new SQL query is needed</td>
+</tr>
+</tbody>
+</table>
+<p>Restart: <code>cold_reports</code> (and <code>datasetd</code> if
+<code>cold_api.yaml</code> changed).</p>
+<h3 id="parameterized-report-option-b-separate-page">Parameterized
+report — Option B (separate page)</h3>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Change</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>run_&lt;name&gt;.bash</code></td>
+<td>Create the script, validate <code>$1</code>, <code>$2</code>, …</td>
+</tr>
+<tr>
+<td><code>cold_reports.yaml</code></td>
+<td>Add the report entry with <code>inputs:</code> list</td>
+</tr>
+<tr>
+<td><code>&lt;name&gt;.ts</code></td>
+<td>Create the TypeScript UI class</td>
+</tr>
+<tr>
+<td><code>htdocs/&lt;name&gt;.html</code></td>
+<td>Create the standalone HTML page</td>
+</tr>
+<tr>
+<td><code>views/report_list.hbs</code></td>
+<td>Add a link to the standalone page</td>
+</tr>
+<tr>
+<td><code>cold_api.yaml</code></td>
+<td>Only if a new SQL query is needed</td>
+</tr>
+</tbody>
+</table>
+<p>Build: <code>deno task htdocs</code> (to transpile the TypeScript
+module).</p>
+<p>Restart: <code>cold_reports</code> (and <code>datasetd</code> if
+<code>cold_api.yaml</code> changed).</p>
+</section>
+<footer-global></footer-global>
+</body>
+</html>

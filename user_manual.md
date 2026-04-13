@@ -1,27 +1,42 @@
 
 # User Manual
 
+## Getting Started
+
+- [COLD overview](COLD.md)
+- [Installation](INSTALL.md)
+- [Deployment](deployment.md)
 - [Site search](search.md)
 
-## Public Interface
+## Using COLD
 
-- [COLD](COLD.md), an overview
-- [Installation](INSTALL.md)
-- [deployments](deployment.md)
-- [cold user interface development](cold_user_interface.md)
-- [cold](cold.1.md) (man page)
-- [cold_reports](cold_reports.1.md) (man page)
-- [directory_sync](directory_sync.1.md) (man page)
-- [division_people](division_people.1.md) (man page)
-- [journal_vocabulary](journal_vocabulary.1.md) (man page)
-- [thesis_option_vocabulary](thesis_option_vocabulary.1.md) (man page)
-- [group_vocabulary](group_vocabulary.1.md) (man page)
-- [people_vocabulary](people_vocabulary.1.md) (man page)
-- [generate_collaborator_rpt](generate_collaborator_rpt.1.md) (man page)
-- [ROR Integration](ror_integration.md)
-    - [ror_import](ror_import.1.md) (man page)
-- [cold_api_test](cold_api_test.1.md) (man page)
-- [devemopment notes](development_notes.md)
-- [presentations](presentations/presentation1.md)
-- [changing keys and identifier](changing_keys_and_identifiers.md)
-- [RDM Review Queue integration](rdm_review_queue_integration.md)
+- [COLD user interface](cold_user_interface.md)
+- [Changing keys and identifiers](changing_keys_and_identifiers.md)
+- [ROR integration](ror_integration.md)
+- [RDM review queue integration](rdm_review_queue_integration.md)
+
+## Command Reference
+
+- [cold](cold.1.md)
+- [cold_reports](cold_reports.1.md)
+- [directory_sync](directory_sync.1.md)
+- [division_people](division_people.1.md)
+- [generate_collaborator_rpt](generate_collaborator_rpt.1.md)
+- [journal_vocabulary](journal_vocabulary.1.md)
+- [thesis_option_vocabulary](thesis_option_vocabulary.1.md)
+- [group_vocabulary](group_vocabulary.1.md)
+- [people_vocabulary](people_vocabulary.1.md)
+- [ror_import](ror_import.1.md)
+- [cold_api_test](cold_api_test.1.md)
+
+## For Developers and Maintainers
+
+- [Software architecture](software_architecture.md)
+- [Development notes](development_notes.md)
+- [Configuring COLD, an overview](configuring_cold.md)
+  - [cold_api.yaml deep dive](cold_api_deep_dive.md)
+  - [cold_reports.yaml deep dive](cold_reports_deep_dive.md)
+- [Adding a new report to COLD](adding_cold_reports.md)
+- [Implementing browser side features in COLD](adding_browser_features.md)
+- [Presentations](presentations/presentation1.md)
+

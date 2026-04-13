@@ -40,3 +40,4 @@ load_rdm_records.bash
 *_review_submissions.sql
 docker_*.bash
 load_dataset_with_jsonl.bash
+CLAUDE.html

@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <title>cold</title>
+    <link rel="stylesheet" href="https://caltechlibrary.github.io/css/site.css">
+    <link rel="stylesheet" href="https://media.library.caltech.edu/cl-webcomponents/css/code-blocks.css">
+    <script type="module" src="https://media.library.caltech.edu/cl-webcomponents/copyToClipboard.js"></script>
+    <script type="module" src="https://media.library.caltech.edu/cl-webcomponents/footer-global.js"></script>
+</head>
+<body>
+<header>
+<a href="https://library.caltech.edu"><img src="https://media.library.caltech.edu/assets/caltechlibrary-logo.png" alt="Caltech Library logo"></a>
+</header>
+<nav>
+<ul>
+    <li><a href="/">Home</a></li>
+    <li><a href="index.html">README</a></li>
+    <li><a href="LICENSE">LICENSE</a></li>
+    <li><a href="INSTALL.html">INSTALL</a></li>
+    <li><a href="user_manual.html">User Manual</a></li>
+    <li><a href="about.html">About</a></li>
+    <li><a href="search.html">Search</a></li>
+    <li><a href="https://github.com/caltechlibrary/cold">GitHub</a></li>
+</ul>
+</nav>
+<section>
+<h1 id="cold_api.yaml-deep-dive">cold_api.yaml Deep Dive</h1>
+<p><code>cold_api.yaml</code> is the configuration file for
+<code>datasetd</code>, the JSON API backend that COLD builds on. It is
+not read by any TypeScript code — it is consumed entirely by the
+<code>datasetd</code> binary. Everything the middleware and browser can
+access about stored objects is ultimately controlled by what this file
+declares.</p>
+<p>Reference documentation for the <code>datasetd</code> configuration
+format: - <a
+href="https://caltechlibrary.github.io/dataset/datasetd.1.html"
+class="uri">https://caltechlibrary.github.io/dataset/datasetd.1.html</a>
+- <a href="https://caltechlibrary.github.io/dataset/datasetd_api.5.html"
+class="uri">https://caltechlibrary.github.io/dataset/datasetd_api.5.html</a></p>
+<hr />
+<h2 id="top-level-fields">Top-level fields</h2>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">host</span><span class="kw">:</span><span class="at"> localhost:8112</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">collections</span><span class="kw">:</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> ...</span></span></code></pre></div>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Field</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>host</code></td>
+<td>The TCP address <code>datasetd</code> listens on. The middleware
+(<code>cold.ts</code>) defaults its <code>--apiUrl</code> to
+<code>http://localhost:8112</code>. They must match.</td>
+</tr>
+<tr>
+<td><code>collections</code></td>
+<td>List of dataset collection configurations. Each entry exposes one
+<code>.ds</code> directory as a REST resource.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="collection-block-structure">Collection block structure</h2>
+<p>Each item under <code>collections</code> has this shape:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">-</span><span class="at"> </span><span class="fu">dataset</span><span class="kw">:</span><span class="at"> &lt;name&gt;.ds</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">query</span><span class="kw">:</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">    &lt;query_name&gt;</span><span class="kw">: </span><span class="ch">|</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>      &lt;SQL&gt;</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">keys</span><span class="kw">:</span><span class="at"> true|false</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">create</span><span class="kw">:</span><span class="at"> true|false</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">read</span><span class="kw">:</span><span class="at"> true|false</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">update</span><span class="kw">:</span><span class="at"> true|false</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">versions</span><span class="kw">:</span><span class="at"> true|false</span></span></code></pre></div>
+<h3 id="dataset">dataset</h3>
+<p>The path to the dataset collection directory, relative to the working
+directory where <code>datasetd</code> is started. The collection name
+(without <code>.ds</code>) becomes the first segment of every URL path
+for that collection: <code>/api/&lt;name&gt;/...</code>.</p>
+<h3 id="query">query</h3>
+<p>A map of named SQL queries. Each query is a SQLite statement that
+operates on the collection’s internal <code>src</code> column, which
+holds the JSON object for each record. Results are returned as a JSON
+array.</p>
+<p>Named queries are exposed at:</p>
+<pre><code>GET /api/&lt;collection_name&gt;/_query/&lt;query_name&gt;</code></pre>
+<p>Parameterized queries use <code>?</code> placeholders. Parameters are
+passed as a JSON body or as query-string key-value pairs, depending on
+how the caller constructs the request. The middleware’s
+<code>browser_api.ts</code> builds query-string calls; internal
+TypeScript handlers use the <code>Dataset</code> client from
+<code>deps.ts</code>.</p>
+<h3 id="crud-permissions">CRUD permissions</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>HTTP method enabled</th>
+<th>datasetd endpoint</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>keys: true</code></td>
+<td>GET</td>
+<td><code>/api/&lt;name&gt;/keys</code></td>
+</tr>
+<tr>
+<td><code>create: true</code></td>
+<td>POST</td>
+<td><code>/api/&lt;name&gt;/</code></td>
+</tr>
+<tr>
+<td><code>read: true</code></td>
+<td>GET</td>
+<td><code>/api/&lt;name&gt;/&lt;key&gt;</code></td>
+</tr>
+<tr>
+<td><code>update: true</code></td>
+<td>PUT</td>
+<td><code>/api/&lt;name&gt;/&lt;key&gt;</code></td>
+</tr>
+</tbody>
+</table>
+<p>There is no <code>delete</code> permission declared in COLD’s
+configuration. Records are never deleted through the API — they are
+either versioned or left in place.</p>
+<h3 id="versions">versions</h3>
+<p>When <code>versions: true</code>, <code>datasetd</code> keeps
+previous copies of each object whenever it is updated. This is COLD’s
+audit trail. All collections enable versioning.</p>
+<hr />
+<h2 id="collections-reference">Collections reference</h2>
+<h3 id="people.ds">people.ds</h3>
+<p>Stores person objects. Each object is keyed by <code>clpid</code>
+(Caltech Library People ID).</p>
+<p><strong>Named queries:</strong></p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Query</th>
+<th>Parameters</th>
+<th>Returns</th>
+<th>Used by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>people_vocabulary</code></td>
+<td>none</td>
+<td>List of objects shaped for the authors vocabulary:
+<code>clpid</code>, <code>family_name</code>, <code>given_name</code>,
+<code>identifiers</code> (ORCID if present), <code>affiliations</code>
+(Caltech ROR if present)</td>
+<td><code>people_vocabulary.ts</code>,
+<code>run_people_vocabulary.bash</code></td>
+</tr>
+<tr>
+<td><code>people_names</code></td>
+<td>none</td>
+<td>Compact list: <code>clpid</code>, <code>family_name</code>,
+<code>given_name</code>, <code>orcid</code>, <code>thesis_id</code>,
+<code>directory_id</code></td>
+<td><code>client_api.ts getPeopleList()</code></td>
+</tr>
+<tr>
+<td><code>missing_bios</code></td>
+<td>none</td>
+<td>People with a <code>directory_user_id</code> but an empty
+<code>bio</code> field</td>
+<td>Administrative/debugging</td>
+</tr>
+<tr>
+<td><code>directory_people</code></td>
+<td>none</td>
+<td>People with a <code>directory_user_id</code> (i.e., current Caltech
+directory members)</td>
+<td><code>directory_sync.ts</code></td>
+</tr>
+<tr>
+<td><code>people_csv</code></td>
+<td>none</td>
+<td>Full people export for the CSV report</td>
+<td><code>run_people_csv.bash</code> (via
+<code>cold_reports</code>)</td>
+</tr>
+<tr>
+<td><code>division_people</code></td>
+<td>none</td>
+<td>Per-person <code>division</code>, <code>clpid</code>,
+<code>orcid</code>, <code>family_name</code>,
+<code>given_name</code></td>
+<td><code>run_division_people.bash</code></td>
+</tr>
+<tr>
+<td><code>people_membership</code></td>
+<td>none</td>
+<td>Flattened list: one row per person-per-group membership</td>
+<td><code>run_people_membership.bash</code></td>
+</tr>
+<tr>
+<td><code>get_all_clpid</code></td>
+<td>none</td>
+<td>Ordered list of all <code>clpid</code> strings (for
+autocomplete)</td>
+<td>Browser UI</td>
+</tr>
+<tr>
+<td><code>validate_clpid</code></td>
+<td><code>?</code> (clpid value)</td>
+<td>Single-element list <code>{clpid}</code> if found, empty if not</td>
+<td>Input validation</td>
+</tr>
+<tr>
+<td><code>lookup_clgid</code></td>
+<td><code>?</code> (clgid value)</td>
+<td>People who belong to the group with that <code>clgid</code></td>
+<td><code>client_api.ts lookupGroupMembership()</code>,
+<code>browser_api.ts</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Notes on <code>people_vocabulary</code>:</strong> The query
+uses a <code>CASE</code> expression to include an ORCID identifier only
+when <code>length(src-&gt;&gt;'orcid') &gt; 1</code>, which guards
+against empty strings. Caltech affiliation is included only when the
+<code>ror</code> field equals the Caltech ROR
+(<code>https://ror.org/05dxps055</code>). These business rules live in
+the SQL, not in TypeScript.</p>
+<p><strong>Notes on <code>lookup_clgid</code>:</strong> This query uses
+a correlated subquery against <code>json_each(src, '$.groups')</code> to
+find all people whose <code>groups</code> array contains the requested
+<code>clgid</code>. The <code>?</code> placeholder is bound by the
+caller.</p>
+<hr />
+<h3 id="groups.ds">groups.ds</h3>
+<p>Stores group objects. Each object is keyed by <code>clgid</code>
+(Caltech Library Group ID).</p>
+<p><strong>Named queries:</strong></p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Query</th>
+<th>Parameters</th>
+<th>Returns</th>
+<th>Used by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>group_vocabulary</code></td>
+<td>none</td>
+<td>List of <code>{clgid, group_name}</code> sorted by name</td>
+<td><code>group_vocabulary.ts</code>,
+<code>run_group_vocabulary.bash</code></td>
+</tr>
+<tr>
+<td><code>group_names</code></td>
+<td>none</td>
+<td>Same shape as <code>group_vocabulary</code> (duplicate, retained for
+compatibility)</td>
+<td><code>client_api.ts getGroupsList()</code></td>
+</tr>
+<tr>
+<td><code>lookup_name</code></td>
+<td><code>?</code> (name pattern)</td>
+<td>Groups whose <code>name</code> or any <code>alternative</code> name
+matches the LIKE pattern</td>
+<td><code>client_api.ts lookupGroupName()</code></td>
+</tr>
+<tr>
+<td><code>lookup_name_or_clgid</code></td>
+<td><code>?</code>, <code>?</code>, <code>?</code> (name, clgid,
+alternative)</td>
+<td>Groups matching any of: name, clgid, alternative names</td>
+<td><code>utils.ts lookupGroupInfo()</code></td>
+</tr>
+<tr>
+<td><code>get_all_clgid</code></td>
+<td>none</td>
+<td>Ordered list of all <code>clgid</code> strings (for
+autocomplete)</td>
+<td>Browser UI</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Notes on <code>lookup_name</code> and
+<code>lookup_name_or_clgid</code>:</strong> Both use
+<code>EXISTS(SELECT true FROM json_each(src-&gt;'alternative') WHERE ...)</code>
+to search inside the JSON array of alternative names. LIKE patterns
+(e.g., <code>%LIGO%</code>) are supplied by callers.
+<code>lookup_name_or_clgid</code> takes three <code>?</code> parameters
+that are all typically set to the same search string.</p>
+<hr />
+<h3 id="funders.ds">funders.ds</h3>
+<p>Stores funder objects. Each object is keyed by <code>clfid</code>
+(Caltech Library Funder ID).</p>
+<p><strong>Named queries:</strong></p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Query</th>
+<th>Parameters</th>
+<th>Returns</th>
+<th>Used by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>funder_names</code></td>
+<td>none</td>
+<td>List of <code>{clfid, name, ror}</code> sorted by name</td>
+<td>Funder autocomplete</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="subjects.ds">subjects.ds</h3>
+<p>Stores subject classification objects. Each object is keyed by
+<code>clsid</code>.</p>
+<p><strong>Named queries:</strong></p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Query</th>
+<th>Parameters</th>
+<th>Returns</th>
+<th>Used by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>subject_names</code></td>
+<td>none</td>
+<td>List of <code>{clsid, name}</code> sorted by name</td>
+<td>Subject autocomplete</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="thesis_options.ds">thesis_options.ds</h3>
+<p>Stores thesis option objects (degree program options). Each object is
+keyed by <code>option_id</code>.</p>
+<p><strong>Named queries:</strong></p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Query</th>
+<th>Parameters</th>
+<th>Returns</th>
+<th>Used by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>thesis_option_names</code></td>
+<td>none</td>
+<td>List of <code>{option_id, name, division}</code> sorted by name</td>
+<td><code>thesis_option_vocabulary.ts</code>, thesis autocomplete</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="journals.ds">journals.ds</h3>
+<p>Stores journal metadata. Each object is keyed by ISSN.</p>
+<p><strong>Named queries:</strong></p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Query</th>
+<th>Parameters</th>
+<th>Returns</th>
+<th>Used by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>journal_names</code></td>
+<td>none</td>
+<td>List of <code>{issn, name}</code> sorted by name</td>
+<td><code>journal_vocabulary.ts</code>, journal autocomplete</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="doi_prefix.ds">doi_prefix.ds</h3>
+<p>Stores DOI prefix records. Each object is keyed by DOI prefix
+string.</p>
+<p><strong>Named queries:</strong></p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Query</th>
+<th>Parameters</th>
+<th>Returns</th>
+<th>Used by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>doi_prefix_names</code></td>
+<td>none</td>
+<td>List of <code>{doi_prefix, name}</code> sorted by name</td>
+<td>DOI prefix autocomplete</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="reports.ds">reports.ds</h3>
+<p>This collection is the report request queue — the integration point
+between the middleware and the <code>cold_reports</code> service.
+Objects are keyed by a UUID v5 generated from the report request content
+plus a timestamp.</p>
+<p><strong>Named queries:</strong></p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Query</th>
+<th>Parameters</th>
+<th>Returns</th>
+<th>Used by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>report_list</code></td>
+<td>none</td>
+<td>All report requests ordered by <code>updated</code> descending
+(stack view)</td>
+<td><code>cold_reports.ts handleReportsList()</code> → renders the
+<code>/reports</code> page</td>
+</tr>
+<tr>
+<td><code>next_request</code></td>
+<td>none</td>
+<td>Oldest report request with <code>status = 'requested'</code> (FIFO
+queue)</td>
+<td><code>cold_reports.ts servicing_requests()</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong><code>report_list</code></strong> omits the
+<code>inputs</code> field — it is a summary view for display.
+<strong><code>next_request</code></strong> includes <code>inputs</code>
+so the runner has the parameter values needed to execute the
+command.</p>
+<p><strong>Status lifecycle:</strong></p>
+<pre><code>&quot;requested&quot;  →  &quot;processing&quot;  →  &quot;completed&quot;
+                             →  &quot;error&quot;
+                             →  &quot;aborting, unknown report&quot;</code></pre>
+<p>The transition from <code>"requested"</code> to
+<code>"processing"</code> is written by <code>cold_reports</code> before
+executing the command; the final status is written after the command
+returns.</p>
+<hr />
+<h3 id="ror.ds">ror.ds</h3>
+<p>Stores Research Organization Registry (ROR) records imported from a
+ROR data dump. Each object is keyed by the ROR identifier suffix (the
+part after <code>https://ror.org/</code>).</p>
+<p><strong>Named queries:</strong></p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Query</th>
+<th>Parameters</th>
+<th>Returns</th>
+<th>Used by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>get_ror</code></td>
+<td><code>?</code> (ror key)</td>
+<td>Full ROR record for the key</td>
+<td><code>client_api.ts getROR()</code></td>
+</tr>
+<tr>
+<td><code>lookup_by_name_or_acronym</code></td>
+<td><code>?</code>, <code>?</code> (name pattern, acronym pattern)</td>
+<td>List of <code>{ror, name, country, acronyms}</code></td>
+<td><code>client_api.ts</code></td>
+</tr>
+<tr>
+<td><code>lookup_by_name</code></td>
+<td><code>?</code> (name pattern)</td>
+<td>List of <code>{ror, name, country, acronyms}</code></td>
+<td>ROR name lookup</td>
+</tr>
+<tr>
+<td><code>lookup_by_acronym</code></td>
+<td><code>?</code> (acronym pattern)</td>
+<td>List of <code>{ror, name, country, acronyms}</code></td>
+<td>ROR acronym lookup</td>
+</tr>
+<tr>
+<td><code>clear_ror_data</code></td>
+<td>none</td>
+<td>Deletes all ROR records (<code>DELETE FROM ror</code>)</td>
+<td><code>ror_import.ts</code> before re-import</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Note:</strong> <code>clear_ror_data</code> is a
+<code>DELETE</code> statement. In <code>datasetd</code> this is exposed
+as a query endpoint, not a DELETE HTTP method. The
+<code>ror_import.ts</code> tool calls it before loading a fresh ROR data
+dump.</p>
+<hr />
+<h3 id="rdm_review_queue.ds">rdm_review_queue.ds</h3>
+<p>Stores records from the RDM (Research Data Management) submission
+review queue. Records are deposited here from the InvenioRDM system for
+curator review.</p>
+<p><strong>Named queries:</strong></p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Query</th>
+<th>Parameters</th>
+<th>Returns</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>browse</code></td>
+<td>none</td>
+<td>All records ordered by <code>updated</code> descending</td>
+</tr>
+<tr>
+<td><code>search</code></td>
+<td><code>?</code> (text pattern)</td>
+<td>Records where the JSON source matches the pattern</td>
+</tr>
+<tr>
+<td><code>by_name</code></td>
+<td><code>?</code> (name pattern)</td>
+<td>Records where any creator’s <code>person_or_org.name</code>
+matches</td>
+</tr>
+<tr>
+<td><code>review_queue_by_name</code></td>
+<td><code>?</code> (name pattern)</td>
+<td>Same as <code>by_name</code> but filtered to
+<code>status = 'submitted'</code></td>
+</tr>
+<tr>
+<td><code>by_clpid</code></td>
+<td><code>?</code> (clpid)</td>
+<td>Records where any creator has a <code>clpid</code> identifier
+matching the value</td>
+</tr>
+<tr>
+<td><code>review_queue_by_clpid</code></td>
+<td><code>?</code> (clpid)</td>
+<td>Same as <code>by_clpid</code> but filtered to
+<code>status = 'submitted'</code></td>
+</tr>
+<tr>
+<td><code>by_orcid</code></td>
+<td><code>?</code> (orcid)</td>
+<td>Records where any creator has an <code>orcid</code> identifier
+matching the value</td>
+</tr>
+<tr>
+<td><code>review_queue_by_orcid</code></td>
+<td><code>?</code> (orcid)</td>
+<td>Same as <code>by_orcid</code> but filtered to
+<code>status = 'submitted'</code></td>
+</tr>
+<tr>
+<td><code>by_clgid</code></td>
+<td><code>?</code> (clgid)</td>
+<td>Records where <code>custom_fields."caltech:groups"</code> contains
+the clgid</td>
+</tr>
+<tr>
+<td><code>review_queue_by_clgid</code></td>
+<td><code>?</code> (clgid)</td>
+<td>Same as <code>by_clgid</code> but filtered to
+<code>status = 'submitted'</code></td>
+</tr>
+<tr>
+<td><code>review_queue_mentions</code></td>
+<td><code>?</code> (text pattern)</td>
+<td>Submitted records with comments containing the pattern</td>
+</tr>
+</tbody>
+</table>
+<p>These queries make heavy use of <code>json_each</code> to search
+inside nested JSON arrays (creators, identifiers, groups). The
+<code>JOIN</code> between two <code>json_each</code> calls in the
+<code>by_clpid</code>/<code>by_orcid</code> family is the pattern to
+follow when adding new identifier-based queries.</p>
+<hr />
+<h2 id="how-the-middleware-consumes-cold_api.yaml">How the middleware
+consumes cold_api.yaml</h2>
+<h3 id="browser_api.ts-the-read-only-browser-api">browser_api.ts — the
+read-only browser API</h3>
+<p><code>handleBrowserAPI</code> (called for <code>GET /api/...</code>)
+parses the URL path using <code>apiPathParse()</code>:</p>
+<pre><code>/api/&lt;c_name&gt;/&lt;query_name&gt;[?key=value&amp;...]</code></pre>
+<p>It constructs a <code>DatasetApiClient</code> for the named
+collection and calls <code>.query(query_name, paramList, body)</code>.
+The result is returned as JSON to the browser. This is how browser-side
+TypeScript modules (<code>client_api.ts</code>,
+<code>validator.ts</code>, <code>collaborator_report.ts</code>) access
+named queries.</p>
+<p><strong>Important:</strong> <code>browser_api.ts</code> only handles
+<code>GET</code>. All browser queries are read-only. Mutation goes
+through the dedicated collection handlers (<code>people.ts</code>,
+<code>groups.ts</code>, etc.) which call <code>datasetd</code>’s CRUD
+endpoints directly, not through named queries.</p>
+<h3 id="collection-handlers-people.ts-groups.ts-etc.">Collection
+handlers (people.ts, groups.ts, etc.)</h3>
+<p>Each collection has a handler module that uses the
+<code>Dataset</code> class from <code>deps.ts</code> to call
+<code>datasetd</code>’s CRUD endpoints:</p>
+<ul>
+<li><code>ds.keys()</code> →
+<code>GET /api/&lt;name&gt;/keys</code></li>
+<li><code>ds.read(key)</code> →
+<code>GET /api/&lt;name&gt;/&lt;key&gt;</code></li>
+<li><code>ds.create(key, obj)</code> →
+<code>POST /api/&lt;name&gt;/</code></li>
+<li><code>ds.update(key, obj)</code> →
+<code>PUT /api/&lt;name&gt;/&lt;key&gt;</code></li>
+<li><code>ds.query(name, params, body)</code> →
+<code>GET /api/&lt;name&gt;/_query/&lt;name&gt;</code></li>
+</ul>
+<p>These are available only because the corresponding <code>keys</code>,
+<code>read</code>, <code>create</code>, <code>update</code> flags are
+set to <code>true</code> in <code>cold_api.yaml</code>.</p>
+<hr />
+<h2 id="debugging-tips">Debugging tips</h2>
+<p><strong>Query returns unexpected results:</strong> Run the SQL
+directly against the SQLite database inside the <code>.ds</code>
+directory:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">sqlite3</span> people.ds/collection.db <span class="st">&quot;SELECT json_object(...) FROM people ...&quot;</span></span></code></pre></div>
+<p>The <code>src</code> column holds the raw JSON. The table name is the
+collection name without <code>.ds</code>.</p>
+<p><strong><code>datasetd</code> rejects a request:</strong> Check that
+the corresponding permission flag (<code>create</code>,
+<code>read</code>, <code>update</code>, <code>keys</code>) is set to
+<code>true</code> in <code>cold_api.yaml</code> for that collection.</p>
+<p><strong>A new query is not accessible:</strong> After editing
+<code>cold_api.yaml</code>, restart <code>datasetd</code>. It reads the
+file at startup only.</p>
+<p><strong>Parameter mismatch:</strong> If a query uses <code>?</code>
+placeholders, the caller must supply exactly the right number of
+parameters in the correct order. Mismatch causes a SQLite error that
+appears in the <code>datasetd</code> log.</p>
+<p><strong>Port conflict:</strong> If the middleware’s
+<code>--apiUrl</code> does not match <code>cold_api.yaml</code>’s
+<code>host</code>, all API calls will fail with a connection error.
+Default is <code>localhost:8112</code> on both sides.</p>
+<hr />
+<h2 id="adding-a-new-query">Adding a new query</h2>
+<ol type="1">
+<li>Edit <code>cold_api.yaml</code>. Under the relevant collection’s
+<code>query:</code> block, add:</li>
+</ol>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">my_new_query</span><span class="kw">: </span><span class="ch">|</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  SELECT json_object(&#39;field&#39;, src-&gt;&#39;field&#39;) AS src</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  FROM &lt;collection_name&gt;</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  WHERE src-&gt;&gt;&#39;some_field&#39; = ?</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  ORDER BY src-&gt;&gt;&#39;field&#39;</span></code></pre></div>
+<ol start="2" type="1">
+<li><p>Restart <code>datasetd</code>.</p></li>
+<li><p>Test directly:</p></li>
+</ol>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="st">&quot;http://localhost:8112/api/&lt;collection_name&gt;/_query/my_new_query&quot;</span> <span class="dt">\</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">-H</span> <span class="st">&quot;Content-Type: application/json&quot;</span> <span class="dt">\</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">-d</span> <span class="st">&#39;{&quot;param&quot;: &quot;value&quot;}&#39;</span></span></code></pre></div>
+<ol start="4" type="1">
+<li>Call it from TypeScript via <code>browser_api.ts</code> at
+<code>GET /api/&lt;collection_name&gt;/my_new_query?q=value</code>, or
+from a server-side handler via
+<code>ds.query("my_new_query", ["param"], {param: "value"})</code>.</li>
+</ol>
+<hr />
+<h2 id="adding-a-new-collection">Adding a new collection</h2>
+<ol type="1">
+<li>Initialize the dataset collection:</li>
+</ol>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">dataset</span> init newcollection.ds <span class="st">&#39;sqlite://collection.db&#39;</span></span></code></pre></div>
+<ol start="2" type="1">
+<li>Add a block to <code>cold_api.yaml</code>:</li>
+</ol>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">-</span><span class="at"> </span><span class="fu">dataset</span><span class="kw">:</span><span class="at"> newcollection.ds</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">query</span><span class="kw">:</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="fu">    list_all</span><span class="kw">: </span><span class="ch">|</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>      SELECT src FROM newcollection ORDER BY src-&gt;&gt;&#39;name&#39;</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">keys</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">create</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">read</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">update</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">versions</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span></code></pre></div>
+<ol start="3" type="1">
+<li><p>Restart <code>datasetd</code>.</p></li>
+<li><p>Add a corresponding handler module (e.g.,
+<code>newcollection.ts</code>) following the pattern in
+<code>people.ts</code> or <code>groups.ts</code>, and wire it into
+<code>cold.ts</code>’s <code>ColdReadWriteHandler</code>.</p></li>
+</ol>
+</section>
+<footer-global></footer-global>
+</body>
+</html>

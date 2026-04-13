@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <title>cold</title>
+    <link rel="stylesheet" href="https://caltechlibrary.github.io/css/site.css">
+    <link rel="stylesheet" href="https://media.library.caltech.edu/cl-webcomponents/css/code-blocks.css">
+    <script type="module" src="https://media.library.caltech.edu/cl-webcomponents/copyToClipboard.js"></script>
+    <script type="module" src="https://media.library.caltech.edu/cl-webcomponents/footer-global.js"></script>
+</head>
+<body>
+<header>
+<a href="https://library.caltech.edu"><img src="https://media.library.caltech.edu/assets/caltechlibrary-logo.png" alt="Caltech Library logo"></a>
+</header>
+<nav>
+<ul>
+    <li><a href="/">Home</a></li>
+    <li><a href="index.html">README</a></li>
+    <li><a href="LICENSE">LICENSE</a></li>
+    <li><a href="INSTALL.html">INSTALL</a></li>
+    <li><a href="user_manual.html">User Manual</a></li>
+    <li><a href="about.html">About</a></li>
+    <li><a href="search.html">Search</a></li>
+    <li><a href="https://github.com/caltechlibrary/cold">GitHub</a></li>
+</ul>
+</nav>
+<section>
+<h1 id="name">NAME</h1>
+<p>generate_collaborator_rpt</p>
+<h1 id="synopsis">SYNOPSIS</h1>
+<p>generate_collaborator_rpt CLPID [–record_id]</p>
+<h1 id="description">DESCRIPTION</h1>
+<p>Given a CLPID generate a collaborator report as a CSV file suitable
+for NSF.</p>
+<h1 id="option">OPTION</h1>
+<dl>
+<dt>-h, –help</dt>
+<dd>
+display help
+</dd>
+<dt>-l, –license</dt>
+<dd>
+display license
+</dd>
+<dt>-v, –version</dt>
+<dd>
+display version
+</dd>
+<dt>–record_id</dt>
+<dd>
+Include the RDM record identifier for comparison
+</dd>
+</dl>
+<h1 id="example">EXAMPLE</h1>
+<pre class="shell"><code>generate_collaborator_rpt Newman-D-K --record_id &gt;Diane_Newman_Collaborators.csv</code></pre>
+</section>
+<footer-global></footer-global>
+</body>
+</html>

@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <title>cold</title>
+    <link rel="stylesheet" href="https://caltechlibrary.github.io/css/site.css">
+    <link rel="stylesheet" href="https://media.library.caltech.edu/cl-webcomponents/css/code-blocks.css">
+    <script type="module" src="https://media.library.caltech.edu/cl-webcomponents/copyToClipboard.js"></script>
+    <script type="module" src="https://media.library.caltech.edu/cl-webcomponents/footer-global.js"></script>
+</head>
+<body>
+<header>
+<a href="https://library.caltech.edu"><img src="https://media.library.caltech.edu/assets/caltechlibrary-logo.png" alt="Caltech Library logo"></a>
+</header>
+<nav>
+<ul>
+    <li><a href="/">Home</a></li>
+    <li><a href="index.html">README</a></li>
+    <li><a href="LICENSE">LICENSE</a></li>
+    <li><a href="INSTALL.html">INSTALL</a></li>
+    <li><a href="user_manual.html">User Manual</a></li>
+    <li><a href="about.html">About</a></li>
+    <li><a href="search.html">Search</a></li>
+    <li><a href="https://github.com/caltechlibrary/cold">GitHub</a></li>
+</ul>
+</nav>
+<section>
+<h1 id="configuring-cold-an-overview">Configuring COLD, An Overview</h1>
+<p>COLD is configured through two YAML files that each govern a distinct
+service:</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>File</th>
+<th>Service</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>cold_api.yaml</code></td>
+<td><code>datasetd</code></td>
+<td>Declares the JSON API backend: dataset collections, SQL queries, and
+CRUD permissions</td>
+</tr>
+<tr>
+<td><code>cold_reports.yaml</code></td>
+<td><code>cold_reports</code></td>
+<td>Declares the report catalogue: what reports exist, how to run them,
+and where output goes</td>
+</tr>
+</tbody>
+</table>
+<p>Understanding the relationship between these two files is essential
+for debugging production problems and for extending COLD with new
+capabilities.</p>
+<hr />
+<h2 id="architecture-recap">Architecture recap</h2>
+<p>COLD runs as three cooperating services:</p>
+<pre><code>Browser / Front-end web server (Apache2 + Shibboleth)
+        |
+        v
+  cold  (Deno, port 8111)          &lt;- cold.ts / bin/cold
+        |
+        +-- /api/...  -----------&gt;  datasetd  (port 8112)   &lt;- cold_api.yaml
+        |
+        +-- /reports  -----------&gt;  cold_reports (Deno)      &lt;- cold_reports.yaml
+                                      |
+                                      v
+                               htdocs/rpt/&lt;output files&gt;</code></pre>
+<p><code>cold</code> (the middleware) receives every browser request. It
+routes <code>/api/...</code> calls directly to <code>datasetd</code>,
+handles object management pages (<code>/people</code>,
+<code>/groups</code>, etc.) by talking to <code>datasetd</code> on
+behalf of the browser, and routes <code>/reports</code> to its own
+report-request handler. <code>cold_reports</code> is a separate
+long-running process that polls the report queue and executes report
+commands.</p>
+<hr />
+<h2 id="cold_api.yaml-the-data-layer">cold_api.yaml — the data
+layer</h2>
+<p><code>cold_api.yaml</code> is read exclusively by
+<code>datasetd</code>, launched as:</p>
+<pre><code>datasetd cold_api.yaml</code></pre>
+<p>or via the Deno task:</p>
+<pre><code>deno task cold_api</code></pre>
+<p>It tells <code>datasetd</code>:</p>
+<ul>
+<li>Which dataset collections to expose (e.g., <code>people.ds</code>,
+<code>groups.ds</code>)</li>
+<li>What named SQL queries are available on each collection</li>
+<li>What CRUD operations (create, read, update, keys) are permitted</li>
+<li>Whether object versioning is enabled</li>
+</ul>
+<p>Every dataset collection declared here gets a base URL path of
+<code>/api/&lt;collection_name&gt;/</code>. Named queries become
+reachable at
+<code>/api/&lt;collection_name&gt;/_query/&lt;query_name&gt;</code>. The
+middleware (<code>cold.ts</code>) and the browser-facing API handler
+(<code>browser_api.ts</code>) consume this API.</p>
+<p>The <code>reports.ds</code> collection is a key bridge between the
+two YAML files. It is declared in <code>cold_api.yaml</code> and carries
+the report request queue. Its <code>next_request</code> and
+<code>report_list</code> named queries are used by both the middleware
+(to list queued requests) and by <code>cold_reports</code> (to dequeue
+the next job to run).</p>
+<hr />
+<h2 id="cold_reports.yaml-the-report-runner-layer">cold_reports.yaml —
+the report runner layer</h2>
+<p><code>cold_reports.yaml</code> is read exclusively by the
+<code>cold_reports</code> service (compiled from
+<code>cold_reports.ts</code>), launched as:</p>
+<pre><code>bin/cold_reports cold_reports.yaml</code></pre>
+<p>or via the Deno task:</p>
+<pre><code>deno task cold_reports</code></pre>
+<p>It tells <code>cold_reports</code>:</p>
+<ul>
+<li>Where to write report output files
+(<code>report_directory</code>)</li>
+<li>What named reports exist in the system</li>
+<li>For each report: which shell command to execute, what to name the
+output file, what MIME type the output is, and what user-supplied inputs
+(if any) the command requires</li>
+</ul>
+<p>When a user requests a report through the browser, the middleware
+writes a <code>Report</code> object to <code>reports.ds</code> (via
+<code>cold_api.yaml</code>’s API) with a <code>status</code> of
+<code>"requested"</code>. <code>cold_reports</code> polls
+<code>reports.ds</code> every ten seconds using the
+<code>next_request</code> query, finds pending jobs, looks up the
+matching entry in <code>cold_reports.yaml</code>, executes the
+associated shell command, writes the output to
+<code>report_directory</code>, and updates the <code>Report</code>
+object’s <code>status</code> and <code>link</code> fields.</p>
+<hr />
+<h2 id="how-they-connect-the-reports.ds-queue">How they connect: the
+reports.ds queue</h2>
+<p><code>reports.ds</code> is the integration point between the two YAML
+files:</p>
+<pre><code>cold_api.yaml declares reports.ds
+       |
+       |  cold middleware writes report request objects to reports.ds
+       |  cold middleware reads report_list from reports.ds (for the /reports page)
+       |
+cold_reports.yaml defines what commands are valid report names
+       |
+       |  cold_reports reads next_request from reports.ds (dequeue)
+       |  cold_reports executes cmd defined in cold_reports.yaml
+       |  cold_reports updates the report object in reports.ds with status + link</code></pre>
+<p>A report request object stored in <code>reports.ds</code> includes a
+<code>report_name</code> field. That name is the key used to look up the
+matching entry in <code>cold_reports.yaml</code>. If a
+<code>report_name</code> arrives in the queue that has no entry in
+<code>cold_reports.yaml</code>, the runner marks it
+<code>"aborting, unknown report"</code> and moves on. This means the two
+files must stay consistent: every report that a user can request from
+the browser must have a corresponding entry in
+<code>cold_reports.yaml</code>.</p>
+<hr />
+<h2 id="request-flow-for-a-report">Request flow for a report</h2>
+<ol type="1">
+<li>User fills in the report request form in the browser and submits it
+(<code>POST /reports</code>).</li>
+<li><code>cold.ts</code> calls <code>handleReports</code> →
+<code>handleReportRequest</code>.</li>
+<li><code>handleReportRequest</code> instantiates a <code>Report</code>
+object, reads <code>cold_reports.yaml</code> to get the input
+definitions for the named report, merges any user-supplied input values,
+and writes the new <code>Report</code> object to <code>reports.ds</code>
+via <code>datasetd</code> with <code>status = "requested"</code>.</li>
+<li><code>cold_reports</code> polls <code>reports.ds</code> every 10
+seconds. The <code>next_request</code> SQL query (defined in
+<code>cold_api.yaml</code>) returns the oldest pending request.</li>
+<li><code>cold_reports</code> looks up the <code>report_name</code> in
+its in-memory map built from <code>cold_reports.yaml</code>. It finds
+the <code>Runnable</code> (command, basename, inputs schema, content
+type).</li>
+<li>The <code>Runnable.run()</code> method executes the shell command,
+writes output to <code>htdocs/rpt/&lt;basename&gt;&lt;ext&gt;</code>,
+and returns the URL path.</li>
+<li><code>cold_reports</code> updates the <code>Report</code> object in
+<code>reports.ds</code> with <code>status = "completed"</code> and
+<code>link = "rpt/&lt;filename&gt;"</code>. If the report declared
+<code>emails</code>, a notification is sent.</li>
+<li>The browser can refresh <code>/reports</code> to see the updated
+status and follow the link to download the file.</li>
+</ol>
+<hr />
+<h2 id="starting-services-in-development">Starting services in
+development</h2>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Terminal 1 — start the JSON API backend</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="ex">deno</span> task cold_api</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Terminal 2 — start the middleware</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="ex">deno</span> task cold</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Terminal 3 — start the report runner</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="ex">deno</span> task cold_reports</span></code></pre></div>
+<p>In production, all three are compiled to native binaries
+(<code>deno task build</code>) and managed by a process supervisor.
+<code>datasetd</code> is controlled by <code>cold_api.yaml</code>;
+<code>bin/cold_reports</code> is invoked with the path to
+<code>cold_reports.yaml</code> as its first argument.</p>
+<hr />
+<h2 id="adding-a-new-capability">Adding a new capability</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Goal</th>
+<th>Files to change</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Add a new SQL query to an existing collection</td>
+<td><code>cold_api.yaml</code> — add a named query under the
+collection</td>
+</tr>
+<tr>
+<td>Add a new dataset collection</td>
+<td><code>cold_api.yaml</code> — add a collection block; run
+<code>dataset init &lt;name&gt;.ds</code></td>
+</tr>
+<tr>
+<td>Add a new report</td>
+<td><code>cold_reports.yaml</code> — add a report entry with
+<code>cmd</code>, <code>basename</code>, <code>content_type</code>;
+write the corresponding shell script</td>
+</tr>
+<tr>
+<td>Expose a new query to the browser</td>
+<td><code>cold_api.yaml</code> (query) + <code>browser_api.ts</code> or
+<code>client_api.ts</code> if custom routing is needed</td>
+</tr>
+<tr>
+<td>Change report output location</td>
+<td><code>cold_reports.yaml</code> <code>report_directory</code> field +
+update the hardcoded <code>basedir</code> in
+<code>cold_reports.ts:520</code></td>
+</tr>
+</tbody>
+</table>
+<p>See <a href="cold_api_deep_dive.html">cold_api.yaml deep dive</a> and
+<a href="cold_reports_deep_dive.html">cold_reports.yaml deep dive</a>
+for field-level detail on each file.</p>
+</section>
+<footer-global></footer-global>
+</body>
+</html>

@@ -84,11 +84,8 @@
     "YAML"
   ],
   "relatedLink": [
-    "https://github.com/caltechlibrary/cold_ui",
-    "https://github.com/caltechlibrary/dataset",
-    "https://github.com/caltechlibrary/csvtextarea"
+    "https://github.com/caltechlibrary/dataset"
   ],
-  "runtimePlatform": "- Deno 2.2",
   "softwareRequirements": [
     "Deno >= 2.7.11",
     "Dataset = 2.3.4",
