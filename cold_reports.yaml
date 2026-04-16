@@ -35,6 +35,10 @@ reports:
     basename: people_identifier
     append_datestamp: true
     content_type: text/csv
+  run_thesis_options_csv:
+    cmd: ./run_thesis_options_csv.bash
+    basename: thesis_options
+    content_type: text/csv
   journal_vocabulary:
     cmd: ./run_journal_vocabulary.bash
     basename: journal_vocabulary
