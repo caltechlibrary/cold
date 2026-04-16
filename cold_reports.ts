@@ -568,7 +568,7 @@ function resolveCommandInputs(
   let inputs: Inputs[] = [];
   let empty: Inputs = new Inputs();
   console.log(`DEBUG cmdInputs type ${typeof cmdInputs}`);
-  if (cmdImputs !== undefined) {
+  if (cmdInputs !== undefined) {
     for (let i = 0; i < cmdInputs.length; i++) {
       // Make sure these match then add it to the inputs array, if not add an empty input element
       if (
