@@ -567,19 +567,22 @@ function resolveCommandInputs(
 ): Inputs[] {
   let inputs: Inputs[] = [];
   let empty: Inputs = new Inputs();
-  for (let i = 0; i < cmdInputs.length; i++) {
-    // Make sure these match then add it to the inputs array, if not add an empty input element
-    if (
-      (cmdInputs[i].id === reqInputs[i].id) &&
-      (cmdInputs[i].type === reqInputs[i].type)
-    ) {
-      inputs.push(reqInputs[i]);
-    } else {
-      // Push an empty
-      empty.id = cmdInputs[i].id;
-      empty.type = cmdInputs[i].type;
-      empty.value = "";
-      inputs.push(empty);
+  console.log(`DEBUG cmdInputs type ${typeof cmdInputs}`);
+  if (cmdImputs !== undefined) {
+    for (let i = 0; i < cmdInputs.length; i++) {
+      // Make sure these match then add it to the inputs array, if not add an empty input element
+      if (
+        (cmdInputs[i].id === reqInputs[i].id) &&
+        (cmdInputs[i].type === reqInputs[i].type)
+      ) {
+        inputs.push(reqInputs[i]);
+      } else {
+        // Push an empty
+        empty.id = cmdInputs[i].id;
+        empty.type = cmdInputs[i].type;
+        empty.value = "";
+        inputs.push(empty);
+      }
     }
   }
   return inputs;

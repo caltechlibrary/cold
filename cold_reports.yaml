@@ -38,6 +38,7 @@ reports:
   run_thesis_options_csv:
     cmd: ./run_thesis_options_csv.bash
     basename: thesis_options
+    append_datestamp: false
     content_type: text/csv
   journal_vocabulary:
     cmd: ./run_journal_vocabulary.bash
