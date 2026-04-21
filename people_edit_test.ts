@@ -1,12 +1,10 @@
-// Import the necessary modules from @std/assert
 import {
   assert,
   assertEquals,
   assertExists,
-} from "https://deno.land/std@0.200.0/assert/mod.ts";
+} from "@std/assert";
 
-// Import your modules
-import * as mdt from "https://caltechlibrary.github.io/metadatatools/mod.ts";
+import * as mdt from "../metadatatools/mod.ts";
 import { ClientAPI } from "./client_api.ts";
 
 // Mock ClientAPI for testing

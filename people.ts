@@ -243,15 +243,15 @@ export class People implements PeopleInterface {
     (obj.clpid === undefined || obj.clpid === "")
       ? this.clpid = ""
       : this.clpid = obj.clpid as unknown as string;
-    (obj.thesis_id === undefined || obj.thesid_id === "")
+    (obj.thesis_id === undefined || obj.thesis_id === "")
       ? this.thesis_id = ""
       : this.thesis_id = obj.thesis_id as unknown as string;
     (obj.authors_id === undefined || obj.authors_id === "")
       ? this.authors_id = ""
-      : this.authors_id = obj.author_id as unknown as string;
+      : this.authors_id = obj.authors_id as unknown as string;
     (obj.advisors_id === undefined || obj.advisors_id === "")
       ? this.advisors_id = ""
-      : this.advisors_id = obj.advisor_id as unknown as string;
+      : this.advisors_id = obj.advisors_id as unknown as string;
     (obj.include_in_feeds === undefined)
       ? this.include_in_feeds = false
       : this.include_in_feeds = obj.include_in_feeds as unknown as boolean;
@@ -297,13 +297,13 @@ export class People implements PeopleInterface {
     (obj.viaf === undefined || obj.viaf === "")
       ? this.viaf = ""
       : this.viaf = mdt.normalizeVIAF(obj.viaf);
-    (obj.lcnaf === undefined || obj.lcnad === "")
+    (obj.lcnaf === undefined || obj.lcnaf === "")
       ? this.lcnaf = ""
       : this.lcnaf = mdt.normalizeLCNAF(obj.lcnaf);
     (obj.isni === undefined || obj.isni === "")
       ? this.isni = ""
       : this.isni = mdt.normalizeISNI(obj.isni);
-    (obj.wikidata === undefined || obj.wikidate === "")
+    (obj.wikidata === undefined || obj.wikidata === "")
       ? this.wikidata = ""
       : this.wikidata = obj.wikidata as unknown as string;
     (obj.snac === undefined || obj.snac === "")
@@ -351,7 +351,7 @@ export class People implements PeopleInterface {
     (obj.internal_notes === undefined || obj.internal_notes === "")
       ? this.internal_notes = ""
       : this.internal_notes = obj.internal_notes as unknown as string;
-    (obj.updated === undefined || obj.update === "")
+    (obj.updated === undefined || obj.updated === "")
       ? this.updated = timeStamp(new Date())
       : this.updated = obj.updated as unknown as string;
   }

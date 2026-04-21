@@ -87,7 +87,7 @@ export class ClientAPI {
 
     let uri: string = base_url;
     if (fieldList.length > 0) {
-      uri = `${base_url}/${fieldList.join("/")}?${params.toString()}`;
+      uri = `${base_url}/${fieldList.join("/")}?${params!.toString()}`;
     }
     try {
       const resp = await fetch(uri, {

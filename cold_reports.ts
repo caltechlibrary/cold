@@ -563,6 +563,7 @@ function resolveCommandInputs(
     for (let i = 0; i < cmdInputs.length; i++) {
       // Make sure these match then add it to the inputs array, if not add an empty input element
       if (
+        reqInputs[i] !== undefined &&
         (cmdInputs[i].id === reqInputs[i].id) &&
         (cmdInputs[i].type === reqInputs[i].type)
       ) {
