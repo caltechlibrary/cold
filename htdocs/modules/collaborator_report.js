@@ -31,7 +31,7 @@ var CollaboratorReportUI = class {
         <section class="collaborator-report-results" id="collaborator-report-results"></section>
     </p>
 `;
-    options.cName === void 0 ? "reports.ds" : this.cName = options.cName;
+    this.cName = options.cName === void 0 ? "people.ds" : options.cName;
     this.reportElement = typeof options.reportElement === "string" ? document.getElementById(options.reportElement) : options.reportElement;
     this.baseUrl = new URL(options.baseUrl);
     this.basePath = this.baseUrl.pathname;
@@ -96,7 +96,6 @@ var CollaboratorReportUI = class {
     const defaultHeaders = {
       "Content-Type": "application/x-www-form-urlencoded"
     };
-    console.log(`DEBUG posting ${postUrl}, ${defaultHeaders.toString()} ${formData.toString()}`);
     const response = await fetch(postUrl, {
       method: "POST",
       headers: defaultHeaders,

@@ -385,6 +385,13 @@ function extractClpidByOrcid(
   return "";
 }
 
+function wildcardToRegex(pattern: string): RegExp {
+  // Escape regex specials except * and %, then convert both wildcards to .*
+  const escaped = pattern.replace(/[.+?^${}()|[\]\\]/g, "\\$&");
+  const regexStr = escaped.replace(/[*%]/g, ".*");
+  return new RegExp(regexStr, "i");
+}
+
 function extractClpidByName(
   items: Array<{
     person_or_org: {
@@ -395,7 +402,7 @@ function extractClpidByName(
   q_name: string,
 ): string {
   const clpidList: string[] = [];
-  const re: RegExp = new RegExp(q_name);
+  const re: RegExp = wildcardToRegex(q_name);
   for (const item of items) {
     const identifiers = item.person_or_org.identifiers || [];
     const clpidObj = identifiers.find((id) => id.scheme === "clpid");
@@ -419,7 +426,7 @@ function extractOrcidByName(
   q_name: string,
 ): string {
   const orcidList: string[] = [];
-  const re: RegExp = new RegExp(q_name);
+  const re: RegExp = wildcardToRegex(q_name);
   for (const item of items) {
     const identifiers = item.person_or_org.identifiers || [];
     const orcidObj = identifiers.find((id) => id.scheme === "orcid");

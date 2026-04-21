@@ -78,7 +78,7 @@ export class CollaboratorReportUI {
     // to display the form I will see how long it takes to get a list of people.ds keys from the API. Hopefully
     // it is fast enough.
 
-    (options.cName === undefined) ? "reports.ds" : this.cName = options.cName;
+    this.cName = (options.cName === undefined) ? "people.ds" : options.cName;
     this.reportElement = typeof options.reportElement === "string"
       ? document.getElementById(options.reportElement)!
       : options.reportElement;
@@ -174,9 +174,6 @@ export class CollaboratorReportUI {
     const defaultHeaders = {
       "Content-Type": "application/x-www-form-urlencoded",
     };
-    console.log(
-      `DEBUG posting ${postUrl}, ${defaultHeaders.toString()} ${formData.toString()}`,
-    );
     const response = await fetch(postUrl, {
       method: "POST",
       headers: defaultHeaders,

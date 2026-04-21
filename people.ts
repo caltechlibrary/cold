@@ -243,15 +243,15 @@ export class People implements PeopleInterface {
     (obj.clpid === undefined || obj.clpid === "")
       ? this.clpid = ""
       : this.clpid = obj.clpid as unknown as string;
-    (obj.thesis_id === undefined || obj.thesid_id === "")
+    (obj.thesis_id === undefined || obj.thesis_id === "")
       ? this.thesis_id = ""
       : this.thesis_id = obj.thesis_id as unknown as string;
     (obj.authors_id === undefined || obj.authors_id === "")
       ? this.authors_id = ""
-      : this.authors_id = obj.author_id as unknown as string;
+      : this.authors_id = obj.authors_id as unknown as string;
     (obj.advisors_id === undefined || obj.advisors_id === "")
       ? this.advisors_id = ""
-      : this.advisors_id = obj.advisor_id as unknown as string;
+      : this.advisors_id = obj.advisors_id as unknown as string;
     (obj.include_in_feeds === undefined)
       ? this.include_in_feeds = false
       : this.include_in_feeds = obj.include_in_feeds as unknown as boolean;
@@ -297,13 +297,13 @@ export class People implements PeopleInterface {
     (obj.viaf === undefined || obj.viaf === "")
       ? this.viaf = ""
       : this.viaf = mdt.normalizeVIAF(obj.viaf);
-    (obj.lcnaf === undefined || obj.lcnad === "")
+    (obj.lcnaf === undefined || obj.lcnaf === "")
       ? this.lcnaf = ""
       : this.lcnaf = mdt.normalizeLCNAF(obj.lcnaf);
     (obj.isni === undefined || obj.isni === "")
       ? this.isni = ""
       : this.isni = mdt.normalizeISNI(obj.isni);
-    (obj.wikidata === undefined || obj.wikidate === "")
+    (obj.wikidata === undefined || obj.wikidata === "")
       ? this.wikidata = ""
       : this.wikidata = obj.wikidata as unknown as string;
     (obj.snac === undefined || obj.snac === "")
@@ -351,7 +351,7 @@ export class People implements PeopleInterface {
     (obj.internal_notes === undefined || obj.internal_notes === "")
       ? this.internal_notes = ""
       : this.internal_notes = obj.internal_notes as unknown as string;
-    (obj.updated === undefined || obj.update === "")
+    (obj.updated === undefined || obj.updated === "")
       ? this.updated = timeStamp(new Date())
       : this.updated = obj.updated as unknown as string;
   }
@@ -498,7 +498,7 @@ async function handleGetPeople(
     const clpid = pathIdentifier(req.url);
     const isCreateObject = clpid === "";
     const obj = await ds.read(clpid);
-    console.log(`We have a GET for people object ${clpid}, view = ${view}`);
+    //console.log(`We have a GET for people object ${clpid}, view = ${view}`);
     return renderPage(tmpl, {
       base_url: baseUrl,
       isCreateObject: isCreateObject,
@@ -526,6 +526,12 @@ async function handlePostPeople(
 
   if (req.body !== null) {
     const form = await req.formData();
+    const rawFormObj: { [k: string]: string } = {};
+    for (const [key, val] of (form as any).entries()) {
+      rawFormObj[key] = val;
+    }
+    //console.log(`POST /people received:`, JSON.stringify(rawFormObj, null, 2));
+
     let obj = formDataToObject(form);
     if (!("clpid" in obj)) {
       console.log("clpid missing", obj);
@@ -547,7 +553,7 @@ async function handlePostPeople(
       );
     }
     if (isCreateObject) {
-      console.log(`send to dataset create object ${clpid}`);
+      //console.log(`POST /people sending to datasetd create ${clpid}:`, JSON.stringify(obj, null, 2));
       if (!(await ds.create(clpid, obj))) {
         return new Response(
           `<html>problem creating object ${clpid}, try again later`,
@@ -558,7 +564,7 @@ async function handlePostPeople(
         );
       }
     } else {
-      console.log(`send to dataset update object ${clpid}`);
+      //console.log(`POST /people sending to datasetd update ${clpid}:`, JSON.stringify(obj, null, 2));
       if (!(await ds.update(clpid, obj))) {
         return new Response(
           `<html>problem updating object ${clpid}, try again later`,

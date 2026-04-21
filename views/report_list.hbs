@@ -44,17 +44,55 @@
     <option value="people_vocabulary" title="Generate RDM people vocabulary">Generate People Vocabulary</option>
   </optgroup>
 
-<!--
   <optgroup label="Mediated reports">
-    <option value="colaborator_report" title="Run a colaborator report with a clpid">Collaborator Report</option>
+    <option value="run_collaborator_report" title="Run a colaborator report with a clpid">Collaborator Report</option>
   </optgroup>
--->
 
 </select>
+
+<div id="collaborator-fields" style="display:none">
+<label for="clpid">Person (clpid)</label>
+<input type="text" id="clpid" name="clpid"
+       placeholder="e.g. Doiel-R-S" list="clpid-list"
+       autocomplete="on">
+<datalist id="clpid-list"></datalist>
+</div>
+
 <label set="emails">Email notification(s)</label>
 <input type="text" id="emails" name="emails" placeholder="rsdoiel@caltech.edu" />
 <input type="submit" id="submit" name="submit" value="Request Report">
 </div>
+
+<script>
+(function() {
+  const sel = document.getElementById('report_name');
+  const fields = document.getElementById('collaborator-fields');
+  const clpidInput = document.getElementById('clpid');
+  let populated = false;
+
+  function update() {
+    const isCollab = sel.value === 'run_collaborator_report';
+    fields.style.display = isCollab ? '' : 'none';
+    clpidInput.required = isCollab;
+    if (isCollab && !populated) {
+      populated = true;
+      fetch('/api/people.ds/get_all_clpid')
+        .then(r => r.json())
+        .then(list => {
+          const dl = document.getElementById('clpid-list');
+          list.forEach(id => {
+            const opt = document.createElement('option');
+            opt.value = id;
+            dl.appendChild(opt);
+          });
+        });
+    }
+  }
+
+  sel.addEventListener('change', update);
+  update();
+})();
+</script>
 
 <!--
 <div>

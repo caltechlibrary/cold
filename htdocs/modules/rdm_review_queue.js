@@ -5,7 +5,7 @@ var ClientAPI = class {
     baseUrl === void 0 ? "" : this.baseUrl = baseUrl;
   }
   joinUrlPath(baseUrl, path) {
-    const url = typeof baseUrl === "string" ? new URL(baseUrl) : baseUrl;
+    const url = typeof baseUrl === "string" && !/^([a-z]+:)?\/\//i.test(baseUrl) ? new URL(baseUrl, window.location.origin) : new URL(baseUrl);
     const normalizedPath = path.replace(/^\/+/, "");
     const combinedPath = `${url.pathname}/${normalizedPath}`.replace(/\/\/+/g, "/");
     const newUrl = new URL(url.origin + combinedPath);
@@ -42,34 +42,37 @@ var ClientAPI = class {
     }
     return [];
   }
+  getParamNames(params) {
+    return params ? Array.from(params.keys()) : [];
+  }
   async getList(c_name, query_name, params) {
+    const fieldList = this.getParamNames(params);
     const base_url = this.joinUrlPath(this.baseUrl, `/api/${c_name}/${query_name}`);
     let uri = base_url;
-    let resp;
-    if (params !== void 0) {
-      uri = `${base_url}?${params}`;
+    if (fieldList.length > 0) {
+      uri = `${base_url}/${fieldList.join("/")}?${params.toString()}`;
     }
     try {
-      resp = await fetch(uri, {
+      const resp = await fetch(uri, {
         headers: {
           "Content-Type": "application/json"
         },
         method: "GET"
       });
-    } catch (err) {
-      return [];
-    }
-    if (resp.ok) {
+      if (!resp.ok) {
+        return [];
+      }
       const src = await resp.text();
       if (src !== void 0 && src !== "") {
-        let l = [];
         try {
-          l = JSON.parse(src);
+          return JSON.parse(src);
         } catch (err) {
           return [];
         }
-        return l;
       }
+    } catch (err) {
+      console.log(`ERROR: fetching ${uri}, ${err}`);
+      return [];
     }
     return [];
   }
@@ -98,6 +101,7 @@ var ClientAPI = class {
     const query_name = "lookup_name";
     let params = new URLSearchParams();
     params.append("q", name);
+    params.append("alternate", name);
     return await this.getList(c_name, query_name, params);
   }
   async lookupGroupMembership(clgid) {
@@ -357,9 +361,14 @@ function extractClpidByOrcid(items, targetOrcid) {
   }
   return "";
 }
+function wildcardToRegex(pattern) {
+  const escaped = pattern.replace(/[.+?^${}()|[\]\\]/g, "\\$&");
+  const regexStr = escaped.replace(/[*%]/g, ".*");
+  return new RegExp(regexStr, "i");
+}
 function extractClpidByName(items, q_name) {
   const clpidList = [];
-  const re = new RegExp(q_name);
+  const re = wildcardToRegex(q_name);
   for (const item of items) {
     const identifiers = item.person_or_org.identifiers || [];
     const clpidObj = identifiers.find((id) => id.scheme === "clpid");
@@ -371,7 +380,7 @@ function extractClpidByName(items, q_name) {
 }
 function extractOrcidByName(items, q_name) {
   const orcidList = [];
-  const re = new RegExp(q_name);
+  const re = wildcardToRegex(q_name);
   for (const item of items) {
     const identifiers = item.person_or_org.identifiers || [];
     const orcidObj = identifiers.find((id) => id.scheme === "orcid");
