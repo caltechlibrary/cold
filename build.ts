@@ -82,9 +82,9 @@ if (import.meta.main) {
   await Deno.mkdir(modules_path, { mode: 0o775, recursive: true });
   // NOTE: Switched to deno bundle with v2.7 deno ugrade, RSD 2026-04-20
   let transpileFiles = [
-//    "client_api.ts",
-//    "orcid_api.ts",
-//    "directory_client.ts",
+    //    "client_api.ts",
+    //    "orcid_api.ts",
+    //    "directory_client.ts",
   ];
   let ok: boolean = await transpileToJavaScript(transpileFiles, modules_path);
   if (

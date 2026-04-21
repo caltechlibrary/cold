@@ -1,22 +1,21 @@
-
 /**
  * Parses a CSV string that represents an array of columns.
  * @param {string} csvRowString - The CSV data as a string.
  * @returns {string[]} - An array of columns.
  */
 export function parseCSVRow(csvRowString: string): string[] {
-  let currentColumn = '';
+  let currentColumn = "";
   let inQuotes = false;
   const columns = [];
-  const row = csvRowString.split('');
+  const row = csvRowString.split("");
 
   for (let i = 0; i < row.length; i++) {
     const char = row[i];
     if (char === '"') {
       inQuotes = !inQuotes;
-    } else if (char === ',' && !inQuotes) {
+    } else if (char === "," && !inQuotes) {
       columns.push(currentColumn.trim());
-      currentColumn = '';
+      currentColumn = "";
     } else {
       currentColumn += char;
     }
@@ -31,16 +30,16 @@ export function parseCSVRow(csvRowString: string): string[] {
  * @returns {string[][]} - A 2D array of rows and columns.
  */
 export function parseCSV(csvString: string): string[][] {
-  const rows = csvString.trim().split('\n');
+  const rows = csvString.trim().split("\n");
   const maxColumns = 0;
 
   const data = rows.map(parseCSVRow);
-  
+
   const maxColumnCount = Math.max(...data.map((row) => row.length));
 
   return data.map((row) => {
     while (row.length < maxColumnCount) {
-      row.push('');
+      row.push("");
     }
     return row;
   });
@@ -52,14 +51,14 @@ export function parseCSV(csvString: string): string[][] {
  * @returns {string} - a string represnetation of the rows
  */
 export function stringifyCSVRow(array: string[]): string {
-  return array.map(field => {
-      // Check if the field contains a comma, newline, or double quote
-      if (/[",\n]/.test(field)) {
-          // Escape double quotes and enclose the field in double quotes
-          return `"${field.replace(/"/g, '""')}"`;
-      }
-      return field;
-  }).join(',');
+  return array.map((field) => {
+    // Check if the field contains a comma, newline, or double quote
+    if (/[",\n]/.test(field)) {
+      // Escape double quotes and enclose the field in double quotes
+      return `"${field.replace(/"/g, '""')}"`;
+    }
+    return field;
+  }).join(",");
 }
 
 /**
@@ -68,6 +67,5 @@ export function stringifyCSVRow(array: string[]): string {
  * @returns {string} - A 2D array of rows and columns.
  */
 export function stringifyCSV(data: string[][]): string {
-  return data.map(stringifyCSVRow).join('\n');
+  return data.map(stringifyCSVRow).join("\n");
 }
-

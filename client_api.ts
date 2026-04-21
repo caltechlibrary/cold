@@ -14,18 +14,21 @@ export class ClientAPI {
   }
 
   joinUrlPath(baseUrl: string | URL, path: string): string {
-      // If baseUrl is a string and a relative path, resolve it against the current page's origin
-      // Convert baseUrl to a URL object if it's a string
-      const url = typeof baseUrl === "string" && !/^([a-z]+:)?\/\//i.test(baseUrl)
-        ? new URL(baseUrl, window.location.origin)
-        : new URL(baseUrl);
-      // Remove leading slashes from the path to avoid double slashes
-      const normalizedPath = path.replace(/^\/+/, "");
-      // Combine the base URL's pathname with the normalized path
-      const combinedPath = `${url.pathname}/${normalizedPath}`.replace(/\/\/+/g, "/");
-      // Construct the new URL
-      const newUrl = new URL(url.origin + combinedPath);
-      return newUrl.toString();
+    // If baseUrl is a string and a relative path, resolve it against the current page's origin
+    // Convert baseUrl to a URL object if it's a string
+    const url = typeof baseUrl === "string" && !/^([a-z]+:)?\/\//i.test(baseUrl)
+      ? new URL(baseUrl, window.location.origin)
+      : new URL(baseUrl);
+    // Remove leading slashes from the path to avoid double slashes
+    const normalizedPath = path.replace(/^\/+/, "");
+    // Combine the base URL's pathname with the normalized path
+    const combinedPath = `${url.pathname}/${normalizedPath}`.replace(
+      /\/\/+/g,
+      "/",
+    );
+    // Construct the new URL
+    const newUrl = new URL(url.origin + combinedPath);
+    return newUrl.toString();
   }
 
   async getStringList(
@@ -84,10 +87,8 @@ export class ClientAPI {
 
     let uri: string = base_url;
     if (fieldList.length > 0) {
-      uri = `${base_url}/${fieldList.join('/')}?${params.toString()}` ;
-      console.log(`DEBUG updated uri updated -> ${uri}`);
+      uri = `${base_url}/${fieldList.join("/")}?${params.toString()}`;
     }
-    //console.log(`DEBUG look uri: ${uri}, params count -> ${fieldList.length}, params names -> ${fieldList.join('/')}`);
     try {
       const resp = await fetch(uri, {
         headers: { "Content-Type": "application/json" },
@@ -95,28 +96,19 @@ export class ClientAPI {
       });
 
       if (!resp.ok) {
-            console.log(
-              `DEBUG fetch failed: ${resp.status} ${resp.statusText}, URL: ${uri}`
-            );
-            return [];
+        return [];
       }
-
-      console.log(`DEBUG resp -> ${resp.status} -> ${resp.statusText}, URL: ${uri}`);
 
       const src = await resp.text();
       if (src !== undefined && src !== "") {
-        console.log(`DEBUG src -> ${src}`);
         try {
           return JSON.parse(src);
         } catch (err) {
-          console.log(`DEBUG error parsing JSON: ${err}, response: ${src}`);
           return [];
         }
-      } else {
-        console.log(`DEBUG why is the source empty? ${src}`);
       }
     } catch (err) {
-      console.log(`DEBUG error in fetching ${uri}, ${err}`);
+      console.log(`ERROR: fetching ${uri}, ${err}`);
       return [];
     }
     return [];

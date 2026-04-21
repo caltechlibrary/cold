@@ -51,7 +51,6 @@ var ClientAPI = class {
     let uri = base_url;
     if (fieldList.length > 0) {
       uri = `${base_url}/${fieldList.join("/")}?${params.toString()}`;
-      console.log(`DEBUG updated uri updated -> ${uri}`);
     }
     try {
       const resp = await fetch(uri, {
@@ -61,24 +60,18 @@ var ClientAPI = class {
         method: "GET"
       });
       if (!resp.ok) {
-        console.log(`DEBUG fetch failed: ${resp.status} ${resp.statusText}, URL: ${uri}`);
         return [];
       }
-      console.log(`DEBUG resp -> ${resp.status} -> ${resp.statusText}, URL: ${uri}`);
       const src = await resp.text();
       if (src !== void 0 && src !== "") {
-        console.log(`DEBUG src -> ${src}`);
         try {
           return JSON.parse(src);
         } catch (err) {
-          console.log(`DEBUG error parsing JSON: ${err}, response: ${src}`);
           return [];
         }
-      } else {
-        console.log(`DEBUG why is the source empty? ${src}`);
       }
     } catch (err) {
-      console.log(`DEBUG error in fetching ${uri}, ${err}`);
+      console.log(`ERROR: fetching ${uri}, ${err}`);
       return [];
     }
     return [];

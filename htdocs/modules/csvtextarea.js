@@ -206,6 +206,7 @@ ${this.getAttribute("help-description") || ""}`);
         }
       }
     }, true);
+    this.closest("form")?.addEventListener("submit", () => this.toTextarea());
     this.shadowRoot?.querySelector("tbody")?.addEventListener("keydown", (event) => {
       const target = event.target;
       if (event.key === "Backspace" && target.tagName === "INPUT") {
@@ -271,10 +272,8 @@ ${this.getAttribute("help-description") || ""}`);
     if (tbody) {
       const rows = tbody.rows;
       for (let i = rows.length - 1; i >= 0; i--) {
-        if (this.isEmptyRow(i)) {
-          tbody.deleteRow(i);
-        }
-        if (this.customCleanupFilter !== void 0 && this.customCleanupFilter(rows[i]) === false) {
+        const shouldDelete = this.isEmptyRow(i) || this.customCleanupFilter !== void 0 && this.customCleanupFilter(rows[i]) === false;
+        if (shouldDelete) {
           tbody.deleteRow(i);
         }
       }

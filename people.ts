@@ -498,7 +498,7 @@ async function handleGetPeople(
     const clpid = pathIdentifier(req.url);
     const isCreateObject = clpid === "";
     const obj = await ds.read(clpid);
-    console.log(`We have a GET for people object ${clpid}, view = ${view}`);
+    //console.log(`We have a GET for people object ${clpid}, view = ${view}`);
     return renderPage(tmpl, {
       base_url: baseUrl,
       isCreateObject: isCreateObject,
@@ -526,6 +526,12 @@ async function handlePostPeople(
 
   if (req.body !== null) {
     const form = await req.formData();
+    const rawFormObj: { [k: string]: string } = {};
+    for (const [key, val] of (form as any).entries()) {
+      rawFormObj[key] = val;
+    }
+    //console.log(`POST /people received:`, JSON.stringify(rawFormObj, null, 2));
+
     let obj = formDataToObject(form);
     if (!("clpid" in obj)) {
       console.log("clpid missing", obj);
@@ -547,7 +553,7 @@ async function handlePostPeople(
       );
     }
     if (isCreateObject) {
-      console.log(`send to dataset create object ${clpid}`);
+      //console.log(`POST /people sending to datasetd create ${clpid}:`, JSON.stringify(obj, null, 2));
       if (!(await ds.create(clpid, obj))) {
         return new Response(
           `<html>problem creating object ${clpid}, try again later`,
@@ -558,7 +564,7 @@ async function handlePostPeople(
         );
       }
     } else {
-      console.log(`send to dataset update object ${clpid}`);
+      //console.log(`POST /people sending to datasetd update ${clpid}:`, JSON.stringify(obj, null, 2));
       if (!(await ds.update(clpid, obj))) {
         return new Response(
           `<html>problem updating object ${clpid}, try again later`,

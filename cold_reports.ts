@@ -145,7 +145,6 @@ export class Report implements ReportInterface {
     // then updated to hold the values too.
     if (await this.get_report_inputs(this.report_name)) {
       if (this.inputs !== undefined) {
-        console.log(`DEBUG o (${typeof o}) -> ${JSON.stringify(o)}`);
         this.merge_inputs(o as Record<string, string>);
       }
     } else {
@@ -276,9 +275,7 @@ async function handleReportRequest(
     const rpt = new Report("cold_reports.yaml");
     // NOTE: request_report is mapping the obj need to validate that it is a report request,
     // and the form contents so any additional inputs can be mapped to the report inputs.
-    console.log(`DEBUG form input -> ${JSON.stringify(obj)}`);
     const ok = await rpt.request_report(obj);
-    console.log(`DEBUG: Requesting ${rpt.report_name} <- ${ok}`);
     if (ok) {
       // We want to create the record and return success. If the record
       // has already been created then we should distriguish that error from
@@ -411,9 +408,6 @@ class Runnable implements RunnableInterface {
   filenameTemplate(template: string, inputs: Inputs[]): string {
     // Replace each placeholder in the template with the corresponding input value
     return template.replace(/\{\{(\w+)\}\}/g, (_, key) => {
-      console.log(
-        `DEBUG replacing ${key} with an input.value if found, otherwise key name wrapped in _`,
-      );
       const input = inputs.find((input) => input.id === key);
       return input ? input.value : `_${key}_`;
     });
@@ -449,7 +443,6 @@ class Runnable implements RunnableInterface {
           }
           return input.value;
         });
-        console.log(`DEBUG validatedInputs -> ${validatedInputs}`);
 
         // Construct the command with parameters
         // Use Deno's Command API for safer parameter handling
@@ -480,7 +473,6 @@ class Runnable implements RunnableInterface {
       //console.log(`FIXME: need to render the template here`);
       //return "error://basename templates not implemented yet";
       filename = this.filenameTemplate(this.basename, this.inputs);
-      //console.log(`DEBUG filename set to" "${filename}" after filenameTemplate( "${this.basename}", "${JSON.stringify(this.inputs)}" )`;
     }
     // FIXME: See if I need at add a prefix
     let ext: string = ".txt";
@@ -567,7 +559,6 @@ function resolveCommandInputs(
 ): Inputs[] {
   let inputs: Inputs[] = [];
   let empty: Inputs = new Inputs();
-  console.log(`DEBUG cmdInputs type ${typeof cmdInputs}`);
   if (cmdInputs !== undefined) {
     for (let i = 0; i < cmdInputs.length; i++) {
       // Make sure these match then add it to the inputs array, if not add an empty input element
@@ -600,9 +591,6 @@ async function process_request(
   request.updated = (new Date()).toJSON();
   if (request.inputs !== undefined) {
     cmd.inputs = resolveCommandInputs(cmd.inputs, request.inputs);
-    console.log(
-      `DEBUG resolved command inputs -> ${JSON.stringify(cmd.inputs)}`,
-    );
   }
   console.log(
     `INFO: updated request object to processing ${request.report_name}`,
@@ -648,9 +636,6 @@ async function servicing_requests(runner: Runner): Promise<void> {
   let requests = await ds.query("next_request", [], {}) as Report[];
   if (requests.length > 0) {
     for (let request of requests) {
-      console.log(
-        `DEBUG report request to process -> ${JSON.stringify(request)}`,
-      );
       let report_name = request.report_name;
       let runnable = runner.report_map[report_name];
       if (runnable !== undefined) {
@@ -677,7 +662,6 @@ async function servicing_requests(runner: Runner): Promise<void> {
         request.status = "aborting, unknown report";
         request.link = "";
         request.updated = (new Date()).toJSON();
-        console.log(`DEBUG aborting request ${JSON.stringify(request)}`);
         if (!await ds.update(request.id, request)) {
           console.log(
             `ERROR: updated of request error ${request} failed, aborting request runner`,

@@ -32,7 +32,7 @@ maintainer:
     id: https://orcid.org/0000-0003-0900-6903
 
 repository_code: https://github.com/caltechlibrary/cold
-version: 0.0.39c
+version: 0.0.39d
 license_url: https://caltechlibrary.github.io/cold/LICENSE
 operating_system:
   - Linux
@@ -52,15 +52,18 @@ keywords:
   - objects
   - controlled vocabulary
 
-date_released: 2026-04-09
+date_released: 2026-04-21
 ---
 
 About this software
 ===================
 
-## cold 0.0.39c
+## cold 0.0.39d
 
 - clean up text in the collaborator_report.html page we'll use for testing collaborator report integration
+- fixed regression, issue #100, in group submission in people form.
+- fixed regressions where the "[email protect]" string wound up in the email field.
+- Moved JavaScript for problem code from `htdocs/js`, re-coded as TypeScript with new implementations in `htdocs/modules`
 
 ### Authors
 
