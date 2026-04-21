@@ -14,10 +14,10 @@ export class ClientAPI {
   }
 
   joinUrlPath(baseUrl: string | URL, path: string): string {
-    // If baseUrl is a string and a relative path, resolve it against the current page's origin
-    // Convert baseUrl to a URL object if it's a string
+    // Resolve relative baseUrl against the full page URL (including path) so that
+    // relative paths like "../" correctly resolve under a sub-path like /cold/.
     const url = typeof baseUrl === "string" && !/^([a-z]+:)?\/\//i.test(baseUrl)
-      ? new URL(baseUrl, window.location.origin)
+      ? new URL(baseUrl, window.location.href)
       : new URL(baseUrl);
     // Remove leading slashes from the path to avoid double slashes
     const normalizedPath = path.replace(/^\/+/, "");

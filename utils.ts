@@ -48,10 +48,13 @@ export function pathIdentifier(u: string): string {
  *    console.log("Collection ", obj.c_name, " query is ", obj.q);
  * ```
  */
-export function apiPathParse(uri: string): { [key: string]: string } {
+export function apiPathParse(uri: string, basePath?: string): { [key: string]: string } {
   let resp: { [key: string]: string } = {};
   const u = new URL(uri);
-  let parts: string[] = u.pathname.replace(/^\/api/, "").split("/");
+  const apiPrefix = `${basePath || ""}/api`;
+  let parts: string[] = (u.pathname.startsWith(apiPrefix)
+    ? u.pathname.slice(apiPrefix.length)
+    : u.pathname.replace(/^\/api/, "")).split("/");
   // Trim the leading slash element
   if (parts.length > 0 && parts[0] === "") {
     parts.shift();
