@@ -361,9 +361,14 @@ function extractClpidByOrcid(items, targetOrcid) {
   }
   return "";
 }
+function wildcardToRegex(pattern) {
+  const escaped = pattern.replace(/[.+?^${}()|[\]\\]/g, "\\$&");
+  const regexStr = escaped.replace(/[*%]/g, ".*");
+  return new RegExp(regexStr, "i");
+}
 function extractClpidByName(items, q_name) {
   const clpidList = [];
-  const re = new RegExp(q_name);
+  const re = wildcardToRegex(q_name);
   for (const item of items) {
     const identifiers = item.person_or_org.identifiers || [];
     const clpidObj = identifiers.find((id) => id.scheme === "clpid");
@@ -375,7 +380,7 @@ function extractClpidByName(items, q_name) {
 }
 function extractOrcidByName(items, q_name) {
   const orcidList = [];
-  const re = new RegExp(q_name);
+  const re = wildcardToRegex(q_name);
   for (const item of items) {
     const identifiers = item.person_or_org.identifiers || [];
     const orcidObj = identifiers.find((id) => id.scheme === "orcid");

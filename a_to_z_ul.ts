@@ -37,7 +37,11 @@ class AToZUL extends HTMLElement {
       </style>
       <menu id="menu"></menu>
       <div id="list-container"></div>
-      ${this.hasAttribute("long") ? '<a class="back-to-menu" href="#menu">Back to Menu</a>' : ""}
+      ${
+      this.hasAttribute("long")
+        ? '<a class="back-to-menu" href="#menu">Back to Menu</a>'
+        : ""
+    }
     `;
 
     this.shadowRoot!.appendChild(template.content.cloneNode(true));
@@ -109,8 +113,8 @@ class AToZUL extends HTMLElement {
 
   private scrollToSection(section: HTMLElement) {
     const yOffset = -100;
-    const y =
-      section.getBoundingClientRect().top + window.pageYOffset + yOffset;
+    const y = section.getBoundingClientRect().top + window.pageYOffset +
+      yOffset;
     window.scrollTo({ top: y, behavior: "smooth" });
   }
 }

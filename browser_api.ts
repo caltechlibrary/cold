@@ -52,12 +52,22 @@ export async function handleBrowserAPI(
   }
   let resp = await ds.query(apiReq.query_name, pList, body);
   if (resp.ok) {
-    let data = await resp.json();
-    return renderJSON(data, 200);
+    try {
+      let data = await resp.json();
+      return renderJSON(data, 200);
+    } catch (err) {
+      return renderJSON({
+        "ok": false,
+        "msg": `query ${apiReq.query_name} failed to read response: ${err}`,
+        "api": apiReq,
+      }, 500);
+    }
   }
+  // Consume the error body to avoid corrupting the keep-alive connection
+  await resp.body?.cancel();
   return renderJSON({
     "ok": false,
-    "msg": "not found",
+    "msg": `query ${apiReq.query_name} failed with status ${resp.status}`,
     "api": apiReq,
-  }, 404);
+  }, resp.status === 404 ? 404 : 500);
 }

@@ -62,6 +62,7 @@ About this software
 
 - clean up text in the collaborator_report.html page we'll use for testing collaborator report integration
 - fixed regression, issue #100, in group submission in people form.
+- fixed issue #101 in review queue
 - fixed regressions where the "[email protect]" string wound up in the email field.
 - Moved JavaScript for problem code from `htdocs/js`, re-coded as TypeScript with new implementations in `htdocs/modules`
 

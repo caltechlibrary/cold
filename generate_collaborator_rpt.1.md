@@ -1,4 +1,4 @@
-%generate_collaborator_rpt(1) user manual | 0.0.39d c0ff569
+%generate_collaborator_rpt(1) user manual | 0.0.39d 58f6de3
 % R. S.Doiel
 % 2026-04-21
 
