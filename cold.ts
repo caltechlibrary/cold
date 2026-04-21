@@ -43,11 +43,30 @@ const appName: string = "cold";
  *   });
  * ```
  */
+/**
+ * basePathFromUrl extracts the pathname from a URL string, returning "" if the
+ * URL is invalid or the path is just "/". Used to derive the base path prefix
+ * that Apache passes through when COLD is mounted at a sub-path like /cold.
+ */
+function basePathFromUrl(baseUrl: string): string {
+  try {
+    const p = new URL(baseUrl).pathname.replace(/\/$/, "");
+    return p === "" ? "" : p;
+  } catch {
+    return "";
+  }
+}
+
 export function ColdReadWriteHandler(
   req: Request,
   options: { debug: boolean; htdocs: string; baseUrl: string; apiUrl: string },
 ): Response | Promise<Response> {
-  const pathname = new URL(req.url).pathname;
+  const fullPathname = new URL(req.url).pathname;
+  const basePath = basePathFromUrl(options.baseUrl);
+  // Strip the deployment base path so internal routing always sees paths like /people, /api, etc.
+  const pathname = basePath && fullPathname.startsWith(basePath)
+    ? fullPathname.slice(basePath.length) || "/"
+    : fullPathname;
   const htdocs: string = path.normalize(options.htdocs);
 
   if (options.debug) console.log("debugging request", req);
@@ -94,6 +113,7 @@ export function ColdReadWriteHandler(
   // requesting a static asset.
   return serveDir(req, {
     fsRoot: htdocs,
+    urlRoot: basePath.replace(/^\//, ""), // strip /cold prefix when mapping to htdocs
     enableCors: false,
   });
 }

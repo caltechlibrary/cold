@@ -16,7 +16,9 @@ export async function handleBrowserAPI(
       "msg": `${req.method} method not supported`,
     }, 501);
   }
-  const apiReq: { [key: string]: string } = apiPathParse(req.url);
+  let basePath: string = "";
+  try { basePath = new URL(options.baseUrl).pathname.replace(/\/$/, ""); } catch { basePath = ""; }
+  const apiReq: { [key: string]: string } = apiPathParse(req.url, basePath);
   if (apiReq.c_name === undefined) {
     return renderJSON({
       "ok": false,
