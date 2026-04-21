@@ -1,9 +1,10 @@
+
 /**
  * Parses a CSV string that represents an array of columns.
  * @param {string} csvRowString - The CSV data as a string.
  * @returns {string[]} - An array of columns.
  */
-export function parseCSVRow(csvRowString) {
+export function parseCSVRow(csvRowString: string): string[] {
   let currentColumn = '';
   let inQuotes = false;
   const columns = [];
@@ -29,7 +30,7 @@ export function parseCSVRow(csvRowString) {
  * @param {string} csvString - The CSV data as a string.
  * @returns {string[][]} - A 2D array of rows and columns.
  */
-export function parseCSV(csvString) {
+export function parseCSV(csvString: string): string[][] {
   const rows = csvString.trim().split('\n');
   const maxColumns = 0;
 
@@ -47,8 +48,10 @@ export function parseCSV(csvString) {
 
 /**
  * stringifyCSVRow takes an array of strings and returns a CSV encoded string.
+ * @param {string[]} array - The a row CSV data as a string[].
+ * @returns {string} - a string represnetation of the rows
  */
-export function stringifyCSVRow(array) {
+export function stringifyCSVRow(array: string[]): string {
   return array.map(field => {
       // Check if the field contains a comma, newline, or double quote
       if (/[",\n]/.test(field)) {
@@ -61,8 +64,10 @@ export function stringifyCSVRow(array) {
 
 /**
  * stringifyCSV a 2D array of strings (rows and columns) and returns a CSV encoded string.
+ * @param {string[][]} data - The CSV data as a string[][].
+ * @returns {string} - A 2D array of rows and columns.
  */
-export function stringifyCSV(data) {
+export function stringifyCSV(data: string[][]): string {
   return data.map(stringifyCSVRow).join('\n');
 }
 

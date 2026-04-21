@@ -14,22 +14,18 @@ export class ClientAPI {
   }
 
   joinUrlPath(baseUrl: string | URL, path: string): string {
-    // Convert baseUrl to a URL object if it's a string
-    const url = typeof baseUrl === "string" ? new URL(baseUrl) : baseUrl;
-
-    // Remove leading slashes from the path to avoid double slashes
-    const normalizedPath = path.replace(/^\/+/, "");
-
-    // Combine the base URL's pathname with the normalized path
-    const combinedPath = `${url.pathname}/${normalizedPath}`.replace(
-      /\/\/+/g,
-      "/",
-    );
-
-    // Construct the new URL
-    const newUrl = new URL(url.origin + combinedPath);
-
-    return newUrl.toString();
+      // If baseUrl is a string and a relative path, resolve it against the current page's origin
+      // Convert baseUrl to a URL object if it's a string
+      const url = typeof baseUrl === "string" && !/^([a-z]+:)?\/\//i.test(baseUrl)
+        ? new URL(baseUrl, window.location.origin)
+        : new URL(baseUrl);
+      // Remove leading slashes from the path to avoid double slashes
+      const normalizedPath = path.replace(/^\/+/, "");
+      // Combine the base URL's pathname with the normalized path
+      const combinedPath = `${url.pathname}/${normalizedPath}`.replace(/\/\/+/g, "/");
+      // Construct the new URL
+      const newUrl = new URL(url.origin + combinedPath);
+      return newUrl.toString();
   }
 
   async getStringList(
@@ -69,39 +65,59 @@ export class ClientAPI {
     return [];
   }
 
+  getParamNames(params?: URLSearchParams | null): string[] {
+    return params ? Array.from(params.keys()) : [];
+  }
+
   async getList(
     c_name: string,
     query_name: string,
     params?: URLSearchParams,
   ): Promise<{ [key: string]: any }[]> {
+    // Get an ordered list of parameters as an array of [key, value] pairs
+    const fieldList = this.getParamNames(params);
+
     const base_url = this.joinUrlPath(
       this.baseUrl,
       `/api/${c_name}/${query_name}`,
     );
+
     let uri: string = base_url;
-    let resp: Response;
-    if (params !== undefined) {
-      uri = `${base_url}?${params}`;
+    if (fieldList.length > 0) {
+      uri = `${base_url}/${fieldList.join('/')}?${params.toString()}` ;
+      console.log(`DEBUG updated uri updated -> ${uri}`);
     }
+    //console.log(`DEBUG look uri: ${uri}, params count -> ${fieldList.length}, params names -> ${fieldList.join('/')}`);
     try {
-      resp = await fetch(uri, {
+      const resp = await fetch(uri, {
         headers: { "Content-Type": "application/json" },
         method: "GET",
       });
-    } catch (err) {
-      return [];
-    }
-    if (resp.ok) {
+
+      if (!resp.ok) {
+            console.log(
+              `DEBUG fetch failed: ${resp.status} ${resp.statusText}, URL: ${uri}`
+            );
+            return [];
+      }
+
+      console.log(`DEBUG resp -> ${resp.status} -> ${resp.statusText}, URL: ${uri}`);
+
       const src = await resp.text();
       if (src !== undefined && src !== "") {
-        let l: { clgid: string; group_name: string }[] = [];
+        console.log(`DEBUG src -> ${src}`);
         try {
-          l = JSON.parse(src);
+          return JSON.parse(src);
         } catch (err) {
+          console.log(`DEBUG error parsing JSON: ${err}, response: ${src}`);
           return [];
         }
-        return l;
+      } else {
+        console.log(`DEBUG why is the source empty? ${src}`);
       }
+    } catch (err) {
+      console.log(`DEBUG error in fetching ${uri}, ${err}`);
+      return [];
     }
     return [];
   }
@@ -146,7 +162,7 @@ export class ClientAPI {
     let params = new URLSearchParams();
     params.append("q", name);
     //params.append("clgid", name);
-    //params.append("alternative", name);
+    params.append("alternate", name);
     return await this.getList(c_name, query_name, params) as {
       clgid: string;
       name: string;

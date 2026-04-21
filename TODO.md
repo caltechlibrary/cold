@@ -5,6 +5,7 @@ Action items
 bug
 ---
 
+- [ ] Tracked down the group list problem in people_edit.ts, the list is getting returned now from the API but the object I am returning from getList isn't what is expected further down in the code now that types must match. I need to look through and see how getList is used to determine the right way to format the return value. Basically some functions expect aresponse looking object and are getting an array of results.
 - [X] Description field is not needed in the harvested content from RDM review queue
 - [X] funders field is not needed in the harvested content from RDM review queue
 - [X] The pulldown list needs to indicate if you're looking at all records or review queue

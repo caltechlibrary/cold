@@ -140,6 +140,31 @@ var ClientAPI = class {
     return await this.getList(c_name, query_name, params);
   }
 };
-export {
-  ClientAPI
-};
+
+// people_edit.ts
+var clientAPI = new ClientAPI();
+var groupsElem = document.getElementById("groups");
+async function updateRowGroupID(event) {
+  if (!groupsElem) return;
+  const row = event.detail?.rowIndex || 0;
+  const col = event.detail?.colIndex || 0;
+  if (col === 1) {
+    let clgid = event.detail?.value === void 0 ? "" : event.detail.value.trim();
+    if (clgid === "") {
+      const groupName = groupsElem.getCellValue(row, 0);
+      if (groupName === "") return;
+      const objList = await clientAPI.lookupGroupName(groupName);
+      for (const obj of objList) {
+        if (obj.name === groupName) {
+          groupsElem.setCellValue(row, 1, obj.clgid);
+          return;
+        }
+      }
+    }
+  }
+}
+groupsElem?.addEventListener("focused", function(event) {
+  (async () => {
+    await updateRowGroupID(event);
+  })();
+});

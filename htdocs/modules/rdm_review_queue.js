@@ -5,7 +5,7 @@ var ClientAPI = class {
     baseUrl === void 0 ? "" : this.baseUrl = baseUrl;
   }
   joinUrlPath(baseUrl, path) {
-    const url = typeof baseUrl === "string" ? new URL(baseUrl) : baseUrl;
+    const url = typeof baseUrl === "string" && !/^([a-z]+:)?\/\//i.test(baseUrl) ? new URL(baseUrl, window.location.origin) : new URL(baseUrl);
     const normalizedPath = path.replace(/^\/+/, "");
     const combinedPath = `${url.pathname}/${normalizedPath}`.replace(/\/\/+/g, "/");
     const newUrl = new URL(url.origin + combinedPath);
@@ -42,34 +42,44 @@ var ClientAPI = class {
     }
     return [];
   }
+  getParamNames(params) {
+    return params ? Array.from(params.keys()) : [];
+  }
   async getList(c_name, query_name, params) {
+    const fieldList = this.getParamNames(params);
     const base_url = this.joinUrlPath(this.baseUrl, `/api/${c_name}/${query_name}`);
     let uri = base_url;
-    let resp;
-    if (params !== void 0) {
-      uri = `${base_url}?${params}`;
+    if (fieldList.length > 0) {
+      uri = `${base_url}/${fieldList.join("/")}?${params.toString()}`;
+      console.log(`DEBUG updated uri updated -> ${uri}`);
     }
     try {
-      resp = await fetch(uri, {
+      const resp = await fetch(uri, {
         headers: {
           "Content-Type": "application/json"
         },
         method: "GET"
       });
-    } catch (err) {
-      return [];
-    }
-    if (resp.ok) {
+      if (!resp.ok) {
+        console.log(`DEBUG fetch failed: ${resp.status} ${resp.statusText}, URL: ${uri}`);
+        return [];
+      }
+      console.log(`DEBUG resp -> ${resp.status} -> ${resp.statusText}, URL: ${uri}`);
       const src = await resp.text();
       if (src !== void 0 && src !== "") {
-        let l = [];
+        console.log(`DEBUG src -> ${src}`);
         try {
-          l = JSON.parse(src);
+          return JSON.parse(src);
         } catch (err) {
+          console.log(`DEBUG error parsing JSON: ${err}, response: ${src}`);
           return [];
         }
-        return l;
+      } else {
+        console.log(`DEBUG why is the source empty? ${src}`);
       }
+    } catch (err) {
+      console.log(`DEBUG error in fetching ${uri}, ${err}`);
+      return [];
     }
     return [];
   }
@@ -98,6 +108,7 @@ var ClientAPI = class {
     const query_name = "lookup_name";
     let params = new URLSearchParams();
     params.append("q", name);
+    params.append("alternate", name);
     return await this.getList(c_name, query_name, params);
   }
   async lookupGroupMembership(clgid) {

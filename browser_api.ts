@@ -35,6 +35,7 @@ export async function handleBrowserAPI(
   let body: string = "";
   let pList: string[] = [];
   if (apiReq.query_name === "lookup_clgid") {
+	  console.log(`DEBUG lookup clgid from name, ${apiReq.q}`);
     body = JSON.stringify({ name: apiReq.q, alternative: apiReq.q });
     pList = ["name", "alternative"];
   } else {
