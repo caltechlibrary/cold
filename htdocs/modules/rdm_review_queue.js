@@ -5,7 +5,7 @@ var ClientAPI = class {
     baseUrl === void 0 ? "" : this.baseUrl = baseUrl;
   }
   joinUrlPath(baseUrl, path) {
-    const url = typeof baseUrl === "string" && !/^([a-z]+:)?\/\//i.test(baseUrl) ? new URL(baseUrl, window.location.origin) : new URL(baseUrl);
+    const url = typeof baseUrl === "string" && !/^([a-z]+:)?\/\//i.test(baseUrl) ? new URL(baseUrl, window.location.href) : new URL(baseUrl);
     const normalizedPath = path.replace(/^\/+/, "");
     const combinedPath = `${url.pathname}/${normalizedPath}`.replace(/\/\/+/g, "/");
     const newUrl = new URL(url.origin + combinedPath);

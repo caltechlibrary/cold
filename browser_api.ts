@@ -17,7 +17,11 @@ export async function handleBrowserAPI(
     }, 501);
   }
   let basePath: string = "";
-  try { basePath = new URL(options.baseUrl).pathname.replace(/\/$/, ""); } catch { basePath = ""; }
+  try {
+    basePath = new URL(options.baseUrl).pathname.replace(/\/$/, "");
+  } catch {
+    basePath = "";
+  }
   const apiReq: { [key: string]: string } = apiPathParse(req.url, basePath);
   if (apiReq.c_name === undefined) {
     return renderJSON({
