@@ -9,6 +9,7 @@ _codemeta.json
 *~
 *.bak
 *.tmp
+tmp
 people.csv
 groups.csv
 issn_journal_publisher.*
