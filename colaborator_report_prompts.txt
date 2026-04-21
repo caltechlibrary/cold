@@ -1,0 +1,34 @@
+You are an exprienced Deno+TypeScript developer.
+
+I need you to update part of a function that executes code as an external sub-process.
+
+The current code execute a Bash script without passing any parameters. I need the code modified to allow an array of string holding parameters to be passed when executing the code.  The code in the function includes the follow TypeScript that needs modification.
+
+```
+    let txt: string;
+    try {
+      // FIXME: if inputs are defined then they need to be validated before forming the command sequence to execute
+      txt = await $`${this.cmd}`.text();
+    } catch (err) {
+      txt = "error://" + err;
+    }
+```
+
+Explain the code you are modifing and show a recommended 
+
+-------
+
+When the output is returned I save save it to disk by calculating the filename using a variable named 'basename'. Right now 'basename' is a fixed string. I would like to be able to treat it as a template. Curly braces identifiy the variable names to be replaced.  I want to pass a list of inputs and use them to replace the variables defined in the template expression.  Each input is three attribute, id will match the variable name in the template, a type attribute which you can ignore and a value attribute holding the value for the replacement. I need a function that takes the template string and the inputs and returns the a string with template variables replace by input values.
+
+Here's an example of how the code will get used.
+
+```
+let inputs: Input[] = [
+  { "id": "clpid", "type": "string", "Doiel-R-S" } as Input
+];
+
+this.basename = '{{clpid}}_review_queue_report.csv';
+
+filename = basenameTemplate(this.basename, inputs);
+// filename should look like "Doiel-R-S_review_queue_report.csv"
+```
