@@ -2,7 +2,7 @@
 
 export const version: string = '0.0.39d',
 releaseDate: string = '2026-04-21',
-releaseHash: string = '58f6de3',
+releaseHash: string = 'b3d47be',
 licenseText: string = `
 
 Copyright (c) 2024, Caltech

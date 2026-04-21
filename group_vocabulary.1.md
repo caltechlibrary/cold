@@ -1,4 +1,4 @@
-%group_vocabulary(1) user manual | 0.0.39d  58f6de3
+%group_vocabulary(1) user manual | 0.0.39d  b3d47be
 % R. S.Doiel
 % 2026-04-21
 
