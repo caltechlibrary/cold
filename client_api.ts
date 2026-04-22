@@ -147,19 +147,16 @@ export class ClientAPI {
   }
 
   async lookupGroupName(name: string): Promise<
-    { clgid: string; name: string; ok: boolean; msg: string }[]
+    { clgid: string; group_name: string }[]
   > {
     const c_name = "groups.ds";
     const query_name = "lookup_name";
     let params = new URLSearchParams();
-    params.append("q", name);
-    //params.append("clgid", name);
-    params.append("alternate", name);
+    params.append("q", name + "%");
+    params.append("alternate", name + "%");
     return await this.getList(c_name, query_name, params) as {
       clgid: string;
-      name: string;
-      ok: boolean;
-      msg: string;
+      group_name: string;
     }[];
   }
 

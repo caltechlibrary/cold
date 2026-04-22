@@ -100,8 +100,8 @@ var ClientAPI = class {
     const c_name = "groups.ds";
     const query_name = "lookup_name";
     let params = new URLSearchParams();
-    params.append("q", name);
-    params.append("alternate", name);
+    params.append("q", name + "%");
+    params.append("alternate", name + "%");
     return await this.getList(c_name, query_name, params);
   }
   async lookupGroupMembership(clgid) {

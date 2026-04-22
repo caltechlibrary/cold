@@ -1,4 +1,4 @@
-%group_vocabulary(1) user manual | 0.0.39d  c3902bc
+%group_vocabulary(1) user manual | 0.0.39d  5889724
 % R. S.Doiel
 % 2026-04-21
 

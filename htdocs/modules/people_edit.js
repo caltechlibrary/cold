@@ -100,8 +100,8 @@ var ClientAPI = class {
     const c_name = "groups.ds";
     const query_name = "lookup_name";
     let params = new URLSearchParams();
-    params.append("q", name);
-    params.append("alternate", name);
+    params.append("q", name + "%");
+    params.append("alternate", name + "%");
     return await this.getList(c_name, query_name, params);
   }
   async lookupGroupMembership(clgid) {
@@ -137,21 +137,29 @@ var ClientAPI = class {
 // people_edit.ts
 var clientAPI = new ClientAPI();
 var groupsElem = document.getElementById("groups");
+async function initGroupNameAutocomplete() {
+  if (!groupsElem) return;
+  const groupData = await clientAPI.getList("groups.ds", "group_names");
+  groupsElem.setAutocomplete(0, groupData.map((g) => ({
+    value: g.group_name
+  })));
+}
 async function updateRowGroupID(event) {
   if (!groupsElem) return;
   const row = event.detail?.rowIndex || 0;
   const col = event.detail?.colIndex || 0;
   if (col === 1) {
-    let clgid = event.detail?.value === void 0 ? "" : event.detail.value.trim();
+    const clgid = event.detail?.value === void 0 ? "" : event.detail.value.trim();
     if (clgid === "") {
       const groupName = groupsElem.getCellValue(row, 0);
       if (groupName === "") return;
       const objList = await clientAPI.lookupGroupName(groupName);
-      console.log(`DEBUG objList -> ${JSON.stringify(objList)}`);
+      if (objList.length === 1) {
+        groupsElem.setCellValue(row, 1, objList[0].clgid);
+        return;
+      }
       for (const obj of objList) {
-        console.log(`DEBUG checking obj -> ${JSON.stringify(obj)}`);
         if (obj.group_name === groupName) {
-          console.log(`DEBUG found obj -> ${JSON.stringify(obj)}`);
           groupsElem.setCellValue(row, 1, obj.clgid);
           return;
         }
@@ -164,3 +172,4 @@ groupsElem?.addEventListener("focused", function(event) {
     await updateRowGroupID(event);
   })();
 });
+initGroupNameAutocomplete();

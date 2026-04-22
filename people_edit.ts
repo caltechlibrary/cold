@@ -16,25 +16,38 @@ const groupsElem = document.getElementById("groups") as unknown as {
   setAutocomplete: (col: number, data: { value: string }[]) => void;
 } | null;
 
-// Update row group ID
+// Populate group name datalist for col 0
+async function initGroupNameAutocomplete() {
+  if (!groupsElem) return;
+  const groupData = await clientAPI.getList("groups.ds", "group_names") as {
+    clgid: string;
+    group_name: string;
+  }[];
+  groupsElem.setAutocomplete(
+    0,
+    groupData.map((g) => ({ value: g.group_name })),
+  );
+}
+
+// Update row group ID when user tabs into the clgid column
 async function updateRowGroupID(event: CustomEvent) {
   if (!groupsElem) return;
   const row = event.detail?.rowIndex || 0;
   const col = event.detail?.colIndex || 0;
   if (col === 1) {
-    let clgid = (event.detail?.value === undefined)
+    const clgid = (event.detail?.value === undefined)
       ? ""
       : event.detail.value.trim();
     if (clgid === "") {
       const groupName = groupsElem.getCellValue(row, 0);
       if (groupName === "") return;
       const objList = await clientAPI.lookupGroupName(groupName);
-      console.log(`DEBUG objList -> ${JSON.stringify(objList)}`);
+      if (objList.length === 1) {
+        groupsElem.setCellValue(row, 1, objList[0].clgid);
+        return;
+      }
       for (const obj of objList) {
-        console.log(`DEBUG checking obj -> ${JSON.stringify(obj)}`);
-
         if (obj.group_name === groupName) {
-          console.log(`DEBUG found obj -> ${JSON.stringify(obj)}`);
           groupsElem.setCellValue(row, 1, obj.clgid);
           return;
         }
@@ -49,3 +62,5 @@ groupsElem?.addEventListener("focused", function (event: Event) {
     await updateRowGroupID(event as CustomEvent);
   })();
 });
+
+initGroupNameAutocomplete();
