@@ -15,7 +15,7 @@ echo "Working directory $(pwd)"
 
 function startService() {
         echo "Starting cold"
-        /usr/local/bin/cold /usr/local/etc/cold/settings.json
+        /Sites/cold/bin/cold --htdocs=/Sites/cold/htdocs --baseUrl=https://apps.library.caltech.edu/cold
 }
 
 function stopService() {
@@ -47,7 +47,7 @@ case "$1" in
                 statusService
                 ;;
         *)
-                echo 'usage: epi3apid [start|stop|restart|reindex|status]'
+                echo 'usage: cold.bash [start|stop|restart|reindex|status]'
                 ;;
 esac
 

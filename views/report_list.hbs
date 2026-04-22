@@ -76,7 +76,7 @@
     clpidInput.required = isCollab;
     if (isCollab && !populated) {
       populated = true;
-      fetch('/api/people.ds/get_all_clpid')
+      fetch('./api/people.ds/get_all_clpid')
         .then(r => r.json())
         .then(list => {
           const dl = document.getElementById('clpid-list');
