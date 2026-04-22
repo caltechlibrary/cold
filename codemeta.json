@@ -53,8 +53,8 @@
     }
   ],
   "dateCreated": "2023-12-12",
-  "dateModified": "2026-04-21",
-  "datePublished": "2026-04-21",
+  "dateModified": "2026-04-22",
+  "datePublished": "2026-04-22",
   "description": "Caltech Library maintains a list of people, groups and funders and their related identifiers. For many years these were managed using a spreadsheets. That has become cumbersome. **COLD** manages data as JSON objects in [dataset](https://github.com/caltechlibrary/dataset) collections.\n\n**COLD** is implemented as three web web services\n\n- cold web UI\n- cold JSON API (provided by datasetd)\n- cold reports (the report request system)\n\nReports are implemented as a set of programs or bash scripts.\n\nTypeScript+Deno is used to implement the web UI and report system.\nThe JSON API is provided by Dataset's datasetd.\nAccess control is provided by the front end web server integrated with Shibboleth.",
   "funder": [
     {
@@ -95,10 +95,10 @@
     "GNU Make",
     "Pandoc 3.1"
   ],
-  "version": "0.0.39d",
+  "version": "0.0.39c",
   "developmentStatus": "active",
   "issueTracker": "https://github.com/caltechlibrary/cold/issues",
   "downloadUrl": "https://github.com/caltechlibrary/cold/release/latest",
-  "releaseNotes": "- clean up text in the collaborator_report.html page we'll use for testing collaborator report integration\n- fixed regression, issue #100, in group submission in people form.\n- fixed issue #101 in review queue\n- fixed regressions where the \"[email protect]\" string wound up in the email field.\n- Moved JavaScript for problem code from `htdocs/js`, re-coded as TypeScript with new implementations in `htdocs/modules`",
+  "releaseNotes": "- clean up text in the collaborator_report.html page we'll use for testing collaborator report integration\n- fixed regression, issue #100, in group submission in people form.\n- fixed issue #101 in review queue\n- fixed issue #102 in people edit\n- fixed regressions where the \"[email protect]\" string wound up in the email field.\n- Moved JavaScript for problem code from `htdocs/js`, re-coded as TypeScript with new implementations in `htdocs/modules`",
   "copyrightYear": 2026
 }

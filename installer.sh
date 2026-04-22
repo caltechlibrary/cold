@@ -4,7 +4,7 @@
 # Set the package name and version to install
 #
 PACKAGE="cold"
-VERSION="0.0.39d"
+VERSION="0.0.39c"
 GIT_GROUP="caltechlibrary"
 RELEASE="https://github.com/$GIT_GROUP/$PACKAGE/releases/tag/v$VERSION"
 
