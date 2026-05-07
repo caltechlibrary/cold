@@ -93,7 +93,7 @@
   ],
   "softwareSuggestions": [
     "GNU Make",
-    "Pandoc >= 3.1"
+    "Pandoc >= 3.9"
   ],
   "version": "0.0.39c",
   "developmentStatus": "active",

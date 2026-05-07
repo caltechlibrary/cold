@@ -153,7 +153,7 @@ your file to <code>transpileFiles</code> in <code>build.ts</code>.</p>
 resolution), add a <code>deno bundle</code> command to the
 <code>htdocs</code> task in <code>deno.json</code>:</p>
 <div class="sourceCode" id="cb4"><pre
-class="sourceCode json"><code class="sourceCode json"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="er">&quot;htdocs&quot;:</span> <span class="er">&quot;deno</span> <span class="er">run</span> <span class="er">--allow-net</span> <span class="er">--allow-read</span> <span class="er">--allow-env</span> <span class="er">--allow-write=htdocs</span> <span class="er">--allow-import</span> <span class="er">build.ts</span> <span class="er">;</span> <span class="er">deno</span> <span class="er">bundle</span> <span class="er">--config</span> <span class="er">tsconfig.json</span> <span class="er">client_api.ts</span> <span class="er">my_feature.ts</span> <span class="er">--outdir</span> <span class="er">htdocs/modules/&quot;</span></span></code></pre></div>
+class="sourceCode json"><code class="sourceCode json"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;htdocs&quot;</span><span class="er">:</span> <span class="st">&quot;deno run --allow-net --allow-read --allow-env --allow-write=htdocs --allow-import build.ts ; deno bundle --config tsconfig.json client_api.ts my_feature.ts --outdir htdocs/modules/&quot;</span></span></code></pre></div>
 <p>Check the existing <code>htdocs</code> task in <code>deno.json</code>
 for the exact flags already in use and follow that pattern.</p>
 <h3 id="building">Building</h3>
@@ -375,13 +375,13 @@ works:</p>
 <h2 id="summary-of-files-changed">Summary of Files Changed</h2>
 <table>
 <colgroup>
-<col style="width: 50%" />
-<col style="width: 50%" />
+<col style="width: 42%" />
+<col style="width: 57%" />
 </colgroup>
 <thead>
 <tr>
-<th>File</th>
-<th>Change</th>
+<th scope="col">File</th>
+<th scope="col">Change</th>
 </tr>
 </thead>
 <tbody>

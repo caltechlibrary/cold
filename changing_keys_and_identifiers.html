@@ -42,9 +42,9 @@ returns the revised object. JSON object attribute needing an update is
 the more JSON style path rather than the SQL arrow notation. Below is
 the resulting UPDATE statement needed to update both the “_Key” column
 and the <code>src-&gt;'clpid'</code> value.</p>
-<p>~~SQL UPDATE people SET _Key = ‘Dimitrov-Vesselin’, src =
+<p><sub></sub>SQL UPDATE people SET _Key = ‘Dimitrov-Vesselin’, src =
 json_set(src, ‘$.clpid’, ‘Dimitrov-Vesselin’) WHERE _Key = ‘Dimitrov-M’;
-~~</p>
+<sub></sub></p>
 <p>After running this command on the SQL database the record will
 reflect the new key and clpid values.</p>
 </section>

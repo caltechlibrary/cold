@@ -148,11 +148,10 @@ run_collaborator_report:
   content_type: application/vnd.ms-excel
 ~~~
 
-This keeps the linkage between the report excetuable largely separate. The `clpid` value will be vetted by the browser, by the middleware and again by the report runner[^1]. The `clpid` is required so will be non-empty (or the report will be aborted). It should be safe to pass that value to the script `run_collaborator_report.bash`.
+This keeps the linkage between the report excetuable largely separate. The `clpid` value will be vetted by the browser, by the middleware and again by the report runner (ideally again inside the Bash script ./run_collaborator_report.bash and the Python script it runs). The `clpid` is required so will be non-empty (or the report will be aborted). It should be safe to pass that value to the script `run_collaborator_report.bash`.
 
 Other than exit code and error messages (prefixed with `error://` in the output of `run_collaborator_report.bash`) the report interacts minimally with the report runner (the standard output can be used as the contents of the report and written to by the current formation of the basename attribute).  The report configuration only sees the addition of the inputs attribute and the enhanced behavior of resolving the basename if the `{{` and `}}` are present.
 
-[^1]: Ideally again inside the Bash script ./run_collaborator_report.bash and the Python script it runs.
 
 ## Notes
 
