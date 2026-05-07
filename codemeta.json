@@ -89,7 +89,7 @@
   "softwareRequirements": [
     "Deno >= 2.7.12",
     "Dataset >= 2.4.0",
-    "CMTools >= 0.0.42"
+    "CMTools >= 0.0.43"
   ],
   "softwareSuggestions": [
     "GNU Make",

@@ -1,5 +1,5 @@
 
-# generated with CMTools 0.0.39c 7f42b4c
+# generated with CMTools 0.0.39c 6bd57b9
 
 #
 # Makefile for running pandoc on all Markdown docs ending in .md

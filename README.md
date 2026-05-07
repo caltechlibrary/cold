@@ -49,12 +49,12 @@ Access control is provided by the front end web server integrated with Shibbolet
 
 - Deno >= 2.7.12
 - Dataset >= 2.4.0
-- CMTools >= 0.0.42
+- CMTools >= 0.0.43
 
 ### Software Suggestions
 
 - GNU Make
-- Pandoc >= 3.1
+- Pandoc >= 3.9
 
 
 
