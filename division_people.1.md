@@ -1,4 +1,4 @@
-%division_people(1) user manual | 0.0.39c afaaa56
+%division_people(1) user manual | 0.0.39c ccc8ac9
 % R. S.Doiel
 % 2026-04-22
 

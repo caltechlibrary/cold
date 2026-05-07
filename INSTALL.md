@@ -1,5 +1,5 @@
-Installation for development of **cold**
-===========================================
+Installation **cold**
+============================
 
 **cold** Caltech Library maintains a list of people, groups and funders and their related identifiers. For many years these were managed using a spreadsheets. That has become cumbersome. **COLD** manages data as JSON objects in [dataset](https://github.com/caltechlibrary/dataset) collections.
 
@@ -44,9 +44,9 @@ Installing from source
 
 ### Required software
 
-- Deno &gt;&#x3D; 2.7.11
-- Dataset &#x3D; 2.3.4
-- CMTools &gt;&#x3D; 0.0.40
+- Deno &gt;&#x3D; 2.7.12
+- Dataset &gt;&#x3D; 2.4.0
+- CMTools &gt;&#x3D; 0.0.42
 
 ### Steps
 

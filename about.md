@@ -67,20 +67,20 @@ About this software
 - fixed regressions where the "[email protect]" string wound up in the email field.
 - Moved JavaScript for problem code from `htdocs/js`, re-coded as TypeScript with new implementations in `htdocs/modules`
 
-### Authors
+## Authors
 
-- R. S. Doiel, <https://orcid.org/0000-0003-0900-6903>
-
-
-### Contributors
-
-- Kathy Johnson, <https://orcid.org/0000-0002-0026-2516>
-- Thomas E Morrell, <https://orcid.org/0000-0001-9266-5146>
+- [R. S. Doiel](https://orcid.org/0000-0003-0900-6903)
 
 
-### Maintainers
+## Contributors
 
-- R. S. Doiel, <https://orcid.org/0000-0003-0900-6903>
+- [Kathy Johnson](https://orcid.org/0000-0002-0026-2516)
+- [Thomas E Morrell](https://orcid.org/0000-0001-9266-5146)
+
+
+## Maintainers
+
+- [R. S. Doiel](https://orcid.org/0000-0003-0900-6903)
 
 
 Caltech Library maintains a list of people, groups and funders and their related identifiers. For many years these were managed using a spreadsheets. That has become cumbersome. **COLD** manages data as JSON objects in [dataset](https://github.com/caltechlibrary/dataset) collections.
@@ -97,11 +97,11 @@ TypeScript+Deno is used to implement the web UI and report system.
 The JSON API is provided by Dataset&#x27;s datasetd.
 Access control is provided by the front end web server integrated with Shibboleth.
 
-- License: <https://caltechlibrary.github.io/cold/LICENSE>
-- GitHub: <https://github.com/caltechlibrary/cold>
-- Issues: <https://github.com/caltechlibrary/cold/issues>
+- [License](https://caltechlibrary.github.io/cold/LICENSE)
+- [Code Repository](https://github.com/caltechlibrary/cold)
+  - [Issue Tracker](https://github.com/caltechlibrary/cold/issues)
 
-### Programming languages
+## Programming languages
 
 - CSS
 - HTML
@@ -113,21 +113,21 @@ Access control is provided by the front end web server integrated with Shibbolet
 - YAML
 
 
-### Operating Systems
+## Operating Systems
 
 - Linux
 
 
-### Software Requirements
+## Software Requirements
 
-- Deno >= 2.7.11
-- Dataset = 2.3.4
-- CMTools >= 0.0.40
+- Deno >= 2.7.12
+- Dataset >= 2.4.0
+- CMTools >= 0.0.42
 
 
-### Software Suggestions
+## Software Suggestions
 
 - GNU Make
-- Pandoc 3.1
+- Pandoc &gt;&#x3D; 3.1
 
 
