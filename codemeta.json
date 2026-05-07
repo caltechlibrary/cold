@@ -98,7 +98,7 @@
   "version": "0.0.39c",
   "developmentStatus": "active",
   "issueTracker": "https://github.com/caltechlibrary/cold/issues",
-  "downloadUrl": "https://github.com/caltechlibrary/cold/release/latest",
+  "downloadUrl": "https://github.com/caltechlibrary/cold/releases/latest",
   "releaseNotes": "- clean up text in the collaborator_report.html page we'll use for testing collaborator report integration\n- fixed regression, issue #100, in group submission in people form.\n- fixed issue #101 in review queue\n- fixed issue #102 in people edit\n- fixed regressions where the \"[email protect]\" string wound up in the email field.\n- Moved JavaScript for problem code from `htdocs/js`, re-coded as TypeScript with new implementations in `htdocs/modules`",
   "copyrightYear": 2026
 }

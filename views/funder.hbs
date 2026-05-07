@@ -3,15 +3,16 @@
 {{>collection_head}}
 <body>
 {{>header}}
+<a href="#main-content" class="visually-hidden">skip to main content</a>
 <nav>
 <ul>
-<li><a href="/" title="return home">Home</a></li>
+<li><a href="/" title="return home">All Library Apps</a></li>
 <li><a href="../" title="return to dashboard">Dashboard</a></li>
 <li><a href="./" title="return to funder list">Funders</a></li>
 <li><a href="{{funder.clfid}}?view=edit">Edit {{funder.clfid}}</a></li>
 </ul>
 </nav>
-<section>
+<section id="main-content">
 
 <h1>{{funder.name}}{{#if funder.acronyms}}
 <span class="acronyms">({{#funder.acronyms}}{{#if @first}}{{this}}{{else}}, {{this}}{{/if}}{{/funder.acronyms}})</span>

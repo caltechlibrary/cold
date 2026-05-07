@@ -3,15 +3,16 @@
 {{>head}}
 <body>
 {{>header}}
+<a href="#main-content" class="visually-hidden">skip to main content</a>
 <nav>
 <ul>
-<li><a href="/" title="return home">Home</a></li>
+<li><a href="/" title="return home">All Library Apps</a></li>
 <li><a href="../" title="return to dashboard">Dashboard</a></li>
 <li><a href="./" title="return to issn list">Journals</a></li>
 <li><a href="{{journal.issn}}?view=edit">Edit {{journal.name}}</a></li>
 </ul>
 </nav>
-<section>
+<section id="main-content">
 <h1>{{journal.name}}</h1>
 
 <div class="identifier">ISSN: {{journal.issn}}</div>

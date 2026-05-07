@@ -16,6 +16,7 @@ bug
 next
 ----
 
+- [ ] If their is no Caltech directory record for someone then the Bio field should become editable for people records
 - [ ] Revisit the prototype collaborator report page, see if I can folder it back into the main reports page's web form
   - [ ] Figure out how to fold that report directly into COLD's source code base rather than rely on relative directories to run it
     - [ ] Look at reports page and decide if there is an easy way to swith form elements based on the selected reports, example I could at clpid, clgid and hide the ones not used

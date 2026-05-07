@@ -20,9 +20,14 @@ Access control is provided by the front end web server integrated with Shibbolet
 
 - version: 0.0.39c
 - status: active
-- released: 2026-04-09
+- released: 2026-04-22
 
-clean up text in the collaborator_report.html page we'll use for testing collaborator report integration
+- clean up text in the collaborator_report.html page we&#x27;ll use for testing collaborator report integration
+- fixed regression, issue #100, in group submission in people form.
+- fixed issue #101 in review queue
+- fixed issue #102 in people edit
+- fixed regressions where the &quot;[email protect]&quot; string wound up in the email field.
+- Moved JavaScript for problem code from &#x60;htdocs/js&#x60;, re-coded as TypeScript with new implementations in &#x60;htdocs/modules&#x60;
 
 
 ### Authors
@@ -42,21 +47,23 @@ clean up text in the collaborator_report.html page we'll use for testing collabo
 
 ## Software Requirements
 
-- Deno >= 2.7.11
-- Dataset = 2.3.4
-- CMTools >= 0.0.40
+- Deno >= 2.7.12
+- Dataset >= 2.4.0
+- CMTools >= 0.0.42
 
 ### Software Suggestions
 
 - GNU Make
-- Pandoc 3.1
+- Pandoc >= 3.1
+
+
 
 ## Related resources
 
-- [Download](https://github.com/caltechlibrary/cold/release/latest)
+
+- [Download](https://github.com/caltechlibrary/cold/releases/latest)
 - [Getting Help, Reporting bugs](https://github.com/caltechlibrary/cold/issues)
 - [LICENSE](https://caltechlibrary.github.io/cold/LICENSE)
 - [Installation](INSTALL.md)
 - [About](about.md)
-
 
