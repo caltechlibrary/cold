@@ -64,3 +64,56 @@ groupsElem?.addEventListener("focused", function (event: Event) {
 });
 
 initGroupNameAutocomplete();
+
+function slugify(s: string): string {
+  return s
+    .replace(/[^\p{L}\p{N}\s()]/gu, "")
+    .replace(/\s{2,}/g, " ")
+    .trim()
+    .replace(/\s/g, "-");
+}
+
+async function updateClpid() {
+  const clpidElem = document.getElementById(
+    "clpid",
+  ) as HTMLInputElement | null;
+  const familyNameElem = document.getElementById(
+    "family_name",
+  ) as HTMLInputElement | null;
+  const givenNameElem = document.getElementById(
+    "given_name",
+  ) as HTMLInputElement | null;
+  if (clpidElem === null || clpidElem.value !== "") return;
+  const family = familyNameElem?.value.trim() ?? "";
+  const given = givenNameElem?.value.trim() ?? "";
+  if (family === "" || given === "") return;
+  const proposed = slugify(family + " " + given);
+  if (proposed === "") return;
+  const exists = await clientAPI.validateClpid(proposed);
+  if (exists) {
+    clpidElem.style.borderColor = "red";
+    clpidElem.placeholder =
+      `"${proposed}" already exists — enter a unique clpid`;
+  } else {
+    clpidElem.style.borderColor = "";
+    clpidElem.value = proposed;
+  }
+}
+
+document.addEventListener("focusout", (event: FocusEvent) => {
+  const target = event.target as HTMLElement;
+  if (target.id === "family_name" || target.id === "given_name") {
+    updateClpid();
+  }
+});
+
+const caltechElem = document.getElementById("caltech") as
+  | HTMLInputElement
+  | null;
+const rorElem = document.getElementById("ror") as HTMLInputElement | null;
+
+caltechElem?.addEventListener("change", function () {
+  if (caltechElem.checked && rorElem !== null && rorElem.value === "") {
+    rorElem.value = "https://ror.org/05dxps055";
+  }
+});

@@ -1,4 +1,4 @@
-%thesis_option_vocabulary(1) user manual | 0.0.39c  758122e
+%thesis_option_vocabulary(1) user manual | 0.0.39c  2cd5f09
 % R. S.Doiel
 % 2026-04-22
 

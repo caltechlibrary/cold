@@ -5,7 +5,7 @@ Action items
 bug
 ---
 
-- [ ] Tracked down the group list problem in people_edit.ts, the list is getting returned now from the API but the object I am returning from getList isn't what is expected further down in the code now that types must match. I need to look through and see how getList is used to determine the right way to format the return value. Basically some functions expect aresponse looking object and are getting an array of results.
+- [X] Tracked down the group list problem in people_edit.ts, the list is getting returned now from the API but the object I am returning from getList isn't what is expected further down in the code now that types must match. I need to look through and see how getList is used to determine the right way to format the return value. Basically some functions expect aresponse looking object and are getting an array of results.
 - [X] Description field is not needed in the harvested content from RDM review queue
 - [X] funders field is not needed in the harvested content from RDM review queue
 - [X] The pulldown list needs to indicate if you're looking at all records or review queue
@@ -16,30 +16,12 @@ bug
 next
 ----
 
-- [ ] If their is no Caltech directory record for someone then the Bio field should become editable for people records
-- [ ] Revisit the prototype collaborator report page, see if I can folder it back into the main reports page's web form
-  - [ ] Figure out how to fold that report directly into COLD's source code base rather than rely on relative directories to run it
-    - [ ] Look at reports page and decide if there is an easy way to swith form elements based on the selected reports, example I could at clpid, clgid and hide the ones not used
+- [X] When creating a new people record a slugified version of the family and given name needs to be generated for the clpid that will be used as the key for the record. It most be unique.
+- [X] When creating a new group record a slugified version of the name needs to be generated for the clgid that will be used as the key for the record. It most be unique.
+- [X] Add self-service clpid changes for the people.ds, see the Bash script move_people_record.bash for implementation example. This should run from the Web UI.
+- [X] If their is no Caltech directory record for someone then the Bio field should become editable for people records
 - [ ] COLD needs a ROADMAP document to guide development as cold's needs seem ambigious
-- [X] Revisit Tom's Python collaborator report to confirm to the COLD reports expectation OR allow reports to skip standard output
-  - [X] Decided if it makes sense render to CSV instead of Excel
-- [X] Figure a useful way to snapshot the RDM Review queue tables and load into a dataset collection
-  - [X] harvest submitted status requests
-  - [X] harvest accepted status requests
-- [X] Create a Web UI to search the review queue collection
-  - [X] Figure out how to make searches bookmark-able
-  - [X] Figure out how to map search to various queries of rdm_review_queue.ds
-  - [X] Implemented retrieve JSON array results
-  - [X] Format output for HTMLL display
-  - [X] Figure out CSV download option for search results
-- [X] Create a set of status reports for the review queue, historical reports should include "accepted" status as well as "submitted" status requests
-- [X] Need to produce the Groups YAML vocabulary for CaltechAUTHORS
-- [X] Add directoryLookup() call on submit of people_edit
-- [X] Make sure `author_id` and `thesis_id` continue to be mapped on reloading data from CSV file, if a person has an "clpid" and only are alumni then that should go into the `thesis_id` field.
-- [X] Display name should always be taken from Caltech Directory
-- [X] If the name fields family_name, given_name should be taken from the Caltech Directory if empty
-- [ ] When Caltech is checked active the ROR should populate with https://ror.org/05dxps055 (client side code)
-- [X] Add "internal_notes" property to people object, group object and issn (journals) object
+- [X] When Caltech is checked active the ROR should populate with https://ror.org/05dxps055 (client side code)
 - [ ] Write reports
   - [ ] Funders
   - [X] Prototype a reports request system in COLD
@@ -50,9 +32,6 @@ next
   - [X] People (should be written to feeds)
   - [X] Group  (should be written to feeds)
   - [X] RDM vocabulary files report (should be written to feeds)
-- [X] Write push of CSV files to datawork for inclusion in feeds (implemented but commented out in feeds fetch db script)
-- [X] Add button to pull in current directory data
-- [X] Write data flow document for cold people and group data indicating we're using public data from the directory as authorative and where publish the group and people data to in feeds
 - [ ] Implement client/server validation for objects and attributes in dataset
  - [ ] Implement validation in datasetd based on models, coming in dataset v3 or late minor release v2
  - [X] People
@@ -73,6 +52,30 @@ Someday, maybe
 
 ## Completed
 
+- [X] Write push of CSV files to datawork for inclusion in feeds (implemented but commented out in feeds fetch db script)
+- [X] Add button to pull in current directory data
+- [X] Write data flow document for cold people and group data indicating we're using public data from the directory as authorative and where publish the group and people data to in feeds
+- [X] Revisit the prototype collaborator report page, see if I can folder it back into the main reports page's web form
+  - [X] Figure out how to fold that report directly into COLD's source code base rather than rely on relative directories to run it
+    - [X] Look at reports page and decide if there is an easy way to swith form elements based on the selected reports, example I could at clpid, clgid and hide the ones not used
+- [X] Revisit Tom's Python collaborator report to confirm to the COLD reports expectation OR allow reports to skip standard output
+  - [X] Decided if it makes sense render to CSV instead of Excel
+- [X] Figure a useful way to snapshot the RDM Review queue tables and load into a dataset collection
+  - [X] harvest submitted status requests
+  - [X] harvest accepted status requests
+- [X] Create a Web UI to search the review queue collection
+  - [X] Figure out how to make searches bookmark-able
+  - [X] Figure out how to map search to various queries of rdm_review_queue.ds
+  - [X] Implemented retrieve JSON array results
+  - [X] Format output for HTMLL display
+  - [X] Figure out CSV download option for search results
+- [X] Create a set of status reports for the review queue, historical reports should include "accepted" status as well as "submitted" status requests
+- [X] Need to produce the Groups YAML vocabulary for CaltechAUTHORS
+- [X] Add directoryLookup() call on submit of people_edit
+- [X] Make sure `author_id` and `thesis_id` continue to be mapped on reloading data from CSV file, if a person has an "clpid" and only are alumni then that should go into the `thesis_id` field.
+- [X] Display name should always be taken from Caltech Directory
+- [X] If the name fields family_name, given_name should be taken from the Caltech Directory if empty
+- [X] Add "internal_notes" property to people object, group object and issn (journals) object
 - [x] Remove mkpage dependency, replace with Pandoc 3 templates from github.com/caltechlibrary/codemeta-pandoc-examples
 - [X] Setup PostgreSQL user and cold database (replaced with SQLite3 and datasetd)
 - [X] Migrate current SQL schema to PostgreSQL schema (replaced with SQLite3 and datasetd)

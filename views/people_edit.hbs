@@ -144,8 +144,9 @@
 </div>
 
 <div>
-<label set="bio"><a class="foot_note" href="#directory_note"><sup>◇</sup></a> Bio</label><br >
-<textarea id="bio" name="bio" rows="10" cols="60" placeholder="pulled from directory" readonly>{{people.bio}}</textarea>
+<label set="bio"><a class="foot_note" href="#directory_note"><sup>◇</sup></a> Bio</label>
+<span id="bio_status"></span><br >
+<textarea id="bio" name="bio" rows="10" cols="60" placeholder="pulled from directory" {{#if people.caltech}}readonly{{/if}}>{{people.bio}}</textarea>
 </div>
 
 

@@ -132,6 +132,28 @@ var ClientAPI = class {
     params.append("q", acronym);
     return await this.getList(c_name, query_name, params);
   }
+  async lookupPeopleName(clpid) {
+    const params = new URLSearchParams();
+    params.append("clpid", clpid);
+    return await this.getList("people.ds", "lookup_people_name", params);
+  }
+  async lookupPersonByClpid(clpid) {
+    const params = new URLSearchParams();
+    params.append("clpid", clpid);
+    return await this.getList("people.ds", "lookup_person_by_clpid", params);
+  }
+  async validateClpid(clpid) {
+    const params = new URLSearchParams();
+    params.append("clpid", clpid);
+    const results = await this.getList("people.ds", "validate_clpid", params);
+    return results.length > 0;
+  }
+  async validateClgid(clgid) {
+    const params = new URLSearchParams();
+    params.append("clgid", clgid);
+    const results = await this.getList("groups.ds", "validate_clgid", params);
+    return results.length > 0;
+  }
 };
 
 // group_view.ts

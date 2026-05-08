@@ -1,5 +1,5 @@
 
-# generated with CMTools 0.0.39c 6bd57b9
+# generated with CMTools 0.0.40 2cd5f09
 
 #
 # Makefile for running pandoc on all Markdown docs ending in .md
@@ -10,7 +10,7 @@ PANDOC = $(shell which pandoc)
 
 MD_PAGES = $(shell ls -1 *.md)
 
-HTML_PAGES = $(shell ls -1 *.md | sed -E 's/.md/.html/g')
+HTML_PAGES = $(shell ls -1 *.md | sed -E 's/\.md/\.html/g')
 
 build: $(HTML_PAGES) $(MD_PAGES) # pagefind
 

@@ -60,6 +60,11 @@ About this software
 
 ## cold 0.0.39c
 
+- Bio field is now editable when a person is no longer in the campus directory; directory lookup 404 also unlocks bio with a visible warning
+- ROR field auto-populates with Caltech ROR when the Caltech checkbox is checked and ROR is currently empty
+- clpid auto-generated from family and given name on people create form; clgid auto-generated from group name on group create form; both check uniqueness before populating
+- Fixed Firefox bug where module-level DOM captures produced stale references; switched to document-level focusout delegation
+- Self-service clpid rename: new /people/rename page linked from dashboard and people view; shows full person record for confirmation; validates old key exists and new key is unique
 - clean up text in the collaborator_report.html page we'll use for testing collaborator report integration
 - fixed regression, issue #100, in group submission in people form.
 - fixed issue #101 in review queue
@@ -122,12 +127,12 @@ Access control is provided by the front end web server integrated with Shibbolet
 
 - Deno >= 2.7.12
 - Dataset >= 2.4.0
-- CMTools >= 0.0.42
+- CMTools >= 0.0.43
 
 
 ## Software Suggestions
 
 - GNU Make
-- Pandoc &gt;&#x3D; 3.1
+- Pandoc >= 3.9
 
 

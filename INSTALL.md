@@ -46,7 +46,7 @@ Installing from source
 
 - Deno &gt;&#x3D; 2.7.12
 - Dataset &gt;&#x3D; 2.4.0
-- CMTools &gt;&#x3D; 0.0.42
+- CMTools &gt;&#x3D; 0.0.43
 
 ### Steps
 

@@ -14,7 +14,7 @@
 <a href="#main-content" class="visually-hidden">skip to main content</a>
 <nav>
 <ul>
-  <li><a href="/" title="return home">Home</a></li>
+  <li><a href="/" title="return home">All Library Apps</a></li>
   <li><a href="./" title="return to dashboard">Dashboard</a></li>
   <li><a href="https://github.com/caltechlibrary/cold/issues">Report a problem</a></li>
   <li><a href="./about.html">About</a></li>
@@ -25,6 +25,11 @@
 <h1>About this software</h1>
 <h2>cold 0.0.39c</h2>
 <ul>
+<li>Bio field is now editable when a person is no longer in the campus directory; directory lookup 404 also unlocks bio with a visible warning</li>
+<li>ROR field auto-populates with Caltech ROR when the Caltech checkbox is checked and ROR is currently empty</li>
+<li>clpid auto-generated from family and given name on people create form; clgid auto-generated from group name on group create form; both check uniqueness before populating</li>
+<li>Fixed Firefox bug where module-level DOM captures produced stale references; switched to document-level focusout delegation</li>
+<li>Self-service clpid rename: new /people/rename page linked from dashboard and people view; shows full person record for confirmation; validates old key exists and new key is unique</li>
 <li>clean up text in the collaborator_report.html page we'll use for testing collaborator report integration</li>
 <li>fixed regression, issue #100, in group submission in people form.</li>
 <li>fixed issue #101 in review queue</li>
@@ -83,12 +88,12 @@ Access control is provided by the front end web server integrated with Shibbolet
 <ul>
 <li>Deno &gt;= 2.7.12</li>
 <li>Dataset &gt;= 2.4.0</li>
-<li>CMTools &gt;= 0.0.42</li>
+<li>CMTools &gt;= 0.0.43</li>
 </ul>
 <h2>Software Suggestions</h2>
 <ul>
 <li>GNU Make</li>
-<li>Pandoc &gt;= 3.1</li>
+<li>Pandoc &gt;= 3.9</li>
 </ul>
 
 
