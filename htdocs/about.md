@@ -32,7 +32,7 @@ maintainer:
     id: https://orcid.org/0000-0003-0900-6903
 
 repository_code: https://github.com/caltechlibrary/cold
-version: 0.0.39c
+version: 0.0.40
 license_url: https://caltechlibrary.github.io/cold/LICENSE
 operating_system:
   - Linux
@@ -52,13 +52,13 @@ keywords:
   - objects
   - controlled vocabulary
 
-date_released: 2026-04-22
+date_released: 2026-05-08
 ---
 
 About this software
 ===================
 
-## cold 0.0.39c
+## cold 0.0.40
 
 - Bio field is now editable when a person is no longer in the campus directory; directory lookup 404 also unlocks bio with a visible warning
 - ROR field auto-populates with Caltech ROR when the Caltech checkbox is checked and ROR is currently empty
