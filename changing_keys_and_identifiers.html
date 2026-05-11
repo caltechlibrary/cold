@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <title>cold</title>
+    <link rel="stylesheet" href="https://caltechlibrary.github.io/css/site.css">
+    <link rel="stylesheet" href="https://media.library.caltech.edu/cl-webcomponents/css/code-blocks.css">
+    <script type="module" src="https://media.library.caltech.edu/cl-webcomponents/copyToClipboard.js"></script>
+    <script type="module" src="https://media.library.caltech.edu/cl-webcomponents/footer-global.js"></script>
+</head>
+<body>
+<header>
+<a href="https://library.caltech.edu"><img src="https://media.library.caltech.edu/assets/caltechlibrary-logo.png" alt="Caltech Library logo"></a>
+</header>
+<a href="#main-content" class="visually-hidden">skip to main content</a>
+<nav>
+<ul>
+    <li><a href="/">All Library Apps</a></li>
+    <li><a href="index.html">Home</a></li>
+    <li><a href="LICENSE">LICENSE</a></li>
+    <li><a href="INSTALL.html">INSTALL</a></li>
+    <li><a href="user_manual.html">User Manual</a></li>
+    <li><a href="about.html">About</a></li>
+    <!-- <li><a href="search.html">Search</a></li> -->
+    <li><a href="https://github.com/caltechlibrary/cold">Code Repository</a></li>
+</ul>
+</nav>
+<section id="main-content">
+<h1 id="changing-keys-and-identifiers">Changing Keys and
+Identifiers</h1>
+<p>By default COLD does not allow you to change object keys or the
+related identifier in an object. Never the less there are times when
+this needs to be done. This can be handled via a simple SQL statement
+executed on the SQLite3 database holding the collection data.</p>
+<p>The example that follows is from Caltech People. A faculty member had
+been assigned the object key and clpid id “Dimitrov-M”. Both needed to
+be changed to “Dimitrov-Vesselin”. At the SQL level the “_Key” column
+needed to be change but also an attribute in the JSON colomn called
+“src”. To change JSON attribute SQLite3 provides a JSON function called
+<code>json_set</code>. It lets you update a specific attribute and
+returns the revised object. JSON object attribute needing an update is
+<code>src-&gt;'clpid'</code>. The <code>json_set</code> function uses
+the more JSON style path rather than the SQL arrow notation. Below is
+the resulting UPDATE statement needed to update both the “_Key” column
+and the <code>src-&gt;'clpid'</code> value.</p>
+<p><sub></sub>SQL UPDATE people SET _Key = ‘Dimitrov-Vesselin’, src =
+json_set(src, ‘$.clpid’, ‘Dimitrov-Vesselin’) WHERE _Key = ‘Dimitrov-M’;
+<sub></sub></p>
+<p>After running this command on the SQL database the record will
+reflect the new key and clpid values.</p>
+</section>
+<footer-global></footer-global>
+</body>
+</html>

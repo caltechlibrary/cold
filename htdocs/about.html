@@ -11,19 +11,25 @@
 <header>
 <a href="http://library.caltech.edu" title="link to Caltech Library Homepage"><img src="/assets/liblogo.gif" alt="Caltech Library logo"></a>
 </header>
+<a href="#main-content" class="visually-hidden">skip to main content</a>
 <nav>
 <ul>
-  <li><a href="/" title="return home">Home</a></li>
+  <li><a href="/" title="return home">All Library Apps</a></li>
   <li><a href="./" title="return to dashboard">Dashboard</a></li>
   <li><a href="https://github.com/caltechlibrary/cold/issues">Report a problem</a></li>
   <li><a href="./about.html">About</a></li>
 </ul>
 </nav>
-<section>
+<section id="main-content">
 
 <h1>About this software</h1>
-<h2>cold 0.0.39c</h2>
+<h2>cold 0.0.40</h2>
 <ul>
+<li>Bio field is now editable when a person is no longer in the campus directory; directory lookup 404 also unlocks bio with a visible warning</li>
+<li>ROR field auto-populates with Caltech ROR when the Caltech checkbox is checked and ROR is currently empty</li>
+<li>clpid auto-generated from family and given name on people create form; clgid auto-generated from group name on group create form; both check uniqueness before populating</li>
+<li>Fixed Firefox bug where module-level DOM captures produced stale references; switched to document-level focusout delegation</li>
+<li>Self-service clpid rename: new /people/rename page linked from dashboard and people view; shows full person record for confirmation; validates old key exists and new key is unique</li>
 <li>clean up text in the collaborator_report.html page we'll use for testing collaborator report integration</li>
 <li>fixed regression, issue #100, in group submission in people form.</li>
 <li>fixed issue #101 in review queue</li>
@@ -31,18 +37,18 @@
 <li>fixed regressions where the &quot;[email protect]&quot; string wound up in the email field.</li>
 <li>Moved JavaScript for problem code from <code>htdocs/js</code>, re-coded as TypeScript with new implementations in <code>htdocs/modules</code></li>
 </ul>
-<h3>Authors</h3>
+<h2>Authors</h2>
 <ul>
-<li>R. S. Doiel, <a href="https://orcid.org/0000-0003-0900-6903">https://orcid.org/0000-0003-0900-6903</a></li>
+<li><a href="https://orcid.org/0000-0003-0900-6903">R. S. Doiel</a></li>
 </ul>
-<h3>Contributors</h3>
+<h2>Contributors</h2>
 <ul>
-<li>Kathy Johnson, <a href="https://orcid.org/0000-0002-0026-2516">https://orcid.org/0000-0002-0026-2516</a></li>
-<li>Thomas E Morrell, <a href="https://orcid.org/0000-0001-9266-5146">https://orcid.org/0000-0001-9266-5146</a></li>
+<li><a href="https://orcid.org/0000-0002-0026-2516">Kathy Johnson</a></li>
+<li><a href="https://orcid.org/0000-0001-9266-5146">Thomas E Morrell</a></li>
 </ul>
-<h3>Maintainers</h3>
+<h2>Maintainers</h2>
 <ul>
-<li>R. S. Doiel, <a href="https://orcid.org/0000-0003-0900-6903">https://orcid.org/0000-0003-0900-6903</a></li>
+<li><a href="https://orcid.org/0000-0003-0900-6903">R. S. Doiel</a></li>
 </ul>
 <p>Caltech Library maintains a list of people, groups and funders and their related identifiers. For many years these were managed using a spreadsheets. That has become cumbersome. <strong>COLD</strong> manages data as JSON objects in <a href="https://github.com/caltechlibrary/dataset">dataset</a> collections.</p>
 <p><strong>COLD</strong> is implemented as three web web services</p>
@@ -56,11 +62,14 @@
 The JSON API is provided by Dataset's datasetd.
 Access control is provided by the front end web server integrated with Shibboleth.</p>
 <ul>
-<li>License: <a href="https://caltechlibrary.github.io/cold/LICENSE">https://caltechlibrary.github.io/cold/LICENSE</a></li>
-<li>GitHub: <a href="https://github.com/caltechlibrary/cold">https://github.com/caltechlibrary/cold</a></li>
-<li>Issues: <a href="https://github.com/caltechlibrary/cold/issues">https://github.com/caltechlibrary/cold/issues</a></li>
+<li><a href="https://caltechlibrary.github.io/cold/LICENSE">License</a></li>
+<li><a href="https://github.com/caltechlibrary/cold">Code Repository</a>
+<ul>
+<li><a href="https://github.com/caltechlibrary/cold/issues">Issue Tracker</a></li>
 </ul>
-<h3>Programming languages</h3>
+</li>
+</ul>
+<h2>Programming languages</h2>
 <ul>
 <li>CSS</li>
 <li>HTML</li>
@@ -71,20 +80,20 @@ Access control is provided by the front end web server integrated with Shibbolet
 <li>Typescript</li>
 <li>YAML</li>
 </ul>
-<h3>Operating Systems</h3>
+<h2>Operating Systems</h2>
 <ul>
 <li>Linux</li>
 </ul>
-<h3>Software Requirements</h3>
+<h2>Software Requirements</h2>
 <ul>
-<li>Deno &gt;= 2.7.11</li>
-<li>Dataset = 2.3.4</li>
-<li>CMTools &gt;= 0.0.40</li>
+<li>Deno &gt;= 2.7.12</li>
+<li>Dataset &gt;= 2.4.0</li>
+<li>CMTools &gt;= 0.0.43</li>
 </ul>
-<h3>Software Suggestions</h3>
+<h2>Software Suggestions</h2>
 <ul>
 <li>GNU Make</li>
-<li>Pandoc 3.1</li>
+<li>Pandoc &gt;= 3.9</li>
 </ul>
 
 

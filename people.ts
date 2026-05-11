@@ -456,6 +456,89 @@ export async function handlePeople(
  * - `/` list the people by name (`?q=...` would perform a search by name fields)
  * - `/{clpid}` indicates retrieving a single object by the Caltech Library people id
  */
+async function handleGetPeopleRename(
+  req: Request,
+  options: { debug: boolean; htdocs: string; baseUrl: string },
+): Promise<Response> {
+  const url = new URL(req.url);
+  const oldClpid = url.searchParams.get("old_clpid") ?? "";
+  let people: object = {};
+  if (oldClpid !== "") {
+    people = (await ds.read(oldClpid)) ?? {};
+  }
+  return renderPage("people_rename", {
+    base_url: options.baseUrl,
+    old_clpid: oldClpid,
+    new_clpid: "",
+    people: people,
+    error: "",
+  });
+}
+
+async function handlePostPeopleRename(
+  req: Request,
+  options: { debug: boolean; htdocs: string; baseUrl: string },
+): Promise<Response> {
+  const form = await req.formData();
+  const oldClpid = (form.get("old_clpid") ?? "").toString().trim();
+  const newClpid = (form.get("new_clpid") ?? "").toString().trim();
+
+  const rerender = (error: string, people: object) =>
+    renderPage("people_rename", {
+      base_url: options.baseUrl,
+      old_clpid: oldClpid,
+      new_clpid: newClpid,
+      people: people,
+      error: error,
+    });
+
+  if (oldClpid === "" || newClpid === "") {
+    return rerender("Both current and new IDs are required.", {});
+  }
+  if (oldClpid === newClpid) {
+    return rerender("New ID must be different from the current ID.", {});
+  }
+
+  const existingCheck = await ds.query(
+    "validate_clpid",
+    ["clpid"],
+    { clpid: oldClpid },
+  ) as unknown[];
+  if (!existingCheck || existingCheck.length === 0) {
+    return rerender(`Person ID "${oldClpid}" not found.`, {});
+  }
+  const existing = (await ds.read(oldClpid)) ?? {};
+
+  const collisionCheck = await ds.query(
+    "validate_clpid",
+    ["clpid"],
+    { clpid: newClpid },
+  ) as unknown[];
+  if (collisionCheck && collisionCheck.length > 0) {
+    return rerender(
+      `Person ID "${newClpid}" already exists. Choose a different ID.`,
+      existing,
+    );
+  }
+
+  const result = await ds.query(
+    "rename_clpid",
+    ["new_key", "new_key", "old_key"],
+    { new_key: newClpid, old_key: oldClpid },
+  );
+  if (result === undefined) {
+    return rerender(
+      `Rename failed. Please try again or contact an administrator.`,
+      existing,
+    );
+  }
+
+  return new Response(`<html>Redirect to ${newClpid}</html>`, {
+    status: 303,
+    headers: { Location: newClpid },
+  });
+}
+
 async function handleGetPeople(
   req: Request,
   options: { debug: boolean; htdocs: string; baseUrl: string },
@@ -463,6 +546,9 @@ async function handleGetPeople(
   /* parse the URL */
   const url = new URL(req.url);
   const clpid = pathIdentifier(req.url);
+  if (clpid === "rename") {
+    return handleGetPeopleRename(req, options);
+  }
   const params = url.searchParams;
   const baseUrl = options.baseUrl;
   let view = params.get("view");
@@ -519,9 +605,12 @@ async function handleGetPeople(
  */
 async function handlePostPeople(
   req: Request,
-  options: { debug: boolean; htdocs: string },
+  options: { debug: boolean; htdocs: string; baseUrl: string },
 ): Promise<Response> {
   let clpid = pathIdentifier(req.url);
+  if (clpid === "rename") {
+    return handlePostPeopleRename(req, options);
+  }
   const isCreateObject = clpid === "";
 
   if (req.body !== null) {

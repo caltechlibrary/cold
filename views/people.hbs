@@ -3,19 +3,21 @@
 {{>collection_head}}
 <body>
 {{>header}}
+<a href="#main-content" class="visually-hidden">skip to main content</a>
 <nav>
 <ul>
-<li><a href="/" title="return home">Home</a></li>
+<li><a href="/" title="return home">All Library Apps</a></li>
 <li><a href="../" title="return to dashboard">Dashboard</a></li>
 <li><a href="./" title="return to group list">People</a></li>
 <li><a href="{{people.clpid}}?view=edit">Edit {{people.clpid}}</a></li>
+<li><a href="rename?old_clpid={{people.clpid}}">Change ID...</a></li>
 <li><a href="../rdm_review_queue.html?q_name=review_queue_by_clpid&q={{people.clpid}}" title="review queue search by clpid">Review {{people.clpid}}</a></li>
 {{#if people.orcid }}<li><a href="../rdm_review_queue.html?q_name=review_queue_by_orcid&q={{people.orcid}}" title="review queue search by ORCID">Review {{people.orcid}}</a></li>{{/if}}
 <li><a href="../rdm_review_queue.html?q_name=by_clpid&q={{people.clpid}}" title="lookup by clpid" title="records search by clpid">Records {{people.clpid}}</a></li>
 {{#if people.orcid }}<li><a href="../rdm_review_queue.html?q_name=by_orcid&q={{people.orcid}}" title="records search by orcid">Records {{people.orcid}}</a></li>{{/if}}
 </ul>
 </nav>
-<section>
+<section id="main-content">
 
 {{#if people.display_name}}<h1>{{people.display_name}}</h1>{{else}}
 <h1>{{people.family_name}}{{#if people.given_name}}, {{people.given_name}}{{/if}}</h1>{{/if}}

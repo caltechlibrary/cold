@@ -11,19 +11,20 @@
 <header>
 <a href="https://library.caltech.edu"><img src="https://media.library.caltech.edu/assets/caltechlibrary-logo.png" alt="Caltech Library logo"></a>
 </header>
+<a href="#main-content" class="visually-hidden">skip to main content</a>
 <nav>
 <ul>
-    <li><a href="/">Home</a></li>
-    <li><a href="index.html">README</a></li>
+    <li><a href="/">All Library Apps</a></li>
+    <li><a href="index.html">Home</a></li>
     <li><a href="LICENSE">LICENSE</a></li>
     <li><a href="INSTALL.html">INSTALL</a></li>
     <li><a href="user_manual.html">User Manual</a></li>
     <li><a href="about.html">About</a></li>
-    <li><a href="search.html">Search</a></li>
-    <li><a href="https://github.com/caltechlibrary/cold">GitHub</a></li>
+    <!-- <li><a href="search.html">Search</a></li> -->
+    <li><a href="https://github.com/caltechlibrary/cold">Code Repository</a></li>
 </ul>
 </nav>
-<section>
+<section id="main-content">
 <h1 id="cold_api.yaml-deep-dive">cold_api.yaml Deep Dive</h1>
 <p><code>cold_api.yaml</code> is the configuration file for
 <code>datasetd</code>, the JSON API backend that COLD builds on. It is
@@ -50,8 +51,8 @@ class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb1-1"><a href="
 </colgroup>
 <thead>
 <tr>
-<th>Field</th>
-<th>Purpose</th>
+<th scope="col">Field</th>
+<th scope="col">Purpose</th>
 </tr>
 </thead>
 <tbody>
@@ -103,9 +104,9 @@ TypeScript handlers use the <code>Dataset</code> client from
 <table>
 <thead>
 <tr>
-<th>Field</th>
-<th>HTTP method enabled</th>
-<th>datasetd endpoint</th>
+<th scope="col">Field</th>
+<th scope="col">HTTP method enabled</th>
+<th scope="col">datasetd endpoint</th>
 </tr>
 </thead>
 <tbody>
@@ -153,10 +154,10 @@ audit trail. All collections enable versioning.</p>
 </colgroup>
 <thead>
 <tr>
-<th>Query</th>
-<th>Parameters</th>
-<th>Returns</th>
-<th>Used by</th>
+<th scope="col">Query</th>
+<th scope="col">Parameters</th>
+<th scope="col">Returns</th>
+<th scope="col">Used by</th>
 </tr>
 </thead>
 <tbody>
@@ -261,10 +262,10 @@ caller.</p>
 </colgroup>
 <thead>
 <tr>
-<th>Query</th>
-<th>Parameters</th>
-<th>Returns</th>
-<th>Used by</th>
+<th scope="col">Query</th>
+<th scope="col">Parameters</th>
+<th scope="col">Returns</th>
+<th scope="col">Used by</th>
 </tr>
 </thead>
 <tbody>
@@ -326,10 +327,10 @@ that are all typically set to the same search string.</p>
 </colgroup>
 <thead>
 <tr>
-<th>Query</th>
-<th>Parameters</th>
-<th>Returns</th>
-<th>Used by</th>
+<th scope="col">Query</th>
+<th scope="col">Parameters</th>
+<th scope="col">Returns</th>
+<th scope="col">Used by</th>
 </tr>
 </thead>
 <tbody>
@@ -355,10 +356,10 @@ that are all typically set to the same search string.</p>
 </colgroup>
 <thead>
 <tr>
-<th>Query</th>
-<th>Parameters</th>
-<th>Returns</th>
-<th>Used by</th>
+<th scope="col">Query</th>
+<th scope="col">Parameters</th>
+<th scope="col">Returns</th>
+<th scope="col">Used by</th>
 </tr>
 </thead>
 <tbody>
@@ -384,10 +385,10 @@ keyed by <code>option_id</code>.</p>
 </colgroup>
 <thead>
 <tr>
-<th>Query</th>
-<th>Parameters</th>
-<th>Returns</th>
-<th>Used by</th>
+<th scope="col">Query</th>
+<th scope="col">Parameters</th>
+<th scope="col">Returns</th>
+<th scope="col">Used by</th>
 </tr>
 </thead>
 <tbody>
@@ -412,10 +413,10 @@ keyed by <code>option_id</code>.</p>
 </colgroup>
 <thead>
 <tr>
-<th>Query</th>
-<th>Parameters</th>
-<th>Returns</th>
-<th>Used by</th>
+<th scope="col">Query</th>
+<th scope="col">Parameters</th>
+<th scope="col">Returns</th>
+<th scope="col">Used by</th>
 </tr>
 </thead>
 <tbody>
@@ -441,10 +442,10 @@ string.</p>
 </colgroup>
 <thead>
 <tr>
-<th>Query</th>
-<th>Parameters</th>
-<th>Returns</th>
-<th>Used by</th>
+<th scope="col">Query</th>
+<th scope="col">Parameters</th>
+<th scope="col">Returns</th>
+<th scope="col">Used by</th>
 </tr>
 </thead>
 <tbody>
@@ -472,10 +473,10 @@ plus a timestamp.</p>
 </colgroup>
 <thead>
 <tr>
-<th>Query</th>
-<th>Parameters</th>
-<th>Returns</th>
-<th>Used by</th>
+<th scope="col">Query</th>
+<th scope="col">Parameters</th>
+<th scope="col">Returns</th>
+<th scope="col">Used by</th>
 </tr>
 </thead>
 <tbody>
@@ -524,10 +525,10 @@ part after <code>https://ror.org/</code>).</p>
 </colgroup>
 <thead>
 <tr>
-<th>Query</th>
-<th>Parameters</th>
-<th>Returns</th>
-<th>Used by</th>
+<th scope="col">Query</th>
+<th scope="col">Parameters</th>
+<th scope="col">Returns</th>
+<th scope="col">Used by</th>
 </tr>
 </thead>
 <tbody>
@@ -582,9 +583,9 @@ curator review.</p>
 </colgroup>
 <thead>
 <tr>
-<th>Query</th>
-<th>Parameters</th>
-<th>Returns</th>
+<th scope="col">Query</th>
+<th scope="col">Parameters</th>
+<th scope="col">Returns</th>
 </tr>
 </thead>
 <tbody>

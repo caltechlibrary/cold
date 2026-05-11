@@ -11,19 +11,20 @@
 <header>
 <a href="https://library.caltech.edu"><img src="https://media.library.caltech.edu/assets/caltechlibrary-logo.png" alt="Caltech Library logo"></a>
 </header>
+<a href="#main-content" class="visually-hidden">skip to main content</a>
 <nav>
 <ul>
-    <li><a href="/">Home</a></li>
-    <li><a href="index.html">README</a></li>
+    <li><a href="/">All Library Apps</a></li>
+    <li><a href="index.html">Home</a></li>
     <li><a href="LICENSE">LICENSE</a></li>
     <li><a href="INSTALL.html">INSTALL</a></li>
     <li><a href="user_manual.html">User Manual</a></li>
     <li><a href="about.html">About</a></li>
-    <li><a href="search.html">Search</a></li>
-    <li><a href="https://github.com/caltechlibrary/cold">GitHub</a></li>
+    <!-- <li><a href="search.html">Search</a></li> -->
+    <li><a href="https://github.com/caltechlibrary/cold">Code Repository</a></li>
 </ul>
 </nav>
-<section>
+<section id="main-content">
 <p>COLD has a report request service with a web user interface. To
 generate a report a report runner service is needed.</p>
 <p>Once the report request is made a record is created in the reports.ds
@@ -312,11 +313,11 @@ class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb3-1"><a href="
 <span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">content_type</span><span class="kw">:</span><span class="at"> application/vnd.ms-excel</span></span></code></pre></div>
 <p>This keeps the linkage between the report excetuable largely
 separate. The <code>clpid</code> value will be vetted by the browser, by
-the middleware and again by the report runner<a href="#fn1"
-class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>.
-The <code>clpid</code> is required so will be non-empty (or the report
-will be aborted). It should be safe to pass that value to the script
-<code>run_collaborator_report.bash</code>.</p>
+the middleware and again by the report runner (ideally again inside the
+Bash script ./run_collaborator_report.bash and the Python script it
+runs). The <code>clpid</code> is required so will be non-empty (or the
+report will be aborted). It should be safe to pass that value to the
+script <code>run_collaborator_report.bash</code>.</p>
 <p>Other than exit code and error messages (prefixed with
 <code>error://</code> in the output of
 <code>run_collaborator_report.bash</code>) the report interacts
@@ -425,15 +426,6 @@ report service, report runner, the report itself. This increases the
 burden on the person writing parameterized reports. The report itself
 also needs to enforce sanitiy checking and gaurd against abuse. Security
 practice is best at all levels.</p>
-<section id="footnotes" class="footnotes footnotes-end-of-document"
-role="doc-endnotes">
-<hr />
-<ol>
-<li id="fn1"><p>Ideally again inside the Bash script
-./run_collaborator_report.bash and the Python script it runs.<a
-href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-</ol>
-</section>
 </section>
 <footer-global></footer-global>
 </body>

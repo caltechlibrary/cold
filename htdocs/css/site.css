@@ -11,8 +11,75 @@
  * darkgrey: #616265
  *
  * Impact Pallete see: http://identity.caltech.edu/web/colors
+ *
+ *
+ * ============================================
+ * Customization & Theming Notes
+ * ============================================
+ *
+ * This stylesheet uses CSS custom properties (variables)
+ * to allow optional theming and customization.
+ *
+ * Default values are defined in the :root selector below.
+ * These defaults will be used automatically if no overrides
+ * are provided.
+ *
+ * To customize styles, create a separate CSS file and define
+ * your own :root variables there. Then include that file
+ * AFTER this stylesheet in your HTML.
+ *
+ * Example:
+ *
+ *   <link rel="stylesheet" href="site.css">
+ *   <link rel="stylesheet" href="custom.css">
+ *
+ * In custom.css:
+ *
+ *   :root {
+ *     --color-primary: #0055cc;
+ *     --color-nav-bg: black;
+ *   }
+ *
+ * Only override the variables you need—everything else will
+ * fall back to the defaults defined here.
+ *
+ * This approach allows:
+ *   - Zero configuration for most users
+ *   - Simple overrides for advanced users
+ *   - Safe fallback values if variables are missing
+ *
+ * Note: CSS applies the "cascade" rule, meaning later files
+ * override earlier ones when selectors have equal specificity.
  */
-/* @import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&display=swap'); */
+
+/* Base values */
+:root {
+  /* Primary */
+  --color-primary: #FF6E1E;
+
+  /* Secondary palette */
+  --color-lightgrey: #C8C8C8;
+  --color-grey: #76777B;
+  --color-darkgrey: #616265;
+  --color-slategrey: #AAA99F;
+
+  /* Base */
+  --color-text: black;
+  --color-bg: white;
+  --color-link: #747267;
+  --color-nav-bg: #333333;
+  --color-footer-bg: #303030;
+  --color-border: red;
+
+  --font-family-base: Open Sans, Helvetica, Sans-Serif;
+  --font-size-base: 14px;
+
+  /* special cases */
+  --color-announcement: white;
+  --color-bg-announcement: orange;
+}
+
+
 body {
      margin: 0;
      border: 0;
@@ -66,7 +133,7 @@ a, a:link, a:visited {
 /*     color: #76776B; */
      color: #666666;
      background-color: inherit;
-     text-decoration: none;
+     /* text-decoration: none; Removed per WCAG 1.4.1. issue. */
 }
 
 a:active, a:hover, a:focus {
@@ -332,3 +399,31 @@ footer a, footer a:link, footer a:visited, footer a:active, footer a:focus, foot
     font-style: italic;
     font-size: smaller;
 }
+
+a.visually-hidden:focus {
+    position: static;
+    display: block;
+    width: 9rem;
+    height: 1rem;
+    margin: 5px;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
+    padding: 0.5rem 1rem;
+    border: 2px solid #000000;
+    border-radius: 4px;
+    background-color: #ffffff;
+}
+
+a.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0px;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+

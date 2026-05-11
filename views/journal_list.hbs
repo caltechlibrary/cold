@@ -2,14 +2,15 @@
 <html lang="en-US">
 {{>head}}
 {{>header}}
+<a href="#main-content" class="visually-hidden">skip to main content</a>
 <nav>
 <ul>
-<li><a href="/" title="return home">Home</a></li>
+<li><a href="/" title="return home">All Library Apps</a></li>
 <li><a href="../" title="return to dashboard">Dashboard</a></li>
 <li><a href="./?view=create">Add a Journal</a></li>
 </ul>
 </nav>
-<section>
+<section id="main-content">
 <h1>Journals</h1>
 <ul>
 {{#journal_list}}

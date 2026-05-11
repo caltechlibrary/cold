@@ -11,19 +11,20 @@
 <header>
 <a href="https://library.caltech.edu"><img src="https://media.library.caltech.edu/assets/caltechlibrary-logo.png" alt="Caltech Library logo"></a>
 </header>
+<a href="#main-content" class="visually-hidden">skip to main content</a>
 <nav>
 <ul>
-    <li><a href="/">Home</a></li>
-    <li><a href="index.html">README</a></li>
+    <li><a href="/">All Library Apps</a></li>
+    <li><a href="index.html">Home</a></li>
     <li><a href="LICENSE">LICENSE</a></li>
     <li><a href="INSTALL.html">INSTALL</a></li>
     <li><a href="user_manual.html">User Manual</a></li>
     <li><a href="about.html">About</a></li>
-    <li><a href="search.html">Search</a></li>
-    <li><a href="https://github.com/caltechlibrary/cold">GitHub</a></li>
+    <!-- <li><a href="search.html">Search</a></li> -->
+    <li><a href="https://github.com/caltechlibrary/cold">Code Repository</a></li>
 </ul>
 </nav>
-<section>
+<section id="main-content">
 <h1 id="configuring-cold-an-overview">Configuring COLD, An Overview</h1>
 <p>COLD is configured through two YAML files that each govern a distinct
 service:</p>
@@ -35,9 +36,9 @@ service:</p>
 </colgroup>
 <thead>
 <tr>
-<th>File</th>
-<th>Service</th>
-<th>Purpose</th>
+<th scope="col">File</th>
+<th scope="col">Service</th>
+<th scope="col">Purpose</th>
 </tr>
 </thead>
 <tbody>
@@ -215,8 +216,8 @@ class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="
 </colgroup>
 <thead>
 <tr>
-<th>Goal</th>
-<th>Files to change</th>
+<th scope="col">Goal</th>
+<th scope="col">Files to change</th>
 </tr>
 </thead>
 <tbody>

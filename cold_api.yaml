@@ -160,6 +160,13 @@ collections:
         select json_object('clpid', src->'clpid')
         from people
         where json_extract(src, '$.clpid') = ?
+      # Retrieve a full person record by clpid
+      lookup_person_by_clpid: |
+        select src from people
+        where json_extract(src, '$.clpid') = ?
+      # Rename a person's clpid — updates both the record key and the clpid field
+      rename_clpid: |
+        UPDATE people SET _key = ?, src = json_set(src, '$.clpid', ?) WHERE _key = ?
       # What follows are object level permissions
       lookup_clgid: |
         select json_object(
@@ -211,6 +218,11 @@ collections:
         select src->'clgid'
         from groups
         order by src->>'clgid'
+      # Look up group by clgid for validation
+      validate_clgid: |
+        select json_object('clgid', src->'clgid')
+        from groups
+        where json_extract(src, '$.clgid') = ?
 
     # What follows are object level permissions
     keys: true

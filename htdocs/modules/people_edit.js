@@ -132,6 +132,28 @@ var ClientAPI = class {
     params.append("q", acronym);
     return await this.getList(c_name, query_name, params);
   }
+  async lookupPeopleName(clpid) {
+    const params = new URLSearchParams();
+    params.append("clpid", clpid);
+    return await this.getList("people.ds", "lookup_people_name", params);
+  }
+  async lookupPersonByClpid(clpid) {
+    const params = new URLSearchParams();
+    params.append("clpid", clpid);
+    return await this.getList("people.ds", "lookup_person_by_clpid", params);
+  }
+  async validateClpid(clpid) {
+    const params = new URLSearchParams();
+    params.append("clpid", clpid);
+    const results = await this.getList("people.ds", "validate_clpid", params);
+    return results.length > 0;
+  }
+  async validateClgid(clgid) {
+    const params = new URLSearchParams();
+    params.append("clgid", clgid);
+    const results = await this.getList("groups.ds", "validate_clgid", params);
+    return results.length > 0;
+  }
 };
 
 // people_edit.ts
@@ -173,3 +195,38 @@ groupsElem?.addEventListener("focused", function(event) {
   })();
 });
 initGroupNameAutocomplete();
+function slugify(s) {
+  return s.replace(/[^\p{L}\p{N}\s()]/gu, "").replace(/\s{2,}/g, " ").trim().replace(/\s/g, "-");
+}
+async function updateClpid() {
+  const clpidElem = document.getElementById("clpid");
+  const familyNameElem = document.getElementById("family_name");
+  const givenNameElem = document.getElementById("given_name");
+  if (clpidElem === null || clpidElem.value !== "") return;
+  const family = familyNameElem?.value.trim() ?? "";
+  const given = givenNameElem?.value.trim() ?? "";
+  if (family === "" || given === "") return;
+  const proposed = slugify(family + " " + given);
+  if (proposed === "") return;
+  const exists = await clientAPI.validateClpid(proposed);
+  if (exists) {
+    clpidElem.style.borderColor = "red";
+    clpidElem.placeholder = `"${proposed}" already exists \u2014 enter a unique clpid`;
+  } else {
+    clpidElem.style.borderColor = "";
+    clpidElem.value = proposed;
+  }
+}
+document.addEventListener("focusout", (event) => {
+  const target = event.target;
+  if (target.id === "family_name" || target.id === "given_name") {
+    updateClpid();
+  }
+});
+var caltechElem = document.getElementById("caltech");
+var rorElem = document.getElementById("ror");
+caltechElem?.addEventListener("change", function() {
+  if (caltechElem.checked && rorElem !== null && rorElem.value === "") {
+    rorElem.value = "https://ror.org/05dxps055";
+  }
+});

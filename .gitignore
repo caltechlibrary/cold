@@ -32,7 +32,6 @@ htdocs/rpt/*
 *backups*/
 # App development files to ignore
 *_test.sql
-changing_keys_and_identifiers.html
 dataset-installer.sh
 fetch_db_records.bash
 load_rdm_records.bash

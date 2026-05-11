@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en-US">
+{{>collection_head}}
+<body>
+{{>header}}
+<a href="#main-content" class="visually-hidden">skip to main content</a>
+<nav>
+<ul>
+<li><a href="/" title="return home">All Library Apps</a></li>
+<li><a href="../" title="return to dashboard">Dashboard</a></li>
+<li><a href="./" title="return to people list">People</a></li>
+{{#if old_clpid}}<li><a href="{{old_clpid}}">View {{old_clpid}}</a></li>{{/if}}
+</ul>
+</nav>
+<section id="main-content">
+<h1>Rename Person ID</h1>
+
+<p>This changes a person's Caltech Library People ID and cannot be undone.
+The new ID must not already exist.</p>
+
+{{#if error}}<p class="error" style="color:red">{{error}}</p>{{/if}}
+
+<form id="people_rename" name="people_rename" action="rename" method="post">
+<div>
+<label for="old_clpid">Current Person ID</label>
+<input type="text" id="old_clpid" name="old_clpid" value="{{old_clpid}}" {{#if old_clpid}}readonly{{/if}} size="40" required>
+</div>
+
+<div id="person_details">
+{{#if people.family_name}}
+<h2>{{#if people.display_name}}{{people.display_name}}{{else}}{{people.family_name}}{{#if people.given_name}}, {{people.given_name}}{{/if}}{{/if}}</h2>
+<div class="identifier">Caltech Library ID: {{#if people.include_in_feeds}}<a href="https://feeds.library.caltech.edu/people/{{people.clpid}}" target="_blank">{{people.clpid}}</a>{{else}}{{people.clpid}}{{/if}}</div>
+{{#if people.bio}}<div class="bio">BIO: {{people.bio}}</div>{{/if}}
+{{#if people.division}}<div class="division">Division: {{people.division}}</div>{{/if}}
+{{#if people.groups}}<div class="groups">Groups:
+<ul>{{#each people.groups}}<li>{{#if clgid}}<a href="../groups/{{clgid}}">{{group_name}}</a>{{else}}{{group_name}}{{/if}}</li>{{/each}}</ul>
+</div>{{/if}}
+{{#if people.clpid}}<p>Search <a href="https://authors.library.caltech.edu/search?q=metadata.creators.person_or_org.identifiers.identifier%3A%22{{people.clpid}}%22" target="_blank">@CaltechAUTHORS</a></p>{{/if}}
+{{#if people.orcid}}<div class="orcid">ORCID: <a href="https://orcid.org/{{people.orcid}}" target="_blank">{{people.orcid}}</a></div>{{/if}}
+{{#if people.authors_id}}<div class="authors_id">CaltechAUTHORS ID: {{people.authors_id}}</div>{{/if}}
+{{#if people.thesis_id}}<div class="thesis_id">CaltechTHESIS ID: {{people.thesis_id}}</div>{{/if}}
+{{#if people.advisors_id}}<div class="advisors_id">CaltechTHESIS Advisor ID: {{people.advisors_id}}</div>{{/if}}
+{{#if people.email}}<div class="email">Email: {{people.email}}</div>{{/if}}
+<div class="active-affiliations">Institute Affiliation(s):
+<ul>
+{{#if people.caltech}}<li class="is_caltech">Active Caltech</li>{{/if}}
+{{#if people.jpl}}<li class="is_jpl">Active JPL</li>{{/if}}
+</ul></div>
+<div class="type-affiliation">Affiliation Type(s):
+<ul>
+{{#people.faculty}}<li class="is_faculty">Faculty</li>{{/people.faculty}}
+{{#people.staff}}<li class="is_staff">Staff</li>{{/people.staff}}
+{{#people.alumn}}<li class="is_alumn">Alumn</li>{{/people.alumn}}
+{{#people.postdoc}}<li class="is_postdoc">Postdoc</li>{{/people.postdoc}}
+{{#people.visitor}}<li class="is_visitor">Visitor</li>{{/people.visitor}}
+{{#people.retired}}<li class="is_retired">Retired</li>{{/people.retired}}
+{{#people.emeritus}}<li class="is_emeritus">Emeritus</li>{{/people.emeritus}}
+</ul></div>
+<div class="included-in-feeds">{{people.given_name}} {{people.family_name}} is {{#unless people.include_in_feeds}}NOT {{/unless}}included in feeds</div>
+{{#if people.updated}}<div class="updated">Record Updated: {{people.updated}}</div>{{/if}}
+{{/if}}
+</div>
+
+<div>
+<label for="new_clpid">New Person ID</label>
+<input type="text" id="new_clpid" name="new_clpid" value="{{new_clpid}}" pattern="(\w|\.|-)+" size="40" required {{#unless old_clpid}}disabled{{/unless}}>
+</div>
+
+<div>
+<input type="submit" id="rename_submit" value="Rename" {{#unless old_clpid}}disabled{{/unless}}>
+<a href="{{#if old_clpid}}{{old_clpid}}{{else}}./{{/if}}">Cancel</a>
+</div>
+</form>
+</section>
+{{>footer}}
+<script type="module" src="../modules/people_rename.js"></script>
+</body>
+</html>

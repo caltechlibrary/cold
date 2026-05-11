@@ -216,4 +216,42 @@ export class ClientAPI {
       msg: string;
     }[];
   }
+
+  async lookupPeopleName(
+    clpid: string,
+  ): Promise<{ clpid: string; family_name: string; given_name: string }[]> {
+    const params = new URLSearchParams();
+    params.append("clpid", clpid);
+    return await this.getList("people.ds", "lookup_people_name", params) as {
+      clpid: string;
+      family_name: string;
+      given_name: string;
+    }[];
+  }
+
+  async lookupPersonByClpid(
+    clpid: string,
+  ): Promise<Record<string, unknown>[]> {
+    const params = new URLSearchParams();
+    params.append("clpid", clpid);
+    return await this.getList(
+      "people.ds",
+      "lookup_person_by_clpid",
+      params,
+    ) as Record<string, unknown>[];
+  }
+
+  async validateClpid(clpid: string): Promise<boolean> {
+    const params = new URLSearchParams();
+    params.append("clpid", clpid);
+    const results = await this.getList("people.ds", "validate_clpid", params);
+    return results.length > 0;
+  }
+
+  async validateClgid(clgid: string): Promise<boolean> {
+    const params = new URLSearchParams();
+    params.append("clgid", clgid);
+    const results = await this.getList("groups.ds", "validate_clgid", params);
+    return results.length > 0;
+  }
 }

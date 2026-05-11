@@ -63,6 +63,16 @@ async function directoryUpdateRecord(evt) {
     } else {
       console.log(`ERROR: ${resp.status} ${resp.statusText}`);
       spinnerElem === null ? "" : spinnerElem.style.display = "none";
+      if (resp.status === 404) {
+        const bio_elem = document.getElementById("bio");
+        const bio_status_elem = document.getElementById("bio_status");
+        if (bio_elem !== null) {
+          bio_elem.removeAttribute("readonly");
+        }
+        if (bio_status_elem !== null) {
+          bio_status_elem.textContent = "\u26A0 Directory ID not found \u2014 bio may be edited manually.";
+        }
+      }
     }
   }
 }

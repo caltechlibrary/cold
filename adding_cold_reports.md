@@ -142,7 +142,7 @@ run_my_report:
 ```
 
 | Field | Notes |
-|---|---|
+|-------|-------|
 | `cmd` | Path to the script, relative to the COLD working directory. |
 | `basename` | Base filename without extension. Output goes to `htdocs/rpt/<basename><ext>`. |
 | `append_datestamp` | Set to `true` to produce dated snapshots like `my_report_2026-04-13.csv` instead of overwriting the same file each time. |
@@ -165,7 +165,7 @@ run_my_parameterized_report:
 The `inputs` list must be declared in the order they will be passed as command-line arguments to `cmd`. Each input has:
 
 | Field | Notes |
-|---|---|
+|-------|-------|
 | `id` | The form field name and the `{{id}}` placeholder in `basename`. |
 | `type` | HTML5 input type (`text`, `email`, etc.) or an identifier type from metadatatools (`clpid`, `orcid`). Used for validation in the middleware and runner. |
 | `required` | If `true`, the runner rejects the request if this value is absent or empty. |
@@ -350,8 +350,8 @@ The page `collaborator_report.html` loads the module:
 
 **When to use Option A vs Option B:**
 
-| | Option A (inline) | Option B (separate page) |
-|---|---|---|
+| Choice   | Option A (inline) | Option B (separate page) |
+|----------|-------------------|--------------------------|
 | Input count | 1–2 simple fields | Many fields or complex UI |
 | Validation | Basic HTML5 / regexp | Requires API lookups (e.g., validate clpid exists) |
 | Autocomplete | Not needed | Needed (datalist populated from API) |

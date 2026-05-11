@@ -368,7 +368,7 @@ other page in `htdocs/`.
 ## Summary of Files Changed
 
 | File | Change |
-|---|---|
+|------|--------|
 | `my_feature.ts` | New — browser-side UI module |
 | `build.ts` | Add `"my_feature.ts"` to `transpileFiles` (or add bundle command to `deno.json`) |
 | `cold_api.yaml` | Add named SQL query to the relevant collection |

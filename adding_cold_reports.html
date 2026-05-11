@@ -11,19 +11,20 @@
 <header>
 <a href="https://library.caltech.edu"><img src="https://media.library.caltech.edu/assets/caltechlibrary-logo.png" alt="Caltech Library logo"></a>
 </header>
+<a href="#main-content" class="visually-hidden">skip to main content</a>
 <nav>
 <ul>
-    <li><a href="/">Home</a></li>
-    <li><a href="index.html">README</a></li>
+    <li><a href="/">All Library Apps</a></li>
+    <li><a href="index.html">Home</a></li>
     <li><a href="LICENSE">LICENSE</a></li>
     <li><a href="INSTALL.html">INSTALL</a></li>
     <li><a href="user_manual.html">User Manual</a></li>
     <li><a href="about.html">About</a></li>
-    <li><a href="search.html">Search</a></li>
-    <li><a href="https://github.com/caltechlibrary/cold">GitHub</a></li>
+    <!-- <li><a href="search.html">Search</a></li> -->
+    <li><a href="https://github.com/caltechlibrary/cold">Code Repository</a></li>
 </ul>
 </nav>
-<section>
+<section id="main-content">
 <h1 id="adding-a-new-report-to-cold">Adding a New Report to COLD</h1>
 <p>This guide walks through everything required to add a new report to
 the COLD reports system. It covers both simple (non-parameterized)
@@ -177,8 +178,8 @@ class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb7-1"><a href="
 </colgroup>
 <thead>
 <tr>
-<th>Field</th>
-<th>Notes</th>
+<th scope="col">Field</th>
+<th scope="col">Notes</th>
 </tr>
 </thead>
 <tbody>
@@ -227,8 +228,8 @@ has:</p>
 </colgroup>
 <thead>
 <tr>
-<th>Field</th>
-<th>Notes</th>
+<th scope="col">Field</th>
+<th scope="col">Notes</th>
 </tr>
 </thead>
 <tbody>
@@ -459,15 +460,15 @@ instantiates your class.</li>
 <p><strong>When to use Option A vs Option B:</strong></p>
 <table>
 <colgroup>
-<col style="width: 33%" />
-<col style="width: 33%" />
-<col style="width: 33%" />
+<col style="width: 18%" />
+<col style="width: 34%" />
+<col style="width: 47%" />
 </colgroup>
 <thead>
 <tr>
-<th></th>
-<th>Option A (inline)</th>
-<th>Option B (separate page)</th>
+<th scope="col">Choice</th>
+<th scope="col">Option A (inline)</th>
+<th scope="col">Option B (separate page)</th>
 </tr>
 </thead>
 <tbody>
@@ -580,8 +581,8 @@ reference: files to change for each report type</h2>
 <table>
 <thead>
 <tr>
-<th>File</th>
-<th>Change</th>
+<th scope="col">File</th>
+<th scope="col">Change</th>
 </tr>
 </thead>
 <tbody>
@@ -614,8 +615,8 @@ reference: files to change for each report type</h2>
 </colgroup>
 <thead>
 <tr>
-<th>File</th>
-<th>Change</th>
+<th scope="col">File</th>
+<th scope="col">Change</th>
 </tr>
 </thead>
 <tbody>
@@ -646,8 +647,8 @@ report — Option B (separate page)</h3>
 <table>
 <thead>
 <tr>
-<th>File</th>
-<th>Change</th>
+<th scope="col">File</th>
+<th scope="col">Change</th>
 </tr>
 </thead>
 <tbody>
