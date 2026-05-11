@@ -3,7 +3,6 @@
  */
 import {
   apiPort,
-  basePathFromUrl,
   Dataset,
   formDataToObject,
   matchType,
@@ -534,10 +533,9 @@ async function handlePostPeopleRename(
     );
   }
 
-  const basePath = basePathFromUrl(options.baseUrl);
   return new Response(`<html>Redirect to ${newClpid}</html>`, {
     status: 303,
-    headers: { Location: `${basePath}/people/${newClpid}` },
+    headers: { Location: `../../people/${newClpid}` },
   });
 }
 
