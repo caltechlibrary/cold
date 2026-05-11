@@ -95,7 +95,7 @@
     "GNU Make",
     "Pandoc >= 3.9"
   ],
-  "version": "0.0.40",
+  "version": "0.0.41",
   "developmentStatus": "active",
   "issueTracker": "https://github.com/caltechlibrary/cold/issues",
   "downloadUrl": "https://github.com/caltechlibrary/cold/releases/latest",
