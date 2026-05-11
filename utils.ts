@@ -26,6 +26,20 @@ const dsGroups = new Dataset(apiPort, "groups.ds");
  *    console.log("group identifier is", clgid);
  * ```
  */
+/**
+ * basePathFromUrl extracts the pathname prefix from a base URL string, returning ""
+ * if the URL is invalid or the path is just "/". Used to build deployment-relative
+ * redirect paths when COLD is mounted at a sub-path (e.g. /cold).
+ */
+export function basePathFromUrl(baseUrl: string): string {
+  try {
+    const p = new URL(baseUrl).pathname.replace(/\/$/, "");
+    return p === "" ? "" : p;
+  } catch {
+    return "";
+  }
+}
+
 export function pathIdentifier(u: string): string {
   const pathname: string = new URL(u).pathname;
   const cut_pos = pathname.lastIndexOf("/");

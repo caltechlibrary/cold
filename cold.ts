@@ -1,4 +1,5 @@
 import {
+  basePathFromUrl,
   existsSync,
   handleDirectoryLookup,
   handleDOIPrefix,
@@ -44,20 +45,6 @@ const appName: string = "cold";
  *   });
  * ```
  */
-/**
- * basePathFromUrl extracts the pathname from a URL string, returning "" if the
- * URL is invalid or the path is just "/". Used to derive the base path prefix
- * that Apache passes through when COLD is mounted at a sub-path like /cold.
- */
-function basePathFromUrl(baseUrl: string): string {
-  try {
-    const p = new URL(baseUrl).pathname.replace(/\/$/, "");
-    return p === "" ? "" : p;
-  } catch {
-    return "";
-  }
-}
-
 export function ColdReadWriteHandler(
   req: Request,
   options: { debug: boolean; htdocs: string; baseUrl: string; apiUrl: string },

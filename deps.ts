@@ -33,7 +33,7 @@ export { handleFunders, Funder } from "./funders.ts";
 export { handleSubjects, Subject } from "./subjects.ts";
 export { handleJournals, Journal } from "./journals.ts";
 export { handleDOIPrefix, DOIPrefix } from "./doi_prefix.ts";
-export { formDataToObject, pathIdentifier, apiPathParse } from "./utils.ts";
+export { basePathFromUrl, formDataToObject, pathIdentifier, apiPathParse } from "./utils.ts";
 export { ColdReadWriteHandler } from "./cold.ts";
 export { handleThesisOption, ThesisOption } from "./thesis_option.ts";
 
