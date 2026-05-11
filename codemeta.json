@@ -95,10 +95,10 @@
     "GNU Make",
     "Pandoc >= 3.9"
   ],
-  "version": "0.0.41",
+  "version": "0.0.42",
   "developmentStatus": "active",
   "issueTracker": "https://github.com/caltechlibrary/cold/issues",
   "downloadUrl": "https://github.com/caltechlibrary/cold/releases/latest",
-  "releaseNotes": "- Self-service clpid rename: new /rename/people page linked from dashboard and people view; shows full person record for confirmation; validates old key exists and new key is unique",
+  "releaseNotes": "- Self-service clpid rename: new /rename/people page linked from dashboard and people view; shows full person record for confirmation; validates old key exists and new key is unique\n- Fixed some relative path issues discovered in production deployment.\n- Linked in new rename people method from dashboard.",
   "copyrightYear": 2026
 }
