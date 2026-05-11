@@ -535,7 +535,7 @@ async function handlePostPeopleRename(
 
   return new Response(`<html>Redirect to ${newClpid}</html>`, {
     status: 303,
-    headers: { Location: `../../people/${newClpid}` },
+    headers: { Location: `../people/${newClpid}` },
   });
 }
 
