@@ -1,4 +1,4 @@
-%people_vocabulary(1) user manual | 0.0.40  d287067
+%people_vocabulary(1) user manual | 0.0.41  72a3095
 % R. S.Doiel
 % 2026-05-11
 
