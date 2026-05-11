@@ -10,6 +10,7 @@ pubDate: 2024-05-07
 COLD lets you manage Caltech People, Groups and Funders used in Caltech Library's repositories and feeds systems.
 
 - [People](./people/ "Curate CaltechPEOPLE")
+  - [Reassign a clpid](./rename/people)
 - [Groups](./groups/ "Curate CaltechGROUPS")
 - [Funders](./funders/ "Curate CaltechFUNDERS")
 

@@ -535,7 +535,24 @@ async function handlePostPeopleRename(
 
   return new Response(`<html>Redirect to ${newClpid}</html>`, {
     status: 303,
-    headers: { Location: newClpid },
+    headers: { Location: `/people/${newClpid}` },
+  });
+}
+
+export async function handleRenamePeople(
+  req: Request,
+  options: { debug: boolean; htdocs: string; baseUrl: string },
+): Promise<Response> {
+  if (req.method === "GET") {
+    return await handleGetPeopleRename(req, options);
+  }
+  if (req.method === "POST") {
+    return await handlePostPeopleRename(req, options);
+  }
+  const body = `<html>${req.method} not supported</html>`;
+  return new Response(body, {
+    status: 405,
+    headers: { "content-type": "text/html" },
   });
 }
 
@@ -546,9 +563,7 @@ async function handleGetPeople(
   /* parse the URL */
   const url = new URL(req.url);
   const clpid = pathIdentifier(req.url);
-  if (clpid === "rename") {
-    return handleGetPeopleRename(req, options);
-  }
+
   const params = url.searchParams;
   const baseUrl = options.baseUrl;
   let view = params.get("view");
@@ -608,9 +623,7 @@ async function handlePostPeople(
   options: { debug: boolean; htdocs: string; baseUrl: string },
 ): Promise<Response> {
   let clpid = pathIdentifier(req.url);
-  if (clpid === "rename") {
-    return handlePostPeopleRename(req, options);
-  }
+
   const isCreateObject = clpid === "";
 
   if (req.body !== null) {
