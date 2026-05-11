@@ -1,5 +1,5 @@
-Installation for development of **cold**
-===========================================
+Installation **cold**
+============================
 
 **cold** Caltech Library maintains a list of people, groups and funders and their related identifiers. For many years these were managed using a spreadsheets. That has become cumbersome. **COLD** manages data as JSON objects in [dataset](https://github.com/caltechlibrary/dataset) collections.
 

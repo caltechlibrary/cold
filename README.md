@@ -18,11 +18,13 @@ Access control is provided by the front end web server integrated with Shibbolet
 
 ## Release Notes
 
-- version: 0.0.41
+- version: 0.0.42
 - status: active
 - released: 2026-05-11
 
 - Self-service clpid rename: new /rename/people page linked from dashboard and people view; shows full person record for confirmation; validates old key exists and new key is unique
+- Fixed some relative path issues discovered in production deployment.
+- Linked in new rename people method from dashboard.
 
 
 ### Authors
