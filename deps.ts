@@ -25,7 +25,7 @@ export { makePage, renderPage, renderJSON } from "./render.ts";
 export { version, releaseDate, releaseHash, licenseText } from "./version.ts";
 export { fmtHelp } from "./helptext.ts";
 export { OptionsProcessor, matchType } from "./options.ts";
-export { handlePeople, People } from "./people.ts";
+export { handlePeople, handleRenamePeople, People } from "./people.ts";
 export type { PeopleInterface } from "./people.ts";
 export { handleGroups, Group } from "./groups.ts";
 export type { GroupInterface } from "./groups.ts";

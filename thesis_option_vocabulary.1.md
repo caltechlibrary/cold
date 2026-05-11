@@ -1,10 +1,6 @@
-<<<<<<< HEAD
-%thesis_option_vocabulary(1) user manual | 0.0.39c  ccc8ac9
-=======
-%thesis_option_vocabulary(1) user manual | 0.0.40  cf3625d
->>>>>>> d2870679a5761b5f584d5170ba905de301eca0f3
+%thesis_option_vocabulary(1) user manual | 0.0.41  f11a594
 % R. S.Doiel
-% 2026-05-08
+% 2026-05-11
 
 # NAME
 

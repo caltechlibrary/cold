@@ -6,6 +6,7 @@ import {
   handleGroups,
   handleJournals,
   handlePeople,
+  handleRenamePeople,
   handleReports,
   handleSubjects,
   handleThesisOption,
@@ -72,6 +73,9 @@ export function ColdReadWriteHandler(
   if (options.debug) console.log("debugging request", req);
   if (options.debug) console.log("debugging options", options);
   // Handle the various dataset collections management pages.
+  if (pathname.startsWith("/rename/people")) {
+    return handleRenamePeople(req, options);
+  }
   if (pathname.startsWith("/people")) {
     return handlePeople(req, options);
   }

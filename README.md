@@ -18,21 +18,11 @@ Access control is provided by the front end web server integrated with Shibbolet
 
 ## Release Notes
 
-- version: 0.0.40
+- version: 0.0.41
 - status: active
-- released: 2026-05-08
+- released: 2026-05-11
 
-- Bio field is now editable when a person is no longer in the campus directory; directory lookup 404 also unlocks bio with a visible warning
-- ROR field auto-populates with Caltech ROR when the Caltech checkbox is checked and ROR is currently empty
-- clpid auto-generated from family and given name on people create form; clgid auto-generated from group name on group create form; both check uniqueness before populating
-- Fixed Firefox bug where module-level DOM captures produced stale references; switched to document-level focusout delegation
-- Self-service clpid rename: new /people/rename page linked from dashboard and people view; shows full person record for confirmation; validates old key exists and new key is unique
-- clean up text in the collaborator_report.html page we&#x27;ll use for testing collaborator report integration
-- fixed regression, issue #100, in group submission in people form.
-- fixed issue #101 in review queue
-- fixed issue #102 in people edit
-- fixed regressions where the &quot;[email protect]&quot; string wound up in the email field.
-- Moved JavaScript for problem code from &#x60;htdocs/js&#x60;, re-coded as TypeScript with new implementations in &#x60;htdocs/modules&#x60;
+- Self-service clpid rename: new /rename/people page linked from dashboard and people view; shows full person record for confirmation; validates old key exists and new key is unique
 
 
 ### Authors
