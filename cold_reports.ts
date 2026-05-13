@@ -515,6 +515,7 @@ class Runnable implements RunnableInterface {
     const utf8Encoder = new TextEncoder();
     const data = utf8Encoder.encode(txt);
     try {
+      await Deno.mkdir(basedir, { recursive: true });
       await Deno.writeFile(`${basedir}/${filename}`, data, { create: true });
     } catch (err) {
       return "error://" + err;

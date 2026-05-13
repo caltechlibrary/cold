@@ -11,7 +11,7 @@ abstract: "Caltech Library maintains a list of people, groups and funders and th
 Reports are implemented as a set of programs or bash scripts.
 
 TypeScript+Deno is used to implement the web UI and report system.
-The JSON API is provided by Dataset&#x27;s datasetd.
+The JSON API is provided by Dataset's datasetd.
 Access control is provided by the front end web server integrated with Shibboleth."
 authors:
   - family_name: Doiel
@@ -91,7 +91,7 @@ Caltech Library maintains a list of people, groups and funders and their related
 Reports are implemented as a set of programs or bash scripts.
 
 TypeScript+Deno is used to implement the web UI and report system.
-The JSON API is provided by Dataset&#x27;s datasetd.
+The JSON API is provided by Dataset's datasetd.
 Access control is provided by the front end web server integrated with Shibboleth.
 
 - [License](https://caltechlibrary.github.io/cold/LICENSE)

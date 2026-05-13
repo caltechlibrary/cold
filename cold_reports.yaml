@@ -80,3 +80,15 @@ reports:
     append_datestamp: false
     content_type: text/csv
     #content_type: application/vnd.ms-excel
+  run_publications_by_person_identifiers:
+    cmd: ./run_publications_by_person_identifiers.bash
+    inputs:
+      - id: clpid
+        type: text
+        required: false
+      - id: orcid
+        type: text
+        required: false
+    basename: "{{clpid}}_{{orcid}}_publications"
+    append_datestamp: false
+    content_type: text/csv

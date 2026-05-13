@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <title>cold</title>
+    <link rel="stylesheet" href="https://caltechlibrary.github.io/css/site.css">
+    <link rel="stylesheet" href="https://media.library.caltech.edu/cl-webcomponents/css/code-blocks.css">
+    <script type="module" src="https://media.library.caltech.edu/cl-webcomponents/copyToClipboard.js"></script>
+    <script type="module" src="https://media.library.caltech.edu/cl-webcomponents/footer-global.js"></script>
+</head>
+<body>
+<header>
+<a href="https://library.caltech.edu"><img src="https://media.library.caltech.edu/assets/caltechlibrary-logo.png" alt="Caltech Library logo"></a>
+</header>
+<a href="#main-content" class="visually-hidden">skip to main content</a>
+<nav>
+<ul>
+    <li><a href="/">All Library Apps</a></li>
+    <li><a href="index.html">Home</a></li>
+    <li><a href="LICENSE">LICENSE</a></li>
+    <li><a href="INSTALL.html">INSTALL</a></li>
+    <li><a href="user_manual.html">User Manual</a></li>
+    <li><a href="about.html">About</a></li>
+    <!-- <li><a href="search.html">Search</a></li> -->
+    <li><a href="https://github.com/caltechlibrary/cold">Code Repository</a></li>
+</ul>
+</nav>
+<section id="main-content">
+<h1 id="name">NAME</h1>
+<p>publications_by_person_identifiers</p>
+<h1 id="synopsis">SYNOPSIS</h1>
+<p>publications_by_person_identifiers <a href="#options">OPTIONS</a>
+[CLPID] [ORCID]</p>
+<h1 id="description">DESCRIPTION</h1>
+<p>publications_by_person_identifiers retrieves publication records from
+the Invenio RDM JSON API for CaltechAUTHORS based on a CLPID (Caltech
+Library People Identifier) and/or ORCID. It outputs the results in one
+of three formats: csv (default), json, or jsonl.</p>
+<p>At least one of CLPID or ORCID must be provided as positional
+arguments. Both can be provided to combine results. If a parameter is
+not known, pass an empty string.</p>
+<p>The report includes the following fields for each publication: -
+clpid: The CLPID provided as input for the search - orcid: The ORCID
+provided as input for the search - rdm_id: The RDM record identifier -
+title: The publication title - publication_year: The year of publication
+- doi: The Digital Object Identifier - authors_with_affiliations:
+authors with their affiliations - acknowledgements: The acknowledgements
+text - funding: funding information - record_clpid: The CLPID found in
+the matching author’s identifiers from the RDM record - record_orcid:
+The ORCID found in the matching author’s identifiers from the RDM
+record</p>
+<h1 id="options">OPTIONS</h1>
+<dl>
+<dt>-h, –help</dt>
+<dd>
+display help
+</dd>
+<dt>-l, –license</dt>
+<dd>
+display license
+</dd>
+<dt>-v, –version</dt>
+<dd>
+display version
+</dd>
+<dt>-f, –format=FORMAT</dt>
+<dd>
+Output format. One of ‘json’, ‘csv’, or ‘jsonl’ (default: csv).
+<ul>
+<li>json: JSON array of all records</li>
+<li>jsonl: JSON Lines (one record per line)</li>
+<li>csv: Comma-separated values with flattened array fields</li>
+</ul>
+</dd>
+</dl>
+<h1 id="arguments">ARGUMENTS</h1>
+<dl>
+<dt>CLPID</dt>
+<dd>
+Caltech Library People Identifier to search for (optional if ORCID
+provided)
+</dd>
+<dt>ORCID</dt>
+<dd>
+ORCID identifier to search for (optional if CLPID provided)
+</dd>
+</dl>
+<h1 id="example">EXAMPLE</h1>
+<p>Retrieve publications for a person by CLPID (default csv format):</p>
+<pre class="shell"><code>publications_by_person_identifiers Newman-D-K</code></pre>
+<p>Retrieve publications for a person by ORCID as JSON array:</p>
+<pre class="shell"><code>publications_by_person_identifiers -f json &quot;&quot; 0000-0000-0000-0000</code></pre>
+<p>Retrieve publications as CSV:</p>
+<pre class="shell"><code>publications_by_person_identifiers -f csv Newman-D-K</code></pre>
+<p>Retrieve publications using both CLPID and ORCID:</p>
+<pre class="shell"><code>publications_by_person_identifiers Newman-D-K 0000-0000-0000-0000</code></pre>
+<p>Retrieve publications with unknown CLPID:</p>
+<pre class="shell"><code>publications_by_person_identifiers &quot;&quot; 0000-0000-0000-0000</code></pre>
+</section>
+<footer-global></footer-global>
+</body>
+</html>
