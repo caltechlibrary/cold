@@ -32,7 +32,7 @@ maintainer:
     id: https://orcid.org/0000-0003-0900-6903
 
 repository_code: https://github.com/caltechlibrary/cold
-version: 0.0.42
+version: 0.0.43
 license_url: https://caltechlibrary.github.io/cold/LICENSE
 operating_system:
   - Linux
@@ -52,17 +52,15 @@ keywords:
   - objects
   - controlled vocabulary
 
-date_released: 2026-05-11
+date_released: 2026-05-13
 ---
 
 About this software
 ===================
 
-## cold 0.0.42
+## cold 0.0.43
 
-- Self-service clpid rename: new /rename/people page linked from dashboard and people view; shows full person record for confirmation; validates old key exists and new key is unique
-- Fixed some relative path issues discovered in production deployment.
-- Linked in new rename people method from dashboard.
+- Added publications by person identifiers report
 
 ## Authors
 
