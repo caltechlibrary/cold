@@ -533,6 +533,12 @@ collections:
         WHERE je.value IS NOT NULL AND je.value != '' AND je.value != 'null'
         ORDER BY je.value
 
+      get_distinct_local_group: |
+        SELECT DISTINCT json_quote(je.value)
+        FROM caltechthesis ct, json_each(ct.src, '$.local_group') je
+        WHERE je.value IS NOT NULL AND je.value != '' AND je.value != 'null'
+        ORDER BY je.value
+
       # --- Text LIKE searches (* wildcard -> %) ---
 
       by_text: |

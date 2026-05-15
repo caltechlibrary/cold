@@ -100,6 +100,20 @@ const optionLabels: Record<string, string> = {
   "medee": "Medical and Electrical Engineering",
 };
 
+const dateTypeLabels: Record<string, string> = {
+  "published": "Publication",
+  "submitted": "Submission for publication",
+  "completed": "Completion",
+  "degree": "Degree Awarded",
+};
+
+const isPublishedLabels: Record<string, string> = {
+  "pub": "Published",
+  "inpress": "In Press",
+  "submitted": "Submitted",
+  "unpub": "Unpublished",
+};
+
 const thesisTypeLabels: Record<string, string> = {
   "phd": "Dissertation (Ph.D.)",
   "masters": "Master's thesis",
@@ -205,26 +219,57 @@ export class ThesisSearchUI {
     const formHTML = `
 <form method="get" id="thesis-search-form">
 
-<div class="ts-text-row">
-  <label for="q_name">Search field:</label>
-  <select name="q_name" id="q_name">
-    <optgroup label="Text searches">
-      <option value="by_text">Full text (title / abstract / keywords)</option>
-      <option value="by_title">Title</option>
-      <option value="by_abstract">Abstract</option>
-      <option value="by_author">Author name</option>
-      <option value="by_advisor">Advisor name</option>
-      <option value="by_committee">Committee member name</option>
-      <option value="by_orcid">ORCID</option>
-      <option value="by_doi">DOI</option>
-      <option value="by_reviewer">Reviewer</option>
-      <option value="by_depositor">Depositor (username or name)</option>
-      <option value="by_funder">Funding agency / grant number</option>
-      <option value="by_eprintid">Item ID (exact number)</option>
-    </optgroup>
-  </select>
-  <input id="q" name="q" type="search" size="45"
-         placeholder="use * as wildcard" value="">
+<div class="ts-fields">
+  <div class="ts-field-row">
+    <label for="q_text">Full text (title / abstract / keywords):</label>
+    <input id="q_text" name="q_text" type="search" size="45" placeholder="use * as wildcard">
+  </div>
+  <div class="ts-field-row">
+    <label for="q_title">Title:</label>
+    <input id="q_title" name="q_title" type="search" size="45" placeholder="use * as wildcard">
+  </div>
+  <div class="ts-field-row">
+    <label for="q_abstract">Abstract:</label>
+    <input id="q_abstract" name="q_abstract" type="search" size="45" placeholder="use * as wildcard">
+  </div>
+  <div class="ts-field-row">
+    <label for="q_author">Author name:</label>
+    <input id="q_author" name="q_author" type="search" size="45" placeholder="use * as wildcard">
+  </div>
+  <div class="ts-field-row">
+    <label for="q_orcid">ORCID:</label>
+    <input id="q_orcid" name="q_orcid" type="search" size="45" placeholder="use * as wildcard">
+  </div>
+  <div class="ts-field-row">
+    <label for="q_advisor">Advisor name:</label>
+    <input id="q_advisor" name="q_advisor" type="search" size="45" placeholder="use * as wildcard">
+  </div>
+  <div class="ts-field-row">
+    <label for="q_committee">Committee member:</label>
+    <input id="q_committee" name="q_committee" type="search" size="45" placeholder="use * as wildcard">
+  </div>
+  <div class="ts-field-row">
+    <label for="q_doi">DOI:</label>
+    <input id="q_doi" name="q_doi" type="search" size="45" placeholder="use * as wildcard">
+  </div>
+  <div class="ts-field-row">
+    <label for="q_reviewer">Reviewer:</label>
+    <input id="q_reviewer" name="q_reviewer" type="search" size="45" placeholder="use * as wildcard">
+  </div>
+  <div class="ts-field-row">
+    <label for="q_depositor">Depositor (username or name):</label>
+    <input id="q_depositor" name="q_depositor" type="search" size="45" placeholder="use * as wildcard">
+  </div>
+  <div class="ts-field-row">
+    <label for="q_funder">Funding agency / grant number:</label>
+    <input id="q_funder" name="q_funder" type="search" size="45" placeholder="use * as wildcard">
+  </div>
+  <div class="ts-field-row">
+    <label for="q_group">Group:</label>
+    <input id="q_group" name="q_group" type="search" size="45"
+           list="q_group_list" placeholder="type to filter groups">
+    <datalist id="q_group_list"></datalist>
+  </div>
 </div>
 
 <div class="ts-year-row">
@@ -291,6 +336,16 @@ export class ThesisSearchUI {
     <legend>Review Status</legend>
     ${this.checkboxGroup("review_status", reviewStatusLabels, [])}
   </fieldset>
+
+  <fieldset>
+    <legend>Date Type</legend>
+    ${this.checkboxGroup("date_type", dateTypeLabels, [])}
+  </fieldset>
+
+  <fieldset>
+    <legend>Publication Status</legend>
+    ${this.checkboxGroup("ispublished", isPublishedLabels, [])}
+  </fieldset>
 </div>
 
 <div class="ts-buttons-row">
@@ -340,14 +395,17 @@ export class ThesisSearchUI {
   // --- Vocabulary loading ---------------------------------------------------
 
   private async loadVocabularies(): Promise<void> {
-    const [divisions, optionsMajor, optionsMinor] = await Promise.all([
-      this.clientAPI.getStringList(this.cName, "get_distinct_divisions"),
-      this.clientAPI.getStringList(this.cName, "get_distinct_option_major"),
-      this.clientAPI.getStringList(this.cName, "get_distinct_option_minor"),
-    ]);
+    const [divisions, optionsMajor, optionsMinor, localGroups] =
+      await Promise.all([
+        this.clientAPI.getStringList(this.cName, "get_distinct_divisions"),
+        this.clientAPI.getStringList(this.cName, "get_distinct_option_major"),
+        this.clientAPI.getStringList(this.cName, "get_distinct_option_minor"),
+        this.clientAPI.getStringList(this.cName, "get_distinct_local_group"),
+      ]);
     this.populateSelect("divisions", divisions, divisionLabels);
     this.populateSelect("option_major", optionsMajor, optionLabels);
     this.populateSelect("option_minor", optionsMinor, optionLabels);
+    this.populateDatalist("q_group_list", localGroups);
   }
 
   private populateSelect(
@@ -363,31 +421,38 @@ export class ThesisSearchUI {
     }).join("");
   }
 
+  private populateDatalist(id: string, values: string[]): void {
+    const dl = document.getElementById(id) as HTMLDataListElement | null;
+    if (!dl) return;
+    dl.innerHTML = values.map((v) => `<option value="${escapeHTML(v)}">`).join(
+      "",
+    );
+  }
+
   // --- URL state -----------------------------------------------------------
 
   private restoreFromURL(): void {
     const params = new URL(window.location.href).searchParams;
 
-    const qName = params.get("q_name");
-    const q = params.get("q");
-    if (qName) {
-      const sel = document.getElementById("q_name") as HTMLSelectElement;
-      if (sel) sel.value = qName;
-    }
-    if (q) {
-      const inp = document.getElementById("q") as HTMLInputElement;
-      if (inp) inp.value = q;
+    const textFieldIds = [
+      "q_text", "q_title", "q_abstract", "q_author", "q_orcid",
+      "q_advisor", "q_committee", "q_doi", "q_reviewer", "q_depositor",
+      "q_funder", "q_group",
+    ];
+    for (const id of textFieldIds) {
+      const v = params.get(id);
+      if (v) (document.getElementById(id) as HTMLInputElement).value = v;
     }
 
-    const setNum = (id: string, key: string) => {
-      const v = params.get(key);
+    const setNum = (id: string) => {
+      const v = params.get(id);
       if (v) (document.getElementById(id) as HTMLInputElement).value = v;
     };
-    setNum("year_from", "year_from");
-    setNum("year_to", "year_to");
+    setNum("year_from");
+    setNum("year_to");
 
-    const restoreMultiSelect = (id: string, key: string) => {
-      const values = params.getAll(key);
+    const restoreMultiSelect = (id: string) => {
+      const values = params.getAll(id);
       if (!values.length) return;
       const sel = document.getElementById(id) as HTMLSelectElement;
       if (!sel) return;
@@ -395,9 +460,9 @@ export class ThesisSearchUI {
         opt.selected = values.includes(opt.value);
       }
     };
-    restoreMultiSelect("divisions", "divisions");
-    restoreMultiSelect("option_major", "option_major");
-    restoreMultiSelect("option_minor", "option_minor");
+    restoreMultiSelect("divisions");
+    restoreMultiSelect("option_major");
+    restoreMultiSelect("option_minor");
 
     const restoreChecks = (name: string) => {
       const values = params.getAll(name);
@@ -411,6 +476,8 @@ export class ThesisSearchUI {
     restoreChecks("thesis_type");
     restoreChecks("full_text_status");
     restoreChecks("review_status");
+    restoreChecks("date_type");
+    restoreChecks("ispublished");
 
     const satisfyAll = params.get("satisfyall");
     if (satisfyAll) {
@@ -418,9 +485,13 @@ export class ThesisSearchUI {
       if (sel) sel.value = satisfyAll;
     }
 
+    const anyText = textFieldIds.some((id) => params.get(id));
     if (
-      qName || q || params.get("year_from") || params.get("year_to") ||
-      params.getAll("divisions").length || params.getAll("thesis_type").length
+      anyText || params.get("year_from") || params.get("year_to") ||
+      params.getAll("divisions").length ||
+      params.getAll("thesis_type").length ||
+      params.getAll("date_type").length ||
+      params.getAll("ispublished").length
     ) {
       this.runSearch();
     }
@@ -431,29 +502,33 @@ export class ThesisSearchUI {
     url.search = "";
     const p = url.searchParams;
 
-    const qName =
-      (document.getElementById("q_name") as HTMLSelectElement).value;
-    const q = (document.getElementById("q") as HTMLInputElement).value.trim();
-    if (qName) p.set("q_name", qName);
-    if (q) p.set("q", q);
-
-    const addNum = (id: string, key: string) => {
+    const textFieldIds = [
+      "q_text", "q_title", "q_abstract", "q_author", "q_orcid",
+      "q_advisor", "q_committee", "q_doi", "q_reviewer", "q_depositor",
+      "q_funder", "q_group",
+    ];
+    for (const id of textFieldIds) {
       const v = (document.getElementById(id) as HTMLInputElement).value.trim();
-      if (v) p.set(key, v);
-    };
-    addNum("year_from", "year_from");
-    addNum("year_to", "year_to");
+      if (v) p.set(id, v);
+    }
 
-    const addMultiSelect = (id: string, key: string) => {
+    const addNum = (id: string) => {
+      const v = (document.getElementById(id) as HTMLInputElement).value.trim();
+      if (v) p.set(id, v);
+    };
+    addNum("year_from");
+    addNum("year_to");
+
+    const addMultiSelect = (id: string) => {
       const sel = document.getElementById(id) as HTMLSelectElement;
       if (!sel) return;
       for (const opt of Array.from(sel.options)) {
-        if (opt.selected) p.append(key, opt.value);
+        if (opt.selected) p.append(id, opt.value);
       }
     };
-    addMultiSelect("divisions", "divisions");
-    addMultiSelect("option_major", "option_major");
-    addMultiSelect("option_minor", "option_minor");
+    addMultiSelect("divisions");
+    addMultiSelect("option_major");
+    addMultiSelect("option_minor");
 
     const addChecks = (name: string) => {
       document.querySelectorAll<HTMLInputElement>(
@@ -466,6 +541,8 @@ export class ThesisSearchUI {
     addChecks("thesis_type");
     addChecks("full_text_status");
     addChecks("review_status");
+    addChecks("date_type");
+    addChecks("ispublished");
 
     const satisfyAll =
       (document.getElementById("satisfyall") as HTMLSelectElement).value;
@@ -484,14 +561,28 @@ export class ThesisSearchUI {
         "ALL";
     const conditions: Array<() => Promise<ThesisRecord[]>> = [];
 
-    // Text / ID search
-    const qName =
-      (document.getElementById("q_name") as HTMLSelectElement).value;
-    const rawQ = (document.getElementById("q") as HTMLInputElement).value
-      .trim();
-    if (rawQ !== "") {
-      const q = qName === "by_eprintid" ? rawQ : rawQ.replace(/\*/g, "%");
-      conditions.push(() => this.fetchResults(qName, q));
+    // Text field searches
+    const textFields: Array<{ id: string; query: string }> = [
+      { id: "q_text", query: "by_text" },
+      { id: "q_title", query: "by_title" },
+      { id: "q_abstract", query: "by_abstract" },
+      { id: "q_author", query: "by_author" },
+      { id: "q_orcid", query: "by_orcid" },
+      { id: "q_advisor", query: "by_advisor" },
+      { id: "q_committee", query: "by_committee" },
+      { id: "q_doi", query: "by_doi" },
+      { id: "q_reviewer", query: "by_reviewer" },
+      { id: "q_depositor", query: "by_depositor" },
+      { id: "q_funder", query: "by_funder" },
+      { id: "q_group", query: "by_local_group" },
+    ];
+    for (const { id, query } of textFields) {
+      const val =
+        (document.getElementById(id) as HTMLInputElement).value.trim();
+      if (val) {
+        const q = val.replace(/\*/g, "%");
+        conditions.push(() => this.fetchResults(query, q));
+      }
     }
 
     // Year range
@@ -582,6 +673,20 @@ export class ThesisSearchUI {
     if (reviewStatuses.length > 0) {
       conditions.push(() =>
         this.fetchResults("by_review_status", reviewStatuses.join(","))
+      );
+    }
+
+    const dateTypes = this.getCheckedValues("date_type");
+    if (dateTypes.length > 0) {
+      conditions.push(() =>
+        this.fetchResults("by_date_type", dateTypes.join(","))
+      );
+    }
+
+    const pubStatuses = this.getCheckedValues("ispublished");
+    if (pubStatuses.length > 0) {
+      conditions.push(() =>
+        this.fetchResults("by_ispublished", pubStatuses.join(","))
       );
     }
 
