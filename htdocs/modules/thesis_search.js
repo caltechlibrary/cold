@@ -634,7 +634,9 @@ var ThesisSearchUI = class {
   statusFlag(r) {
     const flags = [];
     if (r.eprint_status !== "archive") flags.push(`[${r.eprint_status}]`);
-    if (r.metadata_visibility !== "show") flags.push(`[${r.metadata_visibility}]`);
+    if (r.metadata_visibility !== "show") {
+      flags.push(`[${r.metadata_visibility}]`);
+    }
     if (r.full_text_status === "restricted") flags.push("[restricted]");
     if (r.full_text_status === "withheld") flags.push("[withheld]");
     return flags.length > 0 ? `<em class="ts-flag">${flags.join(" ")}</em>` : "";

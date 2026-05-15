@@ -27,145 +27,145 @@ import { ClientAPI } from "./client_api.ts";
 // --- Vocabulary maps --------------------------------------------------------
 
 const divisionLabels: Record<string, string> = {
-  "div_bbe":  "Biology and Biological Engineering",
+  "div_bbe": "Biology and Biological Engineering",
   "div_biol": "Biology",
   "div_chem": "Chemistry and Chemical Engineering",
-  "div_eng":  "Engineering and Applied Science",
-  "div_gps":  "Geological and Planetary Sciences",
-  "div_hss":  "Humanities and Social Sciences",
-  "div_int":  "Interdisciplinary Programs",
-  "div_pma":  "Physics, Mathematics and Astronomy",
+  "div_eng": "Engineering and Applied Science",
+  "div_gps": "Geological and Planetary Sciences",
+  "div_hss": "Humanities and Social Sciences",
+  "div_int": "Interdisciplinary Programs",
+  "div_pma": "Physics, Mathematics and Astronomy",
 };
 
 const optionLabels: Record<string, string> = {
-  "aeronautics":   "Aeronautics",
-  "aerospace":     "Aerospace Engineering",
-  "appliedmath":   "Applied And Computational Mathematics",
-  "appmath":       "Applied Mathematics",
-  "appliedmech":   "Applied Mechanics",
-  "appliedphys":   "Applied Physics",
-  "astronomy":     "Astronomy",
-  "astrophys":     "Astrophysics",
-  "behav":         "Behavioral and Social Neuroscience",
-  "bioch":         "Biochemistry",
-  "biochem":       "Biochemistry and Molecular Biophysics",
-  "bioeng":        "Bioengineering",
-  "bioinfo":       "Bioinformation Systems",
-  "bioleng":       "Biological Engineering",
-  "biology":       "Biology",
-  "busecon":       "Business Economics and Management",
-  "chemeng":       "Chemical Engineering",
-  "chemistry":     "Chemistry",
-  "civileng":      "Civil Engineering",
-  "cns":           "Computation and Neural Systems",
-  "compscieng":    "Computational Science and Engineering",
-  "compsci":       "Computer Science",
-  "cms":           "Computing and Mathematical Sciences",
-  "cds":           "Control and Dynamical Systems",
-  "biodev":        "Developmental Biology",
-  "economics":     "Economics",
-  "eleceng":       "Electrical Engineering",
-  "eng":           "Engineering",
-  "engappsci":     "Engineering and Applied Science",
-  "english":       "English",
-  "envreng":       "Environmental Science and Engineering",
-  "geobiol":       "Geobiology",
-  "geochem":       "Geochemistry",
-  "gps":           "Geological and Planetary Sciences",
-  "geol":          "Geology",
-  "geophys":       "Geophysics",
-  "history":       "History",
-  "histsci":       "History and Philosophy of Science",
-  "humanities":    "Humanities",
-  "immun":         "Immunology",
-  "matsci":        "Materials Science",
-  "math":          "Mathematics",
-  "mecheng":       "Mechanical Engineering",
-  "medeng":        "Medical Engineering",
-  "meteor":        "Meteorology",
-  "microbio":      "Microbiology",
-  "molbio":        "Molecular Biology",
-  "molbiochem":    "Molecular Biology and Biochemistry",
-  "neurobio":      "Neurobiology",
-  "paleontology":  "Paleontology",
-  "philosophy":    "Philosophy",
-  "physics":       "Physics",
-  "plansci":       "Planetary Sciences",
-  "polisci":       "Political Science",
-  "socsci":        "Social Science",
-  "socdecneusci":  "Social and Decision Neuroscience",
-  "space":         "Space Engineering",
-  "sysbiol":       "Systems Biology",
-  "infdatasci":    "Information and Data Sciences",
-  "medee":         "Medical and Electrical Engineering",
+  "aeronautics": "Aeronautics",
+  "aerospace": "Aerospace Engineering",
+  "appliedmath": "Applied And Computational Mathematics",
+  "appmath": "Applied Mathematics",
+  "appliedmech": "Applied Mechanics",
+  "appliedphys": "Applied Physics",
+  "astronomy": "Astronomy",
+  "astrophys": "Astrophysics",
+  "behav": "Behavioral and Social Neuroscience",
+  "bioch": "Biochemistry",
+  "biochem": "Biochemistry and Molecular Biophysics",
+  "bioeng": "Bioengineering",
+  "bioinfo": "Bioinformation Systems",
+  "bioleng": "Biological Engineering",
+  "biology": "Biology",
+  "busecon": "Business Economics and Management",
+  "chemeng": "Chemical Engineering",
+  "chemistry": "Chemistry",
+  "civileng": "Civil Engineering",
+  "cns": "Computation and Neural Systems",
+  "compscieng": "Computational Science and Engineering",
+  "compsci": "Computer Science",
+  "cms": "Computing and Mathematical Sciences",
+  "cds": "Control and Dynamical Systems",
+  "biodev": "Developmental Biology",
+  "economics": "Economics",
+  "eleceng": "Electrical Engineering",
+  "eng": "Engineering",
+  "engappsci": "Engineering and Applied Science",
+  "english": "English",
+  "envreng": "Environmental Science and Engineering",
+  "geobiol": "Geobiology",
+  "geochem": "Geochemistry",
+  "gps": "Geological and Planetary Sciences",
+  "geol": "Geology",
+  "geophys": "Geophysics",
+  "history": "History",
+  "histsci": "History and Philosophy of Science",
+  "humanities": "Humanities",
+  "immun": "Immunology",
+  "matsci": "Materials Science",
+  "math": "Mathematics",
+  "mecheng": "Mechanical Engineering",
+  "medeng": "Medical Engineering",
+  "meteor": "Meteorology",
+  "microbio": "Microbiology",
+  "molbio": "Molecular Biology",
+  "molbiochem": "Molecular Biology and Biochemistry",
+  "neurobio": "Neurobiology",
+  "paleontology": "Paleontology",
+  "philosophy": "Philosophy",
+  "physics": "Physics",
+  "plansci": "Planetary Sciences",
+  "polisci": "Political Science",
+  "socsci": "Social Science",
+  "socdecneusci": "Social and Decision Neuroscience",
+  "space": "Space Engineering",
+  "sysbiol": "Systems Biology",
+  "infdatasci": "Information and Data Sciences",
+  "medee": "Medical and Electrical Engineering",
 };
 
 const thesisTypeLabels: Record<string, string> = {
-  "phd":          "Dissertation (Ph.D.)",
-  "masters":      "Master's thesis",
-  "engd":         "Engineer's thesis",
-  "bachelors":    "Bachelor's thesis",
+  "phd": "Dissertation (Ph.D.)",
+  "masters": "Master's thesis",
+  "engd": "Engineer's thesis",
+  "bachelors": "Bachelor's thesis",
   "senior_minor": "Senior thesis (Minor)",
   "senior_major": "Senior thesis (Major)",
-  "other":        "Other",
+  "other": "Other",
 };
 
 const eprintStatusLabels: Record<string, string> = {
   "archive": "Live Archive",
-  "buffer":  "Under Review",
-  "inbox":   "User Workarea",
-  "deletion":"Retired",
+  "buffer": "Under Review",
+  "inbox": "User Workarea",
+  "deletion": "Retired",
 };
 
 const reviewStatusLabels: Record<string, string> = {
-  "review":      "Being reviewed",
-  "correction":  "Waiting for corrections",
-  "gradoffice":  "Sent to Grad Office",
-  "go-pending":  "Pending in GO — see notes",
+  "review": "Being reviewed",
+  "correction": "Waiting for corrections",
+  "gradoffice": "Sent to Grad Office",
+  "go-pending": "Pending in GO — see notes",
   "notapproved": "Not Approved — see notes",
-  "approved":    "Approved",
-  "withheld":    "Approved — WITHHELD",
-  "other":       "Other — see Internal Notes",
+  "approved": "Approved",
+  "withheld": "Approved — WITHHELD",
+  "other": "Other — see Internal Notes",
 };
 
 const fullTextStatusLabels: Record<string, string> = {
-  "public":     "Public (worldwide)",
+  "public": "Public (worldwide)",
   "restricted": "Caltech community only",
-  "mixed":      "Mixed (file-level)",
-  "withheld":   "Withheld",
+  "mixed": "Mixed (file-level)",
+  "withheld": "Withheld",
 };
 
 // --- Types -----------------------------------------------------------------
 
 interface Creator {
   family: string;
-  given:  string;
-  id:     string;
-  orcid:  string;
+  given: string;
+  id: string;
+  orcid: string;
 }
 
 interface ThesisRecord {
-  eprintid:          number;
-  title:             string;
-  abstract:          string;
-  date:              number;
-  thesis_degree:     string;
-  thesis_type:       string;
-  eprint_status:     string;
+  eprintid: number;
+  title: string;
+  abstract: string;
+  date: number;
+  thesis_degree: string;
+  thesis_type: string;
+  eprint_status: string;
   metadata_visibility: string;
-  full_text_status:  string;
-  review_status:     string;
-  ispublished:       string;
-  link:              string;
-  creators:          Creator[] | null;
-  thesis_advisor:    Creator[] | null;
-  divisions:         string[] | null;
-  option_major:      string[] | null;
-  option_minor:      string[] | null;
+  full_text_status: string;
+  review_status: string;
+  ispublished: string;
+  link: string;
+  creators: Creator[] | null;
+  thesis_advisor: Creator[] | null;
+  divisions: string[] | null;
+  option_major: string[] | null;
+  option_minor: string[] | null;
   creator_names_idx: string;
   advisor_names_idx: string;
-  reviewer:          string;
-  lastmod:           string;
+  reviewer: string;
+  lastmod: string;
 }
 
 // --- Main class ------------------------------------------------------------
@@ -184,7 +184,7 @@ export class ThesisSearchUI {
     cName?: string;
   }) {
     if (options.cName) this.cName = options.cName;
-    this.baseUrl  = new URL(options.baseUrl);
+    this.baseUrl = new URL(options.baseUrl);
     this.basePath = this.baseUrl.pathname;
     this.clientAPI = new ClientAPI(this.baseUrl.toString());
 
@@ -310,19 +310,29 @@ export class ThesisSearchUI {
     this.searchElement.innerHTML = formHTML;
     this.resultSection = this.searchElement.querySelector("section")!;
 
-    this.searchElement.querySelector("form")!.addEventListener("submit", (e) => {
-      e.preventDefault();
-      this.runSearch();
-    });
+    this.searchElement.querySelector("form")!.addEventListener(
+      "submit",
+      (e) => {
+        e.preventDefault();
+        this.runSearch();
+      },
+    );
 
-    this.searchElement.querySelector("input[type=reset]")!.addEventListener("click", () => {
-      this.resultSection.innerHTML = "";
-    });
+    this.searchElement.querySelector("input[type=reset]")!.addEventListener(
+      "click",
+      () => {
+        this.resultSection.innerHTML = "";
+      },
+    );
   }
 
-  private checkboxGroup(name: string, labels: Record<string, string>, defaultChecked: string[]): string {
+  private checkboxGroup(
+    name: string,
+    labels: Record<string, string>,
+    defaultChecked: string[],
+  ): string {
     return Object.entries(labels).map(([val, label]) => {
-      const checked = defaultChecked.includes(val) ? ' checked' : '';
+      const checked = defaultChecked.includes(val) ? " checked" : "";
       return `<label><input type="checkbox" name="${name}" value="${val}"${checked}> ${label}</label>`;
     }).join("\n    ");
   }
@@ -335,15 +345,19 @@ export class ThesisSearchUI {
       this.clientAPI.getStringList(this.cName, "get_distinct_option_major"),
       this.clientAPI.getStringList(this.cName, "get_distinct_option_minor"),
     ]);
-    this.populateSelect("divisions",    divisions,    divisionLabels);
+    this.populateSelect("divisions", divisions, divisionLabels);
     this.populateSelect("option_major", optionsMajor, optionLabels);
     this.populateSelect("option_minor", optionsMinor, optionLabels);
   }
 
-  private populateSelect(id: string, codes: string[], labelMap: Record<string, string>): void {
+  private populateSelect(
+    id: string,
+    codes: string[],
+    labelMap: Record<string, string>,
+  ): void {
     const sel = document.getElementById(id) as HTMLSelectElement | null;
     if (!sel) return;
-    sel.innerHTML = codes.map(code => {
+    sel.innerHTML = codes.map((code) => {
       const label = labelMap[code] ?? code;
       return `<option value="${code}">${label}</option>`;
     }).join("");
@@ -355,7 +369,7 @@ export class ThesisSearchUI {
     const params = new URL(window.location.href).searchParams;
 
     const qName = params.get("q_name");
-    const q     = params.get("q");
+    const q = params.get("q");
     if (qName) {
       const sel = document.getElementById("q_name") as HTMLSelectElement;
       if (sel) sel.value = qName;
@@ -370,7 +384,7 @@ export class ThesisSearchUI {
       if (v) (document.getElementById(id) as HTMLInputElement).value = v;
     };
     setNum("year_from", "year_from");
-    setNum("year_to",   "year_to");
+    setNum("year_to", "year_to");
 
     const restoreMultiSelect = (id: string, key: string) => {
       const values = params.getAll(key);
@@ -381,16 +395,17 @@ export class ThesisSearchUI {
         opt.selected = values.includes(opt.value);
       }
     };
-    restoreMultiSelect("divisions",    "divisions");
+    restoreMultiSelect("divisions", "divisions");
     restoreMultiSelect("option_major", "option_major");
     restoreMultiSelect("option_minor", "option_minor");
 
     const restoreChecks = (name: string) => {
       const values = params.getAll(name);
       if (!values.length) return;
-      document.querySelectorAll<HTMLInputElement>(`input[name="${name}"]`).forEach(cb => {
-        cb.checked = values.includes(cb.value);
-      });
+      document.querySelectorAll<HTMLInputElement>(`input[name="${name}"]`)
+        .forEach((cb) => {
+          cb.checked = values.includes(cb.value);
+        });
     };
     restoreChecks("eprint_status");
     restoreChecks("thesis_type");
@@ -403,8 +418,10 @@ export class ThesisSearchUI {
       if (sel) sel.value = satisfyAll;
     }
 
-    if (qName || q || params.get("year_from") || params.get("year_to") ||
-        params.getAll("divisions").length || params.getAll("thesis_type").length) {
+    if (
+      qName || q || params.get("year_from") || params.get("year_to") ||
+      params.getAll("divisions").length || params.getAll("thesis_type").length
+    ) {
       this.runSearch();
     }
   }
@@ -414,17 +431,18 @@ export class ThesisSearchUI {
     url.search = "";
     const p = url.searchParams;
 
-    const qName = (document.getElementById("q_name") as HTMLSelectElement).value;
-    const q     = (document.getElementById("q") as HTMLInputElement).value.trim();
+    const qName =
+      (document.getElementById("q_name") as HTMLSelectElement).value;
+    const q = (document.getElementById("q") as HTMLInputElement).value.trim();
     if (qName) p.set("q_name", qName);
-    if (q)     p.set("q", q);
+    if (q) p.set("q", q);
 
     const addNum = (id: string, key: string) => {
       const v = (document.getElementById(id) as HTMLInputElement).value.trim();
       if (v) p.set(key, v);
     };
     addNum("year_from", "year_from");
-    addNum("year_to",   "year_to");
+    addNum("year_to", "year_to");
 
     const addMultiSelect = (id: string, key: string) => {
       const sel = document.getElementById(id) as HTMLSelectElement;
@@ -433,12 +451,14 @@ export class ThesisSearchUI {
         if (opt.selected) p.append(key, opt.value);
       }
     };
-    addMultiSelect("divisions",    "divisions");
+    addMultiSelect("divisions", "divisions");
     addMultiSelect("option_major", "option_major");
     addMultiSelect("option_minor", "option_minor");
 
     const addChecks = (name: string) => {
-      document.querySelectorAll<HTMLInputElement>(`input[name="${name}"]:checked`).forEach(cb => {
+      document.querySelectorAll<HTMLInputElement>(
+        `input[name="${name}"]:checked`,
+      ).forEach((cb) => {
         p.append(name, cb.value);
       });
     };
@@ -447,7 +467,8 @@ export class ThesisSearchUI {
     addChecks("full_text_status");
     addChecks("review_status");
 
-    const satisfyAll = (document.getElementById("satisfyall") as HTMLSelectElement).value;
+    const satisfyAll =
+      (document.getElementById("satisfyall") as HTMLSelectElement).value;
     p.set("satisfyall", satisfyAll);
 
     window.history.pushState({}, "", url);
@@ -458,25 +479,33 @@ export class ThesisSearchUI {
   private async runSearch(): Promise<void> {
     this.updateURL();
 
-    const satisfyAll = (document.getElementById("satisfyall") as HTMLSelectElement).value === "ALL";
+    const satisfyAll =
+      (document.getElementById("satisfyall") as HTMLSelectElement).value ===
+        "ALL";
     const conditions: Array<() => Promise<ThesisRecord[]>> = [];
 
     // Text / ID search
-    const qName = (document.getElementById("q_name") as HTMLSelectElement).value;
-    const rawQ  = (document.getElementById("q") as HTMLInputElement).value.trim();
+    const qName =
+      (document.getElementById("q_name") as HTMLSelectElement).value;
+    const rawQ = (document.getElementById("q") as HTMLInputElement).value
+      .trim();
     if (rawQ !== "") {
       const q = qName === "by_eprintid" ? rawQ : rawQ.replace(/\*/g, "%");
       conditions.push(() => this.fetchResults(qName, q));
     }
 
     // Year range
-    const yearFrom = (document.getElementById("year_from") as HTMLInputElement).value.trim();
-    const yearTo   = (document.getElementById("year_to") as HTMLInputElement).value.trim();
+    const yearFrom = (document.getElementById("year_from") as HTMLInputElement)
+      .value.trim();
+    const yearTo = (document.getElementById("year_to") as HTMLInputElement)
+      .value.trim();
     if (yearFrom && yearTo) {
       const yf = yearFrom, yt = yearTo;
-      conditions.push(() => this.fetchResults("by_year_from", yf).then(results =>
-        results.filter(r => r.date <= parseInt(yt))
-      ));
+      conditions.push(() =>
+        this.fetchResults("by_year_from", yf).then((results) =>
+          results.filter((r) => r.date <= parseInt(yt))
+        )
+      );
     } else if (yearFrom) {
       conditions.push(() => this.fetchResults("by_year_from", yearFrom));
     } else if (yearTo) {
@@ -485,27 +514,35 @@ export class ThesisSearchUI {
 
     // Division multi-select
     const divisions = this.getSelectedValues("divisions");
-    const divMerge  = this.getRadioValue("divisions_merge");
+    const divMerge = this.getRadioValue("divisions_merge");
     if (divisions.length > 0) {
       const q = divisions.join(",");
       if (divMerge === "ALL") {
-        conditions.push(() => this.fetchResults("by_division", q).then(results =>
-          results.filter(r => divisions.every(d => (r.divisions ?? []).includes(d)))
-        ));
+        conditions.push(() =>
+          this.fetchResults("by_division", q).then((results) =>
+            results.filter((r) =>
+              divisions.every((d) => (r.divisions ?? []).includes(d))
+            )
+          )
+        );
       } else {
         conditions.push(() => this.fetchResults("by_division", q));
       }
     }
 
     // Option major multi-select
-    const optMajor      = this.getSelectedValues("option_major");
+    const optMajor = this.getSelectedValues("option_major");
     const optMajorMerge = this.getRadioValue("option_major_merge");
     if (optMajor.length > 0) {
       const q = optMajor.join(",");
       if (optMajorMerge === "ALL") {
-        conditions.push(() => this.fetchResults("by_option_major", q).then(results =>
-          results.filter(r => optMajor.every(o => (r.option_major ?? []).includes(o)))
-        ));
+        conditions.push(() =>
+          this.fetchResults("by_option_major", q).then((results) =>
+            results.filter((r) =>
+              optMajor.every((o) => (r.option_major ?? []).includes(o))
+            )
+          )
+        );
       } else {
         conditions.push(() => this.fetchResults("by_option_major", q));
       }
@@ -514,39 +551,51 @@ export class ThesisSearchUI {
     // Option minor multi-select
     const optMinor = this.getSelectedValues("option_minor");
     if (optMinor.length > 0) {
-      conditions.push(() => this.fetchResults("by_option_minor", optMinor.join(",")));
+      conditions.push(() =>
+        this.fetchResults("by_option_minor", optMinor.join(","))
+      );
     }
 
     // Status checkboxes
     const statusVals = this.getCheckedValues("eprint_status");
     if (statusVals.length > 0) {
-      conditions.push(() => this.fetchResults("by_eprint_status", statusVals.join(",")));
+      conditions.push(() =>
+        this.fetchResults("by_eprint_status", statusVals.join(","))
+      );
     }
 
     const thesisTypes = this.getCheckedValues("thesis_type");
     if (thesisTypes.length > 0) {
-      conditions.push(() => this.fetchResults("by_thesis_type", thesisTypes.join(",")));
+      conditions.push(() =>
+        this.fetchResults("by_thesis_type", thesisTypes.join(","))
+      );
     }
 
     const ftStatuses = this.getCheckedValues("full_text_status");
     if (ftStatuses.length > 0) {
-      conditions.push(() => this.fetchResults("by_full_text_status", ftStatuses.join(",")));
+      conditions.push(() =>
+        this.fetchResults("by_full_text_status", ftStatuses.join(","))
+      );
     }
 
     const reviewStatuses = this.getCheckedValues("review_status");
     if (reviewStatuses.length > 0) {
-      conditions.push(() => this.fetchResults("by_review_status", reviewStatuses.join(",")));
+      conditions.push(() =>
+        this.fetchResults("by_review_status", reviewStatuses.join(","))
+      );
     }
 
     if (conditions.length === 0) {
-      this.resultSection.innerHTML = `<p>Fill in at least one field and press 🔎</p>`;
+      this.resultSection.innerHTML =
+        `<p>Fill in at least one field and press 🔎</p>`;
       return;
     }
 
-    this.resultSection.innerHTML = `<p>Searching… <span id="spinner">👓</span></p>`;
+    this.resultSection.innerHTML =
+      `<p>Searching… <span id="spinner">👓</span></p>`;
 
     try {
-      const resultSets = await Promise.all(conditions.map(fn => fn()));
+      const resultSets = await Promise.all(conditions.map((fn) => fn()));
       const combined = satisfyAll
         ? this.intersect(resultSets)
         : this.union(resultSets);
@@ -556,7 +605,10 @@ export class ThesisSearchUI {
     }
   }
 
-  private async fetchResults(qName: string, q: string): Promise<ThesisRecord[]> {
+  private async fetchResults(
+    qName: string,
+    q: string,
+  ): Promise<ThesisRecord[]> {
     const url = new URL(this.baseUrl);
     url.pathname = `${this.basePath}api/${this.cName}/${qName}/q`;
     url.search = new URLSearchParams({ q }).toString();
@@ -570,12 +622,12 @@ export class ThesisSearchUI {
   private intersect(sets: ThesisRecord[][]): ThesisRecord[] {
     if (sets.length === 0) return [];
     if (sets.length === 1) return sets[0];
-    const idSets = sets.map(s => new Set(s.map(r => r.eprintid)));
+    const idSets = sets.map((s) => new Set(s.map((r) => r.eprintid)));
     const commonIds = sets[0]
-      .map(r => r.eprintid)
-      .filter(id => idSets.every(s => s.has(id)));
+      .map((r) => r.eprintid)
+      .filter((id) => idSets.every((s) => s.has(id)));
     const idSet = new Set(commonIds);
-    return sets[0].filter(r => idSet.has(r.eprintid));
+    return sets[0].filter((r) => idSet.has(r.eprintid));
   }
 
   private union(sets: ThesisRecord[][]): ThesisRecord[] {
@@ -600,9 +652,12 @@ export class ThesisSearchUI {
       return;
     }
 
-    const csvText    = this.formatCSV(records);
-    const downloadEl = csvToDownloadElements(csvText, `caltechthesis_${Date.now()}.csv`);
-    const tableHTML  = this.formatTable(records);
+    const csvText = this.formatCSV(records);
+    const downloadEl = csvToDownloadElements(
+      csvText,
+      `caltechthesis_${Date.now()}.csv`,
+    );
+    const tableHTML = this.formatTable(records);
 
     this.resultSection.innerHTML = `<p>${records.length} record(s) found.</p>`;
     this.resultSection.appendChild(downloadEl);
@@ -611,20 +666,31 @@ export class ThesisSearchUI {
 
   private statusFlag(r: ThesisRecord): string {
     const flags: string[] = [];
-    if (r.eprint_status !== "archive")       flags.push(`[${r.eprint_status}]`);
-    if (r.metadata_visibility !== "show")    flags.push(`[${r.metadata_visibility}]`);
+    if (r.eprint_status !== "archive") flags.push(`[${r.eprint_status}]`);
+    if (r.metadata_visibility !== "show") {
+      flags.push(`[${r.metadata_visibility}]`);
+    }
     if (r.full_text_status === "restricted") flags.push("[restricted]");
-    if (r.full_text_status === "withheld")   flags.push("[withheld]");
-    return flags.length > 0 ? `<em class="ts-flag">${flags.join(" ")}</em>` : "";
+    if (r.full_text_status === "withheld") flags.push("[withheld]");
+    return flags.length > 0
+      ? `<em class="ts-flag">${flags.join(" ")}</em>`
+      : "";
   }
 
   private formatTable(records: ThesisRecord[]): string {
-    const rows = records.map(r => {
-      const authors  = (r.creators      ?? []).map(c => `${c.family}, ${c.given}`).join("; ");
-      const advisors = (r.thesis_advisor ?? []).map(c => `${c.family}, ${c.given}`).join("; ");
-      const divs     = (r.divisions     ?? []).map(d => divisionLabels[d] ?? d).join("; ");
-      const opts     = (r.option_major  ?? []).map(o => optionLabels[o] ?? o).join("; ");
-      const flag     = this.statusFlag(r);
+    const rows = records.map((r) => {
+      const authors = (r.creators ?? []).map((c) => `${c.family}, ${c.given}`)
+        .join("; ");
+      const advisors = (r.thesis_advisor ?? []).map((c) =>
+        `${c.family}, ${c.given}`
+      ).join("; ");
+      const divs = (r.divisions ?? []).map((d) => divisionLabels[d] ?? d).join(
+        "; ",
+      );
+      const opts = (r.option_major ?? []).map((o) => optionLabels[o] ?? o).join(
+        "; ",
+      );
+      const flag = this.statusFlag(r);
       return `<tr>
         <td><a href="${r.link}" target="_blank">${r.eprintid}</a>${flag}</td>
         <td>${escapeHTML(r.title)}</td>
@@ -655,13 +721,17 @@ export class ThesisSearchUI {
   }
 
   private formatCSV(records: ThesisRecord[]): string {
-    const header = "eprintid,link,title,authors,advisors,year,degree,divisions,option_major,eprint_status,metadata_visibility,full_text_status,review_status";
-    const rows = records.map(r => {
-      const q  = (s: string) => `"${s.replace(/"/g, '""')}"`;
-      const authors  = (r.creators      ?? []).map(c => `${c.family}, ${c.given}`).join("; ");
-      const advisors = (r.thesis_advisor ?? []).map(c => `${c.family}, ${c.given}`).join("; ");
-      const divs     = (r.divisions     ?? []).join("; ");
-      const opts     = (r.option_major  ?? []).join("; ");
+    const header =
+      "eprintid,link,title,authors,advisors,year,degree,divisions,option_major,eprint_status,metadata_visibility,full_text_status,review_status";
+    const rows = records.map((r) => {
+      const q = (s: string) => `"${s.replace(/"/g, '""')}"`;
+      const authors = (r.creators ?? []).map((c) => `${c.family}, ${c.given}`)
+        .join("; ");
+      const advisors = (r.thesis_advisor ?? []).map((c) =>
+        `${c.family}, ${c.given}`
+      ).join("; ");
+      const divs = (r.divisions ?? []).join("; ");
+      const opts = (r.option_major ?? []).join("; ");
       return [
         r.eprintid,
         q(r.link),
@@ -687,18 +757,22 @@ export class ThesisSearchUI {
     const sel = document.getElementById(id) as HTMLSelectElement | null;
     if (!sel) return [];
     return Array.from(sel.options)
-      .filter(o => o.selected && o.value !== "")
-      .map(o => o.value);
+      .filter((o) => o.selected && o.value !== "")
+      .map((o) => o.value);
   }
 
   private getCheckedValues(name: string): string[] {
     return Array.from(
-      document.querySelectorAll<HTMLInputElement>(`input[name="${name}"]:checked`)
-    ).map(cb => cb.value);
+      document.querySelectorAll<HTMLInputElement>(
+        `input[name="${name}"]:checked`,
+      ),
+    ).map((cb) => cb.value);
   }
 
   private getRadioValue(name: string): string {
-    const checked = document.querySelector<HTMLInputElement>(`input[name="${name}"]:checked`);
+    const checked = document.querySelector<HTMLInputElement>(
+      `input[name="${name}"]:checked`,
+    );
     return checked ? checked.value : "ANY";
   }
 }
@@ -707,19 +781,22 @@ export class ThesisSearchUI {
 
 function escapeHTML(s: string): string {
   return s.replace(/&/g, "&amp;")
-          .replace(/</g, "&lt;")
-          .replace(/>/g, "&gt;")
-          .replace(/"/g, "&quot;");
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 }
 
-function csvToDownloadElements(csvContent: string, fileName: string = "data.csv"): HTMLElement {
+function csvToDownloadElements(
+  csvContent: string,
+  fileName: string = "data.csv",
+): HTMLElement {
   const container = document.createElement("span");
-  const button    = document.createElement("button");
+  const button = document.createElement("button");
   button.textContent = "Download CSV";
   button.addEventListener("click", () => {
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const link = document.createElement("a");
-    link.href  = URL.createObjectURL(blob);
+    link.href = URL.createObjectURL(blob);
     link.setAttribute("download", fileName);
     link.style.visibility = "hidden";
     document.body.appendChild(link);

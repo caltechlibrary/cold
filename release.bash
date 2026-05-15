@@ -1,5 +1,5 @@
 #!/bin/bash
-# generated with CMTools 0.0.43 6da279d
+# generated with CMTools 0.0.44 070692e
 
 #
 # Release script for cold on GitHub using gh cli.
@@ -44,7 +44,14 @@ if [ "${YES_NO}" = "y" ]; then
 		-F release_notes.tmp \
 		--generate-notes
 	echo "Uploading distribution files and checksums"
-	gh release upload "${RELEASE_TAG}" dist/*.zip "dist/${CHECKSUM_FILE}"
+	echo "  Starting upload: dist/${CHECKSUM_FILE}"
+	gh release upload "${RELEASE_TAG}" "dist/${CHECKSUM_FILE}"
+	echo "  Completed upload: dist/${CHECKSUM_FILE}"
+	for FILE in dist/*.zip; do
+		echo "  Starting upload: ${FILE}"
+		gh release upload "${RELEASE_TAG}" "${FILE}"
+		echo "  Completed upload: ${FILE}"
+	done
 
 	cat <<EOT
 
