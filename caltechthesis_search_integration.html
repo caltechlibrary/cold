@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <title>cold</title>
+    <link rel="stylesheet" href="https://caltechlibrary.github.io/css/site.css">
+    <link rel="stylesheet" href="https://media.library.caltech.edu/cl-webcomponents/css/code-blocks.css">
+    <script type="module" src="https://media.library.caltech.edu/cl-webcomponents/copyToClipboard.js"></script>
+    <script type="module" src="https://media.library.caltech.edu/cl-webcomponents/footer-global.js"></script>
+</head>
+<body>
+<header>
+<a href="https://library.caltech.edu"><img src="https://media.library.caltech.edu/assets/caltechlibrary-logo.png" alt="Caltech Library logo"></a>
+</header>
+<a href="#main-content" class="visually-hidden">skip to main content</a>
+<nav>
+<ul>
+    <li><a href="/">All Library Apps</a></li>
+    <li><a href="index.html">Home</a></li>
+    <li><a href="LICENSE">LICENSE</a></li>
+    <li><a href="INSTALL.html">INSTALL</a></li>
+    <li><a href="user_manual.html">User Manual</a></li>
+    <li><a href="about.html">About</a></li>
+    <!-- <li><a href="search.html">Search</a></li> -->
+    <li><a href="https://github.com/caltechlibrary/cold">Code Repository</a></li>
+</ul>
+</nav>
+<section id="main-content">
+<h1 id="caltechthesis-search-integration-into-cold">CaltechTHESIS Search
+Integration into COLD</h1>
+<h2 id="background">Background</h2>
+<p>CaltechTHESIS (https://thesis.library.caltech.edu) is Caltech
+Library’s thesis repository, built on EPrints 3.3.16 with MySQL 8 as the
+backend database. The EPrints native search implementation has
+long-standing indexing bugs that cause records to be silently omitted
+from search results. All metadata is intact in MySQL; the problem is
+confined to EPrints’ own search index tables
+(<code>eprint__index</code>, <code>eprint__index_grep</code>,
+<code>eprint__rindex</code>).</p>
+<p>Library staff need a reliable search interface covering all ~12K
+records, including records in non-archive states (inbox, buffer) that
+staff must be able to locate for workflow purposes. The reference form
+is the EPrints staff search at <code>/cgi/search/eprint/staff</code>.
+This integration follows the same layered architecture as the RDM review
+queue tool already in COLD.</p>
+<h2 id="ferpa-considerations">FERPA Considerations</h2>
+<p>Some thesis records are subject to FERPA (Family Educational Privacy
+Rights Act) as student education records. Library staff authorized to
+use COLD are authorized to see all thesis records, including non-public
+ones, as part of their role administering library deposit services. The
+following design decisions minimize the attack surface in case a staff
+account is compromised:</p>
+<ul>
+<li><strong>Email and password fields are never harvested.</strong> The
+tables <code>eprint_creators_email</code>,
+<code>eprint_creators_show_email</code>,
+<code>eprint_thesis_advisor_email</code>, and
+<code>eprint_thesis_committee_email</code> are not joined. The
+<code>eprint.contact_email</code> column is not selected. From the
+<code>user</code> table JOIN only <code>username</code>,
+<code>name_family</code>, and <code>name_given</code> are selected;
+<code>email</code>, <code>password</code>, <code>newpassword</code>,
+<code>pin</code>, and <code>pinsettime</code> are omitted.</li>
+<li><strong>Data in transit is encrypted.</strong> Harvest uses SSH to
+<code>eprints.library.caltech.edu</code>; the COLD production interface
+uses HTTPS.</li>
+<li><strong>Access control</strong> is the existing Apache2 + Shibboleth
+SSO that governs all of COLD. No additional role gating is
+required.</li>
+<li><strong>Status and visibility are always displayed</strong> in
+search results so staff immediately know which records are not yet
+public.</li>
+</ul>
+<h2 id="architecture">Architecture</h2>
+<pre><code>CaltechTHESIS MySQL (eprints.library.caltech.edu)
+    |
+    | SSH + mysql client (encrypted)
+    v
+remote_harvest_caltechthesis_full.bash        (nightly, full refresh)
+remote_harvest_caltechthesis_incremental.bash (every 15 min, working hours)
+    |
+    | dataset load -overwrite
+    v
+caltechthesis.ds  (SQLite3-backed dataset collection)
+    |
+    | cold_api.yaml SQL queries
+    v
+cold_api  (datasetd JSON API, proxied by COLD middleware)
+    |
+    | fetch() from browser
+    v
+thesis_search.ts → htdocs/modules/thesis_search.js  (browser UI)
+    |
+    v
+htdocs/thesis_search.md → htdocs/thesis_search.html  (staff-facing page)</code></pre>
+<h2 id="staff-search-form-fields">Staff Search Form Fields</h2>
+<p>The target form is <code>/cgi/search/eprint/staff</code>. Fields are
+organised by input type because that determines query strategy.</p>
+<h3 id="text-inputs-like-search-wildcard">Text inputs (LIKE search,
+<code>*</code> wildcard → <code>%</code>)</h3>
+<table>
+<thead>
+<tr>
+<th scope="col">Form field</th>
+<th scope="col">Label</th>
+<th scope="col">Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>title</code></td>
+<td>Title</td>
+<td></td>
+</tr>
+<tr>
+<td><code>alt_title</code></td>
+<td>Alternate Title</td>
+<td></td>
+</tr>
+<tr>
+<td><code>creators_name</code></td>
+<td>Authors</td>
+<td>family or “family, given”</td>
+</tr>
+<tr>
+<td><code>creators_orcid</code></td>
+<td>ORCID</td>
+<td>exact or partial</td>
+</tr>
+<tr>
+<td><code>abstract</code></td>
+<td>Abstract</td>
+<td></td>
+</tr>
+<tr>
+<td><code>eprintid</code></td>
+<td>Item ID</td>
+<td>exact integer</td>
+</tr>
+<tr>
+<td><code>doi</code></td>
+<td>DOI</td>
+<td></td>
+</tr>
+<tr>
+<td><code>userid.username</code></td>
+<td>Username</td>
+<td>depositor’s EPrints/Caltech username</td>
+</tr>
+<tr>
+<td><code>userid.name</code></td>
+<td>Name</td>
+<td>depositor’s name</td>
+</tr>
+<tr>
+<td><code>reviewer</code></td>
+<td>Reviewer</td>
+<td>library staff name</td>
+</tr>
+<tr>
+<td><code>date</code></td>
+<td>Degree Date (Year)</td>
+<td>year range</td>
+</tr>
+<tr>
+<td><code>funders_agency</code></td>
+<td>Funding Agency</td>
+<td></td>
+</tr>
+<tr>
+<td><code>funders_grant_number</code></td>
+<td>Grant Number</td>
+<td></td>
+</tr>
+<tr>
+<td><code>local_group</code></td>
+<td>Group</td>
+<td></td>
+</tr>
+<tr>
+<td><code>other_numbering_system_name</code></td>
+<td>Other ID Scheme</td>
+<td>e.g. ProQuest</td>
+</tr>
+<tr>
+<td><code>other_numbering_system_id</code></td>
+<td>Other ID Value</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><code>dir</code> (file system path) and <code>datestamp</code> (Date
+Deposited) are omitted from the search form — not used by staff.
+<code>datestamp</code> is still present in the harvested JSON for status
+display and incremental harvest logic.</p>
+<h3 id="checkbox-groups-multi-value-any-of-semantics-default">Checkbox
+groups (multi-value, ANY-of semantics default)</h3>
+<p><strong>Item Status</strong> (<code>eprint_status</code>): -
+<code>inbox</code> — User Workarea - <code>buffer</code> — Under Review
+- <code>archive</code> — Live Archive - <code>deletion</code> —
+Retired</p>
+<p><strong>Review Status</strong> (<code>review_status</code>): -
+<code>review</code> — Being reviewed - <code>correction</code> — Waiting
+for corrections - <code>gradoffice</code> — Sent to Grad Office -
+<code>go-pending</code> — Pending in GO — see notes -
+<code>notapproved</code> — Not Approved — see notes -
+<code>approved</code> — Approved - <code>withheld</code> — Approved —
+WITHHELD - <code>other</code> — Other — see Internal Notes</p>
+<p><strong>Thesis Availability</strong> (<code>full_text_status</code>):
+- <code>public</code> — Public (worldwide access) -
+<code>restricted</code> — Restricted to Caltech community only -
+<code>mixed</code> — Mixed availability, specified at file level -
+<code>withheld</code> — Withheld</p>
+<p><strong>Publication Status</strong> (<code>ispublished</code>): -
+<code>pub</code> — Published - <code>inpress</code> — In Press -
+<code>submitted</code> — Submitted - <code>unpub</code> —
+Unpublished</p>
+<p><strong>Date Type</strong> (<code>date_type</code>): -
+<code>published</code> — Publication - <code>submitted</code> —
+Submission for publication - <code>completed</code> — Completion -
+<code>degree</code> — Degree Awarded</p>
+<p><strong>Thesis Type</strong> (<code>thesis_type</code>): -
+<code>phd</code> — Dissertation (Ph.D.) - <code>masters</code> —
+Master’s thesis - <code>engd</code> — Engineer’s thesis -
+<code>bachelors</code> — Bachelor’s thesis - <code>senior_minor</code> —
+Senior thesis (Minor) - <code>senior_major</code> — Senior thesis
+(Major) - <code>other</code> — Other</p>
+<h3 id="multi-select-select-multiple-drawn-from-corpus">Multi-select
+<code>&lt;select multiple&gt;</code> (drawn from corpus)</h3>
+<p><strong>Division</strong> (<code>divisions</code>) — 8 values, fixed
+vocabulary:</p>
+<table>
+<thead>
+<tr>
+<th scope="col">Code</th>
+<th scope="col">Label</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>div_biol</code></td>
+<td>Biology</td>
+</tr>
+<tr>
+<td><code>div_bbe</code></td>
+<td>Biology and Biological Engineering</td>
+</tr>
+<tr>
+<td><code>div_chem</code></td>
+<td>Chemistry and Chemical Engineering</td>
+</tr>
+<tr>
+<td><code>div_eng</code></td>
+<td>Engineering and Applied Science</td>
+</tr>
+<tr>
+<td><code>div_gps</code></td>
+<td>Geological and Planetary Sciences</td>
+</tr>
+<tr>
+<td><code>div_hss</code></td>
+<td>Humanities and Social Sciences</td>
+</tr>
+<tr>
+<td><code>div_int</code></td>
+<td>Interdisciplinary Programs</td>
+</tr>
+<tr>
+<td><code>div_pma</code></td>
+<td>Physics, Mathematics and Astronomy</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Major Option</strong> (<code>option_major</code>) and
+<strong>Minor Option</strong> (<code>option_minor</code>) — large
+vocabulary (~60+ codes). Both lists are drawn from distinct values in
+the <code>caltechthesis.ds</code> corpus at page load, covering active
+and historical options. Display labels come from a hardcoded code→label
+map in TypeScript; any unrecognised legacy code falls back to showing
+the code itself.</p>
+<h3 id="global-controls">Global controls</h3>
+<ul>
+<li><strong>Satisfyall</strong> — “all of these conditions” (AND) / “any
+of these conditions” (OR) across all active fields</li>
+<li><strong>Order</strong> — by title / by year oldest / by year most
+recent (default) / by author name</li>
+</ul>
+<h2 id="mysql-schema-confirmed-tables">MySQL Schema (confirmed
+tables)</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col">Table</th>
+<th scope="col">Harvested</th>
+<th scope="col">Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>eprint</code></td>
+<td>Yes</td>
+<td>Main record; see field list below</td>
+</tr>
+<tr>
+<td><code>eprint_creators_name</code></td>
+<td>Yes</td>
+<td>Student/author names</td>
+</tr>
+<tr>
+<td><code>eprint_creators_id</code></td>
+<td>Yes</td>
+<td>Author EPrints IDs</td>
+</tr>
+<tr>
+<td><code>eprint_creators_orcid</code></td>
+<td>Yes</td>
+<td>Author ORCIDs</td>
+</tr>
+<tr>
+<td><code>eprint_creators_email</code></td>
+<td><strong>No — FERPA</strong></td>
+<td></td>
+</tr>
+<tr>
+<td><code>eprint_creators_show_email</code></td>
+<td><strong>No — FERPA</strong></td>
+<td></td>
+</tr>
+<tr>
+<td><code>eprint_thesis_advisor_name</code></td>
+<td>Yes</td>
+<td></td>
+</tr>
+<tr>
+<td><code>eprint_thesis_advisor_id</code></td>
+<td>Yes</td>
+<td></td>
+</tr>
+<tr>
+<td><code>eprint_thesis_advisor_orcid</code></td>
+<td>Yes</td>
+<td></td>
+</tr>
+<tr>
+<td><code>eprint_thesis_advisor_role</code></td>
+<td>Yes</td>
+<td></td>
+</tr>
+<tr>
+<td><code>eprint_thesis_advisor_email</code></td>
+<td><strong>No — FERPA</strong></td>
+<td></td>
+</tr>
+<tr>
+<td><code>eprint_thesis_committee_name</code></td>
+<td>Yes</td>
+<td></td>
+</tr>
+<tr>
+<td><code>eprint_thesis_committee_id</code></td>
+<td>Yes</td>
+<td></td>
+</tr>
+<tr>
+<td><code>eprint_thesis_committee_orcid</code></td>
+<td>Yes</td>
+<td></td>
+</tr>
+<tr>
+<td><code>eprint_thesis_committee_role</code></td>
+<td>Yes</td>
+<td></td>
+</tr>
+<tr>
+<td><code>eprint_thesis_committee_email</code></td>
+<td><strong>No — FERPA</strong></td>
+<td></td>
+</tr>
+<tr>
+<td><code>eprint_divisions</code></td>
+<td>Yes</td>
+<td></td>
+</tr>
+<tr>
+<td><code>eprint_option_major</code></td>
+<td>Yes</td>
+<td></td>
+</tr>
+<tr>
+<td><code>eprint_option_minor</code></td>
+<td>Yes</td>
+<td></td>
+</tr>
+<tr>
+<td><code>eprint_subjects</code></td>
+<td>Yes</td>
+<td></td>
+</tr>
+<tr>
+<td><code>eprint_local_group</code></td>
+<td>Yes</td>
+<td></td>
+</tr>
+<tr>
+<td><code>eprint_alt_title</code></td>
+<td>Yes</td>
+<td></td>
+</tr>
+<tr>
+<td><code>eprint_funders_agency</code></td>
+<td>Yes</td>
+<td></td>
+</tr>
+<tr>
+<td><code>eprint_funders_grant_number</code></td>
+<td>Yes</td>
+<td></td>
+</tr>
+<tr>
+<td><code>eprint_other_numbering_system_id</code></td>
+<td>Yes</td>
+<td></td>
+</tr>
+<tr>
+<td><code>eprint_other_numbering_system_name</code></td>
+<td>Yes</td>
+<td></td>
+</tr>
+<tr>
+<td><code>eprint__index</code> / <code>_grep</code> /
+<code>_rindex</code></td>
+<td><strong>No</strong></td>
+<td>Broken EPrints FTS index</td>
+</tr>
+<tr>
+<td><code>user</code></td>
+<td>Yes (partial)</td>
+<td>JOIN for depositor username + name only; <code>user.email</code>
+excluded</td>
+</tr>
+</tbody>
+</table>
+<p>Fields harvested from the <code>eprint</code> table:
+<code>eprintid</code>, <code>title</code>, <code>abstract</code>,
+<code>date</code>, <code>datestamp</code>, <code>date_type</code>,
+<code>thesis_degree</code>, <code>thesis_type</code>,
+<code>thesis_defense_date</code>, <code>eprint_status</code>,
+<code>metadata_visibility</code>, <code>full_text_status</code>,
+<code>review_status</code>, <code>ispublished</code>,
+<code>keywords</code>, <code>official_url</code>,
+<code>id_number</code>, <code>doi</code>, <code>reviewer</code>,
+<code>lastmod</code>.</p>
+<h2 id="mysql-harvest-query">MySQL Harvest Query</h2>
+<p>MySQL 8 JSON functions aggregate multi-valued fields via subquery
+<code>JSON_ARRAYAGG</code>. Six pre-computed index fields (all
+FERPA-safe, no email) enable single-<code>?</code>-parameter SQLite3
+LIKE searches without middleware changes.</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode sql"><code class="sourceCode sql"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> JSON_OBJECT(</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">&#39;key&#39;</span>, <span class="fu">CONCAT</span>(<span class="st">&#39;caltechthesis-&#39;</span>, e.eprintid),</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">&#39;object&#39;</span>, JSON_OBJECT(</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- Core fields from eprint table</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;eprintid&#39;</span>,            e.eprintid,</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;title&#39;</span>,               <span class="fu">COALESCE</span>(e.title, <span class="st">&#39;&#39;</span>),</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;abstract&#39;</span>,            <span class="fu">COALESCE</span>(e.abstract, <span class="st">&#39;&#39;</span>),</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;date&#39;</span>,                e.<span class="dt">date</span>,</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;datestamp&#39;</span>,           <span class="dt">DATE</span>(e.datestamp),</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;date_type&#39;</span>,           <span class="fu">COALESCE</span>(e.date_type, <span class="st">&#39;&#39;</span>),</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;thesis_degree&#39;</span>,       <span class="fu">COALESCE</span>(e.thesis_degree, <span class="st">&#39;&#39;</span>),</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;thesis_type&#39;</span>,         <span class="fu">COALESCE</span>(e.thesis_type, <span class="st">&#39;&#39;</span>),</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;thesis_defense_date&#39;</span>, <span class="fu">COALESCE</span>(e.thesis_defense_date, <span class="st">&#39;&#39;</span>),</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;eprint_status&#39;</span>,       e.eprint_status,</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;metadata_visibility&#39;</span>, e.metadata_visibility,</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;full_text_status&#39;</span>,    <span class="fu">COALESCE</span>(e.full_text_status, <span class="st">&#39;&#39;</span>),</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;review_status&#39;</span>,       <span class="fu">COALESCE</span>(e.review_status, <span class="st">&#39;&#39;</span>),</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;ispublished&#39;</span>,         <span class="fu">COALESCE</span>(e.ispublished, <span class="st">&#39;&#39;</span>),</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;keywords&#39;</span>,            <span class="fu">COALESCE</span>(e.keywords, <span class="st">&#39;&#39;</span>),</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;official_url&#39;</span>,        <span class="fu">COALESCE</span>(e.official_url, <span class="st">&#39;&#39;</span>),</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;id_number&#39;</span>,           <span class="fu">COALESCE</span>(e.id_number, <span class="st">&#39;&#39;</span>),</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;doi&#39;</span>,                 <span class="fu">COALESCE</span>(e.doi, <span class="st">&#39;&#39;</span>),</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;reviewer&#39;</span>,            <span class="fu">COALESCE</span>(e.reviewer, <span class="st">&#39;&#39;</span>),</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;lastmod&#39;</span>,             e.lastmod,</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;link&#39;</span>,                <span class="fu">CONCAT</span>(<span class="st">&#39;https://thesis.library.caltech.edu/&#39;</span>, e.eprintid),</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- Depositor (staff-facing; no email; FERPA-safe for staff use)</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;depositor_username&#39;</span>,  <span class="fu">COALESCE</span>(u.username, <span class="st">&#39;&#39;</span>),</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;depositor_name&#39;</span>,      <span class="fu">COALESCE</span>(<span class="fu">CONCAT</span>(u.name_family, <span class="st">&#39;, &#39;</span>, u.name_given), <span class="st">&#39;&#39;</span>),</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- Creators (no email)</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;creators&#39;</span>, (</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>      <span class="kw">SELECT</span> JSON_ARRAYAGG(JSON_OBJECT(</span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>        <span class="st">&#39;family&#39;</span>, cn.family,</span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>        <span class="st">&#39;given&#39;</span>,  cn.given,</span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>        <span class="st">&#39;id&#39;</span>,     <span class="fu">COALESCE</span>(ci.<span class="kw">id</span>, <span class="st">&#39;&#39;</span>),</span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>        <span class="st">&#39;orcid&#39;</span>,  <span class="fu">COALESCE</span>(co.orcid, <span class="st">&#39;&#39;</span>)</span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>      ) <span class="kw">ORDER</span> <span class="kw">BY</span> cn.pos)</span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>      <span class="kw">FROM</span> eprint_creators_name cn</span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>      <span class="kw">LEFT</span> <span class="kw">JOIN</span> eprint_creators_id    ci <span class="kw">ON</span> cn.eprintid <span class="op">=</span> ci.eprintid <span class="kw">AND</span> cn.pos <span class="op">=</span> ci.pos</span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>      <span class="kw">LEFT</span> <span class="kw">JOIN</span> eprint_creators_orcid co <span class="kw">ON</span> cn.eprintid <span class="op">=</span> co.eprintid <span class="kw">AND</span> cn.pos <span class="op">=</span> co.pos</span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>      <span class="kw">WHERE</span> cn.eprintid <span class="op">=</span> e.eprintid</span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- Advisors (no email)</span></span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;thesis_advisor&#39;</span>, (</span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>      <span class="kw">SELECT</span> JSON_ARRAYAGG(JSON_OBJECT(</span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>        <span class="st">&#39;family&#39;</span>, an.family,</span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>        <span class="st">&#39;given&#39;</span>,  an.given,</span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a>        <span class="st">&#39;id&#39;</span>,     <span class="fu">COALESCE</span>(ai.<span class="kw">id</span>, <span class="st">&#39;&#39;</span>),</span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a>        <span class="st">&#39;orcid&#39;</span>,  <span class="fu">COALESCE</span>(ao.orcid, <span class="st">&#39;&#39;</span>),</span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a>        <span class="st">&#39;role&#39;</span>,   <span class="fu">COALESCE</span>(ar.<span class="kw">role</span>, <span class="st">&#39;&#39;</span>)</span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a>      ) <span class="kw">ORDER</span> <span class="kw">BY</span> an.pos)</span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a>      <span class="kw">FROM</span> eprint_thesis_advisor_name an</span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a>      <span class="kw">LEFT</span> <span class="kw">JOIN</span> eprint_thesis_advisor_id    ai <span class="kw">ON</span> an.eprintid <span class="op">=</span> ai.eprintid <span class="kw">AND</span> an.pos <span class="op">=</span> ai.pos</span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a>      <span class="kw">LEFT</span> <span class="kw">JOIN</span> eprint_thesis_advisor_orcid ao <span class="kw">ON</span> an.eprintid <span class="op">=</span> ao.eprintid <span class="kw">AND</span> an.pos <span class="op">=</span> ao.pos</span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a>      <span class="kw">LEFT</span> <span class="kw">JOIN</span> eprint_thesis_advisor_role  ar <span class="kw">ON</span> an.eprintid <span class="op">=</span> ar.eprintid <span class="kw">AND</span> an.pos <span class="op">=</span> ar.pos</span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a>      <span class="kw">WHERE</span> an.eprintid <span class="op">=</span> e.eprintid</span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- Committee (no email)</span></span>
+<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;thesis_committee&#39;</span>, (</span>
+<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a>      <span class="kw">SELECT</span> JSON_ARRAYAGG(JSON_OBJECT(</span>
+<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a>        <span class="st">&#39;family&#39;</span>, tc.family,</span>
+<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a>        <span class="st">&#39;given&#39;</span>,  tc.given,</span>
+<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a>        <span class="st">&#39;id&#39;</span>,     <span class="fu">COALESCE</span>(ti.<span class="kw">id</span>, <span class="st">&#39;&#39;</span>),</span>
+<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a>        <span class="st">&#39;orcid&#39;</span>,  <span class="fu">COALESCE</span>(to2.orcid, <span class="st">&#39;&#39;</span>),</span>
+<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a>        <span class="st">&#39;role&#39;</span>,   <span class="fu">COALESCE</span>(tr.<span class="kw">role</span>, <span class="st">&#39;&#39;</span>)</span>
+<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a>      ) <span class="kw">ORDER</span> <span class="kw">BY</span> tc.pos)</span>
+<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a>      <span class="kw">FROM</span> eprint_thesis_committee_name tc</span>
+<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a>      <span class="kw">LEFT</span> <span class="kw">JOIN</span> eprint_thesis_committee_id    ti  <span class="kw">ON</span> tc.eprintid <span class="op">=</span> ti.eprintid  <span class="kw">AND</span> tc.pos <span class="op">=</span> ti.pos</span>
+<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a>      <span class="kw">LEFT</span> <span class="kw">JOIN</span> eprint_thesis_committee_orcid to2 <span class="kw">ON</span> tc.eprintid <span class="op">=</span> to2.eprintid <span class="kw">AND</span> tc.pos <span class="op">=</span> to2.pos</span>
+<span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a>      <span class="kw">LEFT</span> <span class="kw">JOIN</span> eprint_thesis_committee_role  tr  <span class="kw">ON</span> tc.eprintid <span class="op">=</span> tr.eprintid  <span class="kw">AND</span> tc.pos <span class="op">=</span> tr.pos</span>
+<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a>      <span class="kw">WHERE</span> tc.eprintid <span class="op">=</span> e.eprintid</span>
+<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- Multi-valued classification fields</span></span>
+<span id="cb2-78"><a href="#cb2-78" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;divisions&#39;</span>, (</span>
+<span id="cb2-79"><a href="#cb2-79" aria-hidden="true" tabindex="-1"></a>      <span class="kw">SELECT</span> JSON_ARRAYAGG(d.divisions <span class="kw">ORDER</span> <span class="kw">BY</span> d.pos)</span>
+<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a>      <span class="kw">FROM</span> eprint_divisions d <span class="kw">WHERE</span> d.eprintid <span class="op">=</span> e.eprintid</span>
+<span id="cb2-81"><a href="#cb2-81" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb2-82"><a href="#cb2-82" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;option_major&#39;</span>, (</span>
+<span id="cb2-83"><a href="#cb2-83" aria-hidden="true" tabindex="-1"></a>      <span class="kw">SELECT</span> JSON_ARRAYAGG(om.option_major <span class="kw">ORDER</span> <span class="kw">BY</span> om.pos)</span>
+<span id="cb2-84"><a href="#cb2-84" aria-hidden="true" tabindex="-1"></a>      <span class="kw">FROM</span> eprint_option_major om <span class="kw">WHERE</span> om.eprintid <span class="op">=</span> e.eprintid</span>
+<span id="cb2-85"><a href="#cb2-85" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb2-86"><a href="#cb2-86" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;option_minor&#39;</span>, (</span>
+<span id="cb2-87"><a href="#cb2-87" aria-hidden="true" tabindex="-1"></a>      <span class="kw">SELECT</span> JSON_ARRAYAGG(omi.option_minor <span class="kw">ORDER</span> <span class="kw">BY</span> omi.pos)</span>
+<span id="cb2-88"><a href="#cb2-88" aria-hidden="true" tabindex="-1"></a>      <span class="kw">FROM</span> eprint_option_minor omi <span class="kw">WHERE</span> omi.eprintid <span class="op">=</span> e.eprintid</span>
+<span id="cb2-89"><a href="#cb2-89" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb2-90"><a href="#cb2-90" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;subjects&#39;</span>, (</span>
+<span id="cb2-91"><a href="#cb2-91" aria-hidden="true" tabindex="-1"></a>      <span class="kw">SELECT</span> JSON_ARRAYAGG(s.subjects <span class="kw">ORDER</span> <span class="kw">BY</span> s.pos)</span>
+<span id="cb2-92"><a href="#cb2-92" aria-hidden="true" tabindex="-1"></a>      <span class="kw">FROM</span> eprint_subjects s <span class="kw">WHERE</span> s.eprintid <span class="op">=</span> e.eprintid</span>
+<span id="cb2-93"><a href="#cb2-93" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb2-94"><a href="#cb2-94" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;local_group&#39;</span>, (</span>
+<span id="cb2-95"><a href="#cb2-95" aria-hidden="true" tabindex="-1"></a>      <span class="kw">SELECT</span> JSON_ARRAYAGG(lg.local_group <span class="kw">ORDER</span> <span class="kw">BY</span> lg.pos)</span>
+<span id="cb2-96"><a href="#cb2-96" aria-hidden="true" tabindex="-1"></a>      <span class="kw">FROM</span> eprint_local_group lg <span class="kw">WHERE</span> lg.eprintid <span class="op">=</span> e.eprintid</span>
+<span id="cb2-97"><a href="#cb2-97" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb2-98"><a href="#cb2-98" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;alt_title&#39;</span>, (</span>
+<span id="cb2-99"><a href="#cb2-99" aria-hidden="true" tabindex="-1"></a>      <span class="kw">SELECT</span> JSON_ARRAYAGG(at2.alt_title <span class="kw">ORDER</span> <span class="kw">BY</span> at2.pos)</span>
+<span id="cb2-100"><a href="#cb2-100" aria-hidden="true" tabindex="-1"></a>      <span class="kw">FROM</span> eprint_alt_title at2 <span class="kw">WHERE</span> at2.eprintid <span class="op">=</span> e.eprintid</span>
+<span id="cb2-101"><a href="#cb2-101" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb2-102"><a href="#cb2-102" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-103"><a href="#cb2-103" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- Funders as structured array</span></span>
+<span id="cb2-104"><a href="#cb2-104" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;funders&#39;</span>, (</span>
+<span id="cb2-105"><a href="#cb2-105" aria-hidden="true" tabindex="-1"></a>      <span class="kw">SELECT</span> JSON_ARRAYAGG(JSON_OBJECT(</span>
+<span id="cb2-106"><a href="#cb2-106" aria-hidden="true" tabindex="-1"></a>        <span class="st">&#39;agency&#39;</span>,        <span class="fu">COALESCE</span>(fa.agency, <span class="st">&#39;&#39;</span>),</span>
+<span id="cb2-107"><a href="#cb2-107" aria-hidden="true" tabindex="-1"></a>        <span class="st">&#39;grant_number&#39;</span>,  <span class="fu">COALESCE</span>(fg.grant_number, <span class="st">&#39;&#39;</span>)</span>
+<span id="cb2-108"><a href="#cb2-108" aria-hidden="true" tabindex="-1"></a>      ) <span class="kw">ORDER</span> <span class="kw">BY</span> fa.pos)</span>
+<span id="cb2-109"><a href="#cb2-109" aria-hidden="true" tabindex="-1"></a>      <span class="kw">FROM</span> eprint_funders_agency fa</span>
+<span id="cb2-110"><a href="#cb2-110" aria-hidden="true" tabindex="-1"></a>      <span class="kw">LEFT</span> <span class="kw">JOIN</span> eprint_funders_grant_number fg <span class="kw">ON</span> fa.eprintid <span class="op">=</span> fg.eprintid <span class="kw">AND</span> fa.pos <span class="op">=</span> fg.pos</span>
+<span id="cb2-111"><a href="#cb2-111" aria-hidden="true" tabindex="-1"></a>      <span class="kw">WHERE</span> fa.eprintid <span class="op">=</span> e.eprintid</span>
+<span id="cb2-112"><a href="#cb2-112" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb2-113"><a href="#cb2-113" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-114"><a href="#cb2-114" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- Other numbering systems (ProQuest ID, etc.)</span></span>
+<span id="cb2-115"><a href="#cb2-115" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;other_ids&#39;</span>, (</span>
+<span id="cb2-116"><a href="#cb2-116" aria-hidden="true" tabindex="-1"></a>      <span class="kw">SELECT</span> JSON_ARRAYAGG(JSON_OBJECT(</span>
+<span id="cb2-117"><a href="#cb2-117" aria-hidden="true" tabindex="-1"></a>        <span class="st">&#39;name&#39;</span>, <span class="fu">COALESCE</span>(osn.name, <span class="st">&#39;&#39;</span>),</span>
+<span id="cb2-118"><a href="#cb2-118" aria-hidden="true" tabindex="-1"></a>        <span class="st">&#39;id&#39;</span>,   <span class="fu">COALESCE</span>(osi.<span class="kw">id</span>, <span class="st">&#39;&#39;</span>)</span>
+<span id="cb2-119"><a href="#cb2-119" aria-hidden="true" tabindex="-1"></a>      ) <span class="kw">ORDER</span> <span class="kw">BY</span> osn.pos)</span>
+<span id="cb2-120"><a href="#cb2-120" aria-hidden="true" tabindex="-1"></a>      <span class="kw">FROM</span> eprint_other_numbering_system_name osn</span>
+<span id="cb2-121"><a href="#cb2-121" aria-hidden="true" tabindex="-1"></a>      <span class="kw">LEFT</span> <span class="kw">JOIN</span> eprint_other_numbering_system_id osi <span class="kw">ON</span> osn.eprintid <span class="op">=</span> osi.eprintid <span class="kw">AND</span> osn.pos <span class="op">=</span> osi.pos</span>
+<span id="cb2-122"><a href="#cb2-122" aria-hidden="true" tabindex="-1"></a>      <span class="kw">WHERE</span> osn.eprintid <span class="op">=</span> e.eprintid</span>
+<span id="cb2-123"><a href="#cb2-123" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb2-124"><a href="#cb2-124" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-125"><a href="#cb2-125" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- Pre-computed search index fields (single-param LIKE; no email; FERPA-safe)</span></span>
+<span id="cb2-126"><a href="#cb2-126" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;fulltext_idx&#39;</span>, <span class="fu">TRIM</span>(CONCAT_WS(<span class="st">&#39; &#39;</span>,</span>
+<span id="cb2-127"><a href="#cb2-127" aria-hidden="true" tabindex="-1"></a>      <span class="fu">COALESCE</span>(e.title, <span class="st">&#39;&#39;</span>),</span>
+<span id="cb2-128"><a href="#cb2-128" aria-hidden="true" tabindex="-1"></a>      <span class="fu">COALESCE</span>(e.abstract, <span class="st">&#39;&#39;</span>),</span>
+<span id="cb2-129"><a href="#cb2-129" aria-hidden="true" tabindex="-1"></a>      <span class="fu">COALESCE</span>(e.keywords, <span class="st">&#39;&#39;</span>),</span>
+<span id="cb2-130"><a href="#cb2-130" aria-hidden="true" tabindex="-1"></a>      <span class="fu">COALESCE</span>((<span class="kw">SELECT</span> GROUP_CONCAT(at2.alt_title SEPARATOR <span class="st">&#39; &#39;</span>)</span>
+<span id="cb2-131"><a href="#cb2-131" aria-hidden="true" tabindex="-1"></a>                <span class="kw">FROM</span> eprint_alt_title at2 <span class="kw">WHERE</span> at2.eprintid <span class="op">=</span> e.eprintid), <span class="st">&#39;&#39;</span>)</span>
+<span id="cb2-132"><a href="#cb2-132" aria-hidden="true" tabindex="-1"></a>    )),</span>
+<span id="cb2-133"><a href="#cb2-133" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;creator_names_idx&#39;</span>, <span class="fu">COALESCE</span>((</span>
+<span id="cb2-134"><a href="#cb2-134" aria-hidden="true" tabindex="-1"></a>      <span class="kw">SELECT</span> GROUP_CONCAT(<span class="fu">CONCAT</span>(cn.family, <span class="st">&#39;, &#39;</span>, cn.given) SEPARATOR <span class="st">&#39;; &#39;</span>)</span>
+<span id="cb2-135"><a href="#cb2-135" aria-hidden="true" tabindex="-1"></a>      <span class="kw">FROM</span> eprint_creators_name cn <span class="kw">WHERE</span> cn.eprintid <span class="op">=</span> e.eprintid</span>
+<span id="cb2-136"><a href="#cb2-136" aria-hidden="true" tabindex="-1"></a>    ), <span class="st">&#39;&#39;</span>),</span>
+<span id="cb2-137"><a href="#cb2-137" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;creator_orcid_idx&#39;</span>, <span class="fu">COALESCE</span>((</span>
+<span id="cb2-138"><a href="#cb2-138" aria-hidden="true" tabindex="-1"></a>      <span class="kw">SELECT</span> GROUP_CONCAT(co.orcid SEPARATOR <span class="st">&#39;; &#39;</span>)</span>
+<span id="cb2-139"><a href="#cb2-139" aria-hidden="true" tabindex="-1"></a>      <span class="kw">FROM</span> eprint_creators_orcid co <span class="kw">WHERE</span> co.eprintid <span class="op">=</span> e.eprintid</span>
+<span id="cb2-140"><a href="#cb2-140" aria-hidden="true" tabindex="-1"></a>    ), <span class="st">&#39;&#39;</span>),</span>
+<span id="cb2-141"><a href="#cb2-141" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;advisor_names_idx&#39;</span>, <span class="fu">COALESCE</span>((</span>
+<span id="cb2-142"><a href="#cb2-142" aria-hidden="true" tabindex="-1"></a>      <span class="kw">SELECT</span> GROUP_CONCAT(<span class="fu">CONCAT</span>(an.family, <span class="st">&#39;, &#39;</span>, an.given) SEPARATOR <span class="st">&#39;; &#39;</span>)</span>
+<span id="cb2-143"><a href="#cb2-143" aria-hidden="true" tabindex="-1"></a>      <span class="kw">FROM</span> eprint_thesis_advisor_name an <span class="kw">WHERE</span> an.eprintid <span class="op">=</span> e.eprintid</span>
+<span id="cb2-144"><a href="#cb2-144" aria-hidden="true" tabindex="-1"></a>    ), <span class="st">&#39;&#39;</span>),</span>
+<span id="cb2-145"><a href="#cb2-145" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;committee_names_idx&#39;</span>, <span class="fu">COALESCE</span>((</span>
+<span id="cb2-146"><a href="#cb2-146" aria-hidden="true" tabindex="-1"></a>      <span class="kw">SELECT</span> GROUP_CONCAT(<span class="fu">CONCAT</span>(tc.family, <span class="st">&#39;, &#39;</span>, tc.given) SEPARATOR <span class="st">&#39;; &#39;</span>)</span>
+<span id="cb2-147"><a href="#cb2-147" aria-hidden="true" tabindex="-1"></a>      <span class="kw">FROM</span> eprint_thesis_committee_name tc <span class="kw">WHERE</span> tc.eprintid <span class="op">=</span> e.eprintid</span>
+<span id="cb2-148"><a href="#cb2-148" aria-hidden="true" tabindex="-1"></a>    ), <span class="st">&#39;&#39;</span>),</span>
+<span id="cb2-149"><a href="#cb2-149" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;funders_idx&#39;</span>, <span class="fu">COALESCE</span>((</span>
+<span id="cb2-150"><a href="#cb2-150" aria-hidden="true" tabindex="-1"></a>      <span class="kw">SELECT</span> GROUP_CONCAT(CONCAT_WS(<span class="st">&#39; &#39;</span>,</span>
+<span id="cb2-151"><a href="#cb2-151" aria-hidden="true" tabindex="-1"></a>        <span class="fu">COALESCE</span>(fa.agency, <span class="st">&#39;&#39;</span>), <span class="fu">COALESCE</span>(fg.grant_number, <span class="st">&#39;&#39;</span>)) SEPARATOR <span class="st">&#39;; &#39;</span>)</span>
+<span id="cb2-152"><a href="#cb2-152" aria-hidden="true" tabindex="-1"></a>      <span class="kw">FROM</span> eprint_funders_agency fa</span>
+<span id="cb2-153"><a href="#cb2-153" aria-hidden="true" tabindex="-1"></a>      <span class="kw">LEFT</span> <span class="kw">JOIN</span> eprint_funders_grant_number fg <span class="kw">ON</span> fa.eprintid <span class="op">=</span> fg.eprintid <span class="kw">AND</span> fa.pos <span class="op">=</span> fg.pos</span>
+<span id="cb2-154"><a href="#cb2-154" aria-hidden="true" tabindex="-1"></a>      <span class="kw">WHERE</span> fa.eprintid <span class="op">=</span> e.eprintid</span>
+<span id="cb2-155"><a href="#cb2-155" aria-hidden="true" tabindex="-1"></a>    ), <span class="st">&#39;&#39;</span>)</span>
+<span id="cb2-156"><a href="#cb2-156" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb2-157"><a href="#cb2-157" aria-hidden="true" tabindex="-1"></a>) <span class="kw">AS</span> obj</span>
+<span id="cb2-158"><a href="#cb2-158" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> eprint e</span>
+<span id="cb2-159"><a href="#cb2-159" aria-hidden="true" tabindex="-1"></a><span class="kw">LEFT</span> <span class="kw">JOIN</span> <span class="fu">user</span> u <span class="kw">ON</span> e.userid <span class="op">=</span> u.userid</span>
+<span id="cb2-160"><a href="#cb2-160" aria-hidden="true" tabindex="-1"></a><span class="co">-- No eprint_status filter: staff see all records including inbox, buffer, deletion</span></span>
+<span id="cb2-161"><a href="#cb2-161" aria-hidden="true" tabindex="-1"></a><span class="co">-- Incremental variant appends: AND e.lastmod &gt; &#39;{saved_timestamp}&#39;</span></span>
+<span id="cb2-162"><a href="#cb2-162" aria-hidden="true" tabindex="-1"></a><span class="kw">ORDER</span> <span class="kw">BY</span> e.eprintid;</span></code></pre></div>
+<p>Output is piped through <code>mysql --batch --raw --silent</code>.
+The <code>--raw</code> flag is essential: without it, MySQL batch mode
+applies its own backslash-escaping on top of JSON_OBJECT’s JSON
+encoding. JSON_OBJECT correctly encodes <code>"</code> as
+<code>\"</code>, but batch mode then escapes that <code>\</code> to
+<code>\\</code>, producing <code>\\"</code> which terminates the JSON
+string prematurely. <code>--raw</code> prevents this
+double-escaping.</p>
+<h2 id="harvest-scripts">Harvest Scripts</h2>
+<h3
+id="remote_harvest_caltechthesis_full.bash"><code>remote_harvest_caltechthesis_full.bash</code></h3>
+<p>Full harvest — nightly cron and initial setup.</p>
+<ol type="1">
+<li>Read <code>THESIS_HOST</code>, <code>THESIS_DBNAME</code>,
+<code>THESIS_DBUSER</code> from env file</li>
+<li>Write MySQL query (no date filter) to a temp file, scp to remote
+host</li>
+<li>SSH:
+<code>mysql --batch --silent ${THESIS_DBNAME} &lt; query.sql &gt; harvest.jsonl</code></li>
+<li>scp <code>harvest.jsonl</code> back to COLD host</li>
+<li><code>dsquery caltechthesis.ds "DELETE FROM caltechthesis"</code></li>
+<li><code>dataset load -overwrite caltechthesis.ds &lt; harvest.jsonl</code></li>
+<li>Write current UTC timestamp to
+<code>caltechthesis_lastmod.txt</code></li>
+</ol>
+<h3
+id="remote_harvest_caltechthesis_incremental.bash"><code>remote_harvest_caltechthesis_incremental.bash</code></h3>
+<p>Incremental harvest — every 15 minutes during working hours.</p>
+<ol type="1">
+<li>Read env file; read saved timestamp from
+<code>caltechthesis_lastmod.txt</code> (falls back to full harvest
+script if state file is missing)</li>
+<li>Append <code>AND e.lastmod &gt; '{saved_timestamp}'</code> to the
+WHERE clause</li>
+<li>SSH + mysql, scp JSONL back</li>
+<li>If JSONL is non-empty:
+<code>dataset load -overwrite caltechthesis.ds &lt; harvest.jsonl</code>
+(upsert — does not delete unchanged records)</li>
+<li>Write new timestamp to <code>caltechthesis_lastmod.txt</code></li>
+</ol>
+<h3 id="env-file-caltechthesis.env">Env file
+(<code>caltechthesis.env</code>)</h3>
+<pre><code>THESIS_HOST=eprints.library.caltech.edu
+THESIS_DBNAME=caltechthesis
+THESIS_DBUSER=&lt;read-only MySQL user&gt;</code></pre>
+<h2 id="cold_api.yaml-additions"><code>cold_api.yaml</code>
+Additions</h2>
+<h3 id="multi-select-any-of-trick">Multi-select ANY-of trick</h3>
+<p>Several search fields accept multiple values (divisions, options,
+status checkboxes). The datasetd prepared-statement API takes a single
+<code>?</code> parameter. The TypeScript UI joins selected values as a
+comma-separated string and the SQL uses SQLite3’s <code>instr()</code>
+to test membership:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode sql"><code class="sourceCode sql"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">WHERE</span> <span class="fu">instr</span>(<span class="st">&#39;,&#39;</span> <span class="op">||</span> ? <span class="op">||</span> <span class="st">&#39;,&#39;</span>, <span class="st">&#39;,&#39;</span> <span class="op">||</span> <span class="fu">value</span> <span class="op">||</span> <span class="st">&#39;,&#39;</span>) <span class="op">&gt;</span> <span class="dv">0</span></span></code></pre></div>
+<p>This works because wrapping both sides with commas makes partial
+matches impossible (e.g. <code>div_eng</code> cannot match inside
+<code>div_engineering</code>).</p>
+<p>For checkbox fields stored as scalar strings on the main record (not
+arrays), the same trick applies against a synthetic comma-wrapped
+value:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode sql"><code class="sourceCode sql"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">WHERE</span> <span class="fu">instr</span>(<span class="st">&#39;,&#39;</span> <span class="op">||</span> ? <span class="op">||</span> <span class="st">&#39;,&#39;</span>, <span class="st">&#39;,&#39;</span> <span class="op">||</span> src<span class="op">-&gt;&gt;</span><span class="st">&#39;eprint_status&#39;</span> <span class="op">||</span> <span class="st">&#39;,&#39;</span>) <span class="op">&gt;</span> <span class="dv">0</span></span></code></pre></div>
+<h3 id="vocabulary-fetch-queries">Vocabulary fetch queries</h3>
+<p>These populate the <code>&lt;select multiple&gt;</code> dropdowns
+from the actual corpus. They return a column of distinct strings
+consumed by <code>clientAPI.getStringList</code>.</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode sql"><code class="sourceCode sql"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">-- get_distinct_divisions</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="kw">DISTINCT</span> <span class="fu">value</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> caltechthesis <span class="kw">JOIN</span> json_each(caltechthesis.src, <span class="st">&#39;$.divisions&#39;</span>)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="kw">WHERE</span> <span class="fu">value</span> <span class="kw">IS</span> <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">AND</span> <span class="fu">value</span> <span class="op">!=</span> <span class="st">&#39;&#39;</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="kw">ORDER</span> <span class="kw">BY</span> <span class="fu">value</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="co">-- get_distinct_option_major</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="kw">DISTINCT</span> <span class="fu">value</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> caltechthesis <span class="kw">JOIN</span> json_each(caltechthesis.src, <span class="st">&#39;$.option_major&#39;</span>)</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="kw">WHERE</span> <span class="fu">value</span> <span class="kw">IS</span> <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">AND</span> <span class="fu">value</span> <span class="op">!=</span> <span class="st">&#39;&#39;</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="kw">ORDER</span> <span class="kw">BY</span> <span class="fu">value</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="co">-- get_distinct_option_minor</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="kw">DISTINCT</span> <span class="fu">value</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> caltechthesis <span class="kw">JOIN</span> json_each(caltechthesis.src, <span class="st">&#39;$.option_minor&#39;</span>)</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="kw">WHERE</span> <span class="fu">value</span> <span class="kw">IS</span> <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">AND</span> <span class="fu">value</span> <span class="op">!=</span> <span class="st">&#39;&#39;</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="kw">ORDER</span> <span class="kw">BY</span> <span class="fu">value</span></span></code></pre></div>
+<h3 id="full-query-block-for-cold_api.yaml">Full query block for
+<code>cold_api.yaml</code></h3>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">dataset</span><span class="kw">:</span><span class="at"> caltechthesis.ds</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">query</span><span class="kw">:</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co">      # --- Vocabulary fetch (populate select dropdowns) ---</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="fu">      get_distinct_divisions</span><span class="kw">: </span><span class="ch">|</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>        SELECT DISTINCT value</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>        FROM caltechthesis JOIN json_each(caltechthesis.src, &#39;$.divisions&#39;)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>        WHERE value IS NOT NULL AND value != &#39;&#39;</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>        ORDER BY value</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="fu">      get_distinct_option_major</span><span class="kw">: </span><span class="ch">|</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>        SELECT DISTINCT value</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>        FROM caltechthesis JOIN json_each(caltechthesis.src, &#39;$.option_major&#39;)</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>        WHERE value IS NOT NULL AND value != &#39;&#39;</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>        ORDER BY value</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a><span class="fu">      get_distinct_option_minor</span><span class="kw">: </span><span class="ch">|</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>        SELECT DISTINCT value</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>        FROM caltechthesis JOIN json_each(caltechthesis.src, &#39;$.option_minor&#39;)</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>        WHERE value IS NOT NULL AND value != &#39;&#39;</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>        ORDER BY value</span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a><span class="co">      # --- Text LIKE searches (wildcard * → %) ---</span></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a><span class="fu">      by_text</span><span class="kw">: </span><span class="ch">|</span></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>        SELECT src FROM caltechthesis</span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>        WHERE src-&gt;&gt;&#39;fulltext_idx&#39; LIKE ?</span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>        ORDER BY src-&gt;&gt;&#39;date&#39; DESC</span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a><span class="fu">      by_title</span><span class="kw">: </span><span class="ch">|</span></span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a>        SELECT src FROM caltechthesis</span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a>        WHERE src-&gt;&gt;&#39;title&#39; LIKE ?</span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a>        ORDER BY src-&gt;&gt;&#39;date&#39; DESC</span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a><span class="fu">      by_alt_title</span><span class="kw">: </span><span class="ch">|</span></span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a>        SELECT src FROM caltechthesis</span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a>        WHERE EXISTS (</span>
+<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a>          SELECT 1 FROM json_each(src, &#39;$.alt_title&#39;) WHERE value LIKE ?</span>
+<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a>        ORDER BY src-&gt;&gt;&#39;date&#39; DESC</span>
+<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a><span class="fu">      by_abstract</span><span class="kw">: </span><span class="ch">|</span></span>
+<span id="cb7-44"><a href="#cb7-44" aria-hidden="true" tabindex="-1"></a>        SELECT src FROM caltechthesis</span>
+<span id="cb7-45"><a href="#cb7-45" aria-hidden="true" tabindex="-1"></a>        WHERE src-&gt;&gt;&#39;abstract&#39; LIKE ?</span>
+<span id="cb7-46"><a href="#cb7-46" aria-hidden="true" tabindex="-1"></a>        ORDER BY src-&gt;&gt;&#39;date&#39; DESC</span>
+<span id="cb7-47"><a href="#cb7-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-48"><a href="#cb7-48" aria-hidden="true" tabindex="-1"></a><span class="fu">      by_author</span><span class="kw">: </span><span class="ch">|</span></span>
+<span id="cb7-49"><a href="#cb7-49" aria-hidden="true" tabindex="-1"></a>        SELECT src FROM caltechthesis</span>
+<span id="cb7-50"><a href="#cb7-50" aria-hidden="true" tabindex="-1"></a>        WHERE src-&gt;&gt;&#39;creator_names_idx&#39; LIKE ?</span>
+<span id="cb7-51"><a href="#cb7-51" aria-hidden="true" tabindex="-1"></a>        ORDER BY src-&gt;&gt;&#39;date&#39; DESC</span>
+<span id="cb7-52"><a href="#cb7-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-53"><a href="#cb7-53" aria-hidden="true" tabindex="-1"></a><span class="fu">      by_orcid</span><span class="kw">: </span><span class="ch">|</span></span>
+<span id="cb7-54"><a href="#cb7-54" aria-hidden="true" tabindex="-1"></a>        SELECT src FROM caltechthesis</span>
+<span id="cb7-55"><a href="#cb7-55" aria-hidden="true" tabindex="-1"></a>        WHERE src-&gt;&gt;&#39;creator_orcid_idx&#39; LIKE ?</span>
+<span id="cb7-56"><a href="#cb7-56" aria-hidden="true" tabindex="-1"></a>        ORDER BY src-&gt;&gt;&#39;date&#39; DESC</span>
+<span id="cb7-57"><a href="#cb7-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-58"><a href="#cb7-58" aria-hidden="true" tabindex="-1"></a><span class="fu">      by_advisor</span><span class="kw">: </span><span class="ch">|</span></span>
+<span id="cb7-59"><a href="#cb7-59" aria-hidden="true" tabindex="-1"></a>        SELECT src FROM caltechthesis</span>
+<span id="cb7-60"><a href="#cb7-60" aria-hidden="true" tabindex="-1"></a>        WHERE src-&gt;&gt;&#39;advisor_names_idx&#39; LIKE ?</span>
+<span id="cb7-61"><a href="#cb7-61" aria-hidden="true" tabindex="-1"></a>        ORDER BY src-&gt;&gt;&#39;date&#39; DESC</span>
+<span id="cb7-62"><a href="#cb7-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-63"><a href="#cb7-63" aria-hidden="true" tabindex="-1"></a><span class="fu">      by_committee</span><span class="kw">: </span><span class="ch">|</span></span>
+<span id="cb7-64"><a href="#cb7-64" aria-hidden="true" tabindex="-1"></a>        SELECT src FROM caltechthesis</span>
+<span id="cb7-65"><a href="#cb7-65" aria-hidden="true" tabindex="-1"></a>        WHERE src-&gt;&gt;&#39;committee_names_idx&#39; LIKE ?</span>
+<span id="cb7-66"><a href="#cb7-66" aria-hidden="true" tabindex="-1"></a>        ORDER BY src-&gt;&gt;&#39;date&#39; DESC</span>
+<span id="cb7-67"><a href="#cb7-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-68"><a href="#cb7-68" aria-hidden="true" tabindex="-1"></a><span class="fu">      by_eprintid</span><span class="kw">: </span><span class="ch">|</span></span>
+<span id="cb7-69"><a href="#cb7-69" aria-hidden="true" tabindex="-1"></a>        SELECT src FROM caltechthesis</span>
+<span id="cb7-70"><a href="#cb7-70" aria-hidden="true" tabindex="-1"></a>        WHERE src-&gt;&gt;&#39;eprintid&#39; = ?</span>
+<span id="cb7-71"><a href="#cb7-71" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-72"><a href="#cb7-72" aria-hidden="true" tabindex="-1"></a><span class="fu">      by_doi</span><span class="kw">: </span><span class="ch">|</span></span>
+<span id="cb7-73"><a href="#cb7-73" aria-hidden="true" tabindex="-1"></a>        SELECT src FROM caltechthesis</span>
+<span id="cb7-74"><a href="#cb7-74" aria-hidden="true" tabindex="-1"></a>        WHERE src-&gt;&gt;&#39;doi&#39; LIKE ?</span>
+<span id="cb7-75"><a href="#cb7-75" aria-hidden="true" tabindex="-1"></a>        ORDER BY src-&gt;&gt;&#39;date&#39; DESC</span>
+<span id="cb7-76"><a href="#cb7-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-77"><a href="#cb7-77" aria-hidden="true" tabindex="-1"></a><span class="fu">      by_reviewer</span><span class="kw">: </span><span class="ch">|</span></span>
+<span id="cb7-78"><a href="#cb7-78" aria-hidden="true" tabindex="-1"></a>        SELECT src FROM caltechthesis</span>
+<span id="cb7-79"><a href="#cb7-79" aria-hidden="true" tabindex="-1"></a>        WHERE src-&gt;&gt;&#39;reviewer&#39; LIKE ?</span>
+<span id="cb7-80"><a href="#cb7-80" aria-hidden="true" tabindex="-1"></a>        ORDER BY src-&gt;&gt;&#39;lastmod&#39; DESC</span>
+<span id="cb7-81"><a href="#cb7-81" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-82"><a href="#cb7-82" aria-hidden="true" tabindex="-1"></a><span class="fu">      by_depositor</span><span class="kw">: </span><span class="ch">|</span></span>
+<span id="cb7-83"><a href="#cb7-83" aria-hidden="true" tabindex="-1"></a>        SELECT src FROM caltechthesis</span>
+<span id="cb7-84"><a href="#cb7-84" aria-hidden="true" tabindex="-1"></a>        WHERE src-&gt;&gt;&#39;depositor_username&#39; LIKE ?</span>
+<span id="cb7-85"><a href="#cb7-85" aria-hidden="true" tabindex="-1"></a>           OR src-&gt;&gt;&#39;depositor_name&#39; LIKE ?</span>
+<span id="cb7-86"><a href="#cb7-86" aria-hidden="true" tabindex="-1"></a>        ORDER BY src-&gt;&gt;&#39;date&#39; DESC</span>
+<span id="cb7-87"><a href="#cb7-87" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-88"><a href="#cb7-88" aria-hidden="true" tabindex="-1"></a><span class="fu">      by_funder</span><span class="kw">: </span><span class="ch">|</span></span>
+<span id="cb7-89"><a href="#cb7-89" aria-hidden="true" tabindex="-1"></a>        SELECT src FROM caltechthesis</span>
+<span id="cb7-90"><a href="#cb7-90" aria-hidden="true" tabindex="-1"></a>        WHERE src-&gt;&gt;&#39;funders_idx&#39; LIKE ?</span>
+<span id="cb7-91"><a href="#cb7-91" aria-hidden="true" tabindex="-1"></a>        ORDER BY src-&gt;&gt;&#39;date&#39; DESC</span>
+<span id="cb7-92"><a href="#cb7-92" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-93"><a href="#cb7-93" aria-hidden="true" tabindex="-1"></a><span class="fu">      by_local_group</span><span class="kw">: </span><span class="ch">|</span></span>
+<span id="cb7-94"><a href="#cb7-94" aria-hidden="true" tabindex="-1"></a>        SELECT src FROM caltechthesis</span>
+<span id="cb7-95"><a href="#cb7-95" aria-hidden="true" tabindex="-1"></a>        WHERE EXISTS (</span>
+<span id="cb7-96"><a href="#cb7-96" aria-hidden="true" tabindex="-1"></a>          SELECT 1 FROM json_each(src, &#39;$.local_group&#39;) WHERE value LIKE ?</span>
+<span id="cb7-97"><a href="#cb7-97" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb7-98"><a href="#cb7-98" aria-hidden="true" tabindex="-1"></a>        ORDER BY src-&gt;&gt;&#39;date&#39; DESC</span>
+<span id="cb7-99"><a href="#cb7-99" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-100"><a href="#cb7-100" aria-hidden="true" tabindex="-1"></a><span class="fu">      by_other_id</span><span class="kw">: </span><span class="ch">|</span></span>
+<span id="cb7-101"><a href="#cb7-101" aria-hidden="true" tabindex="-1"></a>        SELECT src FROM caltechthesis</span>
+<span id="cb7-102"><a href="#cb7-102" aria-hidden="true" tabindex="-1"></a>        WHERE EXISTS (</span>
+<span id="cb7-103"><a href="#cb7-103" aria-hidden="true" tabindex="-1"></a>          SELECT 1 FROM json_each(src, &#39;$.other_ids&#39;)</span>
+<span id="cb7-104"><a href="#cb7-104" aria-hidden="true" tabindex="-1"></a>          WHERE json_extract(value, &#39;$.id&#39;) LIKE ?</span>
+<span id="cb7-105"><a href="#cb7-105" aria-hidden="true" tabindex="-1"></a>             OR json_extract(value, &#39;$.name&#39;) LIKE ?</span>
+<span id="cb7-106"><a href="#cb7-106" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb7-107"><a href="#cb7-107" aria-hidden="true" tabindex="-1"></a>        ORDER BY src-&gt;&gt;&#39;date&#39; DESC</span>
+<span id="cb7-108"><a href="#cb7-108" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-109"><a href="#cb7-109" aria-hidden="true" tabindex="-1"></a><span class="co">      # --- Year / date searches ---</span></span>
+<span id="cb7-110"><a href="#cb7-110" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-111"><a href="#cb7-111" aria-hidden="true" tabindex="-1"></a><span class="fu">      by_year</span><span class="kw">: </span><span class="ch">|</span></span>
+<span id="cb7-112"><a href="#cb7-112" aria-hidden="true" tabindex="-1"></a>        SELECT src FROM caltechthesis</span>
+<span id="cb7-113"><a href="#cb7-113" aria-hidden="true" tabindex="-1"></a>        WHERE CAST(src-&gt;&gt;&#39;date&#39; AS INTEGER) = CAST(? AS INTEGER)</span>
+<span id="cb7-114"><a href="#cb7-114" aria-hidden="true" tabindex="-1"></a>        ORDER BY src-&gt;&gt;&#39;creator_names_idx&#39;</span>
+<span id="cb7-115"><a href="#cb7-115" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-116"><a href="#cb7-116" aria-hidden="true" tabindex="-1"></a><span class="fu">      by_year_from</span><span class="kw">: </span><span class="ch">|</span></span>
+<span id="cb7-117"><a href="#cb7-117" aria-hidden="true" tabindex="-1"></a>        SELECT src FROM caltechthesis</span>
+<span id="cb7-118"><a href="#cb7-118" aria-hidden="true" tabindex="-1"></a>        WHERE CAST(src-&gt;&gt;&#39;date&#39; AS INTEGER) &gt;= CAST(? AS INTEGER)</span>
+<span id="cb7-119"><a href="#cb7-119" aria-hidden="true" tabindex="-1"></a>        ORDER BY src-&gt;&gt;&#39;date&#39; DESC</span>
+<span id="cb7-120"><a href="#cb7-120" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-121"><a href="#cb7-121" aria-hidden="true" tabindex="-1"></a><span class="fu">      by_year_to</span><span class="kw">: </span><span class="ch">|</span></span>
+<span id="cb7-122"><a href="#cb7-122" aria-hidden="true" tabindex="-1"></a>        SELECT src FROM caltechthesis</span>
+<span id="cb7-123"><a href="#cb7-123" aria-hidden="true" tabindex="-1"></a>        WHERE CAST(src-&gt;&gt;&#39;date&#39; AS INTEGER) &lt;= CAST(? AS INTEGER)</span>
+<span id="cb7-124"><a href="#cb7-124" aria-hidden="true" tabindex="-1"></a>        ORDER BY src-&gt;&gt;&#39;date&#39; DESC</span>
+<span id="cb7-125"><a href="#cb7-125" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-126"><a href="#cb7-126" aria-hidden="true" tabindex="-1"></a><span class="fu">      by_year_range</span><span class="kw">: </span><span class="ch">|</span></span>
+<span id="cb7-127"><a href="#cb7-127" aria-hidden="true" tabindex="-1"></a>        SELECT src FROM caltechthesis</span>
+<span id="cb7-128"><a href="#cb7-128" aria-hidden="true" tabindex="-1"></a>        WHERE CAST(src-&gt;&gt;&#39;date&#39; AS INTEGER) &gt;= CAST(? AS INTEGER)</span>
+<span id="cb7-129"><a href="#cb7-129" aria-hidden="true" tabindex="-1"></a>          AND CAST(src-&gt;&gt;&#39;date&#39; AS INTEGER) &lt;= CAST(? AS INTEGER)</span>
+<span id="cb7-130"><a href="#cb7-130" aria-hidden="true" tabindex="-1"></a>        ORDER BY src-&gt;&gt;&#39;date&#39; DESC</span>
+<span id="cb7-131"><a href="#cb7-131" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-132"><a href="#cb7-132" aria-hidden="true" tabindex="-1"></a><span class="co">      # --- Multi-value ANY-of searches (comma-separated param, instr trick) ---</span></span>
+<span id="cb7-133"><a href="#cb7-133" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-134"><a href="#cb7-134" aria-hidden="true" tabindex="-1"></a><span class="fu">      by_eprint_status</span><span class="kw">: </span><span class="ch">|</span></span>
+<span id="cb7-135"><a href="#cb7-135" aria-hidden="true" tabindex="-1"></a>        SELECT src FROM caltechthesis</span>
+<span id="cb7-136"><a href="#cb7-136" aria-hidden="true" tabindex="-1"></a>        WHERE instr(&#39;,&#39; || ? || &#39;,&#39;, &#39;,&#39; || src-&gt;&gt;&#39;eprint_status&#39; || &#39;,&#39;) &gt; 0</span>
+<span id="cb7-137"><a href="#cb7-137" aria-hidden="true" tabindex="-1"></a>        ORDER BY src-&gt;&gt;&#39;lastmod&#39; DESC</span>
+<span id="cb7-138"><a href="#cb7-138" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-139"><a href="#cb7-139" aria-hidden="true" tabindex="-1"></a><span class="fu">      by_review_status</span><span class="kw">: </span><span class="ch">|</span></span>
+<span id="cb7-140"><a href="#cb7-140" aria-hidden="true" tabindex="-1"></a>        SELECT src FROM caltechthesis</span>
+<span id="cb7-141"><a href="#cb7-141" aria-hidden="true" tabindex="-1"></a>        WHERE instr(&#39;,&#39; || ? || &#39;,&#39;, &#39;,&#39; || src-&gt;&gt;&#39;review_status&#39; || &#39;,&#39;) &gt; 0</span>
+<span id="cb7-142"><a href="#cb7-142" aria-hidden="true" tabindex="-1"></a>        ORDER BY src-&gt;&gt;&#39;lastmod&#39; DESC</span>
+<span id="cb7-143"><a href="#cb7-143" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-144"><a href="#cb7-144" aria-hidden="true" tabindex="-1"></a><span class="fu">      by_full_text_status</span><span class="kw">: </span><span class="ch">|</span></span>
+<span id="cb7-145"><a href="#cb7-145" aria-hidden="true" tabindex="-1"></a>        SELECT src FROM caltechthesis</span>
+<span id="cb7-146"><a href="#cb7-146" aria-hidden="true" tabindex="-1"></a>        WHERE instr(&#39;,&#39; || ? || &#39;,&#39;, &#39;,&#39; || src-&gt;&gt;&#39;full_text_status&#39; || &#39;,&#39;) &gt; 0</span>
+<span id="cb7-147"><a href="#cb7-147" aria-hidden="true" tabindex="-1"></a>        ORDER BY src-&gt;&gt;&#39;date&#39; DESC</span>
+<span id="cb7-148"><a href="#cb7-148" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-149"><a href="#cb7-149" aria-hidden="true" tabindex="-1"></a><span class="fu">      by_ispublished</span><span class="kw">: </span><span class="ch">|</span></span>
+<span id="cb7-150"><a href="#cb7-150" aria-hidden="true" tabindex="-1"></a>        SELECT src FROM caltechthesis</span>
+<span id="cb7-151"><a href="#cb7-151" aria-hidden="true" tabindex="-1"></a>        WHERE instr(&#39;,&#39; || ? || &#39;,&#39;, &#39;,&#39; || src-&gt;&gt;&#39;ispublished&#39; || &#39;,&#39;) &gt; 0</span>
+<span id="cb7-152"><a href="#cb7-152" aria-hidden="true" tabindex="-1"></a>        ORDER BY src-&gt;&gt;&#39;date&#39; DESC</span>
+<span id="cb7-153"><a href="#cb7-153" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-154"><a href="#cb7-154" aria-hidden="true" tabindex="-1"></a><span class="fu">      by_date_type</span><span class="kw">: </span><span class="ch">|</span></span>
+<span id="cb7-155"><a href="#cb7-155" aria-hidden="true" tabindex="-1"></a>        SELECT src FROM caltechthesis</span>
+<span id="cb7-156"><a href="#cb7-156" aria-hidden="true" tabindex="-1"></a>        WHERE instr(&#39;,&#39; || ? || &#39;,&#39;, &#39;,&#39; || src-&gt;&gt;&#39;date_type&#39; || &#39;,&#39;) &gt; 0</span>
+<span id="cb7-157"><a href="#cb7-157" aria-hidden="true" tabindex="-1"></a>        ORDER BY src-&gt;&gt;&#39;date&#39; DESC</span>
+<span id="cb7-158"><a href="#cb7-158" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-159"><a href="#cb7-159" aria-hidden="true" tabindex="-1"></a><span class="fu">      by_thesis_type</span><span class="kw">: </span><span class="ch">|</span></span>
+<span id="cb7-160"><a href="#cb7-160" aria-hidden="true" tabindex="-1"></a>        SELECT src FROM caltechthesis</span>
+<span id="cb7-161"><a href="#cb7-161" aria-hidden="true" tabindex="-1"></a>        WHERE instr(&#39;,&#39; || ? || &#39;,&#39;, &#39;,&#39; || src-&gt;&gt;&#39;thesis_type&#39; || &#39;,&#39;) &gt; 0</span>
+<span id="cb7-162"><a href="#cb7-162" aria-hidden="true" tabindex="-1"></a>        ORDER BY src-&gt;&gt;&#39;date&#39; DESC</span>
+<span id="cb7-163"><a href="#cb7-163" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-164"><a href="#cb7-164" aria-hidden="true" tabindex="-1"></a><span class="fu">      by_division</span><span class="kw">: </span><span class="ch">|</span></span>
+<span id="cb7-165"><a href="#cb7-165" aria-hidden="true" tabindex="-1"></a>        SELECT src FROM caltechthesis</span>
+<span id="cb7-166"><a href="#cb7-166" aria-hidden="true" tabindex="-1"></a>        WHERE EXISTS (</span>
+<span id="cb7-167"><a href="#cb7-167" aria-hidden="true" tabindex="-1"></a>          SELECT 1 FROM json_each(src, &#39;$.divisions&#39;)</span>
+<span id="cb7-168"><a href="#cb7-168" aria-hidden="true" tabindex="-1"></a>          WHERE instr(&#39;,&#39; || ? || &#39;,&#39;, &#39;,&#39; || value || &#39;,&#39;) &gt; 0</span>
+<span id="cb7-169"><a href="#cb7-169" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb7-170"><a href="#cb7-170" aria-hidden="true" tabindex="-1"></a>        ORDER BY src-&gt;&gt;&#39;date&#39; DESC</span>
+<span id="cb7-171"><a href="#cb7-171" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-172"><a href="#cb7-172" aria-hidden="true" tabindex="-1"></a><span class="fu">      by_option_major</span><span class="kw">: </span><span class="ch">|</span></span>
+<span id="cb7-173"><a href="#cb7-173" aria-hidden="true" tabindex="-1"></a>        SELECT src FROM caltechthesis</span>
+<span id="cb7-174"><a href="#cb7-174" aria-hidden="true" tabindex="-1"></a>        WHERE EXISTS (</span>
+<span id="cb7-175"><a href="#cb7-175" aria-hidden="true" tabindex="-1"></a>          SELECT 1 FROM json_each(src, &#39;$.option_major&#39;)</span>
+<span id="cb7-176"><a href="#cb7-176" aria-hidden="true" tabindex="-1"></a>          WHERE instr(&#39;,&#39; || ? || &#39;,&#39;, &#39;,&#39; || value || &#39;,&#39;) &gt; 0</span>
+<span id="cb7-177"><a href="#cb7-177" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb7-178"><a href="#cb7-178" aria-hidden="true" tabindex="-1"></a>        ORDER BY src-&gt;&gt;&#39;date&#39; DESC</span>
+<span id="cb7-179"><a href="#cb7-179" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-180"><a href="#cb7-180" aria-hidden="true" tabindex="-1"></a><span class="fu">      by_option_minor</span><span class="kw">: </span><span class="ch">|</span></span>
+<span id="cb7-181"><a href="#cb7-181" aria-hidden="true" tabindex="-1"></a>        SELECT src FROM caltechthesis</span>
+<span id="cb7-182"><a href="#cb7-182" aria-hidden="true" tabindex="-1"></a>        WHERE EXISTS (</span>
+<span id="cb7-183"><a href="#cb7-183" aria-hidden="true" tabindex="-1"></a>          SELECT 1 FROM json_each(src, &#39;$.option_minor&#39;)</span>
+<span id="cb7-184"><a href="#cb7-184" aria-hidden="true" tabindex="-1"></a>          WHERE instr(&#39;,&#39; || ? || &#39;,&#39;, &#39;,&#39; || value || &#39;,&#39;) &gt; 0</span>
+<span id="cb7-185"><a href="#cb7-185" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb7-186"><a href="#cb7-186" aria-hidden="true" tabindex="-1"></a>        ORDER BY src-&gt;&gt;&#39;date&#39; DESC</span>
+<span id="cb7-187"><a href="#cb7-187" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-188"><a href="#cb7-188" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">keys</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb7-189"><a href="#cb7-189" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">read</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb7-190"><a href="#cb7-190" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">create</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb7-191"><a href="#cb7-191" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">update</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span></code></pre></div>
+<p>Note: <code>by_depositor</code> and <code>by_other_id</code> require
+two <code>?</code> parameters each. The TypeScript UI passes the same
+value twice as <code>q[]=value&amp;q[]=value</code> in the request, or
+the middleware can be extended to pass <code>q</code> twice when the
+query name is in a known two-param list. Alternatively, add two
+pre-computed index fields (<code>depositor_idx</code>,
+<code>other_id_idx</code>) to the harvest and use single-param queries —
+simpler and consistent with the rest.</p>
+<h2 id="browser-ui-thesis_search.ts">Browser UI
+(<code>thesis_search.ts</code>)</h2>
+<p>Class <code>ThesisSearchUI</code> follows the same pattern as
+<code>RdmReviewQueueUI</code> but uses a different form layout to
+reflect the richer field set.</p>
+<h3 id="form-layout">Form layout</h3>
+<pre><code>[ Search ] [ Reset ]
+
+── Text search ─────────────────────────────────────────────
+Full text (title/abstract/keywords):  [___________] [*]
+Title:                                [___________]
+Alternate title:                      [___________]
+Authors:                              [___________]
+ORCID:                                [___________]
+Abstract:                             [___________]
+Advisor name:                         [___________]
+Committee member name:                [___________]
+Item ID:                              [_______]
+DOI:                                  [___________]
+Reviewer:                             [___________]
+Depositor username:                   [___________]
+Depositor name:                       [___________]
+Funding agency:                       [___________]
+Grant number:                         [___________]
+Group:                                [___________]
+Other ID (scheme or value):           [___________]
+
+── Date / year ─────────────────────────────────────────────
+Degree year from: [____]  to: [____]
+
+── Classification ──────────────────────────────────────────
+Division:      [&lt;select multiple, drawn from corpus&gt;]
+               ○ Any of these  ○ All of these
+
+Major option:  [&lt;select multiple, drawn from corpus&gt;]
+               ○ Any of these  ○ All of these
+
+Minor option:  [&lt;select multiple, drawn from corpus&gt;]
+               ○ Any of these  ○ All of these
+
+── Status checkboxes ───────────────────────────────────────
+Item status:   □ User Workarea  □ Under Review  ☑ Live Archive  □ Retired
+Review status: □ Being reviewed  □ Waiting for corrections  □ Sent to Grad Office
+               □ Pending in GO  □ Not Approved  □ Approved  □ WITHHELD  □ Other
+Availability:  □ Public  □ Caltech only  □ Mixed  □ Withheld
+Pub status:    □ Published  □ In Press  □ Submitted  □ Unpublished
+Thesis type:   □ Ph.D.  □ Master&#39;s  □ Engineer&#39;s  □ Bachelor&#39;s
+               □ Senior (Minor)  □ Senior (Major)  □ Other
+
+── Combine results ─────────────────────────────────────────
+Retrieved records must fulfil: ○ All of these conditions  ○ Any of these conditions
+
+Order: [by year (most recent first) ▼]
+
+[ Search ] [ Reset ]</code></pre>
+<h3 id="multi-select-population">Multi-select population</h3>
+<p>On load, <code>ThesisSearchUI</code> fetches three vocabulary lists
+in parallel:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> [divisions<span class="op">,</span> optionsMajor<span class="op">,</span> optionsMinor] <span class="op">=</span> <span class="cf">await</span> <span class="bu">Promise</span><span class="op">.</span><span class="fu">all</span>([</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  clientAPI<span class="op">.</span><span class="fu">getStringList</span>(<span class="st">&quot;caltechthesis.ds&quot;</span><span class="op">,</span> <span class="st">&quot;get_distinct_divisions&quot;</span>)<span class="op">,</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  clientAPI<span class="op">.</span><span class="fu">getStringList</span>(<span class="st">&quot;caltechthesis.ds&quot;</span><span class="op">,</span> <span class="st">&quot;get_distinct_option_major&quot;</span>)<span class="op">,</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  clientAPI<span class="op">.</span><span class="fu">getStringList</span>(<span class="st">&quot;caltechthesis.ds&quot;</span><span class="op">,</span> <span class="st">&quot;get_distinct_option_minor&quot;</span>)<span class="op">,</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>])<span class="op">;</span></span></code></pre></div>
+<p>Each list of codes is rendered into the corresponding
+<code>&lt;select multiple&gt;</code> with display labels from a
+hardcoded code→label map in TypeScript. Codes not in the map render as
+the code itself (handles legacy options).</p>
+<h3 id="query-execution-strategy">Query execution strategy</h3>
+<p>Because users can fill in multiple fields simultaneously, the UI runs
+one query per non-empty field, then combines results:</p>
+<ol type="1">
+<li>Collect all active field values after the user submits</li>
+<li>Run each active query in parallel via <code>Promise.all</code></li>
+<li>Combine result sets:
+<ul>
+<li><strong>AND mode</strong> (default): intersect by
+<code>eprintid</code></li>
+<li><strong>OR mode</strong>: union by <code>eprintid</code>
+(deduplicated)</li>
+</ul></li>
+<li>Apply client-side sort per the Order dropdown</li>
+<li>Render the results table</li>
+</ol>
+<p>For multi-select fields, the selected values are joined as a
+comma-separated string and passed as <code>q</code>. The instr()-based
+SQL handles the ANY-of matching. An “All of these” radio on
+divisions/options is handled client-side by filtering the ANY results to
+records that contain every selected value.</p>
+<h3 id="results-table-columns">Results table columns</h3>
+<p>Thesis ID (link to thesis.library.caltech.edu/{id}), Title,
+Author(s), Advisor(s), Degree, Year, Division(s), Major Option(s),
+Thesis Type, Item Status, Review Status, Availability, Deposited,
+Reviewer</p>
+<p>Records where <code>eprint_status != 'archive'</code> or
+<code>metadata_visibility != 'show'</code> display a bracketed label
+(<code>[inbox]</code>, <code>[restricted]</code>, etc.) in the status
+column as a visual reminder that the record is not public.</p>
+<h3 id="csv-download">CSV download</h3>
+<p>Same <code>csvToDownloadElements</code> pattern as the RDM tool. All
+result columns are included.</p>
+<h2 id="html-page-htdocsthesis_search.md">HTML Page
+(<code>htdocs/thesis_search.md</code>)</h2>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> Search CaltechTHESIS</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="fu"># Search CaltechTHESIS</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> id</span><span class="op">=</span><span class="st">&quot;search&quot;</span><span class="dt">&gt;</span>Loading search form...<span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">noscript</span><span class="dt">&gt;</span>JavaScript required for search to be available<span class="dt">&lt;/</span><span class="kw">noscript</span><span class="dt">&gt;</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">script</span><span class="ot"> type=</span><span class="st">&quot;module&quot;</span><span class="dt">&gt;</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>  <span class="im">import</span> { ThesisSearchUI } <span class="im">from</span> <span class="st">&quot;./modules/thesis_search.js&quot;</span><span class="op">;</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> baseUrl <span class="op">=</span> URL<span class="op">.</span><span class="fu">parse</span>(<span class="bu">window</span><span class="op">.</span><span class="at">location</span><span class="op">.</span><span class="at">href</span>)<span class="op">;</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>  baseUrl<span class="op">.</span><span class="at">pathname</span> <span class="op">=</span> baseUrl<span class="op">.</span><span class="at">pathname</span><span class="op">.</span><span class="fu">replace</span>(<span class="ss">/thesis_search.html</span><span class="sc">$</span><span class="ss">/g</span><span class="op">,</span> <span class="st">&#39;&#39;</span>)<span class="op">;</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>  baseUrl<span class="op">.</span><span class="at">search</span> <span class="op">=</span> <span class="st">&quot;&quot;</span><span class="op">;</span></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>  <span class="bu">window</span><span class="op">.</span><span class="fu">addEventListener</span>(<span class="st">&#39;DOMContentLoaded&#39;</span><span class="op">,</span> () <span class="kw">=&gt;</span> {</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>    <span class="kw">new</span> <span class="fu">ThesisSearchUI</span>({</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>      <span class="dt">baseUrl</span><span class="op">:</span> baseUrl<span class="op">,</span></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>      <span class="dt">searchElement</span><span class="op">:</span> <span class="bu">document</span><span class="op">.</span><span class="fu">getElementById</span>(<span class="st">&quot;search&quot;</span>)</span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>    })<span class="op">;</span></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>  })<span class="op">;</span></span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">script</span><span class="dt">&gt;</span></span></code></pre></div>
+<p>Rendered via
+<code>pandoc thesis_search.md -o htdocs/thesis_search.html</code>.</p>
+<h2 id="build-wiring">Build Wiring</h2>
+<p>Add to <code>deno.json</code> task list:</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;build:thesis_search&quot;</span><span class="er">:</span> <span class="st">&quot;deno bundle thesis_search.ts htdocs/modules/thesis_search.js&quot;</span></span></code></pre></div>
+<p>Include in the main <code>build</code> task.</p>
+<h2 id="cron-schedule">Cron Schedule</h2>
+<p>On the COLD host:</p>
+<pre class="cron"><code># Incremental: every 15 min, Mon–Fri, 7am–7pm
+*/15 7-19 * * 1-5  /path/to/cold/remote_harvest_caltechthesis_incremental.bash caltechthesis.env
+
+# Full refresh: nightly at 2am (catches deletions, status changes, schema drift)
+0 2 * * *           /path/to/cold/remote_harvest_caltechthesis_full.bash caltechthesis.env</code></pre>
+<h2 id="implementation-order">Implementation Order</h2>
+<ol type="1">
+<li><strong>Verify column names on <code>eprint</code> table</strong> —
+<code>DESCRIBE eprint</code> on the server to confirm <code>doi</code>,
+<code>reviewer</code>, <code>review_status</code>,
+<code>ispublished</code>, <code>date_type</code>,
+<code>thesis_defense_date</code> exist before writing scripts</li>
+<li><strong>Confirm <code>user</code> table JOIN</strong> — verify
+<code>user.username</code>, <code>user.name_family</code>,
+<code>user.name_given</code> column names; confirm no email is
+selected</li>
+<li><strong>Test the MySQL query</strong> — run against
+<code>caltechthesis</code> on the server, check JSON shape and
+<code>lastmod</code> ordering</li>
+<li><strong>Write and test both harvest scripts</strong> — test full,
+then incremental</li>
+<li><strong>Add <code>cold_api.yaml</code> block</strong> — restart
+<code>cold_api</code>, verify each query with <code>curl</code>,
+including the three vocabulary-fetch queries</li>
+<li><strong>Implement <code>thesis_search.ts</code></strong> — start
+with vocabulary population and the single-field text searches; add
+multi-select and combination logic second</li>
+<li><strong>Transpile, test in browser</strong> — verify vocabulary
+selects populate, text searches return results, status flags display
+correctly</li>
+<li><strong>Render HTML page</strong> — add to COLD navigation</li>
+<li><strong>Set up cron</strong> — monitor first few incremental
+runs</li>
+</ol>
+<h2 id="open-items">Open Items</h2>
+<ul>
+<li>Confirm MySQL read-only user credentials</li>
+<li>Confirm exact column names on <code>eprint</code> table (step 1
+above)</li>
+<li>Decide how to handle the two-param queries
+(<code>by_depositor</code>, <code>by_other_id</code>): either add
+pre-computed index fields (<code>depositor_idx</code>,
+<code>other_id_idx</code>) to the harvest (recommended — keeps all
+queries single-param) or extend the middleware to pass <code>q</code>
+twice for named queries</li>
+<li>Decide whether to add this tool to the COLD main navigation
+alongside the RDM review queue link</li>
+</ul>
+</section>
+<footer-global></footer-global>
+</body>
+</html>
