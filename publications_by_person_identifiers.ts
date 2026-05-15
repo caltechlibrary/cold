@@ -304,8 +304,8 @@ export async function run_report(
     }
 
     const headers = [
-      "clpid",
-      "orcid",
+      "search_clpid",
+      "search_orcid",
       "rdm_id",
       "title",
       "publication_year",

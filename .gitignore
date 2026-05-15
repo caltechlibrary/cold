@@ -42,3 +42,7 @@ load_rdm_records.bash
 docker_*.bash
 load_dataset_with_jsonl.bash
 CLAUDE.html
+caltechthesis_full.sql
+caltechthesis_incremental.sql
+caltechthesis_lastmod.txt
+

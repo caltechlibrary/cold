@@ -24,4 +24,5 @@ It also lets you manage lists of subjects, issn mappings to cannonical names and
 
 - [Reports](./reports)
 - [Search RDM Records](./rdm_review_queue.html)
+- [Search CaltechTHESIS](./thesis_search.html)
 - [Re-assign clpid in CaltechPEOPLE](./rename/people)

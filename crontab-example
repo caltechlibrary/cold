@@ -23,3 +23,9 @@
 # m h  dom mon dow   command
 15 7 * * 1-5 /Sites/cold/sync_caltech_directory.bash
 30 7 * * 1-5 /Sites/cold/rpt_people_csv.bash
+
+# CaltechTHESIS harvest
+# Incremental: every 15 min, Mon-Fri, 7am-7pm (requires full harvest to have run first)
+*/15 7-19 * * 1-5 /Sites/cold/remote_harvest_caltechthesis_incremental.bash /Sites/cold/caltechthesis.env
+# Full refresh: nightly at 2am every day (catches deletions and status changes)
+0 2 * * * /Sites/cold/remote_harvest_caltechthesis_full.bash /Sites/cold/caltechthesis.env

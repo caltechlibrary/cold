@@ -510,3 +510,183 @@ collections:
     update: true
     # This sets versioning behavior
     versions: true
+  - dataset: caltechthesis.ds
+    query:
+
+      # --- Vocabulary fetch (populate <select> dropdowns from corpus) ---
+
+      get_distinct_divisions: |
+        SELECT DISTINCT json_quote(je.value)
+        FROM caltechthesis ct, json_each(ct.src, '$.divisions') je
+        WHERE je.value IS NOT NULL AND je.value != '' AND je.value != 'null'
+        ORDER BY je.value
+
+      get_distinct_option_major: |
+        SELECT DISTINCT json_quote(je.value)
+        FROM caltechthesis ct, json_each(ct.src, '$.option_major') je
+        WHERE je.value IS NOT NULL AND je.value != '' AND je.value != 'null'
+        ORDER BY je.value
+
+      get_distinct_option_minor: |
+        SELECT DISTINCT json_quote(je.value)
+        FROM caltechthesis ct, json_each(ct.src, '$.option_minor') je
+        WHERE je.value IS NOT NULL AND je.value != '' AND je.value != 'null'
+        ORDER BY je.value
+
+      # --- Text LIKE searches (* wildcard -> %) ---
+
+      by_text: |
+        SELECT src FROM caltechthesis
+        WHERE src->>'fulltext_idx' LIKE ?
+        ORDER BY src->>'date' DESC
+
+      by_title: |
+        SELECT src FROM caltechthesis
+        WHERE src->>'title' LIKE ?
+        ORDER BY src->>'date' DESC
+
+      by_alt_title: |
+        SELECT src FROM caltechthesis
+        WHERE EXISTS (
+          SELECT 1 FROM json_each(src, '$.alt_title') WHERE value LIKE ?
+        )
+        ORDER BY src->>'date' DESC
+
+      by_abstract: |
+        SELECT src FROM caltechthesis
+        WHERE src->>'abstract' LIKE ?
+        ORDER BY src->>'date' DESC
+
+      by_author: |
+        SELECT src FROM caltechthesis
+        WHERE src->>'creator_names_idx' LIKE ?
+        ORDER BY src->>'date' DESC
+
+      by_orcid: |
+        SELECT src FROM caltechthesis
+        WHERE src->>'creator_orcid_idx' LIKE ?
+        ORDER BY src->>'date' DESC
+
+      by_advisor: |
+        SELECT src FROM caltechthesis
+        WHERE src->>'advisor_names_idx' LIKE ?
+        ORDER BY src->>'date' DESC
+
+      by_committee: |
+        SELECT src FROM caltechthesis
+        WHERE src->>'committee_names_idx' LIKE ?
+        ORDER BY src->>'date' DESC
+
+      by_eprintid: |
+        SELECT src FROM caltechthesis
+        WHERE CAST(src->>'eprintid' AS INTEGER) = CAST(? AS INTEGER)
+
+      by_doi: |
+        SELECT src FROM caltechthesis
+        WHERE src->>'doi' LIKE ?
+        ORDER BY src->>'date' DESC
+
+      by_reviewer: |
+        SELECT src FROM caltechthesis
+        WHERE src->>'reviewer' LIKE ?
+        ORDER BY src->>'lastmod' DESC
+
+      by_depositor: |
+        SELECT src FROM caltechthesis
+        WHERE src->>'depositor_idx' LIKE ?
+        ORDER BY src->>'date' DESC
+
+      by_funder: |
+        SELECT src FROM caltechthesis
+        WHERE src->>'funders_idx' LIKE ?
+        ORDER BY src->>'date' DESC
+
+      by_local_group: |
+        SELECT src FROM caltechthesis
+        WHERE EXISTS (
+          SELECT 1 FROM json_each(src, '$.local_group') WHERE value LIKE ?
+        )
+        ORDER BY src->>'date' DESC
+
+      by_other_id: |
+        SELECT src FROM caltechthesis
+        WHERE src->>'other_id_idx' LIKE ?
+        ORDER BY src->>'date' DESC
+
+      # --- Year searches ---
+
+      by_year: |
+        SELECT src FROM caltechthesis
+        WHERE CAST(src->>'date' AS INTEGER) = CAST(? AS INTEGER)
+        ORDER BY src->>'creator_names_idx'
+
+      by_year_from: |
+        SELECT src FROM caltechthesis
+        WHERE CAST(src->>'date' AS INTEGER) >= CAST(? AS INTEGER)
+        ORDER BY src->>'date' DESC
+
+      by_year_to: |
+        SELECT src FROM caltechthesis
+        WHERE CAST(src->>'date' AS INTEGER) <= CAST(? AS INTEGER)
+        ORDER BY src->>'date' DESC
+
+      # --- Multi-value ANY-of (comma-separated param, instr trick) ---
+
+      by_eprint_status: |
+        SELECT src FROM caltechthesis
+        WHERE instr(',' || ? || ',', ',' || json_extract(src, '$.eprint_status') || ',') > 0
+        ORDER BY src->>'lastmod' DESC
+
+      by_review_status: |
+        SELECT src FROM caltechthesis
+        WHERE instr(',' || ? || ',', ',' || json_extract(src, '$.review_status') || ',') > 0
+        ORDER BY src->>'lastmod' DESC
+
+      by_full_text_status: |
+        SELECT src FROM caltechthesis
+        WHERE instr(',' || ? || ',', ',' || json_extract(src, '$.full_text_status') || ',') > 0
+        ORDER BY src->>'date' DESC
+
+      by_ispublished: |
+        SELECT src FROM caltechthesis
+        WHERE instr(',' || ? || ',', ',' || json_extract(src, '$.ispublished') || ',') > 0
+        ORDER BY src->>'date' DESC
+
+      by_date_type: |
+        SELECT src FROM caltechthesis
+        WHERE instr(',' || ? || ',', ',' || json_extract(src, '$.date_type') || ',') > 0
+        ORDER BY src->>'date' DESC
+
+      by_thesis_type: |
+        SELECT src FROM caltechthesis
+        WHERE instr(',' || ? || ',', ',' || json_extract(src, '$.thesis_type') || ',') > 0
+        ORDER BY src->>'date' DESC
+
+      by_division: |
+        SELECT src FROM caltechthesis
+        WHERE EXISTS (
+          SELECT 1 FROM json_each(src, '$.divisions')
+          WHERE instr(',' || ? || ',', ',' || value || ',') > 0
+        )
+        ORDER BY src->>'date' DESC
+
+      by_option_major: |
+        SELECT src FROM caltechthesis
+        WHERE EXISTS (
+          SELECT 1 FROM json_each(src, '$.option_major')
+          WHERE instr(',' || ? || ',', ',' || value || ',') > 0
+        )
+        ORDER BY src->>'date' DESC
+
+      by_option_minor: |
+        SELECT src FROM caltechthesis
+        WHERE EXISTS (
+          SELECT 1 FROM json_each(src, '$.option_minor')
+          WHERE instr(',' || ? || ',', ',' || value || ',') > 0
+        )
+        ORDER BY src->>'date' DESC
+
+    keys: true
+    read: true
+    create: true
+    update: true
