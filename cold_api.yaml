@@ -602,9 +602,35 @@ collections:
         WHERE src->>'depositor_idx' LIKE ?
         ORDER BY src->>'date' DESC
 
+      by_depositor_username: |
+        SELECT src FROM caltechthesis
+        WHERE src->>'depositor_username' LIKE ?
+        ORDER BY src->>'date' DESC
+
+      by_depositor_name: |
+        SELECT src FROM caltechthesis
+        WHERE src->>'depositor_name' LIKE ?
+        ORDER BY src->>'date' DESC
+
       by_funder: |
         SELECT src FROM caltechthesis
         WHERE src->>'funders_idx' LIKE ?
+        ORDER BY src->>'date' DESC
+
+      by_funder_agency: |
+        SELECT src FROM caltechthesis
+        WHERE EXISTS (
+          SELECT 1 FROM json_each(src, '$.funders')
+          WHERE json_extract(value, '$.agency') LIKE ?
+        )
+        ORDER BY src->>'date' DESC
+
+      by_grant_number: |
+        SELECT src FROM caltechthesis
+        WHERE EXISTS (
+          SELECT 1 FROM json_each(src, '$.funders')
+          WHERE json_extract(value, '$.grant_number') LIKE ?
+        )
         ORDER BY src->>'date' DESC
 
       by_local_group: |
@@ -617,6 +643,22 @@ collections:
       by_other_id: |
         SELECT src FROM caltechthesis
         WHERE src->>'other_id_idx' LIKE ?
+        ORDER BY src->>'date' DESC
+
+      by_other_numbering_name: |
+        SELECT src FROM caltechthesis
+        WHERE EXISTS (
+          SELECT 1 FROM json_each(src, '$.other_ids')
+          WHERE json_extract(value, '$.name') LIKE ?
+        )
+        ORDER BY src->>'date' DESC
+
+      by_other_numbering_id: |
+        SELECT src FROM caltechthesis
+        WHERE EXISTS (
+          SELECT 1 FROM json_each(src, '$.other_ids')
+          WHERE json_extract(value, '$.id') LIKE ?
+        )
         ORDER BY src->>'date' DESC
 
       # --- Year searches ---

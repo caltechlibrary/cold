@@ -1,6 +1,6 @@
-%thesis_option_vocabulary(1) user manual | 0.0.44  070692e
+%thesis_option_vocabulary(1) user manual | 0.0.45  536ae4a
 % R. S.Doiel
-% 2026-05-15
+% 2026-05-18
 
 # NAME
 

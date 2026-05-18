@@ -229,6 +229,18 @@ var optionLabels = {
   "infdatasci": "Information and Data Sciences",
   "medee": "Medical and Electrical Engineering"
 };
+var dateTypeLabels = {
+  "published": "Publication",
+  "submitted": "Submission for publication",
+  "completed": "Completion",
+  "degree": "Degree Awarded"
+};
+var isPublishedLabels = {
+  "pub": "Published",
+  "inpress": "In Press",
+  "submitted": "Submitted",
+  "unpub": "Unpublished"
+};
 var thesisTypeLabels = {
   "phd": "Dissertation (Ph.D.)",
   "masters": "Master's thesis",
@@ -286,32 +298,90 @@ var ThesisSearchUI = class {
     const formHTML = `
 <form method="get" id="thesis-search-form">
 
-<div class="ts-text-row">
-  <label for="q_name">Search field:</label>
-  <select name="q_name" id="q_name">
-    <optgroup label="Text searches">
-      <option value="by_text">Full text (title / abstract / keywords)</option>
-      <option value="by_title">Title</option>
-      <option value="by_abstract">Abstract</option>
-      <option value="by_author">Author name</option>
-      <option value="by_advisor">Advisor name</option>
-      <option value="by_committee">Committee member name</option>
-      <option value="by_orcid">ORCID</option>
-      <option value="by_doi">DOI</option>
-      <option value="by_reviewer">Reviewer</option>
-      <option value="by_depositor">Depositor (username or name)</option>
-      <option value="by_funder">Funding agency / grant number</option>
-      <option value="by_eprintid">Item ID (exact number)</option>
-    </optgroup>
-  </select>
-  <input id="q" name="q" type="search" size="45"
-         placeholder="use * as wildcard" value="">
+<div class="ts-fields">
+  <div class="ts-field-row">
+    <label for="q_title">Title:</label>
+    <input id="q_title" name="q_title" type="search" size="45" placeholder="use * as wildcard">
+  </div>
+  <div class="ts-field-row">
+    <label for="q_alt_title">Alternate Title:</label>
+    <input id="q_alt_title" name="q_alt_title" type="search" size="45" placeholder="use * as wildcard">
+  </div>
+  <div class="ts-field-row">
+    <label for="q_author">Authors:</label>
+    <input id="q_author" name="q_author" type="search" size="45" placeholder="use * as wildcard">
+  </div>
+  <div class="ts-field-row">
+    <label for="q_orcid">ORCID:</label>
+    <input id="q_orcid" name="q_orcid" type="search" size="45" placeholder="use * as wildcard">
+  </div>
+  <div class="ts-field-row">
+    <label for="q_abstract">Abstract:</label>
+    <input id="q_abstract" name="q_abstract" type="search" size="45" placeholder="use * as wildcard">
+  </div>
+  <div class="ts-field-row">
+    <label for="q_eprintid">Item ID:</label>
+    <input id="q_eprintid" name="q_eprintid" type="text" size="9">
+  </div>
+  <div class="ts-field-row">
+    <label for="q_doi">DOI:</label>
+    <input id="q_doi" name="q_doi" type="search" size="45" placeholder="use * as wildcard">
+  </div>
+  <div class="ts-field-row">
+    <label for="q_username">Username:</label>
+    <input id="q_username" name="q_username" type="search" size="45">
+  </div>
+  <div class="ts-field-row">
+    <label for="q_depositor_name">Name:</label>
+    <input id="q_depositor_name" name="q_depositor_name" type="search" size="45" placeholder="use * as wildcard">
+  </div>
+</div>
+
+<div class="ts-checks-row">
+  <fieldset>
+    <legend>Item Status</legend>
+    ${this.checkboxGroup("eprint_status", eprintStatusLabels, [
+      "buffer",
+      "archive"
+    ])}
+  </fieldset>
+</div>
+
+<div class="ts-fields">
+  <div class="ts-field-row">
+    <label for="q_reviewer">Reviewer:</label>
+    <input id="q_reviewer" name="q_reviewer" type="search" size="45" placeholder="use * as wildcard">
+  </div>
+</div>
+
+<div class="ts-checks-row">
+  <fieldset>
+    <legend>Review Status</legend>
+    ${this.checkboxGroup("review_status", reviewStatusLabels, [])}
+  </fieldset>
+
+  <fieldset>
+    <legend>Thesis Availability</legend>
+    ${this.checkboxGroup("full_text_status", fullTextStatusLabels, [])}
+  </fieldset>
+
+  <fieldset>
+    <legend>Status</legend>
+    ${this.checkboxGroup("ispublished", isPublishedLabels, [])}
+  </fieldset>
 </div>
 
 <div class="ts-year-row">
-  <label>Degree year:</label>
+  <label>Degree Date (Year Only):</label>
   From <input type="number" id="year_from" name="year_from" size="6" min="1900" max="2100">
   to   <input type="number" id="year_to"   name="year_to"   size="6" min="1900" max="2100">
+</div>
+
+<div class="ts-checks-row">
+  <fieldset>
+    <legend>Date Type</legend>
+    ${this.checkboxGroup("date_type", dateTypeLabels, [])}
+  </fieldset>
 </div>
 
 <div class="ts-selects-row">
@@ -349,46 +419,73 @@ var ThesisSearchUI = class {
     <label class="ts-merge-label">
       <input type="radio" name="option_minor_merge" value="ANY" checked> Any of these
     </label>
+    <label class="ts-merge-label">
+      <input type="radio" name="option_minor_merge" value="ALL"> All of these
+    </label>
   </fieldset>
 </div>
 
 <div class="ts-checks-row">
   <fieldset>
-    <legend>Item Status</legend>
-    ${this.checkboxGroup("eprint_status", eprintStatusLabels, [
-      "archive"
-    ])}
-  </fieldset>
-
-  <fieldset>
     <legend>Thesis Type</legend>
     ${this.checkboxGroup("thesis_type", thesisTypeLabels, [])}
   </fieldset>
+</div>
 
-  <fieldset>
-    <legend>Thesis Availability</legend>
-    ${this.checkboxGroup("full_text_status", fullTextStatusLabels, [])}
-  </fieldset>
-
-  <fieldset>
-    <legend>Review Status</legend>
-    ${this.checkboxGroup("review_status", reviewStatusLabels, [])}
-  </fieldset>
+<div class="ts-fields">
+  <div class="ts-field-row">
+    <label for="q_advisor">Advisor Name:</label>
+    <input id="q_advisor" name="q_advisor" type="search" size="45" placeholder="use * as wildcard">
+  </div>
+  <div class="ts-field-row">
+    <label for="q_committee">Committee Member Name:</label>
+    <input id="q_committee" name="q_committee" type="search" size="45" placeholder="use * as wildcard">
+  </div>
+  <div class="ts-field-row">
+    <label for="q_funder_agency">Funding Agency:</label>
+    <input id="q_funder_agency" name="q_funder_agency" type="search" size="45" placeholder="use * as wildcard">
+  </div>
+  <div class="ts-field-row">
+    <label for="q_grant_number">Grant Number:</label>
+    <input id="q_grant_number" name="q_grant_number" type="search" size="45" placeholder="use * as wildcard">
+  </div>
+  <div class="ts-field-row">
+    <label for="q_group">Group:</label>
+    <input id="q_group" name="q_group" type="search" size="45"
+           list="q_group_list" placeholder="type to filter groups">
+    <datalist id="q_group_list"></datalist>
+  </div>
+  <div class="ts-field-row">
+    <label for="q_other_numbering_name">Other Numbering System Name:</label>
+    <input id="q_other_numbering_name" name="q_other_numbering_name" type="search" size="45" placeholder="use * as wildcard">
+  </div>
+  <div class="ts-field-row">
+    <label for="q_other_numbering_id">Other Numbering System ID:</label>
+    <input id="q_other_numbering_id" name="q_other_numbering_id" type="search" size="45" placeholder="use * as wildcard">
+  </div>
 </div>
 
 <div class="ts-buttons-row">
-  <label>Results must fulfil:
+  <label>Retrieved records must fulfil:
     <select id="satisfyall" name="satisfyall">
-      <option value="ALL" selected>all of these conditions (AND)</option>
-      <option value="ANY">any of these conditions (OR)</option>
+      <option value="ALL" selected>all of these conditions</option>
+      <option value="ANY">any of these conditions</option>
     </select>
   </label>
-  <input type="submit" value="\u{1F50E} Search">
-  <input type="reset" value="\u274C Reset">
+  <label>Order:
+    <select id="order" name="order">
+      <option value="date/creators_name/title">by year (oldest first)</option>
+      <option value="-date/creators_name/title" selected>by year (most recent first)</option>
+      <option value="title/creators_name/-date">by title</option>
+      <option value="creators_name/-date/title">by author's name</option>
+    </select>
+  </label>
+  <input type="submit" value="Search">
+  <input type="reset" value="Reset">
 </div>
 
 </form>
-<p><section class="thesis-search-results" id="thesis-search-results"></section>`;
+<section class="thesis-search-results" id="thesis-search-results"></section>`;
     this.searchElement.innerHTML = formHTML;
     this.resultSection = this.searchElement.querySelector("section");
     this.searchElement.querySelector("form").addEventListener("submit", (e) => {
@@ -407,14 +504,16 @@ var ThesisSearchUI = class {
   }
   // --- Vocabulary loading ---------------------------------------------------
   async loadVocabularies() {
-    const [divisions, optionsMajor, optionsMinor] = await Promise.all([
+    const [divisions, optionsMajor, optionsMinor, localGroups] = await Promise.all([
       this.clientAPI.getStringList(this.cName, "get_distinct_divisions"),
       this.clientAPI.getStringList(this.cName, "get_distinct_option_major"),
-      this.clientAPI.getStringList(this.cName, "get_distinct_option_minor")
+      this.clientAPI.getStringList(this.cName, "get_distinct_option_minor"),
+      this.clientAPI.getStringList(this.cName, "get_distinct_local_group")
     ]);
     this.populateSelect("divisions", divisions, divisionLabels);
     this.populateSelect("option_major", optionsMajor, optionLabels);
     this.populateSelect("option_minor", optionsMinor, optionLabels);
+    this.populateDatalist("q_group_list", localGroups);
   }
   populateSelect(id, codes, labelMap) {
     const sel = document.getElementById(id);
@@ -424,27 +523,45 @@ var ThesisSearchUI = class {
       return `<option value="${code}">${label}</option>`;
     }).join("");
   }
+  populateDatalist(id, values) {
+    const dl = document.getElementById(id);
+    if (!dl) return;
+    dl.innerHTML = values.map((v) => `<option value="${escapeHTML(v)}">`).join("");
+  }
   // --- URL state -----------------------------------------------------------
   restoreFromURL() {
     const params = new URL(window.location.href).searchParams;
-    const qName = params.get("q_name");
-    const q = params.get("q");
-    if (qName) {
-      const sel = document.getElementById("q_name");
-      if (sel) sel.value = qName;
+    const textFieldIds = [
+      "q_title",
+      "q_alt_title",
+      "q_author",
+      "q_orcid",
+      "q_abstract",
+      "q_eprintid",
+      "q_doi",
+      "q_username",
+      "q_depositor_name",
+      "q_reviewer",
+      "q_advisor",
+      "q_committee",
+      "q_funder_agency",
+      "q_grant_number",
+      "q_group",
+      "q_other_numbering_name",
+      "q_other_numbering_id"
+    ];
+    for (const id of textFieldIds) {
+      const v = params.get(id);
+      if (v) document.getElementById(id).value = v;
     }
-    if (q) {
-      const inp = document.getElementById("q");
-      if (inp) inp.value = q;
-    }
-    const setNum = (id, key) => {
-      const v = params.get(key);
+    const setNum = (id) => {
+      const v = params.get(id);
       if (v) document.getElementById(id).value = v;
     };
-    setNum("year_from", "year_from");
-    setNum("year_to", "year_to");
-    const restoreMultiSelect = (id, key) => {
-      const values = params.getAll(key);
+    setNum("year_from");
+    setNum("year_to");
+    const restoreMultiSelect = (id) => {
+      const values = params.getAll(id);
       if (!values.length) return;
       const sel = document.getElementById(id);
       if (!sel) return;
@@ -452,9 +569,9 @@ var ThesisSearchUI = class {
         opt.selected = values.includes(opt.value);
       }
     };
-    restoreMultiSelect("divisions", "divisions");
-    restoreMultiSelect("option_major", "option_major");
-    restoreMultiSelect("option_minor", "option_minor");
+    restoreMultiSelect("divisions");
+    restoreMultiSelect("option_major");
+    restoreMultiSelect("option_minor");
     const restoreChecks = (name) => {
       const values = params.getAll(name);
       if (!values.length) return;
@@ -466,12 +583,20 @@ var ThesisSearchUI = class {
     restoreChecks("thesis_type");
     restoreChecks("full_text_status");
     restoreChecks("review_status");
+    restoreChecks("date_type");
+    restoreChecks("ispublished");
     const satisfyAll = params.get("satisfyall");
     if (satisfyAll) {
       const sel = document.getElementById("satisfyall");
       if (sel) sel.value = satisfyAll;
     }
-    if (qName || q || params.get("year_from") || params.get("year_to") || params.getAll("divisions").length || params.getAll("thesis_type").length) {
+    const order = params.get("order");
+    if (order) {
+      const sel = document.getElementById("order");
+      if (sel) sel.value = order;
+    }
+    const anyText = textFieldIds.some((id) => params.get(id));
+    if (anyText || params.get("year_from") || params.get("year_to") || params.getAll("divisions").length || params.getAll("thesis_type").length || params.getAll("date_type").length || params.getAll("ispublished").length) {
       this.runSearch();
     }
   }
@@ -479,26 +604,45 @@ var ThesisSearchUI = class {
     const url = new URL(window.location.href);
     url.search = "";
     const p = url.searchParams;
-    const qName = document.getElementById("q_name").value;
-    const q = document.getElementById("q").value.trim();
-    if (qName) p.set("q_name", qName);
-    if (q) p.set("q", q);
-    const addNum = (id, key) => {
+    const textFieldIds = [
+      "q_title",
+      "q_alt_title",
+      "q_author",
+      "q_orcid",
+      "q_abstract",
+      "q_eprintid",
+      "q_doi",
+      "q_username",
+      "q_depositor_name",
+      "q_reviewer",
+      "q_advisor",
+      "q_committee",
+      "q_funder_agency",
+      "q_grant_number",
+      "q_group",
+      "q_other_numbering_name",
+      "q_other_numbering_id"
+    ];
+    for (const id of textFieldIds) {
       const v = document.getElementById(id).value.trim();
-      if (v) p.set(key, v);
+      if (v) p.set(id, v);
+    }
+    const addNum = (id) => {
+      const v = document.getElementById(id).value.trim();
+      if (v) p.set(id, v);
     };
-    addNum("year_from", "year_from");
-    addNum("year_to", "year_to");
-    const addMultiSelect = (id, key) => {
+    addNum("year_from");
+    addNum("year_to");
+    const addMultiSelect = (id) => {
       const sel = document.getElementById(id);
       if (!sel) return;
       for (const opt of Array.from(sel.options)) {
-        if (opt.selected) p.append(key, opt.value);
+        if (opt.selected) p.append(id, opt.value);
       }
     };
-    addMultiSelect("divisions", "divisions");
-    addMultiSelect("option_major", "option_major");
-    addMultiSelect("option_minor", "option_minor");
+    addMultiSelect("divisions");
+    addMultiSelect("option_major");
+    addMultiSelect("option_minor");
     const addChecks = (name) => {
       document.querySelectorAll(`input[name="${name}"]:checked`).forEach((cb) => {
         p.append(name, cb.value);
@@ -508,8 +652,12 @@ var ThesisSearchUI = class {
     addChecks("thesis_type");
     addChecks("full_text_status");
     addChecks("review_status");
+    addChecks("date_type");
+    addChecks("ispublished");
     const satisfyAll = document.getElementById("satisfyall").value;
     p.set("satisfyall", satisfyAll);
+    const order = document.getElementById("order").value;
+    p.set("order", order);
     window.history.pushState({}, "", url);
   }
   // --- Query execution -----------------------------------------------------
@@ -517,17 +665,87 @@ var ThesisSearchUI = class {
     this.updateURL();
     const satisfyAll = document.getElementById("satisfyall").value === "ALL";
     const conditions = [];
-    const qName = document.getElementById("q_name").value;
-    const rawQ = document.getElementById("q").value.trim();
-    if (rawQ !== "") {
-      const q = qName === "by_eprintid" ? rawQ : rawQ.replace(/\*/g, "%");
-      conditions.push(() => this.fetchResults(qName, q));
+    const textFields = [
+      {
+        id: "q_title",
+        query: "by_title"
+      },
+      {
+        id: "q_alt_title",
+        query: "by_alt_title"
+      },
+      {
+        id: "q_author",
+        query: "by_author"
+      },
+      {
+        id: "q_orcid",
+        query: "by_orcid"
+      },
+      {
+        id: "q_abstract",
+        query: "by_abstract"
+      },
+      {
+        id: "q_doi",
+        query: "by_doi"
+      },
+      {
+        id: "q_username",
+        query: "by_depositor_username"
+      },
+      {
+        id: "q_depositor_name",
+        query: "by_depositor_name"
+      },
+      {
+        id: "q_reviewer",
+        query: "by_reviewer"
+      },
+      {
+        id: "q_advisor",
+        query: "by_advisor"
+      },
+      {
+        id: "q_committee",
+        query: "by_committee"
+      },
+      {
+        id: "q_funder_agency",
+        query: "by_funder_agency"
+      },
+      {
+        id: "q_grant_number",
+        query: "by_grant_number"
+      },
+      {
+        id: "q_group",
+        query: "by_local_group"
+      },
+      {
+        id: "q_other_numbering_name",
+        query: "by_other_numbering_name"
+      },
+      {
+        id: "q_other_numbering_id",
+        query: "by_other_numbering_id"
+      }
+    ];
+    for (const { id, query } of textFields) {
+      const val = document.getElementById(id).value.trim();
+      if (val) {
+        const q = val.replace(/\*/g, "%");
+        conditions.push(() => this.fetchResults(query, q));
+      }
+    }
+    const eprintidVal = document.getElementById("q_eprintid").value.trim();
+    if (eprintidVal) {
+      conditions.push(() => this.fetchResults("by_eprintid", eprintidVal));
     }
     const yearFrom = document.getElementById("year_from").value.trim();
     const yearTo = document.getElementById("year_to").value.trim();
     if (yearFrom && yearTo) {
-      const yf = yearFrom, yt = yearTo;
-      conditions.push(() => this.fetchResults("by_year_from", yf).then((results) => results.filter((r) => r.date <= parseInt(yt))));
+      conditions.push(() => this.fetchResults2("by_year_range", yearFrom, yearTo));
     } else if (yearFrom) {
       conditions.push(() => this.fetchResults("by_year_from", yearFrom));
     } else if (yearTo) {
@@ -554,8 +772,14 @@ var ThesisSearchUI = class {
       }
     }
     const optMinor = this.getSelectedValues("option_minor");
+    const optMinorMerge = this.getRadioValue("option_minor_merge");
     if (optMinor.length > 0) {
-      conditions.push(() => this.fetchResults("by_option_minor", optMinor.join(",")));
+      const q = optMinor.join(",");
+      if (optMinorMerge === "ALL") {
+        conditions.push(() => this.fetchResults("by_option_minor", q).then((results) => results.filter((r) => optMinor.every((o) => (r.option_minor ?? []).includes(o)))));
+      } else {
+        conditions.push(() => this.fetchResults("by_option_minor", q));
+      }
     }
     const statusVals = this.getCheckedValues("eprint_status");
     if (statusVals.length > 0) {
@@ -572,6 +796,14 @@ var ThesisSearchUI = class {
     const reviewStatuses = this.getCheckedValues("review_status");
     if (reviewStatuses.length > 0) {
       conditions.push(() => this.fetchResults("by_review_status", reviewStatuses.join(",")));
+    }
+    const dateTypes = this.getCheckedValues("date_type");
+    if (dateTypes.length > 0) {
+      conditions.push(() => this.fetchResults("by_date_type", dateTypes.join(",")));
+    }
+    const pubStatuses = this.getCheckedValues("ispublished");
+    if (pubStatuses.length > 0) {
+      conditions.push(() => this.fetchResults("by_ispublished", pubStatuses.join(",")));
     }
     if (conditions.length === 0) {
       this.resultSection.innerHTML = `<p>Fill in at least one field and press \u{1F50E}</p>`;
@@ -591,6 +823,17 @@ var ThesisSearchUI = class {
     url.pathname = `${this.basePath}api/${this.cName}/${qName}/q`;
     url.search = new URLSearchParams({
       q
+    }).toString();
+    const resp = await fetch(url.toString());
+    if (!resp.ok) return [];
+    return await resp.json();
+  }
+  async fetchResults2(qName, q1, q2) {
+    const url = new URL(this.baseUrl);
+    url.pathname = `${this.basePath}api/${this.cName}/${qName}/q1/q2`;
+    url.search = new URLSearchParams({
+      q1,
+      q2
     }).toString();
     const resp = await fetch(url.toString());
     if (!resp.ok) return [];
@@ -618,16 +861,33 @@ var ThesisSearchUI = class {
     }
     return result;
   }
+  sortResults(records, order) {
+    const r = [
+      ...records
+    ];
+    switch (order) {
+      case "date/creators_name/title":
+        return r.sort((a, b) => (a.date ?? 0) - (b.date ?? 0) || (a.creator_names_idx ?? "").localeCompare(b.creator_names_idx ?? "") || (a.title ?? "").localeCompare(b.title ?? ""));
+      case "title/creators_name/-date":
+        return r.sort((a, b) => (a.title ?? "").localeCompare(b.title ?? "") || (a.creator_names_idx ?? "").localeCompare(b.creator_names_idx ?? "") || (b.date ?? 0) - (a.date ?? 0));
+      case "creators_name/-date/title":
+        return r.sort((a, b) => (a.creator_names_idx ?? "").localeCompare(b.creator_names_idx ?? "") || (b.date ?? 0) - (a.date ?? 0) || (a.title ?? "").localeCompare(b.title ?? ""));
+      default:
+        return r.sort((a, b) => (b.date ?? 0) - (a.date ?? 0) || (a.creator_names_idx ?? "").localeCompare(b.creator_names_idx ?? "") || (a.title ?? "").localeCompare(b.title ?? ""));
+    }
+  }
   // --- Rendering -----------------------------------------------------------
   renderResults(records) {
     if (records.length === 0) {
       this.resultSection.innerHTML = `<p>No records found.</p>`;
       return;
     }
-    const csvText = this.formatCSV(records);
+    const order = document.getElementById("order").value;
+    const sorted = this.sortResults(records, order);
+    const csvText = this.formatCSV(sorted);
     const downloadEl = csvToDownloadElements(csvText, `caltechthesis_${Date.now()}.csv`);
-    const tableHTML = this.formatTable(records);
-    this.resultSection.innerHTML = `<p>${records.length} record(s) found.</p>`;
+    const tableHTML = this.formatTable(sorted);
+    this.resultSection.innerHTML = `<p>${sorted.length} record(s) found.</p>`;
     this.resultSection.appendChild(downloadEl);
     this.resultSection.insertAdjacentHTML("beforeend", tableHTML);
   }

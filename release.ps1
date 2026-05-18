@@ -1,5 +1,5 @@
 <#
-generated with CMTools 0.0.44 070692e
+generated with CMTools 0.0.45 536ae4a
 
 .SYNOPSIS
 Release script for cold on GitHub using gh CLI.

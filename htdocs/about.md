@@ -33,7 +33,7 @@ maintainer:
     id: https://orcid.org/0000-0003-0900-6903
 
 repository_code: https://github.com/caltechlibrary/cold
-version: 0.0.44
+version: 0.0.45
 license_url: https://caltechlibrary.github.io/cold/LICENSE
 operating_system:
   - Linux
@@ -53,16 +53,17 @@ keywords:
   - objects
   - controlled vocabulary
 
-date_released: 2026-05-15
+date_released: 2026-05-18
 ---
 
 About this software
 ===================
 
-## cold 0.0.44
+## cold 0.0.45
 
-- Added CaltechTHESIS full-text staff search (harvests MySQL into dataset collection, 30 named queries, browser-side search UI)
-- Fixed Publications by Person Identifiers CSV column headings to search_clpid and search_orcid
+- Improved publications by person identifier report
+  - by Person Identifiers CSV column headings to search_clpid and search_orcid
+- Implemented CaltechTHESIS Administrative Search to COLD following similar structure
 
 ## Authors
 
