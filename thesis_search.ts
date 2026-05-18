@@ -535,7 +535,9 @@ export class ThesisSearchUI {
       if (!values.length) {
         if (!isSearchState) return;
         document.querySelectorAll<HTMLInputElement>(`input[name="${name}"]`)
-          .forEach((cb) => { cb.checked = false; });
+          .forEach((cb) => {
+            cb.checked = false;
+          });
         return;
       }
       document.querySelectorAll<HTMLInputElement>(`input[name="${name}"]`)

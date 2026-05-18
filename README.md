@@ -18,9 +18,9 @@ Access control is provided by the front end web server integrated with Shibbolet
 
 ## Release Notes
 
-- version: 0.0.42
+- version: 0.0.46
 - status: active
-- released: 2026-05-11
+- released: 2026-05-18
 
 - Self-service clpid rename: new /rename/people page linked from dashboard and people view; shows full person record for confirmation; validates old key exists and new key is unique
 - Fixed some relative path issues discovered in production deployment.
@@ -44,9 +44,9 @@ Access control is provided by the front end web server integrated with Shibbolet
 
 ## Software Requirements
 
-- Deno >= 2.7.12
+- Deno >= 2.7.14
 - Dataset >= 2.4.0
-- CMTools >= 0.0.43
+- CMTools >= 0.0.45b
 
 ### Software Suggestions
 

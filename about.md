@@ -33,7 +33,7 @@ maintainer:
     id: https://orcid.org/0000-0003-0900-6903
 
 repository_code: https://github.com/caltechlibrary/cold
-version: 0.0.45
+version: 0.0.46
 license_url: https://caltechlibrary.github.io/cold/LICENSE
 operating_system:
   - Linux
@@ -59,11 +59,13 @@ date_released: 2026-05-18
 About this software
 ===================
 
-## cold 0.0.45
+## cold 0.0.46
 
-- Improved publications by person identifier report
-  - by Person Identifiers CSV column headings to search_clpid and search_orcid
-- Implemented CaltechTHESIS Administrative Search to COLD following similar structure
+- Search CaltechTHESIS form
+  - Fix ORCID to search all orcid fields not just authors's orcid
+  - Fixed default pre-check boxes
+- Re-assign clpid for CaltechPEOPLE form
+  - Add an "internal notes" box to the form.
 
 ## Authors
 
@@ -118,9 +120,9 @@ Access control is provided by the front end web server integrated with Shibbolet
 
 ## Software Requirements
 
-- Deno >= 2.7.12
+- Deno >= 2.7.14
 - Dataset >= 2.4.0
-- CMTools >= 0.0.43
+- CMTools >= 0.0.45b
 
 
 ## Software Suggestions

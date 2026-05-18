@@ -114,7 +114,8 @@ function renderPersonDetails(p: Record<string, unknown>): string {
   if (p.internal_notes) {
     parts.push(
       `<div class="internal-notes"><strong>Internal Notes:</strong><pre>${
-        String(p.internal_notes).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+        String(p.internal_notes).replace(/&/g, "&amp;").replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
       }</pre></div>`,
     );
   }
