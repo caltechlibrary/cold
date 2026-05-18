@@ -213,6 +213,9 @@ function renderPersonDetails(p) {
   if (p.updated) {
     parts.push(`<div class="updated">Record Updated: ${p.updated}</div>`);
   }
+  if (p.internal_notes) {
+    parts.push(`<div class="internal-notes"><strong>Internal Notes:</strong><pre>${String(p.internal_notes).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")}</pre></div>`);
+  }
   return parts.join("\n");
 }
 document.addEventListener("focusout", async (event) => {

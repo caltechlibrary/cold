@@ -572,9 +572,16 @@ var ThesisSearchUI = class {
     restoreMultiSelect("divisions");
     restoreMultiSelect("option_major");
     restoreMultiSelect("option_minor");
+    const isSearchState = params.has("satisfyall");
     const restoreChecks = (name) => {
       const values = params.getAll(name);
-      if (!values.length) return;
+      if (!values.length) {
+        if (!isSearchState) return;
+        document.querySelectorAll(`input[name="${name}"]`).forEach((cb) => {
+          cb.checked = false;
+        });
+        return;
+      }
       document.querySelectorAll(`input[name="${name}"]`).forEach((cb) => {
         cb.checked = values.includes(cb.value);
       });
@@ -905,6 +912,7 @@ var ThesisSearchUI = class {
     const rows = records.map((r) => {
       const authors = (r.creators ?? []).map((c) => `${c.family}, ${c.given}`).join("; ");
       const advisors = (r.thesis_advisor ?? []).map((c) => `${c.family}, ${c.given}`).join("; ");
+      const committee = (r.thesis_committee ?? []).map((c) => `${c.family}, ${c.given}`).join("; ");
       const divs = (r.divisions ?? []).map((d) => divisionLabels[d] ?? d).join("; ");
       const opts = (r.option_major ?? []).map((o) => optionLabels[o] ?? o).join("; ");
       const flag = this.statusFlag(r);
@@ -913,6 +921,7 @@ var ThesisSearchUI = class {
         <td>${escapeHTML(r.title)}</td>
         <td>${escapeHTML(authors)}</td>
         <td>${escapeHTML(advisors)}</td>
+        <td>${escapeHTML(committee)}</td>
         <td>${r.date ?? ""}</td>
         <td>${r.thesis_degree ?? ""}</td>
         <td>${escapeHTML(divs)}</td>
@@ -926,6 +935,7 @@ var ThesisSearchUI = class {
         <th>Title</th>
         <th>Author(s)</th>
         <th>Advisor(s)</th>
+        <th>Committee</th>
         <th>Year</th>
         <th>Degree</th>
         <th>Division(s)</th>
@@ -936,11 +946,12 @@ var ThesisSearchUI = class {
     </table>`;
   }
   formatCSV(records) {
-    const header = "eprintid,link,title,authors,advisors,year,degree,divisions,option_major,eprint_status,metadata_visibility,full_text_status,review_status";
+    const header = "eprintid,link,title,authors,advisors,committee,year,degree,divisions,option_major,eprint_status,metadata_visibility,full_text_status,review_status";
     const rows = records.map((r) => {
       const q = (s) => `"${s.replace(/"/g, '""')}"`;
       const authors = (r.creators ?? []).map((c) => `${c.family}, ${c.given}`).join("; ");
       const advisors = (r.thesis_advisor ?? []).map((c) => `${c.family}, ${c.given}`).join("; ");
+      const committee = (r.thesis_committee ?? []).map((c) => `${c.family}, ${c.given}`).join("; ");
       const divs = (r.divisions ?? []).join("; ");
       const opts = (r.option_major ?? []).join("; ");
       return [
@@ -949,6 +960,7 @@ var ThesisSearchUI = class {
         q(r.title ?? ""),
         q(authors),
         q(advisors),
+        q(committee),
         r.date ?? "",
         q(r.thesis_degree ?? ""),
         q(divs),

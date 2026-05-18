@@ -58,6 +58,7 @@ The new ID must not already exist.</p>
 </ul></div>
 <div class="included-in-feeds">{{people.given_name}} {{people.family_name}} is {{#unless people.include_in_feeds}}NOT {{/unless}}included in feeds</div>
 {{#if people.updated}}<div class="updated">Record Updated: {{people.updated}}</div>{{/if}}
+{{#if people.internal_notes}}<div class="internal-notes"><strong>Internal Notes:</strong><pre>{{people.internal_notes}}</pre></div>{{/if}}
 {{/if}}
 </div>
 

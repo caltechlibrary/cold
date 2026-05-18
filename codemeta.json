@@ -95,10 +95,10 @@
     "GNU Make",
     "Pandoc >= 3.9"
   ],
-  "version": "0.0.45",
+  "version": "0.0.46",
   "developmentStatus": "active",
   "issueTracker": "https://github.com/caltechlibrary/cold/issues",
   "downloadUrl": "https://github.com/caltechlibrary/cold/releases/latest",
-  "releaseNotes": "- Improved publications by person identifier report\n  - by Person Identifiers CSV column headings to search_clpid and search_orcid\n- Implemented CaltechTHESIS Administrative Search to COLD following similar structure",
+  "releaseNotes": "- Search CaltechTHESIS form\n  - Fix ORCID to search all orcid fields not just authors's orcid\n  - Fixed default pre-check boxes\n- Re-assign clpid for CaltechPEOPLE form\n  - Add an \"internal notes\" box to the form.",
   "copyrightYear": 2026
 }

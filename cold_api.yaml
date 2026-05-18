@@ -569,8 +569,17 @@ collections:
         ORDER BY src->>'date' DESC
 
       by_orcid: |
-        SELECT src FROM caltechthesis
-        WHERE src->>'creator_orcid_idx' LIKE ?
+        WITH q AS (SELECT ? AS pattern)
+        SELECT src FROM caltechthesis, q
+        WHERE src->>'creator_orcid_idx' LIKE q.pattern
+           OR EXISTS (
+             SELECT 1 FROM json_each(src, '$.thesis_advisor')
+             WHERE json_extract(value, '$.orcid') LIKE q.pattern
+           )
+           OR EXISTS (
+             SELECT 1 FROM json_each(src, '$.thesis_committee')
+             WHERE json_extract(value, '$.orcid') LIKE q.pattern
+           )
         ORDER BY src->>'date' DESC
 
       by_advisor: |

@@ -156,6 +156,7 @@ interface Creator {
   given: string;
   id: string;
   orcid: string;
+  role?: string;
 }
 
 interface ThesisRecord {
@@ -173,11 +174,13 @@ interface ThesisRecord {
   link: string;
   creators: Creator[] | null;
   thesis_advisor: Creator[] | null;
+  thesis_committee: Creator[] | null;
   divisions: string[] | null;
   option_major: string[] | null;
   option_minor: string[] | null;
   creator_names_idx: string;
   advisor_names_idx: string;
+  committee_names_idx: string;
   reviewer: string;
   lastmod: string;
 }
@@ -526,9 +529,15 @@ export class ThesisSearchUI {
     restoreMultiSelect("option_major");
     restoreMultiSelect("option_minor");
 
+    const isSearchState = params.has("satisfyall");
     const restoreChecks = (name: string) => {
       const values = params.getAll(name);
-      if (!values.length) return;
+      if (!values.length) {
+        if (!isSearchState) return;
+        document.querySelectorAll<HTMLInputElement>(`input[name="${name}"]`)
+          .forEach((cb) => { cb.checked = false; });
+        return;
+      }
       document.querySelectorAll<HTMLInputElement>(`input[name="${name}"]`)
         .forEach((cb) => {
           cb.checked = values.includes(cb.value);
@@ -946,6 +955,9 @@ export class ThesisSearchUI {
       const advisors = (r.thesis_advisor ?? []).map((c) =>
         `${c.family}, ${c.given}`
       ).join("; ");
+      const committee = (r.thesis_committee ?? []).map((c) =>
+        `${c.family}, ${c.given}`
+      ).join("; ");
       const divs = (r.divisions ?? []).map((d) => divisionLabels[d] ?? d).join(
         "; ",
       );
@@ -958,6 +970,7 @@ export class ThesisSearchUI {
         <td>${escapeHTML(r.title)}</td>
         <td>${escapeHTML(authors)}</td>
         <td>${escapeHTML(advisors)}</td>
+        <td>${escapeHTML(committee)}</td>
         <td>${r.date ?? ""}</td>
         <td>${r.thesis_degree ?? ""}</td>
         <td>${escapeHTML(divs)}</td>
@@ -972,6 +985,7 @@ export class ThesisSearchUI {
         <th>Title</th>
         <th>Author(s)</th>
         <th>Advisor(s)</th>
+        <th>Committee</th>
         <th>Year</th>
         <th>Degree</th>
         <th>Division(s)</th>
@@ -984,12 +998,15 @@ export class ThesisSearchUI {
 
   private formatCSV(records: ThesisRecord[]): string {
     const header =
-      "eprintid,link,title,authors,advisors,year,degree,divisions,option_major,eprint_status,metadata_visibility,full_text_status,review_status";
+      "eprintid,link,title,authors,advisors,committee,year,degree,divisions,option_major,eprint_status,metadata_visibility,full_text_status,review_status";
     const rows = records.map((r) => {
       const q = (s: string) => `"${s.replace(/"/g, '""')}"`;
       const authors = (r.creators ?? []).map((c) => `${c.family}, ${c.given}`)
         .join("; ");
       const advisors = (r.thesis_advisor ?? []).map((c) =>
+        `${c.family}, ${c.given}`
+      ).join("; ");
+      const committee = (r.thesis_committee ?? []).map((c) =>
         `${c.family}, ${c.given}`
       ).join("; ");
       const divs = (r.divisions ?? []).join("; ");
@@ -1000,6 +1017,7 @@ export class ThesisSearchUI {
         q(r.title ?? ""),
         q(authors),
         q(advisors),
+        q(committee),
         r.date ?? "",
         q(r.thesis_degree ?? ""),
         q(divs),
