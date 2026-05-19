@@ -161,7 +161,7 @@ SELECT JSON_OBJECT(
     'doi',                 COALESCE(e.doi, ''),
     'reviewer',            COALESCE(e.reviewer, ''),
     'note',                REPLACE(REPLACE(COALESCE(e.note,     ''), '\\"', '"'), "\\'", "'"),
-    'link',                CONCAT('https://thesis.library.caltech.edu/', e.eprintid),
+    'link',                CONCAT('https://thesis.library.caltech.edu/cgi/users/home?screen=Workflow%3A%3AView&dataset=eprint&dataobj=', e.eprintid),
 
     'depositor_username',  COALESCE(u.username, ''),
     'depositor_name',      COALESCE(CONCAT(u.name_family, ', ', u.name_given), ''),
