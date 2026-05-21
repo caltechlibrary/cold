@@ -1,0 +1,44 @@
+I am working with some data held in a dataset collection using SQLite3 as the JSON store. The schema is ```CREATE TABLE people (
+  _key VARCHAR(255) PRIMARY KEY,
+  src JSON,
+  created DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+```. The `src` columns holds the JSON document. I have records that look like ```{
+    "advisors_id": "",
+    "archivesspace_id": "",
+    "authors_id": "",
+    "bio": "",
+    "caltech": true,
+    "clpid": "Antoine-Solene-L",
+    "directory_person_type": "Academic NonFaculty",
+    "directory_user_id": "santoine",
+    "display_name": "Solene L. Antoine",
+    "division": "Geological and Planetary Sciences",
+    "email": "[email protected]",
+    "family_name": "Antoine",
+    "given_name": "Solene",
+    "groups": [
+        {
+            "clgid": "Division of Geological and Planetary Sciences (GPS)",
+            "group_name": "Division of Geological and Planetary Sciences (GPS)"
+        }
+    ],
+    "include_in_feeds": true,
+    "internal_notes": "",
+    "isni": "",
+    "lcnaf": "",
+    "orcid": "",
+    "postdoc": true,
+    "ror": "https://ror.org/05dxps055",
+    "snac": "",
+    "thesis_id": "",
+    "title": "Postdoctoral Scholar Research Associate in Geology",
+    "updated": "2026-04-13",
+    "viaf": "",
+    "wikidata": ""
+}
+```. I need to correct the `groups` list objects that have a target `clgid` that needs to be corrected. In this example the `clgid` is "Division of Geological and Planetary Sciences (GPS)",
+The clgid needs to be changed to "Division-of-Geological-and-Planetary-Sciences". Keep in mind that the `groups` attribute is a list of there could be many groups in a record that needs updating. Also remember the at the objects in th `groups` array are JSON objects, not strings of encoded JSON objects.
+
+What I need is a SQL update statement that can check all records to make the type of correction I've described.
