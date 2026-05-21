@@ -1,19 +1,18 @@
 ---
 title: cold
-abstract: |-
-  Caltech Library maintains a list of people, groups and funders and their related identifiers. For many years these were managed using a spreadsheets. That has become cumbersome. **COLD** manages data as JSON objects in [dataset](https://github.com/caltechlibrary/dataset) collections.
+abstract: "Caltech Library maintains a list of people, groups and funders and their related identifiers. For many years these were managed using a spreadsheets. That has become cumbersome. **COLD** manages data as JSON objects in [dataset](https://github.com/caltechlibrary/dataset) collections.
 
-  **COLD** is implemented as three web web services
+**COLD** is implemented as three web web services
 
-  - cold web UI
-  - cold JSON API (provided by datasetd)
-  - cold reports (the report request system)
+- cold web UI
+- cold JSON API (provided by datasetd)
+- cold reports (the report request system)
 
-  Reports are implemented as a set of programs or bash scripts.
+Reports are implemented as a set of programs or bash scripts.
 
-  TypeScript+Deno is used to implement the web UI and report system.
-  The JSON API is provided by Dataset's datasetd.
-  Access control is provided by the front end web server integrated with Shibboleth.
+TypeScript+Deno is used to implement the web UI and report system.
+The JSON API is provided by Dataset&#x27;s datasetd.
+Access control is provided by the front end web server integrated with Shibboleth."
 authors:
   - family_name: Doiel
     given_name: R. S.
@@ -94,7 +93,7 @@ Caltech Library maintains a list of people, groups and funders and their related
 Reports are implemented as a set of programs or bash scripts.
 
 TypeScript+Deno is used to implement the web UI and report system.
-The JSON API is provided by Dataset's datasetd.
+The JSON API is provided by Dataset&#x27;s datasetd.
 Access control is provided by the front end web server integrated with Shibboleth.
 
 - [License](https://caltechlibrary.github.io/cold/LICENSE)
