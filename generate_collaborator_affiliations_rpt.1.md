@@ -1,4 +1,4 @@
-%generate_collaborator_affiliations_rpt(1) user manual | 0.0.47 c642655
+%generate_collaborator_affiliations_rpt(1) user manual | 0.0.47 14d98ba
 % R. S.Doiel
 % 2026-05-27
 
