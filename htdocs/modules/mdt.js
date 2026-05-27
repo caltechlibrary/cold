@@ -1,47 +1,23 @@
 // ../metadatatools/version.ts
-var appInfo = {
-  // appName holds the application/package name
-  appName: "metadatatools",
-  // Version number of release
-  version: "0.0.4",
-  // ReleaseDate, the date version.ts was generated
-  releaseDate: "2024-12-11",
-  // ReleaseHash, the Git hash when version.go was generated
-  releaseHash: "d5af0f5",
-  // licenseText holds a copy of the application license text.
-  licenseText: `
-Copyright (c) 2024, Caltech All rights not granted herein are expressly
-reserved by Caltech.
+var version = "0.0.6";
+var releaseDate = "2025-05-05";
+var releaseHash = "50a64de";
+var licenseText = `
 
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
+Copyright (c) 2024, Caltech
+All rights not granted herein are expressly reserved by Caltech.
 
-1. Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 
-2. Redistributions in binary form must reproduce the above copyright
-notice, this list of conditions and the following disclaimer in the
-documentation and/or other materials provided with the distribution.
+1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
 
-3. Neither the name of the copyright holder nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
+2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
-IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
-TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
-PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
-TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
-PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
 
-`
-};
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+`;
 
 // ../metadatatools/arxiv.ts
 var ARXIVPattern = "^arxiv:(\\d{4}\\.\\d{4,5}(v\\d+)?|[a-z\\-]+\\/\\d{7}(v\\d+)?)$";
@@ -63,6 +39,7 @@ async function verifyIdentifier(identifier, u, validate) {
   if (validate(identifier)) {
     const response = await fetch(u);
     if (response !== void 0 && response !== null) {
+      if (response.body !== null) await response.body.cancel();
       return response.ok;
     }
   }
@@ -139,7 +116,7 @@ function normalizeISBN(isbn) {
 // ../metadatatools/isbn_record.ts
 async function verifyISBN(isbn) {
   const normalizedISBN = normalizeISBN(isbn);
-  return verifyIdentifier(isbn, `https://openlibrary.org/isbn/${encodeURIComponent(normalizedISBN)}.json`, validateISBN);
+  return await verifyIdentifier(isbn, `https://openlibrary.org/isbn/${encodeURIComponent(normalizedISBN)}.json`, validateISBN);
 }
 
 // ../metadatatools/isni.ts
@@ -197,7 +174,6 @@ function validateISSN(issn) {
 }
 function normalizeISSN(issn) {
   const bareISSN = stripISSN(issn);
-  console.log(`DEBUG bareISSN -> ${bareISSN}`);
   return `${bareISSN.substring(0, 4)}-${bareISSN.substring(4)}`;
 }
 
@@ -270,7 +246,7 @@ async function verifyORCID(orcid) {
 var PMCIDPattern = "^PMC\\d+$";
 var rePMCID = new RegExp(PMCIDPattern);
 function normalizePMCID(pmcid) {
-  let cleanedID = pmcid.trim().toUpperCase();
+  const cleanedID = pmcid.trim().toUpperCase();
   if (pmcid.startsWith("PMC")) {
     return cleanedID;
   }
@@ -309,7 +285,7 @@ var rorPrefix = "https://ror.org/";
 var RORPattern = "^https:\\/\\/ror\\.org\\/0[a-hj-km-np-tv-z|0-9]{6}[0-9]{2}$|^0[a-hj-km-np-tv-z|0-9]{6}[0-9]{2}$";
 var reROR = new RegExp(RORPattern, "i");
 function normalizeROR(ror) {
-  let bareROR = ror.trim().toLowerCase();
+  const bareROR = ror.trim().toLowerCase();
   if (bareROR.startsWith(rorPrefix)) {
     return bareROR;
   }
@@ -414,7 +390,7 @@ export {
   SNACPattern,
   TELPattern,
   VIAFPattern,
-  appInfo,
+  licenseText,
   newARXIVPattern,
   normalizeArXivID,
   normalizeDOI,
@@ -449,6 +425,8 @@ export {
   reSNAC,
   reTEL,
   reVIAF,
+  releaseDate,
+  releaseHash,
   validateArXivID,
   validateDOI,
   validateEMAIL,
@@ -474,5 +452,6 @@ export {
   verifyPMID,
   verifyROR,
   verifySNAC,
-  verifyVIAF
+  verifyVIAF,
+  version
 };

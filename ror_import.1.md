@@ -1,6 +1,6 @@
-%ror_import(1) user manual | 0.0.31 ea40df2
+%ror_import(1) user manual | 0.0.46c 0780912
 % R. S.Doiel
-% 2025-05-14
+% 2026-05-27
 
 # NAME
 
@@ -13,7 +13,7 @@ ror_import ROR_DUMP_ZIP_FILE
 # DESCRIPTION
 
 ror_import reads the contents of ROR_DUMP_ZIP_FILE and updates the
-ror.ds dataset collection. 
+ror.ds dataset collection.
 
 The ror.ds dataset collection must already exist.
 

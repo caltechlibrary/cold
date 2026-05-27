@@ -1,5 +1,6 @@
 /**
- * ror_import.ts this processes a ROR dump retrieved from zenodo updating the ROR dataset collection.
+ * ror_import.ts processes a ROR dump retrieved from Zenodo, updating the ror.ds dataset collection.
+ * Uses the dataset load command with JSONL format instead of the web API.
  */
 
 import { parseArgs } from "@std/cli/parse-args";
@@ -9,10 +10,7 @@ import ProgressBar from "@deno-library/progress";
 import { licenseText, releaseDate, releaseHash, version } from "./version.ts";
 import { fmtHelp, rorImportHelpText } from "./helptext.ts";
 
-import { Dataset, DatasetApiClient } from "../ts_dataset/mod.ts"; //"https://caltechlibrary.github.io/ts_dataset/mod.ts";
-
 const cName = "ror.ds";
-const ds = new DatasetApiClient(8112, cName);
 
 // Function to extract a specific file from a zip file using the unzip command
 // and a file pattern expressed as a RegExp.
@@ -61,38 +59,69 @@ async function retrieveTextFromZipFile(
   return textDecoder.decode(extractResult.stdout);
 }
 
+/**
+ * Converts a single ROR object to JSONL line format for dataset load.
+ * Format: {"key": "ror-id", "object": {...ror-data...}}
+ * The key is derived from the object's id field with the https://ror.org/ prefix removed.
+ * Note: dataset load expects 'key' and 'object' fields (not __key__ and __object__)
+ */
+function rorToJSONLLine(obj: any): string {
+  const key = obj.id?.replace(/^https:\/\/ror\.org\//, "") || "";
+  return JSON.stringify({
+    key: key,
+    object: obj,
+  });
+}
+
 async function processJSONDump(src: string): Promise<number> {
-  const rorObjects: { [key: string]: any }[] = JSON.parse(src);
-  console.log(`${rorObjects.length} ror to process.`);
+  const rorObjects: any[] = JSON.parse(src);
+  console.log(`${rorObjects.length} ROR objects to process.`);
+
   if (rorObjects.length === 0) {
-    console.error(`No ROR objects to process`);
+    console.error("No ROR objects to process");
     return 1;
   }
-  let i: number = 0;
-  let ror: string = "";
-  console.log(`Clearing data from ${cName}`);
-  await ds.query("clear_ror_data", [], "");
-  const title = "ROR Objects processed";
+
+  // Spawn dataset load command with overwrite flag
+  // Use inherit for stdout/stderr so progress bar and dataset output are visible
+  const cmd = new Deno.Command("dataset", {
+    args: ["load", "-overwrite", cName],
+    stdin: "piped",
+    stdout: "inherit",
+    stderr: "inherit",
+  });
+
+  const process = cmd.spawn();
+  const writer = process.stdin.getWriter();
+
+  // Create progress bar
+  const title = "ROR Objects loaded";
   const total = rorObjects.length;
   const progress = new ProgressBar({
     title,
     total,
   });
 
+  // Stream each ROR object as JSONL to dataset load
+  let count = 0;
   for (const obj of rorObjects) {
-    "id" in obj ? ror = obj.id : ror = "";
-    if (ror === "") {
-      console.error(
-        `failed (#{i}), ror id missing from ${JSON.stringify(obj)}, skipping`,
-      );
-    } else {
-      const key = ror.replace(/https:\/\/ror.org\//, "");
-      await ds.create(key, JSON.stringify(obj));
+    if (obj && obj.id) {
+      const line = rorToJSONLLine(obj) + "\n";
+      await writer.write(new TextEncoder().encode(line));
+      await progress.render(++count);
     }
-    await progress.render(i);
-    i++;
   }
-  await progress.render(i);
+
+  await writer.close();
+
+  const { code } = await process.output();
+
+  if (code !== 0) {
+    console.error(`dataset load failed with exit code ${code}`);
+    return 1;
+  }
+
+  console.log(`\nSuccessfully loaded ${count} ROR objects into ${cName}`);
   return 0;
 }
 
@@ -111,6 +140,7 @@ async function main() {
     },
   });
   const args = app._;
+
   if (app.help) {
     console.log(
       fmtHelp(rorImportHelpText, appName, version, releaseDate, releaseHash),
@@ -126,16 +156,20 @@ async function main() {
     console.log(`${appName} ${version} ${releaseDate} ${releaseHash}`);
     Deno.exit(0);
   }
+
   if (args.length === 0) {
     console.error(`USAGE: ${appName} ROR_DUMP_ZIP_FILE`);
     Deno.exit(1);
   }
+
   let zipFilename: string = "";
   args[0] === undefined || args[0] === "" ? "" : zipFilename = `${args[0]}`;
+
   const jsonSrc: string | undefined = await retrieveTextFromZipFile(
     zipFilename,
     /-data\.json$/,
   );
+
   if (jsonSrc === undefined) {
     Deno.exit(1);
   } else {

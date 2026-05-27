@@ -58,6 +58,7 @@ compile: check $(TS_MODS)
 	bin/division_people$(EXT) --help >division_people.1.md
 	bin/generate_collaborator_rpt$(EXT) --help >generate_collaborator_rpt.1.md
 	bin/publications_by_person_identifiers$(EXT) --help >publications_by_person_identifiers.1.md
+	bin/ror_import$(EXIT) --help >ror_import.1.md
 
 check: $(TS_MODS)
 	deno task check

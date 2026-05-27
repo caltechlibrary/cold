@@ -53,7 +53,7 @@
     }
   ],
   "dateCreated": "2023-12-12",
-  "dateModified": "2026-05-19",
+  "dateModified": "2026-05-27",
   "datePublished": "2026-05-18",
   "description": "Caltech Library maintains a list of people, groups and funders and their related identifiers. For many years these were managed using a spreadsheets. That has become cumbersome. **COLD** manages data as JSON objects in [dataset](https://github.com/caltechlibrary/dataset) collections.\n\n**COLD** is implemented as three web web services\n\n- cold web UI\n- cold JSON API (provided by datasetd)\n- cold reports (the report request system)\n\nReports are implemented as a set of programs or bash scripts.\n\nTypeScript+Deno is used to implement the web UI and report system.\nThe JSON API is provided by Dataset's datasetd.\nAccess control is provided by the front end web server integrated with Shibboleth.",
   "funder": [
@@ -95,10 +95,10 @@
     "GNU Make",
     "Pandoc >= 3.9"
   ],
-  "version": "0.0.46b",
+  "version": "0.0.46c",
   "developmentStatus": "active",
   "issueTracker": "https://github.com/caltechlibrary/cold/issues",
   "downloadUrl": "https://github.com/caltechlibrary/cold/releases/latest",
-  "releaseNotes": "- Search CaltechTHESIS form\n  - Fix ORCID to search all orcid fields not just authors's orcid\n  - Fixed default pre-check boxes\n- Re-assign clpid for CaltechPEOPLE form\n  - Add an \"internal notes\" box to the form.\n- Changed link harvesting to use the EPrint Admin view of the record",
+  "releaseNotes": "- Search CaltechTHESIS form\n  - Fix ORCID to search all orcid fields not just authors's orcid\n  - Fixed default pre-check boxes\n- Re-assign clpid for CaltechPEOPLE form\n  - Add an \"internal notes\" box to the form.\n- Changed link harvesting to use the EPrint Admin view of the record\n- Updated ROR import to take advantage of dataset load action.",
   "copyrightYear": 2026
 }
