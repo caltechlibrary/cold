@@ -33,7 +33,7 @@ maintainer:
     id: https://orcid.org/0000-0003-0900-6903
 
 repository_code: https://github.com/caltechlibrary/cold
-version: 0.0.46c
+version: 0.0.47
 license_url: https://caltechlibrary.github.io/cold/LICENSE
 operating_system:
   - Linux
@@ -53,13 +53,13 @@ keywords:
   - objects
   - controlled vocabulary
 
-date_released: 2026-05-18
+date_released: 2026-05-27
 ---
 
 About this software
 ===================
 
-## cold 0.0.46c
+## cold 0.0.47
 
 - Search CaltechTHESIS form
   - Fix ORCID to search all orcid fields not just authors's orcid

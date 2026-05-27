@@ -309,6 +309,12 @@ collections:
           'requested', src->'requested', 'updated', src->'updated') as src
         from reports
         order by src->>'updated' desc;
+      # get_report retrieves status and link for a single report by its id
+      get_report: |
+        select json_object('id', src->'id', 'status', src->'status', 'link', src->'link',
+          'report_name', src->'report_name', 'updated', src->'updated')
+        from reports
+        where json_extract(src, '$.id') = ?
       # next request implements the FIFO, i.e. a queue
       next_request: |
         select json_object('id', src->'id', 'link', src->'link', 'content_type', src->'content_type',

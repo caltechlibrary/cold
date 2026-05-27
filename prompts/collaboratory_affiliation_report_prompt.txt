@@ -1,0 +1,17 @@
+I am working with ~/WorkLab/cold today. We will be adding a new collaborator report to the COLD's report list. 
+
+The new report is called "Collaborator Affilliations Report". 
+
+It is similar to COLD's "Collaborator Report" except it expands of a person's affiliations relationships.
+For each person's affiliation we have a row. So if a person is affiliated with Caltech and other organizations there
+will be additional rows for each affiliation.
+
+In addition to the columns in the collaborator report for each organization will be column showing the ROR and the
+country of the affiliated organization. Example if an affiliation was with "Engineering System Co., Ltd. (Japan)"
+with ROR "https://ror.org/0333a7d27" then the ror column will be shown. You will need to do a lookup to find
+the country bu using the ror identifier value (example "0333a7d27") to retrieve the ROR affiliation from the 
+ror.ds collection available from the JSON API provided in COLD. The returned object has a "locations" attribute
+where the country can be found.
+
+Please ask questions if needed.
+

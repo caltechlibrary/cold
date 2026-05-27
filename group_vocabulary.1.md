@@ -1,4 +1,4 @@
-%group_vocabulary(1) user manual | 0.0.46c  0780912
+%group_vocabulary(1) user manual | 0.0.47  c642655
 % R. S.Doiel
 % 2026-05-27
 

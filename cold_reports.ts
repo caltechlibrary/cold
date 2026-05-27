@@ -13,8 +13,10 @@ import {
   formDataToObject,
   licenseText,
   OptionsProcessor,
+  path,
   releaseDate,
   releaseHash,
+  renderJSON,
   renderPage,
   version,
 } from "./deps.ts";
@@ -150,9 +152,6 @@ export class Report implements ReportInterface {
     } else {
       this.inputs = [];
     }
-    console.log(
-      `FIXME: are the inputs defined? ${JSON.stringify(this.inputs)}`,
-    );
     this.emails = "emails" in o ? `${o.emails}` : ``;
     const now = new Date();
     const expire_in_days = 7;
@@ -267,6 +266,9 @@ async function handleReportRequest(
   req: Request,
   options: { debug: boolean; htdocs: string },
 ): Promise<Response> {
+  const wantsJSON = (req.headers.get("Accept") || "").includes(
+    "application/json",
+  );
   if (req.body !== null) {
     // Request a report to be run
     const form = await req.formData();
@@ -281,6 +283,14 @@ async function handleReportRequest(
       // has already been created then we should distriguish that error from
       // other types of error.
       if ((await ds.create(rpt.id, rpt.asObject()))) {
+        if (wantsJSON) {
+          return renderJSON({
+            ok: true,
+            id: rpt.id,
+            report_name: rpt.report_name,
+            status: "requested",
+          }, 200);
+        }
         let msgs: string[] = [];
         msgs.push(`Report request ${rpt.report_name}`);
         if (rpt.report_name !== rpt.id) {
@@ -307,6 +317,15 @@ async function handleReportRequest(
       // Handle the case of previously created record.
       const readObject = await ds.read(rpt.id);
       if (readObject !== undefined) {
+        if (wantsJSON) {
+          return renderJSON({
+            ok: true,
+            id: rpt.id,
+            report_name: rpt.report_name,
+            status: (readObject as Record<string, string>).status ??
+              "requested",
+          }, 200);
+        }
         let msgs: string[] = [];
         msgs.push(`Report request ${rpt.report_name}`);
         if (rpt.report_name !== rpt.id) {
@@ -330,6 +349,14 @@ async function handleReportRequest(
           },
         );
       }
+      if (wantsJSON) {
+        return renderJSON({
+          ok: false,
+          report_name: rpt.report_name,
+          id: rpt.id,
+          msg: "failed to create report request, try again later",
+        }, 500);
+      }
       return new Response(
         `<html>there was a problem generating report request for ${rpt.report_name}, ${rpt.id} -> ${rpt.toJSON()}, try again later.  <a href="reports">back to reports list</a>`,
         {
@@ -341,6 +368,9 @@ async function handleReportRequest(
   }
   // Method not supported.
   console.log("Bad request", req.url.toString());
+  if (wantsJSON) {
+    return renderJSON({ ok: false, msg: "Bad Request" }, 400);
+  }
   return new Response(`Bad Request`, {
     status: 400,
     headers: { "content-type": "text/html" },
@@ -406,10 +436,12 @@ class Runnable implements RunnableInterface {
   }
 
   filenameTemplate(template: string, inputs: Inputs[]): string {
-    // Replace each placeholder in the template with the corresponding input value
+    // Replace each placeholder in the template with the corresponding input value.
+    // Strip non-safe characters from substituted values to prevent path traversal.
     return template.replace(/\{\{(\w+)\}\}/g, (_, key) => {
       const input = inputs.find((input) => input.id === key);
-      return input ? input.value : `_${key}_`;
+      const value = input ? input.value : `_${key}_`;
+      return value.replace(/[^A-Za-z0-9_\-]/g, "_");
     });
   }
 
@@ -472,7 +504,9 @@ class Runnable implements RunnableInterface {
       // Build a map between the inputs name and the options passed in report request.
       //console.log(`FIXME: need to render the template here`);
       //return "error://basename templates not implemented yet";
-      filename = this.filenameTemplate(this.basename, this.inputs);
+      filename = path.basename(
+        this.filenameTemplate(this.basename, this.inputs),
+      );
     }
     // FIXME: See if I need at add a prefix
     let ext: string = ".txt";

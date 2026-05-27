@@ -47,6 +47,7 @@
 
   <optgroup label="Mediated reports">
     <option value="run_collaborator_report" title="Run a colaborator report with a clpid">Collaborator Report</option>
+    <option value="run_collaborator_affiliations_report" title="Run a collaborator affiliations report with a clpid">Collaborator Affiliations Report</option>
     <option value="run_publications_by_person_identifiers" title="Run a publications report for a person using clpid and/or ORCID">Publications by Person Identifier</option>
   </optgroup>
 
@@ -84,12 +85,13 @@
 
   function update() {
     const isCollab = sel.value === 'run_collaborator_report';
+    const isAffil = sel.value === 'run_collaborator_affiliations_report';
     const isPubs = sel.value === 'run_publications_by_person_identifiers';
-    const needsPersonFields = isCollab || isPubs;
+    const needsPersonFields = isCollab || isAffil || isPubs;
 
     fields.style.display = needsPersonFields ? '' : 'none';
     orcidRow.style.display = isPubs ? '' : 'none';
-    clpidInput.required = isCollab;
+    clpidInput.required = isCollab || isAffil;
     orcidInput.required = false;
 
     if (needsPersonFields && !populated) {
@@ -108,12 +110,29 @@
   }
 
   form.addEventListener('submit', function(e) {
+    e.preventDefault();
     if (sel.value === 'run_publications_by_person_identifiers') {
       if (!clpidInput.value.trim() && !orcidInput.value.trim()) {
-        e.preventDefault();
         alert('Please provide at least one of CLPID or ORCID before submitting this report.');
+        return;
       }
     }
+    var body = new URLSearchParams(new FormData(form));
+    fetch('./reports', {
+      method: 'POST',
+      headers: { 'Accept': 'application/json' },
+      body: body
+    })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.ok && data.id) {
+          window.refreshReportList();
+          window.pollReport(data.id);
+        } else {
+          window.refreshReportList();
+        }
+      })
+      .catch(function() { window.refreshReportList(); });
   });
 
   sel.addEventListener('change', update);
@@ -134,8 +153,8 @@
 <hr>
 <section>
 <h1>Reports</h1>
-<a href="./reports"><button>Refresh List</button></a>
-<table>
+<button onclick="window.refreshReportList()">Refresh List</button>
+<table id="report-list-table">
   <tr>
     <th>Requested</th>
 <!--    <th>Notify</th> -->
@@ -153,6 +172,43 @@
   </tr>
 {{/report_list}}
 </table>
+<script>
+(function() {
+  var reportPollTimer = null;
+
+  window.refreshReportList = function() {
+    fetch('./reports')
+      .then(function(r) { return r.text(); })
+      .then(function(html) {
+        var doc = new DOMParser().parseFromString(html, 'text/html');
+        var newTable = doc.getElementById('report-list-table');
+        var curTable = document.getElementById('report-list-table');
+        if (newTable && curTable) {
+          curTable.innerHTML = newTable.innerHTML;
+        }
+      });
+  };
+
+  window.pollReport = function(id) {
+    clearTimeout(reportPollTimer);
+    reportPollTimer = setTimeout(function() {
+      fetch('./api/reports.ds/get_report?id=' + encodeURIComponent(id))
+        .then(function(r) { return r.json(); })
+        .then(function(rows) {
+          var row = Array.isArray(rows) ? rows[0] : null;
+          var status = row ? (row.status || '').toLowerCase() : '';
+          if (status === 'completed' || status === 'error') {
+            window.refreshReportList();
+          } else {
+            window.refreshReportList();
+            window.pollReport(id);
+          }
+        })
+        .catch(function() { window.pollReport(id); });
+    }, 15000);
+  };
+})();
+</script>
 </section>
 {{>footer}}
 </body>

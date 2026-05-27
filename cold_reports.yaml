@@ -92,3 +92,12 @@ reports:
     basename: "{{clpid}}_{{orcid}}_publications"
     append_datestamp: false
     content_type: text/csv
+  run_collaborator_affiliations_report:
+    cmd: ./run_collaborator_affiliations_report.bash
+    inputs:
+      - id: clpid
+        type: text
+        required: true
+    basename: "{{clpid}}_collaborator_affiliations_report"
+    append_datestamp: false
+    content_type: text/csv

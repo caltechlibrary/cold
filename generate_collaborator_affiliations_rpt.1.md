@@ -1,14 +1,14 @@
-%generate_collaborator_rpt(1) user manual | 0.0.47 c642655
+%generate_collaborator_affiliations_rpt(1) user manual | 0.0.47 c642655
 % R. S.Doiel
 % 2026-05-27
 
 # NAME
 
-generate_collaborator_rpt
+generate_collaborator_affiliations_rpt
 
 # SYNOPSIS
 
-generate_collaborator_rpt CLPID [--record_id]
+generate_collaborator_affiliations_rpt CLPID [--record_id]
 
 # DESCRIPTION
 
