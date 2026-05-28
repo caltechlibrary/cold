@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <title>cold</title>
+    <link rel="stylesheet" href="https://caltechlibrary.github.io/css/site.css">
+    <link rel="stylesheet" href="https://media.library.caltech.edu/cl-webcomponents/css/code-blocks.css">
+    <script type="module" src="https://media.library.caltech.edu/cl-webcomponents/copyToClipboard.js"></script>
+    <script type="module" src="https://media.library.caltech.edu/cl-webcomponents/footer-global.js"></script>
+</head>
+<body>
+<header>
+<a href="https://library.caltech.edu"><img src="https://media.library.caltech.edu/assets/caltechlibrary-logo.png" alt="Caltech Library logo"></a>
+</header>
+<a href="#main-content" class="visually-hidden">skip to main content</a>
+<nav>
+<ul>
+    <li><a href="/">All Library Apps</a></li>
+    <li><a href="index.html">Home</a></li>
+    <li><a href="LICENSE">LICENSE</a></li>
+    <li><a href="INSTALL.html">INSTALL</a></li>
+    <li><a href="user_manual.html">User Manual</a></li>
+    <li><a href="about.html">About</a></li>
+    <!-- <li><a href="search.html">Search</a></li> -->
+    <li><a href="https://github.com/caltechlibrary/cold">Code Repository</a></li>
+</ul>
+</nav>
+<section id="main-content">
+<h1 id="updating-ror-data">Updating ROR Data</h1>
+<p>We use the ROR dataset for affiliation information. We keep a local
+copy in the dataset collection called ror.ds. This needs to be updated
+from the ROR data dump releases that happen every so often.</p>
+<p>You can find the latest ROR data dump at Zenodo, see
+https://zenodo.org/records/20140273. You download the latest Zip file
+and place it in the COLD application directory.</p>
+<p>To update our dataset collection use the <code>bin/ror_import</code>
+command. This updates the dataset collection as well as the country list
+in <code>htdocs/data</code>.</p>
+</section>
+<footer-global></footer-global>
+</body>
+</html>
