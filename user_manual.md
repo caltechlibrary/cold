@@ -14,6 +14,7 @@
 - [Changing keys and identifiers](changing_keys_and_identifiers.md)
 - [ROR integration](ror_integration.md)
 - [RDM review queue integration](rdm_review_queue_integration.md)
+- [Updating ROR data](updating_ror_data.md)
 
 ## Command Reference
 
