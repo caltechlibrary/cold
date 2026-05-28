@@ -49,6 +49,7 @@
     <option value="run_collaborator_report" title="Run a colaborator report with a clpid">Collaborator Report</option>
     <option value="run_collaborator_affiliations_report" title="Run a collaborator affiliations report with a clpid">Collaborator Affiliations Report</option>
     <option value="run_publications_by_person_identifiers" title="Run a publications report for a person using clpid and/or ORCID">Publications by Person Identifier</option>
+    <option value="run_country_collaboration_report" title="Run a country collaboration report using an ISO 3166-1 alpha-2 country code">Country Collaboration Report</option>
   </optgroup>
 
 </select>
@@ -68,6 +69,17 @@
 </div>
 </div>
 
+<div id="country-fields" style="display:none">
+<label for="country_name_display">Country</label>
+<input type="text" id="country_name_display"
+       placeholder="e.g. South Korea, Australia, Germany"
+       list="country-name-list"
+       autocomplete="off">
+<datalist id="country-name-list"></datalist>
+<input type="hidden" id="country_code" name="country_code">
+<input type="hidden" id="country_name" name="country_name">
+</div>
+
 <label set="emails">Email notification(s)</label>
 <input type="text" id="emails" name="emails" placeholder="rsdoiel@caltech.edu" />
 <input type="submit" id="submit" name="submit" value="Request Report">
@@ -78,19 +90,27 @@
   const sel = document.getElementById('report_name');
   const fields = document.getElementById('collaborator-fields');
   const orcidRow = document.getElementById('orcid-row');
+  const countryFields = document.getElementById('country-fields');
   const clpidInput = document.getElementById('clpid');
   const orcidInput = document.getElementById('orcid');
+  const countryCodeInput = document.getElementById('country_code');
+  const countryNameInput = document.getElementById('country_name');
+  const countryNameDisplay = document.getElementById('country_name_display');
   const form = document.getElementById('report-request-form');
   let populated = false;
+  let countryPopulated = false;
+  let countryMap = {};
 
   function update() {
     const isCollab = sel.value === 'run_collaborator_report';
     const isAffil = sel.value === 'run_collaborator_affiliations_report';
     const isPubs = sel.value === 'run_publications_by_person_identifiers';
+    const isCountry = sel.value === 'run_country_collaboration_report';
     const needsPersonFields = isCollab || isAffil || isPubs;
 
     fields.style.display = needsPersonFields ? '' : 'none';
     orcidRow.style.display = isPubs ? '' : 'none';
+    countryFields.style.display = isCountry ? '' : 'none';
     clpidInput.required = isCollab || isAffil;
     orcidInput.required = false;
 
@@ -107,13 +127,46 @@
           });
         });
     }
+
+    if (isCountry && !countryPopulated) {
+      countryPopulated = true;
+      fetch('./data/country_list.json')
+        .then(r => r.json())
+        .then(list => {
+          const dl = document.getElementById('country-name-list');
+          list.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c.name;
+            dl.appendChild(opt);
+            countryMap[c.name] = { code: c.code, filename: c.filename };
+          });
+        });
+    }
   }
+
+  countryNameDisplay.addEventListener('input', function() {
+    const entry = countryMap[this.value.trim()];
+    if (entry) {
+      countryCodeInput.value = entry.code;
+      countryNameInput.value = entry.filename;
+    } else {
+      countryCodeInput.value = '';
+      countryNameInput.value = '';
+    }
+  });
 
   form.addEventListener('submit', function(e) {
     e.preventDefault();
     if (sel.value === 'run_publications_by_person_identifiers') {
       if (!clpidInput.value.trim() && !orcidInput.value.trim()) {
         alert('Please provide at least one of CLPID or ORCID before submitting this report.');
+        return;
+      }
+    }
+    if (sel.value === 'run_country_collaboration_report') {
+      const cc = countryCodeInput.value.trim();
+      if (!cc || !/^[A-Z]{2}$/.test(cc)) {
+        alert('Please select a country from the list before submitting this report.');
         return;
       }
     }

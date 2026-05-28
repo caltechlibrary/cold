@@ -481,10 +481,11 @@ class Runnable implements RunnableInterface {
         const cmd = new Deno.Command(this.cmd, {
           args: validatedInputs,
         });
-        const { stdout, stderr } = await cmd.output();
+        const { code, stdout, stderr } = await cmd.output();
 
-        if (stderr.length > 0) {
-          throw new Error(new TextDecoder().decode(stderr));
+        if (code !== 0) {
+          const errMsg = new TextDecoder().decode(stderr).trim();
+          throw new Error(errMsg || `command exited with code ${code}`);
         }
 
         txt = new TextDecoder().decode(stdout);
@@ -542,6 +543,9 @@ class Runnable implements RunnableInterface {
     }
     console.log("INFO: filename should be", filename);
 
+    if (txt.startsWith("error://")) {
+      return txt;
+    }
     // FIXME: output location for report should not be hardcoded.
     const basedir: string = "./htdocs/rpt";
     // FIXME: base URL of report should not be hardcoded

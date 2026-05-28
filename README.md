@@ -18,8 +18,22 @@ Access control is provided by the front end web server integrated with Shibbolet
 
 ## Release Notes
 
-- version: 0.0.46
+- version: 0.0.48
 - status: active
+- released: 2026-05-28
+
+- Country Collaboration Report: new mediated report that lists all CaltechAUTHORS records where a creator, contributor, or funder is affiliated with an organization in a given country (matched via ROR). Staff pick the country by common English name from a type-ahead list rather than typing an ISO code.
+- Country list auto-generated from ROR data: `ror_import` now writes `htdocs/data/country_list.json` after each ROR dump import, keeping the country picker in sync with the dataset.
+- Collaborator Affiliations Report: new mediated report generating a CSV of collaborator affiliations suitable for NSF, including ROR-based affiliation details for each collaborator.
+- ROR importer updated to use `dataset load` for significantly faster bulk import.
+- Bug fix: the report runner was treating any stderr output as a fatal error. Commands that write progress messages to stderr (such as the country collaboration report) would produce an error string instead of a CSV. The runner now checks exit code only.
+- Bug fix: on command failure, the error string was being written to the report file and the report status was incorrectly set to "completed". Errors now set status to "error" and no file is written.
+- Report descriptions page (`report_descriptions.html`) updated to document all current reports including the three new mediated reports.
+
+### Previous release
+
+- version: 0.0.46
+- status: superseded
 - released: 2026-05-18
 
 - Self-service clpid rename: new /rename/people page linked from dashboard and people view; shows full person record for confirmation; validates old key exists and new key is unique

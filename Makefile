@@ -5,7 +5,7 @@ PROJECT = cold
 
 PACKAGE =  $(shell ls -1 *.ts | grep -v 'version.ts')
 
-PROGRAMS = cold cold_reports directory_sync journal_vocabulary group_vocabulary people_vocabulary division_people thesis_option_vocabulary ror_import cold_api_test generate_collaborator_rpt generate_collaborator_affiliations_rpt publications_by_person_identifiers
+PROGRAMS = cold cold_reports directory_sync journal_vocabulary group_vocabulary people_vocabulary division_people thesis_option_vocabulary ror_import cold_api_test generate_collaborator_rpt generate_collaborator_affiliations_rpt publications_by_person_identifiers generate_country_collaboration_rpt
 
 TS_MODS = cold.ts cold_reports.ts directory_sync.ts journal_vocabulary.ts group_vocabulary.ts people_vocabulary.ts thesis_option_vocabulary.ts ror_import.ts cold_api_test.ts
 

@@ -376,6 +376,53 @@ collections:
             from json_each(src->'acronyms')
             where value like ?)
         order by src->'name';
+      # Lookup ROR entries by ISO 3166-1 alpha-2 country code.
+      # Handles both ROR v2 (names array with ror_display/label types) and v1 (name field).
+      ror_by_country_code: |
+        select json_object(
+          'ror', _key,
+          'name', COALESCE(
+            (select n.value->>'value'
+             from json_each(src->'names') as n
+             where exists (
+               select 1 from json_each(n.value->'types') as t where t.value = 'ror_display'
+             )
+             limit 1),
+            (select n.value->>'value'
+             from json_each(src->'names') as n
+             where n.value->>'lang' = 'en'
+               and exists (
+                 select 1 from json_each(n.value->'types') as t where t.value = 'label'
+               )
+             limit 1),
+            json_extract(src, '$.name')
+          ),
+          'country_code', COALESCE(
+            json_extract(src, '$.locations[0].geonames_details.country_code'),
+            json_extract(src, '$.country.country_code'),
+            json_extract(src, '$.country.code')
+          ),
+          'country_name', COALESCE(
+            json_extract(src, '$.locations[0].geonames_details.country_name'),
+            json_extract(src, '$.country.country_name'),
+            json_extract(src, '$.country.name')
+          )
+        ) as src
+        from ror
+        where COALESCE(
+          json_extract(src, '$.locations[0].geonames_details.country_code'),
+          json_extract(src, '$.country.country_code'),
+          json_extract(src, '$.country.code')
+        ) = ?
+        order by COALESCE(
+          (select n.value->>'value'
+           from json_each(src->'names') as n
+           where exists (
+             select 1 from json_each(n.value->'types') as t where t.value = 'ror_display'
+           )
+           limit 1),
+          json_extract(src, '$.name')
+        )
       # clear the ror data
       clear_ror_data: |
         delete from ror
@@ -496,6 +543,20 @@ collections:
         )
         AND src->>'status' = 'submitted'
         order by created desc
+
+      # All distinct ROR IDs that appear in any creator affiliation.
+      # Used to pre-filter country ROR lists before hitting the CaltechAUTHORS API.
+      unique_creator_ror_ids: |
+        select json_object('ror_id', aff_id) as src
+        from (
+          select distinct json_extract(affiliation.value, '$.id') as aff_id
+          from rdm_review_queue
+          join json_each(src, '$.creators') as creator
+          join json_each(creator.value, '$.affiliations') as affiliation
+          where json_extract(affiliation.value, '$.id') is not null
+            and json_extract(affiliation.value, '$.id') != ''
+        )
+        order by aff_id
 
       # review queue mentions
       review_queue_mentions: |

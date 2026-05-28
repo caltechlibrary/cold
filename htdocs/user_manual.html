@@ -23,9 +23,75 @@
 <section id="main-content">
 
 <h1>Help with COLD</h1>
-<p>This is a place holder for help text and examples. It can also link to other help documents as they evolve.</p>
 <p>COLD
 : Controlled Object Lists and Datum</p>
+<p>COLD is the Caltech Library application for managing controlled vocabularies and objects — primarily the people, groups, and funders used across library systems such as CaltechAUTHORS and CaltechTHESIS.</p>
+<h2>Reports</h2>
+<p>The Reports page lets staff request data exports and analysis reports. Navigate there from the dashboard by clicking <strong>Reports</strong>.</p>
+<p>The page has two parts: the <strong>request form</strong> at the top, and the <strong>report list</strong> below showing recent requests and their status.</p>
+<h3>Requesting a report</h3>
+<ol>
+<li>Select a report from the <strong>Report</strong> dropdown.</li>
+<li>Fill in any additional fields that appear (see sections below).</li>
+<li>Optionally enter one or more email addresses in <strong>Email notification(s)</strong> to be notified when the report is ready.</li>
+<li>Click <strong>Request Report</strong>.</li>
+</ol>
+<p>The report list updates automatically while the report is running. When status changes to <strong>completed</strong> a download link appears. Reports expire after seven days.</p>
+<hr />
+<h3>CSV reports</h3>
+<p>These reports require no additional input. Select the report name and click <strong>Request Report</strong>.</p>
+<p>| Report | File | Description |
+|--------|------|-------------|
+| Generate People CSV File | people.csv | Full export of the CaltechPEOPLE collection |
+| Generate Groups CSV File | groups.csv | Full export of the CaltechGROUPS collection |
+| Generate People Identifier CSV | people_identifier_[DATE].csv | All identifiers per person (clpid, ORCID, thesis advisor/committee ids) |
+| Generate a Division People CSV | division_people.csv | People list using campus directory division affiliation |
+| Generate a People Membership CSV | people_membership.csv | People with their CaltechGROUPS memberships, one row per affiliation |
+| Generate Division People Crosswalk CSV | division_people_crosswalk.csv | Crosswalk of people and Division-* group affiliations |
+| Generate Group People Crosswalk CSV | group_people_crosswalk.csv | Crosswalk of people and all group affiliations |
+| Generate Thesis Options CSV | thesis_options.csv | Thesis option names and identifiers |
+| Generate Authors' Records CSV File | authors_records.csv | All records from the CaltechAUTHORS request, drafts, and records metadata tables |
+| Generate Authors' Review Queue CSV File | authors_review_queue.csv | Records currently in the CaltechAUTHORS review queue |</p>
+<hr />
+<h3>RDM vocabulary reports</h3>
+<p>These reports produce YAML files consumed by InvenioRDM as controlled vocabularies. No additional input is required.</p>
+<p>| Report | File | Description |
+|--------|------|-------------|
+| Generate Journals Vocabulary | journal_vocabulary.yaml | Preferred journal names used in CaltechAUTHORS |
+| Generate Groups Vocabulary | group_vocabulary.yaml | CaltechGROUPS list for RDM |
+| Generate People Vocabulary | people_vocabulary.yaml | CaltechPEOPLE list for RDM |
+| Generate Thesis Option Vocabulary | thesis_option_vocabulary.yaml | Thesis options for RDM |</p>
+<hr />
+<h3>Mediated reports</h3>
+<p>These reports require one or more input parameters. Additional fields appear in the form when you select one of these reports.</p>
+<h4>Collaborator Report</h4>
+<p>Generates an NSF-style collaborator list for a Caltech researcher.</p>
+<ul>
+<li><strong>Person (clpid)</strong> — required. Start typing a name or clpid (e.g. <code>Doiel-R-S</code>) and select from the autocomplete list.</li>
+</ul>
+<p>Output file: <code>[CLPID]_nsf_collaborator_report.csv</code></p>
+<h4>Collaborator Affiliations Report</h4>
+<p>Similar to the Collaborator Report but includes ROR-based affiliation details for each collaborator, making it suitable for NSF submissions that require institutional affiliations.</p>
+<ul>
+<li><strong>Person (clpid)</strong> — required. Start typing a name or clpid and select from the autocomplete list.</li>
+</ul>
+<p>Output file: <code>[CLPID]_collaborator_affiliations_report.csv</code></p>
+<h4>Publications by Person Identifier</h4>
+<p>Retrieves publication records from CaltechAUTHORS for a specific person. Includes title, publication year, DOI, authors with affiliations, and acknowledgements text.</p>
+<ul>
+<li><strong>Person (clpid)</strong> — optional if ORCID is provided.</li>
+<li><strong>ORCID</strong> — optional if clpid is provided. Format: <code>NNNN-NNNN-NNNN-NNNN</code>.</li>
+</ul>
+<p>At least one of clpid or ORCID must be filled in.</p>
+<p>Output file: <code>[CLPID]_[ORCID]_publications.csv</code></p>
+<h4>Country Collaboration Report</h4>
+<p>Lists all CaltechAUTHORS records where a creator, contributor, or funder is affiliated with an organization in a given country, matched via ROR. Rows are sorted by publication year (descending), then journal, then title.</p>
+<ul>
+<li><strong>Country</strong> — required. Start typing the country's common English name (e.g. <code>South Korea</code>, <code>Germany</code>, <code>Australia</code>) and select from the autocomplete list. The two-letter ISO country code is looked up automatically.</li>
+</ul>
+<p>Output file: <code>[COUNTRY]_country_collaboration_report.csv</code> (e.g. <code>South_Korea_country_collaboration_report.csv</code>)</p>
+<hr />
+<p>For a full description of every report see <a href="report_descriptions.html">Report Descriptions</a>.</p>
 
 
 </section>

@@ -44,8 +44,39 @@ The JSON API is provided by Dataset’s datasetd. Access control is
 provided by the front end web server integrated with Shibboleth.</p>
 <h2 id="release-notes">Release Notes</h2>
 <ul>
-<li><p>version: 0.0.46</p></li>
+<li><p>version: 0.0.48</p></li>
 <li><p>status: active</p></li>
+<li><p>released: 2026-05-28</p></li>
+<li><p>Country Collaboration Report: new mediated report that lists all
+CaltechAUTHORS records where a creator, contributor, or funder is
+affiliated with an organization in a given country (matched via ROR).
+Staff pick the country by common English name from a type-ahead list
+rather than typing an ISO code.</p></li>
+<li><p>Country list auto-generated from ROR data:
+<code>ror_import</code> now writes
+<code>htdocs/data/country_list.json</code> after each ROR dump import,
+keeping the country picker in sync with the dataset.</p></li>
+<li><p>Collaborator Affiliations Report: new mediated report generating
+a CSV of collaborator affiliations suitable for NSF, including ROR-based
+affiliation details for each collaborator.</p></li>
+<li><p>ROR importer updated to use <code>dataset load</code> for
+significantly faster bulk import.</p></li>
+<li><p>Bug fix: the report runner was treating any stderr output as a
+fatal error. Commands that write progress messages to stderr (such as
+the country collaboration report) would produce an error string instead
+of a CSV. The runner now checks exit code only.</p></li>
+<li><p>Bug fix: on command failure, the error string was being written
+to the report file and the report status was incorrectly set to
+“completed”. Errors now set status to “error” and no file is
+written.</p></li>
+<li><p>Report descriptions page (<code>report_descriptions.html</code>)
+updated to document all current reports including the three new mediated
+reports.</p></li>
+</ul>
+<h3 id="previous-release">Previous release</h3>
+<ul>
+<li><p>version: 0.0.46</p></li>
+<li><p>status: superseded</p></li>
 <li><p>released: 2026-05-18</p></li>
 <li><p>Self-service clpid rename: new /rename/people page linked from
 dashboard and people view; shows full person record for confirmation;

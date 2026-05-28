@@ -1,6 +1,6 @@
-%generate_collaborator_rpt(1) user manual | 0.0.47 14d98ba
+%generate_collaborator_rpt(1) user manual | 0.0.48 039fd36
 % R. S.Doiel
-% 2026-05-27
+% 2026-05-28
 
 # NAME
 

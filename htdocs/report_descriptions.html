@@ -30,11 +30,14 @@
 <ul>
 <li><strong>Generate People CSV File</strong>
 <ul>
-<li>(people.csv) This reports renders our CaltechPEOPLE collection as a CSV file suitable for import into LibreOffice, Excel or for use with Jupyter Notebooks</li>
+<li>(people.csv) This report renders our CaltechPEOPLE collection as a CSV file suitable for import into LibreOffice, Excel or for use with Jupyter Notebooks</li>
 </ul>
 </li>
-<li><strong>Generate Groups CSV File</strong></li>
-<li>(groups.csv) This report renders out CaltechGROUPS collection as a CSV file suitable for import into LibreOffice, Excel or for use with Jupyter Notebooks</li>
+<li><strong>Generate Groups CSV File</strong>
+<ul>
+<li>(groups.csv) This report renders our CaltechGROUPS collection as a CSV file suitable for import into LibreOffice, Excel or for use with Jupyter Notebooks</li>
+</ul>
+</li>
 <li><strong>Generate a Division People CSV</strong>
 <ul>
 <li>(division_people.csv) This generates a people list using the Caltech directory reported division affiliation</li>
@@ -45,32 +48,37 @@
 <li>(people_membership.csv) This generates a report of people with membership in CaltechGROUPS. Each affiliation gets its own row in the CSV file.</li>
 </ul>
 </li>
-<li><strong>Gernerate Division People Crosswalk CSV</strong>
+<li><strong>Generate Division People Crosswalk CSV</strong>
 <ul>
-<li>(division_people_crosswalk.csv) this report is a crosswalk of people affiliation restricted to clgid starting with &quot;Division-*&quot;</li>
+<li>(division_people_crosswalk.csv) This report is a crosswalk of people affiliation restricted to clgid starting with &quot;Division-*&quot;</li>
 </ul>
 </li>
 <li><strong>Generate Group People Crosswalk</strong>
 <ul>
-<li>(group_people_crosswalk.csv) this report is a crosswalk of people and their group affiliation. It is similar to &quot;Generate People Membership CSV&quot;, slightly different columns</li>
+<li>(group_people_crosswalk.csv) This report is a crosswalk of people and their group affiliation. It is similar to &quot;Generate People Membership CSV&quot; but with slightly different columns.</li>
 </ul>
 </li>
 <li><strong>Generate People Identifier CSV</strong>
 <ul>
-<li>(people_identifier_[DATE_STAMP].csv) This report lists all identifiers from CaltechPEOPLE collection by person (example clpid, orcid plus, thesis committee id, thesis advisor id)</li>
+<li>(people_identifier_[DATE_STAMP].csv) This report lists all identifiers from CaltechPEOPLE collection by person (e.g. clpid, orcid, thesis committee id, thesis advisor id)</li>
+</ul>
+</li>
+<li><strong>Generate Thesis Options CSV</strong>
+<ul>
+<li>(thesis_options.csv) This report delivers a list of thesis option names and their identifiers.</li>
 </ul>
 </li>
 </ul>
 <h2>RDM Records and Review Queue</h2>
 <ul>
-<li><strong>Generate Author's Records CSV file</strong>
+<li><strong>Generate Authors' Records CSV file</strong>
 <ul>
 <li>(authors_records.csv) This is a report on all records from the request metadata, drafts metadata and records metadata tables.</li>
 </ul>
 </li>
 <li><strong>Generate Authors' Review Queue CSV file</strong>
 <ul>
-<li>(authors_review_queue.csv) This is a report of things currently in the review queue based on metadata in the request metadata table and drafts metadata table</li>
+<li>(authors_review_queue.csv) This is a report of things currently in the review queue based on metadata in the request metadata table and drafts metadata table.</li>
 </ul>
 </li>
 </ul>
@@ -81,12 +89,12 @@
 <ul>
 <li><strong>Generate Journals Vocabulary</strong>
 <ul>
-<li>(journal_vocabulary.yaml) The preferred journal names we used in our IR</li>
+<li>(journal_vocabulary.yaml) The preferred journal names we use in our IR</li>
 </ul>
 </li>
 <li><strong>Generate Groups Vocabulary</strong>
 <ul>
-<li>(group_vocabulary.yaml) This is the controlled of Groups defined in COLD used by RDM</li>
+<li>(group_vocabulary.yaml) This is the controlled list of Groups defined in COLD used by RDM</li>
 </ul>
 </li>
 <li><strong>Generate People Vocabulary</strong>
@@ -96,18 +104,33 @@
 </li>
 <li><strong>Generate Thesis Options Vocabulary</strong>
 <ul>
-<li>(thesis_option_vocabulary.yaml) This generates a Thesis option vocabulary. Currently used to implement EPrints' list of Thesis options but will be used with RDM eventually</li>
+<li>(thesis_option_vocabulary.yaml) This generates a Thesis option vocabulary. Currently used to implement EPrints' list of Thesis options but will be used with RDM eventually.</li>
 </ul>
 </li>
 </ul>
 <h2>Mediated Reports</h2>
 <blockquote>
-<p>These are reports librarians run for the Caltech community</p>
+<p>These are reports librarians run for the Caltech community. Each requires one or more parameters entered in the request form.</p>
 </blockquote>
 <ul>
 <li><strong>Collaborator Report</strong>
 <ul>
-<li>This is choice will take you to a collaborator_report.html web page where you can type in the clpid and make the request.</li>
+<li>([CLPID]_nsf_collaborator_report.csv) Given a clpid, generates a collaborator report as a CSV file suitable for NSF. Lists co-authors and their affiliations from CaltechAUTHORS records.</li>
+</ul>
+</li>
+<li><strong>Collaborator Affiliations Report</strong>
+<ul>
+<li>([CLPID]_collaborator_affiliations_report.csv) Given a clpid, generates a collaborator affiliations report as a CSV file suitable for NSF. Similar to the Collaborator Report but includes ROR-based affiliation details for each collaborator.</li>
+</ul>
+</li>
+<li><strong>Publications by Person Identifier</strong>
+<ul>
+<li>([CLPID]_[ORCID]_publications.csv) Given a clpid and/or ORCID, retrieves publication records from CaltechAUTHORS. Includes title, publication year, DOI, authors with affiliations, and acknowledgements. At least one of clpid or ORCID must be provided.</li>
+</ul>
+</li>
+<li><strong>Country Collaboration Report</strong>
+<ul>
+<li>([COUNTRY]_country_collaboration_report.csv) Given a country name, generates a CSV listing all CaltechAUTHORS records where a co-author, contributor, or funder is affiliated with an organization and in that country (matched via ROR). Rows are sorted by publication year (descending), journal, then title.</li>
 </ul>
 </li>
 </ul>

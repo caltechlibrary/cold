@@ -6,6 +6,7 @@
 import { parseArgs } from "@std/cli/parse-args";
 import { exists } from "@std/fs/exists";
 import ProgressBar from "@deno-library/progress";
+import { ensureDir } from "@std/fs/ensure-dir";
 
 import { licenseText, releaseDate, releaseHash, version } from "./version.ts";
 import { fmtHelp, rorImportHelpText } from "./helptext.ts";
@@ -73,6 +74,37 @@ function rorToJSONLLine(obj: any): string {
   });
 }
 
+function toFilenameSafe(name: string): string {
+  // Normalize to NFD, strip combining diacritical marks (U+0300–U+036F), replace non-alphanumeric with _
+  const nfd = name.normalize("NFD").replace(/[̀-ͯ]/g, "");
+  return nfd.replace(/[^a-zA-Z0-9]+/g, "_").replace(/^_|_$/g, "");
+}
+
+async function generateCountryList(
+  rorObjects: any[],
+  outputPath: string,
+): Promise<void> {
+  const seen = new Map<string, string>(); // code → name
+  for (const obj of rorObjects) {
+    const code = obj.locations?.[0]?.geonames_details?.country_code ??
+      obj.country?.country_code ??
+      obj.country?.code;
+    const name = obj.locations?.[0]?.geonames_details?.country_name ??
+      obj.country?.country_name ??
+      obj.country?.name;
+    if (code && name && !seen.has(code)) {
+      seen.set(code, name);
+    }
+  }
+  const list = Array.from(seen.entries())
+    .map(([code, name]) => ({ code, name, filename: toFilenameSafe(name) }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  await ensureDir(new URL("./htdocs/data", import.meta.url).pathname);
+  await Deno.writeTextFile(outputPath, JSON.stringify(list, null, 2));
+  console.log(`Wrote ${list.length} countries to ${outputPath}`);
+}
+
 async function processJSONDump(src: string): Promise<number> {
   const rorObjects: any[] = JSON.parse(src);
   console.log(`${rorObjects.length} ROR objects to process.`);
@@ -122,6 +154,13 @@ async function processJSONDump(src: string): Promise<number> {
   }
 
   console.log(`\nSuccessfully loaded ${count} ROR objects into ${cName}`);
+
+  const countryListPath = new URL(
+    "./htdocs/data/country_list.json",
+    import.meta.url,
+  ).pathname;
+  await generateCountryList(rorObjects, countryListPath);
+
   return 0;
 }
 

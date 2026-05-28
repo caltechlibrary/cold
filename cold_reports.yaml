@@ -101,3 +101,15 @@ reports:
     basename: "{{clpid}}_collaborator_affiliations_report"
     append_datestamp: false
     content_type: text/csv
+  run_country_collaboration_report:
+    cmd: ./run_country_collaboration_report.bash
+    inputs:
+      - id: country_code
+        type: text
+        required: true
+      - id: country_name
+        type: text
+        required: false
+    basename: "{{country_name}}_country_collaboration_report"
+    append_datestamp: false
+    content_type: text/csv

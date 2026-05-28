@@ -33,7 +33,7 @@ maintainer:
     id: https://orcid.org/0000-0003-0900-6903
 
 repository_code: https://github.com/caltechlibrary/cold
-version: 0.0.47
+version: 0.0.48
 license_url: https://caltechlibrary.github.io/cold/LICENSE
 operating_system:
   - Linux
@@ -53,21 +53,16 @@ keywords:
   - objects
   - controlled vocabulary
 
-date_released: 2026-05-27
+date_released: 2026-05-28
 ---
 
 About this software
 ===================
 
-## cold 0.0.47
+## cold 0.0.48
 
-- Search CaltechTHESIS form
-  - Fix ORCID to search all orcid fields not just authors's orcid
-  - Fixed default pre-check boxes
-- Re-assign clpid for CaltechPEOPLE form
-  - Add an "internal notes" box to the form.
-- Changed link harvesting to use the EPrint Admin view of the record
-- Updated ROR import to take advantage of dataset load action.
+- Fixed some error handling in report runner
+- Added Country Collaboration Report
 
 ## Authors
 
