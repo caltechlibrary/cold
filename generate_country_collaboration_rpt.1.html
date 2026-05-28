@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <title>cold</title>
+    <link rel="stylesheet" href="https://caltechlibrary.github.io/css/site.css">
+    <link rel="stylesheet" href="https://media.library.caltech.edu/cl-webcomponents/css/code-blocks.css">
+    <script type="module" src="https://media.library.caltech.edu/cl-webcomponents/copyToClipboard.js"></script>
+    <script type="module" src="https://media.library.caltech.edu/cl-webcomponents/footer-global.js"></script>
+</head>
+<body>
+<header>
+<a href="https://library.caltech.edu"><img src="https://media.library.caltech.edu/assets/caltechlibrary-logo.png" alt="Caltech Library logo"></a>
+</header>
+<a href="#main-content" class="visually-hidden">skip to main content</a>
+<nav>
+<ul>
+    <li><a href="/">All Library Apps</a></li>
+    <li><a href="index.html">Home</a></li>
+    <li><a href="LICENSE">LICENSE</a></li>
+    <li><a href="INSTALL.html">INSTALL</a></li>
+    <li><a href="user_manual.html">User Manual</a></li>
+    <li><a href="about.html">About</a></li>
+    <!-- <li><a href="search.html">Search</a></li> -->
+    <li><a href="https://github.com/caltechlibrary/cold">Code Repository</a></li>
+</ul>
+</nav>
+<section id="main-content">
+<h1 id="name">NAME</h1>
+<p>generate_country_collaboration_rpt</p>
+<h1 id="synopsis">SYNOPSIS</h1>
+<p>generate_country_collaboration_rpt <a href="#options">OPTIONS</a>
+COUNTRY_CODE</p>
+<h1 id="description">DESCRIPTION</h1>
+<p>generate_country_collaboration_rpt generates a country collaboration
+report for CaltechAUTHORS records. Given an ISO 3166-1 alpha-2 country
+code, it queries the local ROR dataset (ror.ds) for all research
+organizations in that country, then searches CaltechAUTHORS for records
+where those ROR identifiers appear in creator affiliations, contributor
+affiliations, or funding entries.</p>
+<p>Each output row represents one (ROR, CaltechAUTHORS record) pair. The
+columns are:</p>
+<ul>
+<li>country: country name for the matched ROR organization</li>
+<li>ror: full ROR URL of the matched organization</li>
+<li>organization: name of the matched ROR organization</li>
+<li>year: publication year, enabling engagement to be tracked over
+time</li>
+<li>caltech_authors: semicolon-separated Caltech creators and
+contributors (Caltech ROR or clpid); each entry is formatted as “Name
+(clpid)” or “Name (orcid)” when an identifier is available</li>
+<li>rdm_record_id: the CaltechAUTHORS InvenioRDM record identifier</li>
+</ul>
+<h1 id="options">OPTIONS</h1>
+<dl>
+<dt>-h, –help</dt>
+<dd>
+display help
+</dd>
+<dt>-l, –license</dt>
+<dd>
+display license
+</dd>
+<dt>-v, –version</dt>
+<dd>
+display version
+</dd>
+</dl>
+<h1 id="arguments">ARGUMENTS</h1>
+<dl>
+<dt>COUNTRY_CODE</dt>
+<dd>
+ISO 3166-1 alpha-2 two-letter country code (e.g. AU, DE, JP, GB)
+</dd>
+</dl>
+<h1 id="example">EXAMPLE</h1>
+<p>Generate a country collaboration report for Australia:</p>
+<pre class="shell"><code>generate_country_collaboration_rpt AU</code></pre>
+<p>Generate a report for Germany:</p>
+<pre class="shell"><code>generate_country_collaboration_rpt DE</code></pre>
+</section>
+<footer-global></footer-global>
+</body>
+</html>
