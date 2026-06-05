@@ -95,10 +95,10 @@
     "GNU Make",
     "Pandoc >= 3.9"
   ],
-  "version": "0.0.49",
+  "version": "0.0.49b",
   "developmentStatus": "active",
   "issueTracker": "https://github.com/caltechlibrary/cold/issues",
   "downloadUrl": "https://github.com/caltechlibrary/cold/releases/latest",
-  "releaseNotes": "- Added Acknolwedgements and Additional Information columns to Country Collaboration Report and Collaborator Affiliation reports",
+  "releaseNotes": "- Added Acknolwedgements and Additional Information columns to Country Collaboration Report and Collaborator Affiliation reports\n- Fix problem in the selection of country for country collaborator report.",
   "copyrightYear": 2026
 }
