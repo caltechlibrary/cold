@@ -28,10 +28,20 @@
 <h1 id="name">NAME</h1>
 <p>generate_collaborator_rpt</p>
 <h1 id="synopsis">SYNOPSIS</h1>
-<p>generate_collaborator_rpt CLPID [–record_id]</p>
+<p>generate_collaborator_rpt CLPID [–record_ids]</p>
 <h1 id="description">DESCRIPTION</h1>
 <p>Given a CLPID generate a collaborator report as a CSV file suitable
-for NSF.</p>
+for NSF. One row is produced per unique coauthor aggregated across all
+CaltechAUTHORS records from the past 48 months.</p>
+<p>The output columns are:</p>
+<ul>
+<li>“4” / “A:”: NSF format marker</li>
+<li>Name: coauthor display name</li>
+<li>Organizational Affiliation: comma-separated affiliations</li>
+<li>Optional (email, Department): blank column for manual
+completion</li>
+<li>Last Active: most recent publication year for that coauthor</li>
+</ul>
 <h1 id="option">OPTION</h1>
 <dl>
 <dt>-h, –help</dt>
@@ -46,13 +56,14 @@ display license
 <dd>
 display version
 </dd>
-<dt>–record_id</dt>
+<dt>–record_ids</dt>
 <dd>
-Include the RDM record identifier for comparison
+Include the CaltechAUTHORS record identifiers in the output (do not
+submit to NSF)
 </dd>
 </dl>
 <h1 id="example">EXAMPLE</h1>
-<pre class="shell"><code>generate_collaborator_rpt Newman-D-K --record_id &gt;Diane_Newman_Collaborators.csv</code></pre>
+<pre class="shell"><code>generate_collaborator_rpt Newman-D-K --record_ids &gt;Diane_Newman_Collaborators.csv</code></pre>
 </section>
 <footer-global></footer-global>
 </body>

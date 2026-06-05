@@ -28,11 +28,38 @@
 <h1 id="name">NAME</h1>
 <p>generate_collaborator_affiliations_rpt</p>
 <h1 id="synopsis">SYNOPSIS</h1>
-<p>generate_collaborator_affiliations_rpt CLPID [–record_id]</p>
+<p>generate_collaborator_affiliations_rpt <a href="#options">OPTIONS</a>
+CLPID</p>
 <h1 id="description">DESCRIPTION</h1>
-<p>Given a CLPID generate a collaborator report as a CSV file suitable
-for NSF.</p>
-<h1 id="option">OPTION</h1>
+<p>Given a CLPID, generate a collaborator affiliations report as a CSV
+file. This report is similar to the basic collaborator report but
+expands affiliation details. Each row represents one (coauthor,
+affiliation, CaltechAUTHORS record) combination, allowing
+acknowledgement and additional information context to be read per
+publication.</p>
+<p>The output columns are:</p>
+<ul>
+<li>“4” / “A:”: NSF format marker</li>
+<li>Name: coauthor display name</li>
+<li>Organizational Affiliation: affiliation name</li>
+<li>ROR ID: full ROR URL for the affiliation (if available in
+CaltechAUTHORS)</li>
+<li>Country: country name derived from the local ror.ds dataset</li>
+<li>Optional (email, Department): blank column for manual
+completion</li>
+<li>Last Active: publication year for that specific record</li>
+<li>Acknowledgements: acknowledgement text from the record</li>
+<li>Additional Information: additional information text from the
+record</li>
+</ul>
+<p>Acknowledgement and Additional Information are sourced from the
+record’s metadata.additional_descriptions field (types “Acknowledgement”
+and “Additional Information” respectively). Multiple entries of the same
+type within one record are joined with two line breaks.</p>
+<p>Records searched cover all available CaltechAUTHORS history. ROR
+country lookups use the local ror.ds dataset collection and are cached
+per affiliation to minimise datasetd calls.</p>
+<h1 id="options">OPTIONS</h1>
 <dl>
 <dt>-h, –help</dt>
 <dd>
@@ -46,13 +73,17 @@ display license
 <dd>
 display version
 </dd>
-<dt>–record_id</dt>
+<dt>–record_ids</dt>
 <dd>
-Include the RDM record identifier for comparison
+Include the CaltechAUTHORS record identifier as a final column (do not
+submit to NSF)
 </dd>
 </dl>
 <h1 id="example">EXAMPLE</h1>
-<pre class="shell"><code>generate_collaborator_rpt Newman-D-K --record_id &gt;Diane_Newman_Collaborators.csv</code></pre>
+<p>Generate a collaborator affiliations report:</p>
+<pre class="shell"><code>generate_collaborator_affiliations_rpt Newman-D-K &gt;Newman_affiliations.csv</code></pre>
+<p>Include CaltechAUTHORS record IDs for cross-referencing:</p>
+<pre class="shell"><code>generate_collaborator_affiliations_rpt --record_ids Newman-D-K &gt;Newman_affiliations.csv</code></pre>
 </section>
 <footer-global></footer-global>
 </body>

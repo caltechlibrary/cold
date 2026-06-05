@@ -120,7 +120,7 @@
 </li>
 <li><strong>Collaborator Affiliations Report</strong>
 <ul>
-<li>([CLPID]_collaborator_affiliations_report.csv) Given a clpid, generates a collaborator affiliations report as a CSV file suitable for NSF. Similar to the Collaborator Report but includes ROR-based affiliation details for each collaborator.</li>
+<li>([CLPID]_collaborator_affiliations_report.csv) Given a clpid, generates a collaborator affiliations report as a CSV file suitable for NSF. Each row covers one (coauthor, affiliation, publication) combination and includes ROR ID, country, acknowledgements, and additional information sourced from the CaltechAUTHORS record.</li>
 </ul>
 </li>
 <li><strong>Publications by Person Identifier</strong>
@@ -130,7 +130,7 @@
 </li>
 <li><strong>Country Collaboration Report</strong>
 <ul>
-<li>([COUNTRY]_country_collaboration_report.csv) Given a country name, generates a CSV listing all CaltechAUTHORS records where a co-author, contributor, or funder is affiliated with an organization and in that country (matched via ROR). Rows are sorted by publication year (descending), journal, then title.</li>
+<li>([COUNTRY]_country_collaboration_report.csv) Given a country name, generates a CSV listing all CaltechAUTHORS records where a co-author, contributor, or funder is affiliated with an organization in that country (matched via ROR). Columns include year, journal, title, Caltech authors, ROR, organization, country, acknowledgements, and additional information. Rows are sorted by publication year (descending), journal, then title.</li>
 </ul>
 </li>
 </ul>

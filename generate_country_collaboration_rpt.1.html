@@ -37,19 +37,26 @@ code, it queries the local ROR dataset (ror.ds) for all research
 organizations in that country, then searches CaltechAUTHORS for records
 where those ROR identifiers appear in creator affiliations, contributor
 affiliations, or funding entries.</p>
-<p>Each output row represents one (ROR, CaltechAUTHORS record) pair. The
-columns are:</p>
+<p>Each output row represents one (ROR organization, CaltechAUTHORS
+record) pair. The columns are:</p>
 <ul>
-<li>country: country name for the matched ROR organization</li>
+<li>year: publication year</li>
+<li>journal: journal title (from custom_fields)</li>
+<li>title: record title</li>
+<li>caltech_authors: semicolon-separated Caltech creators and
+contributors; each entry is formatted as “Name (clpid)” or “Name
+(orcid)” when an identifier is available</li>
+<li>rdm_record_id: the CaltechAUTHORS InvenioRDM record identifier</li>
 <li>ror: full ROR URL of the matched organization</li>
 <li>organization: name of the matched ROR organization</li>
-<li>year: publication year, enabling engagement to be tracked over
-time</li>
-<li>caltech_authors: semicolon-separated Caltech creators and
-contributors (Caltech ROR or clpid); each entry is formatted as “Name
-(clpid)” or “Name (orcid)” when an identifier is available</li>
-<li>rdm_record_id: the CaltechAUTHORS InvenioRDM record identifier</li>
+<li>country: country name for the matched ROR organization</li>
+<li>acknowledgements: acknowledgement text from the record</li>
+<li>additional_information: additional information text from the
+record</li>
 </ul>
+<p>Acknowledgements and additional_information are sourced from the
+record’s metadata.additional_descriptions field (types “Acknowledgement”
+and “Additional Information” respectively).</p>
 <h1 id="options">OPTIONS</h1>
 <dl>
 <dt>-h, –help</dt>

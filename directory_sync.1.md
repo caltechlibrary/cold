@@ -1,4 +1,4 @@
-%directory_sync(1) user manual | 0.0.49  15f9409
+%directory_sync(1) user manual | 0.0.49  2cda10d
 % R. S.Doiel
 % 2026-06-05
 

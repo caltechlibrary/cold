@@ -44,8 +44,26 @@ The JSON API is provided by Dataset’s datasetd. Access control is
 provided by the front end web server integrated with Shibboleth.</p>
 <h2 id="release-notes">Release Notes</h2>
 <ul>
-<li><p>version: 0.0.48</p></li>
+<li><p>version: 0.0.49</p></li>
 <li><p>status: active</p></li>
+<li><p>released: 2026-06-05</p></li>
+<li><p>Collaborator Affiliations Report: restructured to one row per
+(coauthor, affiliation, CaltechAUTHORS record); added Acknowledgements
+and Additional Information columns sourced from
+<code>metadata.additional_descriptions</code>.</p></li>
+<li><p>Country Collaboration Report: added <code>acknowledgements</code>
+and <code>additional_information</code> columns sourced from
+<code>metadata.additional_descriptions</code>.</p></li>
+<li><p>Bug fix: <code>publications_by_person_identifiers</code> now
+reads acknowledgements from
+<code>metadata.additional_descriptions</code> (type “Acknowledgement”)
+instead of the deprecated <code>metadata.acknowledgements</code> field,
+which is no longer reliably populated by CaltechAUTHORS.</p></li>
+</ul>
+<h3 id="previous-release">Previous release</h3>
+<ul>
+<li><p>version: 0.0.48</p></li>
+<li><p>status: superseded</p></li>
 <li><p>released: 2026-05-28</p></li>
 <li><p>Country Collaboration Report: new mediated report that lists all
 CaltechAUTHORS records where a creator, contributor, or funder is
@@ -72,18 +90,6 @@ written.</p></li>
 <li><p>Report descriptions page (<code>report_descriptions.html</code>)
 updated to document all current reports including the three new mediated
 reports.</p></li>
-</ul>
-<h3 id="previous-release">Previous release</h3>
-<ul>
-<li><p>version: 0.0.46</p></li>
-<li><p>status: superseded</p></li>
-<li><p>released: 2026-05-18</p></li>
-<li><p>Self-service clpid rename: new /rename/people page linked from
-dashboard and people view; shows full person record for confirmation;
-validates old key exists and new key is unique</p></li>
-<li><p>Fixed some relative path issues discovered in production
-deployment.</p></li>
-<li><p>Linked in new rename people method from dashboard.</p></li>
 </ul>
 <h3 id="authors">Authors</h3>
 <ul>
