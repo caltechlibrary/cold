@@ -12,7 +12,10 @@ import { stringify } from "jsr:@std/csv";
 
 import { apiPort, Dataset } from "./deps.ts";
 import { licenseText, releaseDate, releaseHash, version } from "./version.ts";
-import { fmtHelp, generateCollaboratorReportHelpText } from "./helptext.ts";
+import {
+  fmtHelp,
+  generateCollaboratorAffiliationsReportHelpText,
+} from "./helptext.ts";
 
 const appName = "generate_collaborator_affiliations_rpt";
 const dsRor = new Dataset(apiPort, "ror.ds");
@@ -26,11 +29,18 @@ interface Author {
   affiliations?: Array<{ name: string; id?: string }>;
 }
 
+interface AdditionalDescription {
+  description: string;
+  type: { id?: string; en?: string; title?: { en?: string } };
+  lang?: { id?: string };
+}
+
 interface Record {
   id: string;
   metadata: {
     publication_date?: string;
     creators: Author[];
+    additional_descriptions?: AdditionalDescription[];
   };
 }
 
@@ -40,7 +50,20 @@ interface AffiliationRow {
   ror_id: string;
   country: string;
   year: string;
-  record_ids: string[];
+  record_id: string;
+  acknowledgements: string;
+  additional_information: string;
+}
+
+function extractDescriptionsByType(
+  descriptions: AdditionalDescription[] | undefined,
+  typeName: string,
+): string {
+  if (!descriptions) return "";
+  return descriptions
+    .filter((d) => (d.type?.en ?? d.type?.title?.en ?? "") === typeName)
+    .map((d) => d.description)
+    .join("\n\n");
 }
 
 /**
@@ -136,8 +159,10 @@ export async function run_report(clpid: string, includeRecordIds: boolean) {
   const data = await response.json();
   const records: Record[] = data.hits.hits;
 
-  // Aggregate coauthors: one row per (collaboratorKey, affiliation, rorId)
-  const affiliationMap = new Map<string, AffiliationRow>();
+  // Collect one row per (coauthor, affiliation, record); cache ROR lookups by affId
+  const rorCache = new Map<string, { country: string; rorUrl: string }>();
+  const seen = new Set<string>(); // "collaboratorKey::affName::affId::recordId"
+  const affiliationRows: AffiliationRow[] = [];
 
   for (const article of records) {
     if (!article.metadata?.publication_date) {
@@ -149,6 +174,14 @@ export async function run_report(clpid: string, includeRecordIds: boolean) {
     const year = article.metadata.publication_date.split("-")[0];
     const authors = article.metadata.creators;
     const recordId = article.id;
+    const acknowledgements = extractDescriptionsByType(
+      article.metadata.additional_descriptions,
+      "Acknowledgement",
+    );
+    const additionalInformation = extractDescriptionsByType(
+      article.metadata.additional_descriptions,
+      "Additional Information",
+    );
 
     for (const author of authors) {
       const name = author.person_or_org.name;
@@ -165,44 +198,43 @@ export async function run_report(clpid: string, includeRecordIds: boolean) {
           const affiliations = author.affiliations || [];
 
           if (affiliations.length === 0) {
-            const mapKey = `${collaboratorKey}::`;
-            const existing = affiliationMap.get(mapKey);
-            if (!existing) {
-              affiliationMap.set(mapKey, {
+            const seenKey = `${collaboratorKey}::::${recordId}`;
+            if (!seen.has(seenKey)) {
+              seen.add(seenKey);
+              affiliationRows.push({
                 name,
                 affiliation_name: "",
                 ror_id: "",
                 country: "",
                 year,
-                record_ids: [recordId],
+                record_id: recordId,
+                acknowledgements,
+                additional_information: additionalInformation,
               });
-            } else {
-              if (!existing.record_ids.includes(recordId)) {
-                existing.record_ids.push(recordId);
-              }
-              if (existing.year < year) existing.year = year;
             }
           } else {
             for (const aff of affiliations) {
               const affName = aff.name || "";
               const affId = aff.id || "";
-              const mapKey = `${collaboratorKey}::${affName}::${affId}`;
-              const existing = affiliationMap.get(mapKey);
-              if (!existing) {
-                const rorInfo = await lookupRorCountry(affId);
-                affiliationMap.set(mapKey, {
+              const seenKey =
+                `${collaboratorKey}::${affName}::${affId}::${recordId}`;
+              if (!seen.has(seenKey)) {
+                seen.add(seenKey);
+                let rorInfo = rorCache.get(affId);
+                if (!rorInfo) {
+                  rorInfo = await lookupRorCountry(affId);
+                  rorCache.set(affId, rorInfo);
+                }
+                affiliationRows.push({
                   name,
                   affiliation_name: affName,
                   ror_id: rorInfo.rorUrl,
                   country: rorInfo.country,
                   year,
-                  record_ids: [recordId],
+                  record_id: recordId,
+                  acknowledgements,
+                  additional_information: additionalInformation,
                 });
-              } else {
-                if (!existing.record_ids.includes(recordId)) {
-                  existing.record_ids.push(recordId);
-                }
-                if (existing.year < year) existing.year = year;
               }
             }
           }
@@ -211,10 +243,7 @@ export async function run_report(clpid: string, includeRecordIds: boolean) {
     }
   }
 
-  const affiliationRows = Array.from(affiliationMap.values());
-
   // Prepare CSV output
-  // Columns: 4, Name:, Organizational Affiliation, ROR ID, Country, Optional (email, Department), Last Active, [Record IDs]
   const headers = [
     "4",
     "Name:",
@@ -223,9 +252,11 @@ export async function run_report(clpid: string, includeRecordIds: boolean) {
     "Country",
     "Optional (email, Department)",
     "Last Active",
+    "Acknowledgements",
+    "Additional Information",
   ];
   if (includeRecordIds) {
-    headers.push("CaltechAUTHORS Record IDs (do not include in NSF report)");
+    headers.push("CaltechAUTHORS Record ID (do not include in NSF report)");
   }
 
   const rows = affiliationRows.map((row: AffiliationRow) => {
@@ -235,20 +266,24 @@ export async function run_report(clpid: string, includeRecordIds: boolean) {
       row.affiliation_name,
       row.ror_id,
       row.country,
-      "", // Optional (email, Department) - empty for now
+      "",
       row.year,
+      row.acknowledgements,
+      row.additional_information,
     ];
     if (includeRecordIds) {
-      csvRow.push(row.record_ids.join("; "));
+      csvRow.push(row.record_id);
     }
     return csvRow;
   });
 
-  // Sort by name, then by affiliation name
+  // Sort by name, then affiliation name, then year descending
   rows.sort((a, b) => {
     const nameCompare = a[1].localeCompare(b[1]);
     if (nameCompare !== 0) return nameCompare;
-    return a[2].localeCompare(b[2]);
+    const affCompare = a[2].localeCompare(b[2]);
+    if (affCompare !== 0) return affCompare;
+    return b[6].localeCompare(a[6]); // year descending
   });
 
   // Output CSV to stdout
@@ -277,7 +312,7 @@ async function main() {
   if (app.help) {
     console.log(
       fmtHelp(
-        generateCollaboratorReportHelpText,
+        generateCollaboratorAffiliationsReportHelpText,
         appName,
         version,
         releaseDate,

@@ -40,6 +40,12 @@ interface FundingItem {
   };
 }
 
+interface AdditionalDescription {
+  description: string;
+  type: { id?: string; en?: string; title?: { en?: string } };
+  lang?: { id?: string };
+}
+
 interface Record {
   id: string;
   metadata: {
@@ -48,9 +54,20 @@ interface Record {
     date_published?: string;
     doi?: string;
     creators?: Creator[];
-    acknowledgements?: string;
+    additional_descriptions?: AdditionalDescription[];
     funding?: FundingItem[];
   };
+}
+
+function extractDescriptionsByType(
+  descriptions: AdditionalDescription[] | undefined,
+  typeName: string,
+): string {
+  if (!descriptions) return "";
+  return descriptions
+    .filter((d) => (d.type?.en ?? d.type?.title?.en ?? "") === typeName)
+    .map((d) => d.description)
+    .join("\n\n");
 }
 
 interface OutputRecord {
@@ -267,7 +284,10 @@ export async function run_report(
         ),
         doi: extractDoi(metadata),
         authors_with_affiliations: authors_with_affiliations,
-        acknowledgements: metadata.acknowledgements || "",
+        acknowledgements: extractDescriptionsByType(
+          metadata.additional_descriptions,
+          "Acknowledgement",
+        ),
         funding: funding,
         record_clpid,
         record_orcid,
@@ -296,7 +316,10 @@ export async function run_report(
         ),
         doi: extractDoi(metadata),
         authors_with_affiliations: formatAuthorsForCSV(creators),
-        acknowledgements: metadata.acknowledgements || "",
+        acknowledgements: extractDescriptionsByType(
+          metadata.additional_descriptions,
+          "Acknowledgement",
+        ),
         funding: formatFundingForCSV(metadata.funding),
         record_clpid,
         record_orcid,
@@ -365,7 +388,10 @@ export async function run_report(
         ),
         doi: extractDoi(metadata),
         authors_with_affiliations: authors_with_affiliations,
-        acknowledgements: metadata.acknowledgements || "",
+        acknowledgements: extractDescriptionsByType(
+          metadata.additional_descriptions,
+          "Acknowledgement",
+        ),
         funding: funding,
         record_clpid,
         record_orcid,

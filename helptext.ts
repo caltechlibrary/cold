@@ -548,11 +548,21 @@ export const generateCollaboratorReportHelpText =
 
 # SYNOPSIS
 
-{app_name} CLPID [--record_id]
+{app_name} CLPID [--record_ids]
 
 # DESCRIPTION
 
 Given a CLPID generate a collaborator report as a CSV file suitable for NSF.
+One row is produced per unique coauthor aggregated across all CaltechAUTHORS
+records from the past 48 months.
+
+The output columns are:
+
+- "4" / "A:": NSF format marker
+- Name: coauthor display name
+- Organizational Affiliation: comma-separated affiliations
+- Optional (email, Department): blank column for manual completion
+- Last Active: most recent publication year for that coauthor
 
 # OPTION
 
@@ -565,13 +575,85 @@ Given a CLPID generate a collaborator report as a CSV file suitable for NSF.
 -v, --version
 : display version
 
---record_id
-: Include the RDM record identifier for comparison
+--record_ids
+: Include the CaltechAUTHORS record identifiers in the output (do not submit to NSF)
 
 # EXAMPLE
 
 ~~~shell
-generate_collaborator_rpt Newman-D-K --record_id >Diane_Newman_Collaborators.csv
+generate_collaborator_rpt Newman-D-K --record_ids >Diane_Newman_Collaborators.csv
+~~~
+
+`;
+
+export const generateCollaboratorAffiliationsReportHelpText =
+  `%{app_name}(1) user manual | {version} {release_hash}
+% R. S.Doiel
+% {release_date}
+
+# NAME
+
+{app_name}
+
+# SYNOPSIS
+
+{app_name} [OPTIONS] CLPID
+
+# DESCRIPTION
+
+Given a CLPID, generate a collaborator affiliations report as a CSV file.
+This report is similar to the basic collaborator report but expands affiliation
+details. Each row represents one (coauthor, affiliation, CaltechAUTHORS record)
+combination, allowing acknowledgement and additional information context to be
+read per publication.
+
+The output columns are:
+
+- "4" / "A:": NSF format marker
+- Name: coauthor display name
+- Organizational Affiliation: affiliation name
+- ROR ID: full ROR URL for the affiliation (if available in CaltechAUTHORS)
+- Country: country name derived from the local ror.ds dataset
+- Optional (email, Department): blank column for manual completion
+- Last Active: publication year for that specific record
+- Acknowledgements: acknowledgement text from the record
+- Additional Information: additional information text from the record
+
+Acknowledgement and Additional Information are sourced from the record's
+metadata.additional_descriptions field (types "Acknowledgement" and
+"Additional Information" respectively). Multiple entries of the same type
+within one record are joined with two line breaks.
+
+Records searched cover all available CaltechAUTHORS history. ROR country
+lookups use the local ror.ds dataset collection and are cached per affiliation
+to minimise datasetd calls.
+
+# OPTIONS
+
+-h, --help
+: display help
+
+-l, --license
+: display license
+
+-v, --version
+: display version
+
+--record_ids
+: Include the CaltechAUTHORS record identifier as a final column (do not submit to NSF)
+
+# EXAMPLE
+
+Generate a collaborator affiliations report:
+
+~~~shell
+{app_name} Newman-D-K >Newman_affiliations.csv
+~~~
+
+Include CaltechAUTHORS record IDs for cross-referencing:
+
+~~~shell
+{app_name} --record_ids Newman-D-K >Newman_affiliations.csv
 ~~~
 
 `;
@@ -691,15 +773,24 @@ for all research organizations in that country, then searches CaltechAUTHORS for
 records where those ROR identifiers appear in creator affiliations, contributor
 affiliations, or funding entries.
 
-Each output row represents one (ROR, CaltechAUTHORS record) pair. The columns are:
+Each output row represents one (ROR organization, CaltechAUTHORS record) pair.
+The columns are:
 
-- country: country name for the matched ROR organization
-- ror: full ROR URL of the matched organization
-- organization: name of the matched ROR organization
-- year: publication year, enabling engagement to be tracked over time
-- caltech_authors: semicolon-separated Caltech creators and contributors (Caltech ROR or clpid);
+- year: publication year
+- journal: journal title (from custom_fields)
+- title: record title
+- caltech_authors: semicolon-separated Caltech creators and contributors;
   each entry is formatted as "Name (clpid)" or "Name (orcid)" when an identifier is available
 - rdm_record_id: the CaltechAUTHORS InvenioRDM record identifier
+- ror: full ROR URL of the matched organization
+- organization: name of the matched ROR organization
+- country: country name for the matched ROR organization
+- acknowledgements: acknowledgement text from the record
+- additional_information: additional information text from the record
+
+Acknowledgements and additional_information are sourced from the record's
+metadata.additional_descriptions field (types "Acknowledgement" and
+"Additional Information" respectively).
 
 # OPTIONS
 

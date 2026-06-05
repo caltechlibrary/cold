@@ -44,8 +44,8 @@ Installing from source
 
 ### Required software
 
-- Deno >= 2.7.14
-- Dataset >= 2.4.0
+- Deno >= 2.8.2
+- Dataset >= 2.5.1
 - CMTools >= 0.0.45b
 
 ### Steps

@@ -53,8 +53,8 @@
     }
   ],
   "dateCreated": "2023-12-12",
-  "dateModified": "2026-05-28",
-  "datePublished": "2026-05-28",
+  "dateModified": "2026-06-05",
+  "datePublished": "2026-06-05",
   "description": "Caltech Library maintains a list of people, groups and funders and their related identifiers. For many years these were managed using a spreadsheets. That has become cumbersome. **COLD** manages data as JSON objects in [dataset](https://github.com/caltechlibrary/dataset) collections.\n\n**COLD** is implemented as three web web services\n\n- cold web UI\n- cold JSON API (provided by datasetd)\n- cold reports (the report request system)\n\nReports are implemented as a set of programs or bash scripts.\n\nTypeScript+Deno is used to implement the web UI and report system.\nThe JSON API is provided by Dataset's datasetd.\nAccess control is provided by the front end web server integrated with Shibboleth.",
   "funder": [
     {
@@ -87,18 +87,18 @@
     "https://github.com/caltechlibrary/dataset"
   ],
   "softwareRequirements": [
-    "Deno >= 2.7.14",
-    "Dataset >= 2.4.0",
+    "Deno >= 2.8.2",
+    "Dataset >= 2.5.1",
     "CMTools >= 0.0.45b"
   ],
   "softwareSuggestions": [
     "GNU Make",
     "Pandoc >= 3.9"
   ],
-  "version": "0.0.48",
+  "version": "0.0.49",
   "developmentStatus": "active",
   "issueTracker": "https://github.com/caltechlibrary/cold/issues",
   "downloadUrl": "https://github.com/caltechlibrary/cold/releases/latest",
-  "releaseNotes": "- Fixed some error handling in report runner\n- Added Country Collaboration Report",
+  "releaseNotes": "- Added Acknolwedgements and Additional Information columns to Country Collaboration Report and Collaborator Affiliation reports",
   "copyrightYear": 2026
 }

@@ -33,7 +33,7 @@ maintainer:
     id: https://orcid.org/0000-0003-0900-6903
 
 repository_code: https://github.com/caltechlibrary/cold
-version: 0.0.48
+version: 0.0.49
 license_url: https://caltechlibrary.github.io/cold/LICENSE
 operating_system:
   - Linux
@@ -53,16 +53,15 @@ keywords:
   - objects
   - controlled vocabulary
 
-date_released: 2026-05-28
+date_released: 2026-06-05
 ---
 
 About this software
 ===================
 
-## cold 0.0.48
+## cold 0.0.49
 
-- Fixed some error handling in report runner
-- Added Country Collaboration Report
+- Added Acknolwedgements and Additional Information columns to Country Collaboration Report and Collaborator Affiliation reports
 
 ## Authors
 
@@ -117,8 +116,8 @@ Access control is provided by the front end web server integrated with Shibbolet
 
 ## Software Requirements
 
-- Deno >= 2.7.14
-- Dataset >= 2.4.0
+- Deno >= 2.8.2
+- Dataset >= 2.5.1
 - CMTools >= 0.0.45b
 
 

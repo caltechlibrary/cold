@@ -38,6 +38,23 @@ interface RorEntry {
   country_name: string;
 }
 
+interface AdditionalDescription {
+  description: string;
+  type: { id?: string; en?: string; title?: { en?: string } };
+  lang?: { id?: string };
+}
+
+function extractDescriptionsByType(
+  descriptions: AdditionalDescription[] | undefined,
+  typeName: string,
+): string {
+  if (!descriptions) return "";
+  return descriptions
+    .filter((d) => (d.type?.en ?? d.type?.title?.en ?? "") === typeName)
+    .map((d) => d.description)
+    .join("\n\n");
+}
+
 interface PersonOrOrg {
   name: string;
   type: string;
@@ -62,6 +79,7 @@ interface RdmRecord {
     creators: AuthorEntry[];
     contributors?: AuthorEntry[];
     funding?: FundingEntry[];
+    additional_descriptions?: AdditionalDescription[];
   };
   custom_fields?: {
     "journal:journal"?: { title?: string };
@@ -231,6 +249,8 @@ export async function run_report(countryCode: string) {
         "ror",
         "organization",
         "country",
+        "acknowledgements",
+        "additional_information",
       ]]),
     );
     Deno.exit(0);
@@ -250,6 +270,8 @@ export async function run_report(countryCode: string) {
     "ror",
     "organization",
     "country",
+    "acknowledgements",
+    "additional_information",
   ];
 
   const csvRows: string[][] = [];
@@ -279,6 +301,14 @@ export async function run_report(countryCode: string) {
         const year = publicationYear(record);
         const title = publicationTitle(record);
         const journal = journalTitle(record);
+        const acknowledgements = extractDescriptionsByType(
+          record.metadata.additional_descriptions,
+          "Acknowledgement",
+        );
+        const additionalInformation = extractDescriptionsByType(
+          record.metadata.additional_descriptions,
+          "Additional Information",
+        );
 
         const caltechAuthors = [
           ...creators.filter((a) => isCaltechAffiliated(a)),
@@ -294,6 +324,8 @@ export async function run_report(countryCode: string) {
           rorUrl,
           entry.name,
           countryName,
+          acknowledgements,
+          additionalInformation,
         ]);
       }
     }

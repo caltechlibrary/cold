@@ -54,8 +54,8 @@ pubDate: 2026-05-28
 - __Collaborator Report__
   - ([CLPID]_nsf_collaborator_report.csv) Given a clpid, generates a collaborator report as a CSV file suitable for NSF. Lists co-authors and their affiliations from CaltechAUTHORS records.
 - __Collaborator Affiliations Report__
-  - ([CLPID]_collaborator_affiliations_report.csv) Given a clpid, generates a collaborator affiliations report as a CSV file suitable for NSF. Similar to the Collaborator Report but includes ROR-based affiliation details for each collaborator.
+  - ([CLPID]_collaborator_affiliations_report.csv) Given a clpid, generates a collaborator affiliations report as a CSV file suitable for NSF. Each row covers one (coauthor, affiliation, publication) combination and includes ROR ID, country, acknowledgements, and additional information sourced from the CaltechAUTHORS record.
 - __Publications by Person Identifier__
   - ([CLPID]_[ORCID]_publications.csv) Given a clpid and/or ORCID, retrieves publication records from CaltechAUTHORS. Includes title, publication year, DOI, authors with affiliations, and acknowledgements. At least one of clpid or ORCID must be provided.
 - __Country Collaboration Report__
-  - ([COUNTRY]_country_collaboration_report.csv) Given a country name, generates a CSV listing all CaltechAUTHORS records where a co-author, contributor, or funder is affiliated with an organization and in that country (matched via ROR). Rows are sorted by publication year (descending), journal, then title.
+  - ([COUNTRY]_country_collaboration_report.csv) Given a country name, generates a CSV listing all CaltechAUTHORS records where a co-author, contributor, or funder is affiliated with an organization in that country (matched via ROR). Columns include year, journal, title, Caltech authors, ROR, organization, country, acknowledgements, and additional information. Rows are sorted by publication year (descending), journal, then title.

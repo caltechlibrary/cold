@@ -74,7 +74,7 @@
 <input type="text" id="country_name_display"
        placeholder="e.g. South Korea, Australia, Germany"
        list="country-name-list"
-       autocomplete="off">
+       autocomplete="country-name">
 <datalist id="country-name-list"></datalist>
 <input type="hidden" id="country_code" name="country_code">
 <input type="hidden" id="country_name" name="country_name">
@@ -144,8 +144,8 @@
     }
   }
 
-  countryNameDisplay.addEventListener('input', function() {
-    const entry = countryMap[this.value.trim()];
+  function applyCountrySelection() {
+    const entry = countryMap[countryNameDisplay.value.trim()];
     if (entry) {
       countryCodeInput.value = entry.code;
       countryNameInput.value = entry.filename;
@@ -153,7 +153,9 @@
       countryCodeInput.value = '';
       countryNameInput.value = '';
     }
-  });
+  }
+  countryNameDisplay.addEventListener('input', applyCountrySelection);
+  countryNameDisplay.addEventListener('change', applyCountrySelection);
 
   form.addEventListener('submit', function(e) {
     e.preventDefault();

@@ -1,6 +1,6 @@
-%generate_country_collaboration_rpt(1) user manual | 0.0.47 039fd36
+%generate_country_collaboration_rpt(1) user manual | 0.0.49 15f9409
 % R. S. Doiel
-% 2026-05-27
+% 2026-06-05
 
 # NAME
 
@@ -18,15 +18,24 @@ for all research organizations in that country, then searches CaltechAUTHORS for
 records where those ROR identifiers appear in creator affiliations, contributor
 affiliations, or funding entries.
 
-Each output row represents one (ROR, CaltechAUTHORS record) pair. The columns are:
+Each output row represents one (ROR organization, CaltechAUTHORS record) pair.
+The columns are:
 
-- country: country name for the matched ROR organization
-- ror: full ROR URL of the matched organization
-- organization: name of the matched ROR organization
-- year: publication year, enabling engagement to be tracked over time
-- caltech_authors: semicolon-separated Caltech creators and contributors (Caltech ROR or clpid);
+- year: publication year
+- journal: journal title (from custom_fields)
+- title: record title
+- caltech_authors: semicolon-separated Caltech creators and contributors;
   each entry is formatted as "Name (clpid)" or "Name (orcid)" when an identifier is available
 - rdm_record_id: the CaltechAUTHORS InvenioRDM record identifier
+- ror: full ROR URL of the matched organization
+- organization: name of the matched ROR organization
+- country: country name for the matched ROR organization
+- acknowledgements: acknowledgement text from the record
+- additional_information: additional information text from the record
+
+Acknowledgements and additional_information are sourced from the record's
+metadata.additional_descriptions field (types "Acknowledgement" and
+"Additional Information" respectively).
 
 # OPTIONS
 
@@ -57,5 +66,4 @@ Generate a report for Germany:
 ~~~shell
 generate_country_collaboration_rpt DE
 ~~~
-
 

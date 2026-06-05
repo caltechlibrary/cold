@@ -18,8 +18,18 @@ Access control is provided by the front end web server integrated with Shibbolet
 
 ## Release Notes
 
-- version: 0.0.48
+- version: 0.0.49
 - status: active
+- released: 2026-06-05
+
+- Collaborator Affiliations Report: restructured to one row per (coauthor, affiliation, CaltechAUTHORS record); added Acknowledgements and Additional Information columns sourced from `metadata.additional_descriptions`.
+- Country Collaboration Report: added `acknowledgements` and `additional_information` columns sourced from `metadata.additional_descriptions`.
+- Bug fix: `publications_by_person_identifiers` now reads acknowledgements from `metadata.additional_descriptions` (type "Acknowledgement") instead of the deprecated `metadata.acknowledgements` field, which is no longer reliably populated by CaltechAUTHORS.
+
+### Previous release
+
+- version: 0.0.48
+- status: superseded
 - released: 2026-05-28
 
 - Country Collaboration Report: new mediated report that lists all CaltechAUTHORS records where a creator, contributor, or funder is affiliated with an organization in a given country (matched via ROR). Staff pick the country by common English name from a type-ahead list rather than typing an ISO code.
@@ -29,16 +39,6 @@ Access control is provided by the front end web server integrated with Shibbolet
 - Bug fix: the report runner was treating any stderr output as a fatal error. Commands that write progress messages to stderr (such as the country collaboration report) would produce an error string instead of a CSV. The runner now checks exit code only.
 - Bug fix: on command failure, the error string was being written to the report file and the report status was incorrectly set to "completed". Errors now set status to "error" and no file is written.
 - Report descriptions page (`report_descriptions.html`) updated to document all current reports including the three new mediated reports.
-
-### Previous release
-
-- version: 0.0.46
-- status: superseded
-- released: 2026-05-18
-
-- Self-service clpid rename: new /rename/people page linked from dashboard and people view; shows full person record for confirmation; validates old key exists and new key is unique
-- Fixed some relative path issues discovered in production deployment.
-- Linked in new rename people method from dashboard.
 
 
 ### Authors
