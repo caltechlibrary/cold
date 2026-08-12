@@ -1,8 +1,12 @@
 ---
-title: Search RDM Records
+title: Review RDM Records
 ---
 
-# Search RDM Records
+# Review RDM Records
+
+- [List all review queue records](https://apps.library.caltech.edu/cold/rdm_review_queue.html?q_name=review_queue_by_name&q=*)
+
+## Seearch Review Queue
 
 <div id="search">Loading search form... </div>
 
