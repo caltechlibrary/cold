@@ -7,73 +7,79 @@ import { renderJSON } from "./render.ts";
  * It is a read API only and responses are always in JSON.
  */
 export async function handleBrowserAPI(
-  req: Request,
-  options: { debug: boolean; htdocs: string; baseUrl: string; apiUrl: string },
+    req: Request,
+    options: {
+        debug: boolean;
+        htdocs: string;
+        baseUrl: string;
+        apiUrl: string;
+    },
 ): Promise<Response> {
-  if (req.method !== "GET") {
-    return renderJSON({
-      "ok": false,
-      "msg": `${req.method} method not supported`,
-    }, 501);
-  }
-  let basePath: string = "";
-  try {
-    basePath = new URL(options.baseUrl).pathname.replace(/\/$/, "");
-  } catch {
-    basePath = "";
-  }
-  const apiReq: { [key: string]: string } = apiPathParse(req.url, basePath);
-  if (apiReq.c_name === undefined) {
-    return renderJSON({
-      "ok": false,
-      "msg": `${apiReq.c_name} collection not found`,
-    }, 404);
-  }
-  if (apiReq.query_name === undefined) {
-    return renderJSON({
-      "ok": false,
-      "msg": `${apiReq.query_name} query not found`,
-    }, 404);
-  }
-  let ds = new DatasetApiClient(apiPort, apiReq.c_name);
-  // NOTE: We have more than FIXME: Need to pass in the parameter value(s)
-  let qObj: { [key: string]: string } = {};
-  let body: string = "";
-  let pList: string[] = [];
-  if (apiReq.query_name === "lookup_clgid") {
-    body = JSON.stringify({ name: apiReq.q, alternative: apiReq.q });
-    pList = ["name", "alternative"];
-  } else {
-    for (let k of Object.keys(apiReq)) {
-      if (k !== "query_name" && k !== "c_name") {
-        if (apiReq.hasOwnProperty(k)) {
-          // handle special case for alternative name search ..., pre-paramaterized requests
-          const v = apiReq[k];
-          qObj[k] = v;
-          pList.push(k);
-        }
-      }
+    if (req.method !== "GET") {
+        return renderJSON({
+            "ok": false,
+            "msg": `${req.method} method not supported`,
+        }, 501);
     }
-    body = JSON.stringify(qObj);
-  }
-  let resp = await ds.query(apiReq.query_name, pList, body);
-  if (resp.ok) {
+    let basePath: string = "";
     try {
-      let data = await resp.json();
-      return renderJSON(data, 200);
-    } catch (err) {
-      return renderJSON({
-        "ok": false,
-        "msg": `query ${apiReq.query_name} failed to read response: ${err}`,
-        "api": apiReq,
-      }, 500);
+        basePath = new URL(options.baseUrl).pathname.replace(/\/$/, "");
+    } catch {
+        basePath = "";
     }
-  }
-  // Consume the error body to avoid corrupting the keep-alive connection
-  await resp.body?.cancel();
-  return renderJSON({
-    "ok": false,
-    "msg": `query ${apiReq.query_name} failed with status ${resp.status}`,
-    "api": apiReq,
-  }, resp.status === 404 ? 404 : 500);
+    const apiReq: { [key: string]: string } = apiPathParse(req.url, basePath);
+    if (apiReq.c_name === undefined) {
+        return renderJSON({
+            "ok": false,
+            "msg": `${apiReq.c_name} collection not found`,
+        }, 404);
+    }
+    if (apiReq.query_name === undefined) {
+        return renderJSON({
+            "ok": false,
+            "msg": `${apiReq.query_name} query not found`,
+        }, 404);
+    }
+    let ds = new DatasetApiClient(apiPort, apiReq.c_name);
+    // NOTE: We have more than FIXME: Need to pass in the parameter value(s)
+    let qObj: { [key: string]: string } = {};
+    let body: string = "";
+    let pList: string[] = [];
+    if (apiReq.query_name === "lookup_clgid") {
+        body = JSON.stringify({ name: apiReq.q, alternative: apiReq.q });
+        pList = ["name", "alternative"];
+    } else {
+        for (let k of Object.keys(apiReq)) {
+            if (k !== "query_name" && k !== "c_name") {
+                if (apiReq.hasOwnProperty(k)) {
+                    // handle special case for alternative name search ..., pre-paramaterized requests
+                    const v = apiReq[k];
+                    qObj[k] = v;
+                    pList.push(k);
+                }
+            }
+        }
+        body = JSON.stringify(qObj);
+    }
+    let resp = await ds.query(apiReq.query_name, pList, body);
+    if (resp.ok) {
+        try {
+            let data = await resp.json();
+            return renderJSON(data, 200);
+        } catch (err) {
+            return renderJSON({
+                "ok": false,
+                "msg":
+                    `query ${apiReq.query_name} failed to read response: ${err}`,
+                "api": apiReq,
+            }, 500);
+        }
+    }
+    // Consume the error body to avoid corrupting the keep-alive connection
+    await resp.body?.cancel();
+    return renderJSON({
+        "ok": false,
+        "msg": `query ${apiReq.query_name} failed with status ${resp.status}`,
+        "api": apiReq,
+    }, resp.status === 404 ? 404 : 500);
 }

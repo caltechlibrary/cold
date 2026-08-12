@@ -32,21 +32,21 @@ const dsGroups = new Dataset(apiPort, "groups.ds");
  * redirect paths when COLD is mounted at a sub-path (e.g. /cold).
  */
 export function basePathFromUrl(baseUrl: string): string {
-  try {
-    const p = new URL(baseUrl).pathname.replace(/\/$/, "");
-    return p === "" ? "" : p;
-  } catch {
-    return "";
-  }
+    try {
+        const p = new URL(baseUrl).pathname.replace(/\/$/, "");
+        return p === "" ? "" : p;
+    } catch {
+        return "";
+    }
 }
 
 export function pathIdentifier(u: string): string {
-  const pathname: string = new URL(u).pathname;
-  const cut_pos = pathname.lastIndexOf("/");
-  if (cut_pos != pathname.indexOf("/")) {
-    return decodeURI(pathname.slice(cut_pos + 1));
-  }
-  return "";
+    const pathname: string = new URL(u).pathname;
+    const cut_pos = pathname.lastIndexOf("/");
+    if (cut_pos != pathname.indexOf("/")) {
+        return decodeURI(pathname.slice(cut_pos + 1));
+    }
+    return "";
 }
 
 /**
@@ -63,40 +63,40 @@ export function pathIdentifier(u: string): string {
  * ```
  */
 export function apiPathParse(
-  uri: string,
-  basePath?: string,
+    uri: string,
+    basePath?: string,
 ): { [key: string]: string } {
-  let resp: { [key: string]: string } = {};
-  const u = new URL(uri);
-  const apiPrefix = `${basePath || ""}/api`;
-  let parts: string[] =
-    (u.pathname.startsWith(apiPrefix)
-      ? u.pathname.slice(apiPrefix.length)
-      : u.pathname.replace(/^\/api/, "")).split("/");
-  // Trim the leading slash element
-  if (parts.length > 0 && parts[0] === "") {
-    parts.shift();
-  }
-
-  let c_name: string | undefined = parts.shift();
-  let query_name: string | undefined = parts.shift();
-  // handle decodeing the element in the path.
-  (c_name === undefined) ? "" : resp.c_name = decodeURIComponent(c_name);
-  (query_name === undefined)
-    ? ""
-    : resp.query_name = decodeURIComponent(query_name);
-
-  // Handle none coliding query string parameters.
-  let params = new URLSearchParams(u.search);
-  for (const key of (params as any).keys()) {
-    if (["c_name", "query_name"].indexOf(key) === -1) {
-      const val = params.get(key);
-      if (val !== null) {
-        resp[key] = val;
-      }
+    let resp: { [key: string]: string } = {};
+    const u = new URL(uri);
+    const apiPrefix = `${basePath || ""}/api`;
+    let parts: string[] =
+        (u.pathname.startsWith(apiPrefix)
+            ? u.pathname.slice(apiPrefix.length)
+            : u.pathname.replace(/^\/api/, "")).split("/");
+    // Trim the leading slash element
+    if (parts.length > 0 && parts[0] === "") {
+        parts.shift();
     }
-  }
-  return resp;
+
+    let c_name: string | undefined = parts.shift();
+    let query_name: string | undefined = parts.shift();
+    // handle decodeing the element in the path.
+    (c_name === undefined) ? "" : resp.c_name = decodeURIComponent(c_name);
+    (query_name === undefined)
+        ? ""
+        : resp.query_name = decodeURIComponent(query_name);
+
+    // Handle none coliding query string parameters.
+    let params = new URLSearchParams(u.search);
+    for (const key of (params as any).keys()) {
+        if (["c_name", "query_name"].indexOf(key) === -1) {
+            const val = params.get(key);
+            if (val !== null) {
+                resp[key] = val;
+            }
+        }
+    }
+    return resp;
 }
 
 /**
@@ -105,7 +105,7 @@ export function apiPathParse(
  * @returns string
  */
 export function timeStamp(dt: Date): string {
-  return dt.toISOString().replace("T", " ").substring(0, 19);
+    return dt.toISOString().replace("T", " ").substring(0, 19);
 }
 
 /**
@@ -119,102 +119,107 @@ export function timeStamp(dt: Date): string {
  * @returns {Object}
  */
 export function formDataToObject(form: FormData): object {
-  const obj: {
-    [k: string]: string | { group_name: string; clgid: string }[] | boolean;
-  } = {};
-  for (const v of (form as any).entries()) {
-    const key: string = v[0];
-    if (key !== "submit") {
-      const val: any = v[1];
-      if (val === "true" || val === "on") {
-        obj[key] = true;
-      } else if (val === "false" || val === "off") {
-        obj[key] = false;
-      } else {
-        obj[key] = val;
-      }
-      if (key === "groups") {
-        obj.groups = [];
-        let rows = parseCSV(val);
-        let group_name: string = "";
-        let clgid: string = "";
-        for (const row of rows) {
-          (row[0] === undefined) ? group_name = "" : group_name = row[0].trim();
-          (row[1] === undefined) ? clgid = "" : clgid = row[1].trim();
-          if (group_name !== "" || clgid !== "") {
-            obj.groups.push({ "group_name": group_name, "clgid": clgid });
-          }
+    const obj: {
+        [k: string]: string | { group_name: string; clgid: string }[] | boolean;
+    } = {};
+    for (const v of (form as any).entries()) {
+        const key: string = v[0];
+        if (key !== "submit") {
+            const val: any = v[1];
+            if (val === "true" || val === "on") {
+                obj[key] = true;
+            } else if (val === "false" || val === "off") {
+                obj[key] = false;
+            } else {
+                obj[key] = val;
+            }
+            if (key === "groups") {
+                obj.groups = [];
+                let rows = parseCSV(val);
+                let group_name: string = "";
+                let clgid: string = "";
+                for (const row of rows) {
+                    (row[0] === undefined)
+                        ? group_name = ""
+                        : group_name = row[0].trim();
+                    (row[1] === undefined) ? clgid = "" : clgid = row[1].trim();
+                    if (group_name !== "" || clgid !== "") {
+                        obj.groups.push({
+                            "group_name": group_name,
+                            "clgid": clgid,
+                        });
+                    }
+                }
+            }
         }
-      }
     }
-  }
-  /*  NOTE: Make sure we update obj.updated */
-  obj["updated"] = timeStamp(new Date());
-  return obj;
+    /*  NOTE: Make sure we update obj.updated */
+    obj["updated"] = timeStamp(new Date());
+    return obj;
 }
 
 async function lookupGroupInfo(name: string): Promise<
-  { clgid: string; name: string; ok: boolean; msg: string }
+    { clgid: string; name: string; ok: boolean; msg: string }
 > {
-  let obj: { [key: string]: any } | undefined = await dsGroups.query(
-    "lookup_name_or_clgid",
-    ["name", "clgid", "alternatives"],
-    { "name": name, "clgid": name, "alternatives": name },
-  );
-  if (obj === undefined) {
-    return {
-      "ok": false,
-      "msg": `failed to find group name ${name}`,
-      name: "",
-      clgid: "",
-    };
-  }
-  //console.log(`DEGUG lookupGroupInfo -> ${JSON.stringify(obj)}`);
-  let clgid: string = (obj[0] === undefined) ? "" : obj[0].clgid;
-  let group_name: string = (obj[0] === undefined) ? name : obj[0].group_name;
-  //console.log(`DEGUG return lookupGroupInfo -> clgid: '${clgid}', name: '${group_name}'`);
-  return { ok: true, msg: "", clgid: clgid, name: group_name };
+    let obj: { [key: string]: any } | undefined = await dsGroups.query(
+        "lookup_name_or_clgid",
+        ["name", "clgid", "alternatives"],
+        { "name": name, "clgid": name, "alternatives": name },
+    );
+    if (obj === undefined) {
+        return {
+            "ok": false,
+            "msg": `failed to find group name ${name}`,
+            name: "",
+            clgid: "",
+        };
+    }
+    //console.log(`DEGUG lookupGroupInfo -> ${JSON.stringify(obj)}`);
+    let clgid: string = (obj[0] === undefined) ? "" : obj[0].clgid;
+    let group_name: string = (obj[0] === undefined) ? name : obj[0].group_name;
+    //console.log(`DEGUG return lookupGroupInfo -> clgid: '${clgid}', name: '${group_name}'`);
+    return { ok: true, msg: "", clgid: clgid, name: group_name };
 }
 
 /**
  * updatePeopleWithGroupInfo(clpid, orcid, familyName, givenName, division, groups);
  */
 async function updatePeopleWithGroupInfo(
-  clpid: string,
-  division: string,
-  orcid: string,
-  groups: { group_name: string; clgid: string }[],
+    clpid: string,
+    division: string,
+    orcid: string,
+    groups: { group_name: string; clgid: string }[],
 ): Promise<string> {
-  let obj: { [key: string]: any } | undefined = {};
-  try {
-    obj = await dsPeople.read(clpid);
-  } catch (err) {
-    return `${err}`;
-  }
-  if (obj === undefined) {
-    return `failed to find ${clpid} in people.ds`;
-  }
-  let person = new People();
-  person.fromObject(obj);
-  person.division = division;
-  person.orcid = orcid;
-  person.groups = [];
-  for (let row of groups) {
-    if (row.group_name !== undefined && row.group_name !== "") {
-      const groupInfo = await lookupGroupInfo(row.group_name);
-      if (groupInfo.ok) {
-        row.group_name = groupInfo.name;
-        row.clgid = groupInfo.clgid.trim() === ""
-          ? "MISSING_CLGID"
-          : groupInfo.clgid;
-      }
-      person.groups.push(row);
+    let obj: { [key: string]: any } | undefined = {};
+    try {
+        obj = await dsPeople.read(clpid);
+    } catch (err) {
+        return `${err}`;
     }
-  }
-  if (await dsPeople.update(clpid, person.asObject()) === false) {
-    return `failed to update ${clpid} in people.ds`;
-  }
-  return "";
+    if (obj === undefined) {
+        return `failed to find ${clpid} in people.ds`;
+    }
+    let person = new People();
+    person.fromObject(obj);
+    person.division = division;
+    person.orcid = orcid;
+    person.groups = [];
+    for (let row of groups) {
+        if (row.group_name !== undefined && row.group_name !== "") {
+            const groupInfo = await lookupGroupInfo(row.group_name);
+            if (groupInfo.ok) {
+                row.group_name = groupInfo.name;
+                row.clgid = groupInfo.clgid.trim() === ""
+                    ? "MISSING_CLGID"
+                    : groupInfo.clgid;
+            }
+            person.groups.push(row);
+        }
+    }
+    if (await dsPeople.update(clpid, person.asObject()) === false) {
+        return `failed to update ${clpid} in people.ds`;
+    }
+    return "";
 }
 
 /**
@@ -229,91 +234,100 @@ async function updatePeopleWithGroupInfo(
  * error message is returned.
  */
 export async function loadDivisionPeopleCSV(
-  filename: string,
-  verbose?: boolean,
+    filename: string,
+    verbose?: boolean,
 ): Promise<string> {
-  let src: string = "";
-  try {
-    src = await Deno.readTextFile(filename);
-  } catch (err) {
-    return `${err}`;
-  }
-  const data = parseCSV(src);
-  let division: string = "";
-  let clgid: string = "";
-  let clpid: string = "";
-  let orcid: string = "";
-  let familyName: string = "";
-  let givenName: string = "";
-  let groups: { group_name: string; clgid: string }[] = [];
-  let i = 0;
-  for (let row of data.slice(1)) {
-    if (verbose) console.log(`%crow[${i}] -> ${row}`, YELLOW);
-    i++;
-    (row.length === 0) ? division = "" : division = row.shift() || "";
-    (row.length === 0)
-      ? clgid = ""
-      : (row.length === 0)
-      ? clpid = ""
-      : clpid = row.shift() || "";
-    if (clpid === "") {
-      console.log(`%crow ${i} has no clpid, skipping`, ERROR_COLOR);
-      continue;
+    let src: string = "";
+    try {
+        src = await Deno.readTextFile(filename);
+    } catch (err) {
+        return `${err}`;
     }
-    (row.length === 0) ? orcid = "" : orcid = row.shift() || "";
-    (row.length === 0) ? familyName = "" : familyName = row.shift() || "";
-    (row.length === 0) ? givenName = "" : givenName = row.shift() || "";
-    groups = [];
-    if (division !== "") {
-      const groupInfo = await lookupGroupInfo(division);
-      if (verbose) {
-        console.log(`%cgroupInfo -> ${JSON.stringify(groupInfo)}`, MAROON);
-      }
-      if (groupInfo.ok && groupInfo.clgid !== "") {
-        groups.push({ group_name: groupInfo.name, clgid: groupInfo.clgid });
-      } else {
-        console.log(
-          `%cgroup_name: ${division} is missing clgid, row ${i}, col: 0`,
-          ERROR_COLOR,
-        );
-        groups.push({ group_name: division, clgid: "" });
-      }
-    }
-    let j = 0;
-    for (const column of row) {
-      if (column.trim() !== "") {
-        const groupInfo = await lookupGroupInfo(column.trim());
-        if (groupInfo.ok && groupInfo.clgid !== "") {
-          groups.push({ group_name: groupInfo.name, clgid: groupInfo.clgid });
-        } else {
-          console.log(
-            `%cgroup_name: ${column.trim()} is missing clgid, row ${i}, col: ${j}`,
-            ERROR_COLOR,
-          );
-          groups.push({ group_name: column.trim(), clgid: "" });
+    const data = parseCSV(src);
+    let division: string = "";
+    let clgid: string = "";
+    let clpid: string = "";
+    let orcid: string = "";
+    let familyName: string = "";
+    let givenName: string = "";
+    let groups: { group_name: string; clgid: string }[] = [];
+    let i = 0;
+    for (let row of data.slice(1)) {
+        if (verbose) console.log(`%crow[${i}] -> ${row}`, YELLOW);
+        i++;
+        (row.length === 0) ? division = "" : division = row.shift() || "";
+        (row.length === 0)
+            ? clgid = ""
+            : (row.length === 0)
+            ? clpid = ""
+            : clpid = row.shift() || "";
+        if (clpid === "") {
+            console.log(`%crow ${i} has no clpid, skipping`, ERROR_COLOR);
+            continue;
         }
-      }
-      j++;
+        (row.length === 0) ? orcid = "" : orcid = row.shift() || "";
+        (row.length === 0) ? familyName = "" : familyName = row.shift() || "";
+        (row.length === 0) ? givenName = "" : givenName = row.shift() || "";
+        groups = [];
+        if (division !== "") {
+            const groupInfo = await lookupGroupInfo(division);
+            if (verbose) {
+                console.log(
+                    `%cgroupInfo -> ${JSON.stringify(groupInfo)}`,
+                    MAROON,
+                );
+            }
+            if (groupInfo.ok && groupInfo.clgid !== "") {
+                groups.push({
+                    group_name: groupInfo.name,
+                    clgid: groupInfo.clgid,
+                });
+            } else {
+                console.log(
+                    `%cgroup_name: ${division} is missing clgid, row ${i}, col: 0`,
+                    ERROR_COLOR,
+                );
+                groups.push({ group_name: division, clgid: "" });
+            }
+        }
+        let j = 0;
+        for (const column of row) {
+            if (column.trim() !== "") {
+                const groupInfo = await lookupGroupInfo(column.trim());
+                if (groupInfo.ok && groupInfo.clgid !== "") {
+                    groups.push({
+                        group_name: groupInfo.name,
+                        clgid: groupInfo.clgid,
+                    });
+                } else {
+                    console.log(
+                        `%cgroup_name: ${column.trim()} is missing clgid, row ${i}, col: ${j}`,
+                        ERROR_COLOR,
+                    );
+                    groups.push({ group_name: column.trim(), clgid: "" });
+                }
+            }
+            j++;
+        }
+        if (verbose) {
+            console.log(
+                `%c updating ${clpid} with division: ${division} and groups: ${
+                    JSON.stringify(groups)
+                }`,
+                GREEN,
+            );
+        }
+        const errMsg = await updatePeopleWithGroupInfo(
+            clpid,
+            division,
+            orcid,
+            groups,
+        );
+        if (errMsg !== "") {
+            return errMsg;
+        }
     }
-    if (verbose) {
-      console.log(
-        `%c updating ${clpid} with division: ${division} and groups: ${
-          JSON.stringify(groups)
-        }`,
-        GREEN,
-      );
-    }
-    const errMsg = await updatePeopleWithGroupInfo(
-      clpid,
-      division,
-      orcid,
-      groups,
-    );
-    if (errMsg !== "") {
-      return errMsg;
-    }
-  }
-  return "";
+    return "";
 }
 
 /**
@@ -326,64 +340,64 @@ export async function loadDivisionPeopleCSV(
  * error message is returned.
  */
 export async function dumpDivisionPeopleCSV(
-  filename: string,
-  verbose?: boolean,
+    filename: string,
+    verbose?: boolean,
 ): Promise<string> {
-  let keys: string[] = await dsPeople.keys();
-  let division: string = "";
-  let clpid: string = "";
-  let orcid: string = "";
-  let groups: { group_name: string; clgid: string }[] = [];
-  let family_name: string = "";
-  let given_name: string = "";
-  let rows: string[][] = [];
-  let row: string[] = [];
-  let heading: string[] = [
-    "division",
-    "clpid",
-    "orcid",
-    "family_name",
-    "given_name",
-  ];
-  let headingCount: number = heading.length;
-  for (const key of keys) {
-    const obj = await dsPeople.read(key);
-    if (obj === undefined) {
-      console.error(`failed to read ${key} from people.ds, skipping`);
-      continue;
-    }
-    const rec = new People();
-    rec.fromObject(obj);
-    clpid = key;
-    (rec.division === undefined) ? division = "" : division = rec.division;
-    (rec.orcid === undefined || rec.orcid === "---")
-      ? orcid = ""
-      : orcid = rec.orcid;
-    (rec.family_name === undefined)
-      ? family_name = ""
-      : family_name = rec.family_name;
-    (rec.given_name === undefined)
-      ? given_name = ""
-      : given_name = rec.given_name;
-    (rec.groups === undefined) ? groups = [] : groups = rec.groups;
-    if (division !== "" || groups.length > 0) {
-      row = [division, clpid, orcid, family_name, given_name];
-      for (const grp of groups) {
-        row.push(grp.group_name);
-        if (headingCount < row.length) {
-          headingCount = row.length;
-          heading.push("other_group");
+    let keys: string[] = await dsPeople.keys();
+    let division: string = "";
+    let clpid: string = "";
+    let orcid: string = "";
+    let groups: { group_name: string; clgid: string }[] = [];
+    let family_name: string = "";
+    let given_name: string = "";
+    let rows: string[][] = [];
+    let row: string[] = [];
+    let heading: string[] = [
+        "division",
+        "clpid",
+        "orcid",
+        "family_name",
+        "given_name",
+    ];
+    let headingCount: number = heading.length;
+    for (const key of keys) {
+        const obj = await dsPeople.read(key);
+        if (obj === undefined) {
+            console.error(`failed to read ${key} from people.ds, skipping`);
+            continue;
         }
-      }
-      rows.push(row);
+        const rec = new People();
+        rec.fromObject(obj);
+        clpid = key;
+        (rec.division === undefined) ? division = "" : division = rec.division;
+        (rec.orcid === undefined || rec.orcid === "---")
+            ? orcid = ""
+            : orcid = rec.orcid;
+        (rec.family_name === undefined)
+            ? family_name = ""
+            : family_name = rec.family_name;
+        (rec.given_name === undefined)
+            ? given_name = ""
+            : given_name = rec.given_name;
+        (rec.groups === undefined) ? groups = [] : groups = rec.groups;
+        if (division !== "" || groups.length > 0) {
+            row = [division, clpid, orcid, family_name, given_name];
+            for (const grp of groups) {
+                row.push(grp.group_name);
+                if (headingCount < row.length) {
+                    headingCount = row.length;
+                    heading.push("other_group");
+                }
+            }
+            rows.push(row);
+        }
     }
-  }
-  // Add the heading row.
-  rows.unshift(heading);
-  try {
-    await Deno.writeTextFile(filename, stringifyCSV(rows));
-  } catch (err) {
-    return `${err}`;
-  }
-  return "";
+    // Add the heading row.
+    rows.unshift(heading);
+    try {
+        await Deno.writeTextFile(filename, stringifyCSV(rows));
+    } catch (err) {
+        return `${err}`;
+    }
+    return "";
 }

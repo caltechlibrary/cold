@@ -12,11 +12,34 @@
  *   deno test --allow-net generate_collaborator_affiliations_rpt_test.ts
  */
 
-import { assertEquals } from "@std/assert";
+import { assertEquals, assertStringIncludes } from "@std/assert";
 import {
+  buildRecordsQueryUrl,
   extractCountry,
   lookupRorCountry,
 } from "./generate_collaborator_affiliations_rpt.ts";
+
+// ---------------------------------------------------------------------------
+// Unit tests — buildRecordsQueryUrl (no network required)
+// ---------------------------------------------------------------------------
+
+Deno.test("buildRecordsQueryUrl includes the clpid identifier filter", () => {
+  const url = buildRecordsQueryUrl("Doiel-R-S", "2021-08-12");
+  const q = new URL(url).searchParams.get("q") ?? "";
+  assertStringIncludes(
+    q,
+    'metadata.creators.person_or_org.identifiers.identifier:"Doiel-R-S"',
+  );
+});
+
+Deno.test("buildRecordsQueryUrl restricts results to the last 48 months (issue #106)", () => {
+  const url = buildRecordsQueryUrl("Doiel-R-S", "2021-08-12");
+  const q = new URL(url).searchParams.get("q") ?? "";
+  assertStringIncludes(
+    q,
+    "metadata.publication_date:[2021-08-12 TO *]",
+  );
+});
 
 // ---------------------------------------------------------------------------
 // Fixtures

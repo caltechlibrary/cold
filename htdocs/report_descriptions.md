@@ -51,8 +51,8 @@ pubDate: 2026-05-28
 
 > These are reports librarians run for the Caltech community. Each requires one or more parameters entered in the request form.
 
-- __Collaborator Report__
-  - ([CLPID]_nsf_collaborator_report.csv) Given a clpid, generates a collaborator report as a CSV file suitable for NSF. Lists co-authors and their affiliations from CaltechAUTHORS records.
+- __NSF Collaborator Report__
+  - ([CLPID]_nsf_collaborator_report.xlsx) Given a clpid, generates a collaborator report as an Excel (XLSX) file suitable for NSF. Lists co-authors and their affiliations from CaltechAUTHORS records published in the last 48 months.
 - __Collaborator Affiliations Report__
   - ([CLPID]_collaborator_affiliations_report.csv) Given a clpid, generates a collaborator affiliations report as a CSV file suitable for NSF. Each row covers one (coauthor, affiliation, publication) combination and includes ROR ID, country, acknowledgements, and additional information sourced from the CaltechAUTHORS record.
 - __Publications by Person Identifier__

@@ -1,8 +1,8 @@
 ---
-title: Collaborator Reports
+title: NSF Collaborator Report
 ---
 
-# Collaborator Report
+# NSF Collaborator Report
 
 FIXME: The collabor report needs a be integrated into the main reports list. This page will be removed when that is completed.
 
