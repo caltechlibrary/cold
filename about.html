@@ -26,10 +26,20 @@
 </nav>
 <section id="main-content">
 <h1 id="about-this-software">About this software</h1>
-<h2 id="cold-0.0.49">cold 0.0.49</h2>
+<h2 id="cold-0.0.50">cold 0.0.50</h2>
 <ul>
-<li>Added Acknolwedgements and Additional Information columns to Country
-Collaboration Report and Collaborator Affiliation reports</li>
+<li>Fixed NSF Collaborator Report and Collaborator Affiliations Report
+to actually restrict results to the last 48 months (the date filter was
+computed but never applied to the query, issue #106)</li>
+<li>Renamed the Collaborator Report label to “NSF Collaborator Report”
+to distinguish it from future collaborator reports (issue #106)</li>
+<li>Added XLSX output option for the NSF Collaborator Report
+(–format=xlsx), now the format used by the mediated report (issue #106),
+report in COLD uses text/csv</li>
+<li>Fixed the report queue (cold_reports.ts) so binary report output
+(e.g. XLSX) is written to disk without UTF-8 corruption (issue
+#106)</li>
+<li>Added a “list all” review queue option on the RDM Search page</li>
 </ul>
 <h2 id="authors">Authors</h2>
 <ul>
@@ -91,6 +101,7 @@ Tracker</a></li>
 <li>Deno &gt;= 2.8.2</li>
 <li>Dataset &gt;= 2.5.1</li>
 <li>CMTools &gt;= 0.0.45b</li>
+<li>yq (mikefarah/yq) &gt;= 4.44</li>
 </ul>
 <h2 id="software-suggestions">Software Suggestions</h2>
 <ul>

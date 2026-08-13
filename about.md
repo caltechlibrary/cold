@@ -33,7 +33,7 @@ maintainer:
     id: https://orcid.org/0000-0003-0900-6903
 
 repository_code: https://github.com/caltechlibrary/cold
-version: 0.0.49
+version: 0.0.50
 license_url: https://caltechlibrary.github.io/cold/LICENSE
 operating_system:
   - Linux
@@ -53,15 +53,19 @@ keywords:
   - objects
   - controlled vocabulary
 
-date_released: 2026-06-05
+date_released: 2026-08-13
 ---
 
 About this software
 ===================
 
-## cold 0.0.49
+## cold 0.0.50
 
-- Added Acknolwedgements and Additional Information columns to Country Collaboration Report and Collaborator Affiliation reports
+- Fixed NSF Collaborator Report and Collaborator Affiliations Report to actually restrict results to the last 48 months (the date filter was computed but never applied to the query, issue #106)
+- Renamed the Collaborator Report label to "NSF Collaborator Report" to distinguish it from future collaborator reports (issue #106)
+- Added XLSX output option for the NSF Collaborator Report (--format=xlsx), now the format used by the mediated report (issue #106), report in COLD uses text/csv
+- Fixed the report queue (cold_reports.ts) so binary report output (e.g. XLSX) is written to disk without UTF-8 corruption (issue #106)
+- Added a "list all" review queue option on the RDM Search page
 
 ## Authors
 
@@ -119,6 +123,7 @@ Access control is provided by the front end web server integrated with Shibbolet
 - Deno >= 2.8.2
 - Dataset >= 2.5.1
 - CMTools >= 0.0.45b
+- yq (mikefarah/yq) >= 4.44
 
 
 ## Software Suggestions
