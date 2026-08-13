@@ -47,6 +47,7 @@ Installing from source
 - Deno >= 2.8.2
 - Dataset >= 2.5.1
 - CMTools >= 0.0.45b
+- yq (mikefarah/yq) >= 4.44
 
 ### Steps
 

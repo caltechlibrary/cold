@@ -63,8 +63,13 @@ About this software
 
 - Fixed NSF Collaborator Report and Collaborator Affiliations Report to actually restrict results to the last 48 months (the date filter was computed but never applied to the query, issue #106)
 - Renamed the Collaborator Report label to "NSF Collaborator Report" to distinguish it from future collaborator reports (issue #106)
-- Added XLSX output option for the NSF Collaborator Report (--format=xlsx), now the format used by the mediated report (issue #106), report in COLD uses text/csv
+- Added --format=csv|xlsx output option to the NSF Collaborator Report generator (generate_collaborator_rpt.ts); fixed the COLD reports menu to actually serve it as CSV, matching every other report (cold_reports.yaml's content_type had been left set to application/vnd.ms-excel, issue #106)
+- run_collaborator_report.bash now derives its --format flag from cold_reports.yaml's own content_type via yq instead of hardcoding it, so the report's real output format can no longer drift out of sync with the extension/MIME type the reports menu serves it as (issue #106)
+- Added yq (mikefarah/yq) as a required dependency for running COLD reports
 - Fixed the report queue (cold_reports.ts) so binary report output (e.g. XLSX) is written to disk without UTF-8 corruption (issue #106)
+- Fixed a stale mock in people_edit_test.ts (MockClientAPI.lookupGroupName still returned the pre-refactor {name, ok, msg} shape instead of {group_name}, failing type-checking)
+- Removed a dead deno.json test task reference to a nonexistent dataset_test.ts left over from an incomplete integration test
+- Extracted people_rename.ts's person-details rendering into person_details.ts and gave it test coverage for the first time (people_rename_test.ts)
 - Added a "list all" review queue option on the RDM Search page
 
 ## Authors

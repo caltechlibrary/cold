@@ -33,7 +33,7 @@ maintainer:
     id: https://orcid.org/0000-0003-0900-6903
 
 repository_code: https://github.com/caltechlibrary/cold
-version: 0.0.49
+version: 0.0.50
 license_url: https://caltechlibrary.github.io/cold/LICENSE
 operating_system:
   - Linux
@@ -53,15 +53,24 @@ keywords:
   - objects
   - controlled vocabulary
 
-date_released: 2026-06-05
+date_released: 2026-08-13
 ---
 
 About this software
 ===================
 
-## cold 0.0.49
+## cold 0.0.50
 
-- Added Acknolwedgements and Additional Information columns to Country Collaboration Report and Collaborator Affiliation reports
+- Fixed NSF Collaborator Report and Collaborator Affiliations Report to actually restrict results to the last 48 months (the date filter was computed but never applied to the query, issue #106)
+- Renamed the Collaborator Report label to "NSF Collaborator Report" to distinguish it from future collaborator reports (issue #106)
+- Added --format=csv|xlsx output option to the NSF Collaborator Report generator (generate_collaborator_rpt.ts); fixed the COLD reports menu to actually serve it as CSV, matching every other report (cold_reports.yaml's content_type had been left set to application/vnd.ms-excel, issue #106)
+- run_collaborator_report.bash now derives its --format flag from cold_reports.yaml's own content_type via yq instead of hardcoding it, so the report's real output format can no longer drift out of sync with the extension/MIME type the reports menu serves it as (issue #106)
+- Added yq (mikefarah/yq) as a required dependency for running COLD reports
+- Fixed the report queue (cold_reports.ts) so binary report output (e.g. XLSX) is written to disk without UTF-8 corruption (issue #106)
+- Fixed a stale mock in people_edit_test.ts (MockClientAPI.lookupGroupName still returned the pre-refactor {name, ok, msg} shape instead of {group_name}, failing type-checking)
+- Removed a dead deno.json test task reference to a nonexistent dataset_test.ts left over from an incomplete integration test
+- Extracted people_rename.ts's person-details rendering into person_details.ts and gave it test coverage for the first time (people_rename_test.ts)
+- Added a "list all" review queue option on the RDM Search page
 
 ## Authors
 
@@ -119,6 +128,7 @@ Access control is provided by the front end web server integrated with Shibbolet
 - Deno >= 2.8.2
 - Dataset >= 2.5.1
 - CMTools >= 0.0.45b
+- yq (mikefarah/yq) >= 4.44
 
 
 ## Software Suggestions

@@ -1,6 +1,6 @@
-%publications_by_person_identifiers(1) user manual | 0.0.49 2cda10d
+%publications_by_person_identifiers(1) user manual | 0.0.50 50cd0f6
 % R. S.Doiel
-% 2026-06-05
+% 2026-08-13
 
 # NAME
 
