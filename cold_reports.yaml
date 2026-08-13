@@ -78,7 +78,7 @@ reports:
         required: true
     basename: "{{clpid}}_nsf_collaborator_report"
     append_datestamp: false
-    content_type: application/vnd.ms-excel
+    content_type: text/csv
   run_publications_by_person_identifiers:
     cmd: ./run_publications_by_person_identifiers.bash
     inputs:

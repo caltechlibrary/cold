@@ -9,8 +9,8 @@ import { ClientAPI } from "./client_api.ts";
 
 // Mock ClientAPI for testing
 class MockClientAPI extends ClientAPI {
-  override async lookupGroupName(name: string): Promise<{ clgid: string; name: string; ok: boolean; msg: string; }[]> {
-    return [{ clgid: "mock_clgid", name: name, ok: true, msg: "Success" }];
+  override async lookupGroupName(name: string): Promise<{ clgid: string; group_name: string; }[]> {
+    return [{ clgid: "mock_clgid", group_name: name }];
   }
 
   override async getList(ds: string, field: string): Promise<{ group_name: string; }[]> {
@@ -83,7 +83,7 @@ async function updateRowGroupID(event: CustomEvent) {
     const groupName = mockGroupsElem.getCellValue(row, 0);
     const objList = await new MockClientAPI().lookupGroupName(groupName);
     for (const obj of objList) {
-      if (obj.name === groupName) {
+      if (obj.group_name === groupName) {
         mockGroupsElem.setCellValue(row, 1, obj.clgid);
       }
     }

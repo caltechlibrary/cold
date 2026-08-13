@@ -9,8 +9,8 @@ next
 ----
 
 - Issue #106
-  - [ ] Issue #106 fixes committed, test fixes and then release
-  - [ ] Update production cold to include bug fixes and issue #106 improvements in v0.0.50 release
+  - [x] Issue #106 fixes committed, test fixes and then release
+  - [x] Update production cold to include bug fixes and issue #106 improvements in v0.0.50 release
 - Search CaltechTHESIS form
   - [x] On Thesis search fix ORCID to search all orcid fields not just authors's orcid
   - [x] Only Item status should have pre-checked boxes (Live Archive, Under Review)

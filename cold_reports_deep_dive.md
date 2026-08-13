@@ -268,12 +268,13 @@ This is the only parameterized report. It generates an NSF collaborator table fo
 3. Substituted into the `basename` template via `{{clpid}}`, producing filenames like `Briney-Kristin-A_nsf_collaborator_report.csv`
 
 **How `run_collaborator_report.bash` works:**
-The script validates that the `clpid` exists in `people.ds` via `dataset read people.ds "$1"`, then calls `bin/generate_collaborator_rpt "$1" --record_ids`. That binary (compiled from `generate_collaborator_rpt.ts`) fetches the person's publication records from the CaltechAUTHORS API and formats them as an NSF collaborator table.
+The script reads this report's own `content_type` back out of `cold_reports.yaml` with `yq` and maps it to a `--format` value (`text/csv` → `csv`, `application/vnd.ms-excel` → `xlsx`, defaulting to `csv` for anything else) — this keeps the binary's output format in sync with the extension/MIME type the runner uses for the download, rather than hardcoding a `--format` value that could drift out of sync with the yaml (see Issue #106). It then validates that the `clpid` exists in `people.ds` via `dataset read people.ds "$1"`, and calls `bin/generate_collaborator_rpt "$1" --record_ids --format="${FORMAT}"`. That binary (compiled from `generate_collaborator_rpt.ts`) fetches the person's publication records from the CaltechAUTHORS API and formats them as an NSF collaborator table.
 
 **Debugging this report:** If the output file is not generated:
 1. Check that `$1` (the clpid) exists in `people.ds`: `dataset read people.ds <clpid>`
 2. Check that `bin/generate_collaborator_rpt` exists and is executable
-3. Run `run_collaborator_report.bash <clpid>` directly from the COLD working directory to see stderr
+3. Check that `yq` is installed and on `PATH`
+4. Run `run_collaborator_report.bash <clpid>` directly from the COLD working directory to see stderr
 
 ---
 

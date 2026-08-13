@@ -61,6 +61,7 @@ Access control is provided by the front end web server integrated with Shibbolet
 - Deno >= 2.7.14
 - Dataset >= 2.4.0
 - CMTools >= 0.0.45b
+- yq (mikefarah/yq) >= 4.44
 
 ### Software Suggestions
 

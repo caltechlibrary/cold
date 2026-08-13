@@ -403,9 +403,17 @@ in <code>reports.ds</code></li>
 <code>Briney-Kristin-A_nsf_collaborator_report.csv</code></li>
 </ol>
 <p><strong>How <code>run_collaborator_report.bash</code> works:</strong>
-The script validates that the <code>clpid</code> exists in
-<code>people.ds</code> via <code>dataset read people.ds "$1"</code>,
-then calls <code>bin/generate_collaborator_rpt "$1" --record_ids</code>.
+The script reads this report’s own <code>content_type</code> back out of
+<code>cold_reports.yaml</code> with <code>yq</code> and maps it to a
+<code>--format</code> value (<code>text/csv</code> → <code>csv</code>,
+<code>application/vnd.ms-excel</code> → <code>xlsx</code>, defaulting to
+<code>csv</code> for anything else) — this keeps the binary’s output
+format in sync with the extension/MIME type the runner uses for the
+download, rather than hardcoding a <code>--format</code> value that
+could drift out of sync with the yaml (see Issue #106). It then
+validates that the <code>clpid</code> exists in <code>people.ds</code>
+via <code>dataset read people.ds "$1"</code>, and calls
+<code>bin/generate_collaborator_rpt "$1" --record_ids --format="${FORMAT}"</code>.
 That binary (compiled from <code>generate_collaborator_rpt.ts</code>)
 fetches the person’s publication records from the CaltechAUTHORS API and
 formats them as an NSF collaborator table.</p>
@@ -414,8 +422,9 @@ generated: 1. Check that <code>$1</code> (the clpid) exists in
 <code>people.ds</code>:
 <code>dataset read people.ds &lt;clpid&gt;</code> 2. Check that
 <code>bin/generate_collaborator_rpt</code> exists and is executable 3.
-Run <code>run_collaborator_report.bash &lt;clpid&gt;</code> directly
-from the COLD working directory to see stderr</p>
+Check that <code>yq</code> is installed and on <code>PATH</code> 4. Run
+<code>run_collaborator_report.bash &lt;clpid&gt;</code> directly from
+the COLD working directory to see stderr</p>
 <hr />
 <h2 id="the-runner-how-cold_reports.ts-processes-the-queue">The runner:
 how cold_reports.ts processes the queue</h2>

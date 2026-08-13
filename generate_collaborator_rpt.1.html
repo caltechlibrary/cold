@@ -28,11 +28,11 @@
 <h1 id="name">NAME</h1>
 <p>generate_collaborator_rpt</p>
 <h1 id="synopsis">SYNOPSIS</h1>
-<p>generate_collaborator_rpt CLPID [–record_ids]</p>
+<p>generate_collaborator_rpt CLPID [–record_ids] [–format=csv|xlsx]</p>
 <h1 id="description">DESCRIPTION</h1>
-<p>Given a CLPID generate a collaborator report as a CSV file suitable
-for NSF. One row is produced per unique coauthor aggregated across all
-CaltechAUTHORS records from the past 48 months.</p>
+<p>Given a CLPID generate an NSF Collaborator Report as CSV or XLSX,
+suitable for NSF. One row is produced per unique coauthor aggregated
+across all CaltechAUTHORS records from the past 48 months.</p>
 <p>The output columns are:</p>
 <ul>
 <li>“4” / “A:”: NSF format marker</li>
@@ -61,9 +61,14 @@ display version
 Include the CaltechAUTHORS record identifiers in the output (do not
 submit to NSF)
 </dd>
+<dt>-f, –format=csv|xlsx</dt>
+<dd>
+Set the output format written to standard output. Defaults to csv.
+</dd>
 </dl>
 <h1 id="example">EXAMPLE</h1>
-<pre class="shell"><code>generate_collaborator_rpt Newman-D-K --record_ids &gt;Diane_Newman_Collaborators.csv</code></pre>
+<pre class="shell"><code>generate_collaborator_rpt Newman-D-K --record_ids &gt;Diane_Newman_Collaborators.csv
+generate_collaborator_rpt Newman-D-K --record_ids --format=xlsx &gt;Diane_Newman_Collaborators.xlsx</code></pre>
 </section>
 <footer-global></footer-global>
 </body>
