@@ -5,6 +5,7 @@ import {
     fmtHelp,
     publicationsByPersonIdentifiersHelpText,
 } from "./helptext.ts";
+import { fetchAllRecords } from "./caltechauthors_api.ts";
 
 const appName = "publications_by_person_identifiers";
 
@@ -208,11 +209,11 @@ interface FlatOutputRecord {
     record_orcid: string;
 }
 
-export async function run_report(
-    clpid: string,
-    orcid: string,
-    format: OutputFormat = "jsonl",
-): Promise<void> {
+/**
+ * buildRecordsQueryUrl builds the CaltechAUTHORS records API URL matching
+ * either clpid or orcid (or both). Throws if neither is provided.
+ */
+export function buildRecordsQueryUrl(clpid: string, orcid: string): string {
     const baseUrl = "https://authors.library.caltech.edu/api/records";
     const params = new URLSearchParams();
 
@@ -232,10 +233,7 @@ export async function run_report(
     }
 
     if (conditions.length === 0) {
-        console.error(
-            "Error: At least one of clpid or orcid must be provided.",
-        );
-        Deno.exit(1);
+        throw new Error("At least one of clpid or orcid must be provided.");
     }
 
     // Combine conditions with OR
@@ -247,21 +245,37 @@ export async function run_report(
     params.set("all", "1");
     params.set("size", "1000");
 
-    const apiUrl = `${baseUrl}?${params.toString()}`;
+    return `${baseUrl}?${params.toString()}`;
+}
 
-    //console.error(`Fetching from: ${apiUrl}`);
-
-    const response = await fetch(apiUrl);
-    if (!response.ok) {
+export async function run_report(
+    clpid: string,
+    orcid: string,
+    format: OutputFormat = "jsonl",
+): Promise<void> {
+    let apiUrl: string;
+    try {
+        apiUrl = buildRecordsQueryUrl(clpid, orcid);
+    } catch (err) {
         console.error(
-            `Error: Failed to fetch records (HTTP ${response.status})`,
+            `Error: ${err instanceof Error ? err.message : String(err)}`,
         );
-        console.error(await response.text());
         Deno.exit(1);
     }
 
-    const data = await response.json();
-    const records: Record[] = data.hits.hits.map((hit: any) => hit);
+    //console.error(`Fetching from: ${apiUrl}`);
+
+    let hits: unknown[];
+    try {
+        hits = await fetchAllRecords(apiUrl);
+    } catch (err) {
+        console.error(
+            `Error: ${err instanceof Error ? err.message : String(err)}`,
+        );
+        Deno.exit(1);
+    }
+
+    const records: Record[] = hits as Record[];
 
     // Process records based on format
     if (format === "json") {

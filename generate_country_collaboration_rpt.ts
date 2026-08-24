@@ -20,6 +20,7 @@ import {
     fmtHelp,
     generateCountryCollaborationRptHelpText,
 } from "./helptext.ts";
+import { fetchAllRecords } from "./caltechauthors_api.ts";
 
 const appName = "generate_country_collaboration_rpt";
 const dsRor = new Dataset(apiPort, "ror.ds");
@@ -168,35 +169,21 @@ async function fetchRecordsForBatch(
     const params = new URLSearchParams({ q, all: "1", size: "1000" });
     const url = `https://authors.library.caltech.edu/api/records?${params}`;
 
-    let response: Response | null = null;
-    for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-        response = await fetch(url);
-        if (response.status !== 429) break;
-        const retryAfter = parseInt(
-            response.headers.get("Retry-After") ?? String(RATE_LIMIT_BACKOFF_S),
-            10,
-        );
-        const wait = (retryAfter > 0 ? retryAfter : RATE_LIMIT_BACKOFF_S) *
-            1000;
+    let hits: unknown[];
+    try {
+        hits = await fetchAllRecords(url, {
+            maxRetries: MAX_RETRIES,
+            defaultBackoffSeconds: RATE_LIMIT_BACKOFF_S,
+        });
+    } catch (err) {
         console.error(
-            `Rate limited (429), waiting ${wait / 1000}s before retry ${
-                attempt + 1
-            }/${MAX_RETRIES}...`,
-        );
-        await sleep(wait);
-    }
-
-    if (!response || !response.ok) {
-        console.error(
-            `Warning: failed to fetch batch of ${rorIds.length} ROR IDs (HTTP ${
-                response?.status ?? "no response"
-            })`,
+            `Warning: failed to fetch batch of ${rorIds.length} ROR IDs: ${
+                err instanceof Error ? err.message : String(err)
+            }`,
         );
         return resultMap;
     }
-
-    const data = await response.json();
-    const records: RdmRecord[] = data.hits?.hits ?? [];
+    const records: RdmRecord[] = hits as RdmRecord[];
 
     for (const record of records) {
         const creators = record.metadata.creators ?? [];

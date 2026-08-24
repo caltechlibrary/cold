@@ -5,6 +5,7 @@ import { stringify } from "jsr:@std/csv";
 import { licenseText, releaseDate, releaseHash, version } from "./version.ts";
 import { fmtHelp, generateCollaboratorReportHelpText } from "./helptext.ts";
 import { writeXlsx } from "./xlsx_writer.ts";
+import { fetchAllRecords } from "./caltechauthors_api.ts";
 
 const VALID_FORMATS = ["csv", "xlsx"];
 
@@ -68,15 +69,17 @@ export async function run_report(
 
     const apiUrl = buildRecordsQueryUrl(clpid, startDateStr);
 
-    // Fetch records from Invenio RDM API
-    const response = await fetch(apiUrl);
-    if (!response.ok) {
-        console.log(`Error: Failed to fetch records (HTTP ${response.status})`);
-        console.log(response.text());
+    // Fetch records from Invenio RDM API, following pagination
+    let hits: unknown[];
+    try {
+        hits = await fetchAllRecords(apiUrl);
+    } catch (err) {
+        console.error(
+            `Error: ${err instanceof Error ? err.message : String(err)}`,
+        );
         Deno.exit(1);
     }
-    const data = await response.json();
-    const records: Record[] = data.hits.hits; //data.hits.hits.map((hit: any) => hit.metadata);
+    const records: Record[] = hits as Record[];
 
     // Aggregate coauthors
     const coauthors: { [key: string]: Coauthor } = {};

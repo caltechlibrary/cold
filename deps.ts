@@ -36,6 +36,8 @@ export { handleDOIPrefix, DOIPrefix } from "./doi_prefix.ts";
 export { basePathFromUrl, formDataToObject, pathIdentifier, apiPathParse } from "./utils.ts";
 export { ColdReadWriteHandler } from "./cold.ts";
 export { handleThesisOption, ThesisOption } from "./thesis_option.ts";
+export { fetchAllRecords } from "./caltechauthors_api.ts";
+export type { FetchAllRecordsOptions } from "./caltechauthors_api.ts";
 
 /* directory_sync setup */
 export { DOMParser, Document, Element } from "jsr:@b-fuze/deno-dom";

@@ -16,6 +16,7 @@ import {
     fmtHelp,
     generateCollaboratorAffiliationsReportHelpText,
 } from "./helptext.ts";
+import { fetchAllRecords } from "./caltechauthors_api.ts";
 
 const appName = "generate_collaborator_affiliations_rpt";
 const dsRor = new Dataset(apiPort, "ror.ds");
@@ -159,14 +160,17 @@ export async function run_report(clpid: string, includeRecordIds: boolean) {
 
     const apiUrl = buildRecordsQueryUrl(clpid, startDateStr);
 
-    // Fetch records from Invenio RDM API
-    const response = await fetch(apiUrl);
-    if (!response.ok) {
-        console.log(`Error: Failed to fetch records (HTTP ${response.status})`);
+    // Fetch records from Invenio RDM API, following pagination
+    let hits: unknown[];
+    try {
+        hits = await fetchAllRecords(apiUrl);
+    } catch (err) {
+        console.error(
+            `Error: ${err instanceof Error ? err.message : String(err)}`,
+        );
         Deno.exit(1);
     }
-    const data = await response.json();
-    const records: Record[] = data.hits.hits;
+    const records: Record[] = hits as Record[];
 
     // Collect one row per (coauthor, affiliation, record); cache ROR lookups by affId
     const rorCache = new Map<string, { country: string; rorUrl: string }>();
