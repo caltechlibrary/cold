@@ -5,6 +5,14 @@ Action items
 bug
 ---
 
+- CaltechAUTHORS API pagination (see `caltechauthors_api_pagination.md`)
+  - [ ] `run_publications_by_person_identifiers` silently truncates at 1000 records (Goddard-W-A-III has 1542 matching records; ~542 missing from report output)
+  - [ ] Add shared `caltechauthors_api.ts` with `fetchAllRecords()` (pagination via `links.next` + generalized 429 retry/backoff)
+  - [ ] Update `publications_by_person_identifiers.ts` to use `fetchAllRecords()`
+  - [ ] Update `generate_collaborator_rpt.ts` to use `fetchAllRecords()`
+  - [ ] Update `generate_collaborator_affiliations_rpt.ts` to use `fetchAllRecords()`
+  - [ ] Update `generate_country_collaboration_rpt.ts`'s `fetchRecordsForBatch` to use `fetchAllRecords()` per batch
+
 next
 ----
 
