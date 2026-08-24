@@ -33,7 +33,7 @@ maintainer:
     id: https://orcid.org/0000-0003-0900-6903
 
 repository_code: https://github.com/caltechlibrary/cold
-version: 0.0.50
+version: 0.0.51
 license_url: https://caltechlibrary.github.io/cold/LICENSE
 operating_system:
   - Linux
@@ -53,24 +53,19 @@ keywords:
   - objects
   - controlled vocabulary
 
-date_released: 2026-08-13
+date_released: 2026-08-24
 ---
 
 About this software
 ===================
 
-## cold 0.0.50
+## cold 0.0.51
 
-- Fixed NSF Collaborator Report and Collaborator Affiliations Report to actually restrict results to the last 48 months (the date filter was computed but never applied to the query, issue #106)
-- Renamed the Collaborator Report label to "NSF Collaborator Report" to distinguish it from future collaborator reports (issue #106)
-- Added --format=csv|xlsx output option to the NSF Collaborator Report generator (generate_collaborator_rpt.ts); fixed the COLD reports menu to actually serve it as CSV, matching every other report (cold_reports.yaml's content_type had been left set to application/vnd.ms-excel, issue #106)
-- run_collaborator_report.bash now derives its --format flag from cold_reports.yaml's own content_type via yq instead of hardcoding it, so the report's real output format can no longer drift out of sync with the extension/MIME type the reports menu serves it as (issue #106)
-- Added yq (mikefarah/yq) as a required dependency for running COLD reports
-- Fixed the report queue (cold_reports.ts) so binary report output (e.g. XLSX) is written to disk without UTF-8 corruption (issue #106)
-- Fixed a stale mock in people_edit_test.ts (MockClientAPI.lookupGroupName still returned the pre-refactor {name, ok, msg} shape instead of {group_name}, failing type-checking)
-- Removed a dead deno.json test task reference to a nonexistent dataset_test.ts left over from an incomplete integration test
-- Extracted people_rename.ts's person-details rendering into person_details.ts and gave it test coverage for the first time (people_rename_test.ts)
-- Added a "list all" review queue option on the RDM Search page
+- Fixed run_publications_by_person_identifiers silently truncating results at 1000 records for anyone with more than 1000 matching CaltechAUTHORS records (confirmed live: Goddard-W-A-III had 1542 matching records, ~542 missing from report output with no error or warning)
+- Added a shared caltechauthors_api.ts module providing fetchAllRecords(), which pages through the CaltechAUTHORS RDM API via links.next (instead of a single size=1000 request) and retries with backoff on HTTP 429 rate limiting
+- Updated publications_by_person_identifiers.ts, generate_collaborator_rpt.ts, generate_collaborator_affiliations_rpt.ts, and generate_country_collaboration_rpt.ts to use fetchAllRecords(), fixing the same silent-truncation exposure in all four CaltechAUTHORS API report scripts
+- Extracted buildRecordsQueryUrl() out of publications_by_person_identifiers.ts for unit testing without network access, matching the existing pattern in the collaborator report scripts
+- Added test coverage: caltechauthors_api_test.ts (pagination, page-ceiling safety net, 429 retry/backoff, fail-fast on other errors) and publications_by_person_identifiers_test.ts
 
 ## Authors
 

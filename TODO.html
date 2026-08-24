@@ -27,6 +27,35 @@
 <section id="main-content">
 <h1 id="action-items">Action items</h1>
 <h2 id="bug">bug</h2>
+<ul>
+<li>CaltechAUTHORS API pagination (see
+<code>caltechauthors_api_pagination.md</code>) – RESOLVED 2026-08-24,
+confirmed fixed on a local dev run of the original problem report,
+released as v0.0.51
+<ul class="task-list">
+<li><label><input type="checkbox"
+checked="" /><code>run_publications_by_person_identifiers</code>
+silently truncates at 1000 records (Goddard-W-A-III has 1542 matching
+records; ~542 missing from report output)</label></li>
+<li><label><input type="checkbox" checked="" />Add shared
+<code>caltechauthors_api.ts</code> with <code>fetchAllRecords()</code>
+(pagination via <code>links.next</code> + generalized 429
+retry/backoff)</label></li>
+<li><label><input type="checkbox" checked="" />Update
+<code>publications_by_person_identifiers.ts</code> to use
+<code>fetchAllRecords()</code></label></li>
+<li><label><input type="checkbox" checked="" />Update
+<code>generate_collaborator_rpt.ts</code> to use
+<code>fetchAllRecords()</code></label></li>
+<li><label><input type="checkbox" checked="" />Update
+<code>generate_collaborator_affiliations_rpt.ts</code> to use
+<code>fetchAllRecords()</code></label></li>
+<li><label><input type="checkbox" checked="" />Update
+<code>generate_country_collaboration_rpt.ts</code>’s
+<code>fetchRecordsForBatch</code> to use <code>fetchAllRecords()</code>
+per batch</label></li>
+</ul></li>
+</ul>
 <h2 id="next">next</h2>
 <ul>
 <li>Issue #106
