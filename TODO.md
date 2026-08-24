@@ -16,6 +16,11 @@ bug
 next
 ----
 
+- Drop the undocumented `all=1` query param on CaltechAUTHORS API calls (left as an open question, out of scope, in `caltechauthors_api_pagination.md`'s Decision section) -- not a recognized InvenioRDM search parameter (real ones are `q`, `size`, `page`, `sort`, `allversions`), appears to be a no-op
+  - [ ] `publications_by_person_identifiers.ts` (`buildRecordsQueryUrl`)
+  - [ ] `generate_collaborator_rpt.ts` (`buildRecordsQueryUrl`)
+  - [ ] `generate_collaborator_affiliations_rpt.ts` (`buildRecordsQueryUrl`)
+  - [ ] `generate_country_collaboration_rpt.ts` (`fetchRecordsForBatch`)
 - Issue #106
   - [x] Issue #106 fixes committed, test fixes and then release
   - [x] Update production cold to include bug fixes and issue #106 improvements in v0.0.50 release
