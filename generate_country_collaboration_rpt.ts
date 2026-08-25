@@ -156,18 +156,31 @@ async function getUsedRorIds(): Promise<Set<string>> {
     return ids;
 }
 
+/**
+ * buildBatchQueryUrl builds the CaltechAUTHORS records API URL matching any of
+ * a batch of ROR ids as a creator affiliation, a contributor affiliation or a
+ * funder. Extracted from fetchRecordsForBatch so it can be tested without
+ * network access, matching the buildRecordsQueryUrl shape the sibling report
+ * scripts already use.
+ */
+export function buildBatchQueryUrl(rorIds: string[]): string {
+    const clauses = rorIds.map((id) =>
+        `metadata.creators.affiliations.id:${id} OR metadata.contributors.affiliations.id:${id} OR metadata.funding.funder.id:${id}`
+    );
+    const params = new URLSearchParams({
+        q: clauses.join(" OR "),
+        size: "1000",
+    });
+    return `https://authors.library.caltech.edu/api/records?${params}`;
+}
+
 async function fetchRecordsForBatch(
     rorIds: string[],
 ): Promise<Map<string, RdmRecord[]>> {
     const resultMap = new Map<string, RdmRecord[]>();
     for (const id of rorIds) resultMap.set(id, []);
 
-    const clauses = rorIds.map((id) =>
-        `metadata.creators.affiliations.id:${id} OR metadata.contributors.affiliations.id:${id} OR metadata.funding.funder.id:${id}`
-    );
-    const q = clauses.join(" OR ");
-    const params = new URLSearchParams({ q, all: "1", size: "1000" });
-    const url = `https://authors.library.caltech.edu/api/records?${params}`;
+    const url = buildBatchQueryUrl(rorIds);
 
     let hits: unknown[];
     try {

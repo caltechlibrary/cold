@@ -57,4 +57,4 @@ a rate-limit change, a schema change — is one fix rather than four.
   Shipped as v0.0.51.
 - Design and decision narrative: `caltechauthors_api_pagination.md`.
 - Left an open question about the undocumented `all=1` parameter, deliberately
-  out of scope — see [DR-0007](0007-open-drop-the-undocumented-all1-query-parameter.md).
+  out of scope — see [DR-0007](0007-drop-the-undocumented-all-1-query-parameter-from.md).

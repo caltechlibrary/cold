@@ -242,7 +242,6 @@ export function buildRecordsQueryUrl(clpid: string, orcid: string): string {
         : `(${conditions.join(" OR ")})`;
 
     params.set("q", query);
-    params.set("all", "1");
     params.set("size", "1000");
 
     return `${baseUrl}?${params.toString()}`;

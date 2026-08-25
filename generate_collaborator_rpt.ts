@@ -49,7 +49,6 @@ export function buildRecordsQueryUrl(
         "q",
         `metadata.creators.person_or_org.identifiers.identifier:"${clpid}" AND metadata.publication_date:[${startDateStr} TO *]`,
     );
-    params.set("all", "1");
     params.set("size", "1000");
     return `${baseUrl}?${params.toString()}`;
 }

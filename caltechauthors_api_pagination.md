@@ -86,11 +86,13 @@ This keeps the shared surface to the one thing that's actually identical
   `additional_descriptions`, contributors vs. creators-only) -- unifying that
   would make the shared module a leaky abstraction for a small typing win.
   Leaving per-report interfaces as-is.
-- **Open question, not yet decided:** whether to also drop the undocumented
+- **Open question, since resolved:** whether to also drop the undocumented
   `all=1` param (present in all four scripts) while touching this code, since
   it appears to be a no-op (not a documented InvenioRDM search parameter).
   Left out of scope for the pagination fix unless explicitly requested as a
-  follow-up cleanup.
+  follow-up cleanup. *Resolved 2026-08-25: removed from all four scripts after
+  confirming against the live API that it is unrecognized and silently ignored.
+  See `decisions/0007-drop-the-undocumented-all-1-query-parameter-from.md`.*
 
 ## Implementation Plan
 
