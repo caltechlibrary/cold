@@ -17,7 +17,7 @@ date: April 2026
 section-titles: false
 toc: true
 keywords: [ "code4lib", "microservice", "SQLite3", "Deno", "TypeScript", "Dataset", "RDM", "controlled vocabulary" ]
-url: "https://caltechlibrary.github.io/cold/presentation"
+url: "https://software.library.caltech.edu/cold/presentation"
 ---
 
 # Caltech Library's strategy: develop at the edges
@@ -54,7 +54,7 @@ These records need to be consistent across multiple systems.
 # COLD today
 
 COLD
-: Controlled Object Lists with [Dataset](https://caltechlibrary.github.io/dataset)
+: Controlled Object Lists with [Dataset](https://software.library.caltech.edu/dataset)
 
 A web application for curating metadata objects and sharing them across library systems.
 
@@ -227,7 +227,7 @@ Changes made in one place propagate outward. Systems stay in sync without manual
 
 - COLD, <https://github.com/caltechlibrary/cold>
 - Caltech Library Feeds, <https://feeds.library.caltech.edu>
-- Dataset (the JSON object manager underlying COLD), <https://caltechlibrary.github.io/dataset>
+- Dataset (the JSON object manager underlying COLD), <https://software.library.caltech.edu/dataset>
 - ROR (Research Organization Registry), <https://ror.org>
 - InvenioRDM, <https://inveniosoftware.org/products/rdm/>
 

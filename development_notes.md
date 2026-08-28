@@ -17,7 +17,7 @@ I am relying on feeds.library.caltech.edu to provide the public facing API.  Dat
 The Go dataset collections
 --------------------------
 
-The `datasetd` program provides localhost static file and JSON API access for managing multiple dataset collection. These use the `https://caltechlibrary.github.io/ts_dataset/mod.ts` module for working with the datasetd JSON API.  The middleware provides pass through proxy services to the localhost instance of the datasetd API for selected queries (e.g. people, groups and ror lookups).
+The `datasetd` program provides localhost static file and JSON API access for managing multiple dataset collection. These use the `https://software.library.caltech.edu/ts_dataset/mod.ts` module for working with the datasetd JSON API.  The middleware provides pass through proxy services to the localhost instance of the datasetd API for selected queries (e.g. people, groups and ror lookups).
 
 The public API isn't part of COLD. The reports system can replicate COLD public data to feeds if that is appropriate.
 

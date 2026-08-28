@@ -3,7 +3,7 @@
 
 > COLD - controlled object lists and datum
 
-This directory implements the staff interface for [cold](https://github.com/caltechlibrary/cold). It is implemented in TypeScript, compiled into an executable via [Deno](https://deno.land). It is intended to run as a service via systemd in Linux or other POSIX system. Objects are stored in [dataset](https://caltechlibrary.github.io/dataset) collection. The collections are accessed via JSON API provided by [datasetd](https://caltechlibrary.github.io/datatset/datasetd.1.html). Dataset collections are using [SQLite 3](https://sqlite.org) for object storage.j
+This directory implements the staff interface for [cold](https://github.com/caltechlibrary/cold). It is implemented in TypeScript, compiled into an executable via [Deno](https://deno.land). It is intended to run as a service via systemd in Linux or other POSIX system. Objects are stored in [dataset](https://software.library.caltech.edu/dataset) collection. The collections are accessed via JSON API provided by [datasetd](https://software.library.caltech.edu/datatset/datasetd.1.html). Dataset collections are using [SQLite 3](https://sqlite.org) for object storage.j
 
 ## Requirements
 
