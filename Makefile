@@ -122,9 +122,6 @@ website: $(HTML_PAGES) presentations .FORCE
 presentations: .FORCE
 	cd presentations && make || exit 1
 
-publish: website .FORCE
-	./publish.bash
-
 htdocs: .FORCE
 	deno task htdocs
 

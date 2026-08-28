@@ -19,7 +19,7 @@
     <li><a href="LICENSE">LICENSE</a></li>
     <li><a href="INSTALL.html">INSTALL</a></li>
     <li><a href="user_manual.html">User Manual</a></li>
-    <li><a href="about.html">About</a></li>
+    <!-- <li><a href="about.html">About</a></li> -->
     <!-- <li><a href="search.html">Search</a></li> -->
     <li><a href="https://github.com/caltechlibrary/cold">Code Repository</a></li>
 </ul>
@@ -58,6 +58,33 @@ per batch</label></li>
 </ul>
 <h2 id="next">next</h2>
 <ul>
+<li>Drop the undocumented <code>all=1</code> query param on
+CaltechAUTHORS API calls – RESOLVED 2026-08-25, see
+<code>decisions/0007-drop-the-undocumented-all-1-query-parameter-from.md</code>
+(DR-0007). Confirmed against the live API rather than inferred:
+<code>all=1</code> returns identical totals and identical record ids to
+both the baseline and an invented parameter, while
+<code>allversions=1</code> does change the result – so it is
+unrecognized and silently ignored. Each site now has a regression test
+asserting the parameter’s absence, since removing a no-op has no
+observable runtime effect to confirm.
+<ul class="task-list">
+<li><label><input type="checkbox"
+checked="" /><code>publications_by_person_identifiers.ts</code>
+(<code>buildRecordsQueryUrl</code>)</label></li>
+<li><label><input type="checkbox"
+checked="" /><code>generate_collaborator_rpt.ts</code>
+(<code>buildRecordsQueryUrl</code>)</label></li>
+<li><label><input type="checkbox"
+checked="" /><code>generate_collaborator_affiliations_rpt.ts</code>
+(<code>buildRecordsQueryUrl</code>)</label></li>
+<li><label><input type="checkbox"
+checked="" /><code>generate_country_collaboration_rpt.ts</code> – URL
+construction extracted from <code>fetchRecordsForBatch</code> into a new
+exported <code>buildBatchQueryUrl()</code> so it could be tested at all;
+new <code>generate_country_collaboration_rpt_test.ts</code> gives it its
+first coverage (4 tests)</label></li>
+</ul></li>
 <li>Issue #106
 <ul class="task-list">
 <li><label><input type="checkbox" checked="" />Issue #106 fixes
