@@ -1,6 +1,18 @@
 
 # RDM Review Queue integration into COLD
 
+> **Update, 2026-09-09.** This page is the original design narrative and is kept
+> as written. Two things in it have since changed. The collection it calls
+> `rdm_review_queue.ds` is now **`rdm_requests.ds`** — the feature, the browser
+> module and the page keep the review-queue name, because that is what the
+> librarians call the view; only the collection was misnamed (DR-0013). And the
+> aggregation described below no longer joins a request to the record version it
+> named: it resolves to the newest version that has not been deleted, because a
+> new version in RDM does not create a new request and roughly a third of the
+> collection was therefore showing metadata from a superseded version
+> (DR-0015). See `agents/projects/cold/design/rdm_requests_harvest.md` in the
+> DLD workspace for the redesign, and issue #109 for what prompted it.
+
 ## NOTES
 
 What follows were the main request details to add to COLD.

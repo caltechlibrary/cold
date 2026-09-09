@@ -115,7 +115,7 @@ Access is controlled by Apache + Shibboleth in front — library staff log in wi
 | subjects.ds | Subject classifications |
 | thesis_options.ds | Degree program options |
 | ror.ds | Local copy of Research Organization Registry |
-| rdm_review_queue.ds | Snapshot of InvenioRDM submission review queue |
+| rdm_requests.ds | Mirror of InvenioRDM request and record state; the review queue is a view over it |
 
 # People records, a richest collection
 

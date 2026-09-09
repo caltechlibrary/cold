@@ -29,3 +29,26 @@
 */15 7-19 * * 1-5 /Sites/cold/remote_harvest_caltechthesis_incremental.bash /Sites/cold/caltechthesis.env
 # Full refresh: nightly at 2am every day (catches deletions and status changes)
 0 2 * * * /Sites/cold/remote_harvest_caltechthesis_full.bash /Sites/cold/caltechthesis.env
+
+# CaltechAUTHORS RDM harvest into rdm_requests.ds
+#
+# Incremental: every 15 min, Mon-Fri, 7am-7pm. Runs in about 15 seconds. Picks
+# up new submissions, state changes, edits to published records, and newly
+# published versions, then prunes anything that has left the states of interest.
+*/15 7-19 * * 1-5 /Sites/cold/remote_harvest_rdm_requests_incremental.bash /Sites/cold/caltechauthors.env
+#
+# Full refresh: nightly at 3am every day. Takes about 26 minutes -- it detoasts
+# roughly 1.5 GB of jsonb -- so it is deliberately away from the CaltechTHESIS
+# full harvest at 2am. It upserts and then sweeps rows it did not touch, so an
+# interrupted run leaves the collection stale but whole rather than empty.
+0 3 * * * /Sites/cold/remote_harvest_rdm_requests_full.bash /Sites/cold/caltechauthors.env
+#
+# These two do not collide on this schedule -- the full harvest finishes around
+# 3:30am, hours before the first incremental. A lock enforces one-harvest-at-a-
+# time anyway, which covers the cases the schedule does not: a harvest run by
+# hand during the working day, and a full harvest that runs long. An incremental
+# that finds one in progress skips quietly and exits 0, since the watermark is
+# untouched and the next run covers the same window.
+#
+# The full harvest must run once before the first incremental, to create the
+# collection and write rdm_requests_lastmod.txt.

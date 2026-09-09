@@ -223,15 +223,23 @@ Stores Research Organization Registry (ROR) records imported from a ROR data dum
 
 ---
 
-### rdm_review_queue.ds
+### rdm_requests.ds
 
-Stores records from the RDM (Research Data Management) submission review queue. Records are deposited here from the InvenioRDM system for curator review.
+A mirror of RDM's request-and-record state: one row per community-submission request in a state librarians care about, harvested from the InvenioRDM Postgres database. The librarians' review queue is a *view* over this collection, filtered to `status = 'submitted'` — which is why the queries below come in plain and `review_queue_` pairs, and why the browser module and page keep the review-queue name while the collection does not.
+
+Requests that are cancelled, declined, never submitted, or whose record is wholly deleted are not harvested at all, so they never appear here.
+
+**Two fields do not mean what a reader tends to assume.** A request names one specific record *version*, and publishing a new version in RDM does not create a second request — so the row's key is the version that was originally submitted, while `rdmid` is the newest version that has not been deleted, which is what RDM currently serves. On CaltechAUTHORS those differ on about a third of the collection. `is_latest` says whether they are the same, and `submitted_rdmid` carries the key's value inside the object for consumers that would otherwise have to read the key. See DR-0015 in the DLD workspace.
+
+`created` and `updated` are full ISO timestamps rather than dates, so a day's activity can be ordered; `updated` is the newest of the request's own timestamp and the harvested version's.
+
+The collection is filled by `remote_harvest_rdm_requests_full.bash` nightly and kept current by `remote_harvest_rdm_requests_incremental.bash`; see `crontab-example`.
 
 **Named queries:**
 
 | Query | Parameters | Returns |
 |---|---|---|
-| `browse` | none | All records ordered by `updated` descending |
+| `browse` | none | All records ordered by RDM's `updated` descending |
 | `search` | `?` (text pattern) | Records where the JSON source matches the pattern |
 | `by_name` | `?` (name pattern) | Records where any creator's `person_or_org.name` matches |
 | `review_queue_by_name` | `?` (name pattern) | Same as `by_name` but filtered to `status = 'submitted'` |
