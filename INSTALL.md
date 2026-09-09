@@ -21,7 +21,7 @@ Quick install with curl or irm
 There is an experimental installer.sh script that can be run with the following command to install latest table release. This may work for macOS, Linux and if you’re using Windows with the Unix subsystem. This would be run from your shell (e.g. Terminal on macOS).
 
 ~~~shell
-curl https://software.library.caltech.edu/cold/installer.sh | sh
+curl https://caltechlibrary.github.io/cold/installer.sh | sh
 ~~~
 
 This will install the programs included in cold in your `$HOME/bin` directory.
@@ -29,12 +29,12 @@ This will install the programs included in cold in your `$HOME/bin` directory.
 If you are running Windows 10 or 11 use the Powershell command below.
 
 ~~~ps1
-irm https://software.library.caltech.edu/cold/installer.ps1 | iex
+irm https://caltechlibrary.github.io/cold/installer.ps1 | iex
 ~~~
 
 ### If your are running macOS or Windows
 
-You may get security warnings if you are using macOS or Windows. See the notes for the specific operating system you're using to fix issues.
+You may get security warnings if you are using macOS or Windows. See the notes for the specific operating system you’re using to fix issues.
 
 - [INSTALL_NOTES_macOS.md](INSTALL_NOTES_macOS.md)
 - [INSTALL_NOTES_Windows.md](INSTALL_NOTES_Windows.md)
@@ -44,10 +44,10 @@ Installing from source
 
 ### Required software
 
-- Deno &gt;&#x3D; 2.8.2
-- Dataset &gt;&#x3D; 2.5.1
-- CMTools &gt;&#x3D; 0.0.45b
-- yq (mikefarah/yq) &gt;&#x3D; 4.44
+- Deno >= 2.8.2
+- Dataset >= 2.5.1
+- CMTools >= 0.0.45b
+- yq (mikefarah/yq) >= 4.44
 
 ### Steps
 

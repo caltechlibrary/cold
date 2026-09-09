@@ -1,8 +1,4 @@
-<<<<<<< Updated upstream
-%cold_reports(1) user manual | 0.0.51 8d8f61d
-=======
-%cold_reports(1) user manual | 0.0.50 590705e
->>>>>>> Stashed changes
+%cold_reports(1) user manual | 0.0.51 cc09558
 % R. S.Doiel
 % 2026-08-24
 

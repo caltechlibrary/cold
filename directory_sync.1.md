@@ -1,8 +1,4 @@
-<<<<<<< Updated upstream
-%directory_sync(1) user manual | 0.0.51  8d8f61d
-=======
-%directory_sync(1) user manual | 0.0.50  590705e
->>>>>>> Stashed changes
+%directory_sync(1) user manual | 0.0.51  cc09558
 % R. S.Doiel
 % 2026-08-24
 

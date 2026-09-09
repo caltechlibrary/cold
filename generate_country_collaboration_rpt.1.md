@@ -1,6 +1,6 @@
-%generate_country_collaboration_rpt(1) user manual | 0.0.49 15f9409
+%generate_country_collaboration_rpt(1) user manual | 0.0.51 cc09558
 % R. S. Doiel
-% 2026-06-05
+% 2026-08-24
 
 # NAME
 
@@ -66,4 +66,5 @@ Generate a report for Germany:
 ~~~shell
 generate_country_collaboration_rpt DE
 ~~~
+
 

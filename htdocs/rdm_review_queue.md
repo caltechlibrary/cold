@@ -4,7 +4,7 @@ title: Review RDM Records
 
 # Review RDM Records
 
-- [List all review queue records](https://apps.library.caltech.edu/cold/rdm_review_queue.html?q_name=review_queue_by_name&q=*)
+- [List all review queue records](rdm_review_queue.html?q_name=review_queue_by_name&q=*)
 
 ## Seearch Review Queue
 
