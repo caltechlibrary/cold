@@ -156,7 +156,6 @@ async function getUsedRorIds(): Promise<Set<string>> {
   return ids;
 }
 
-<<<<<<< Updated upstream
 /**
  * buildBatchQueryUrl builds the CaltechAUTHORS records API URL matching any of
  * a batch of ROR ids as a creator affiliation, a contributor affiliation or a
@@ -203,50 +202,6 @@ async function fetchRecordsForBatch(
     return resultMap;
   }
   const records: RdmRecord[] = hits as RdmRecord[];
-=======
-async function fetchRecordsForBatch(
-  rorIds: string[],
-): Promise<Map<string, RdmRecord[]>> {
-  const resultMap = new Map<string, RdmRecord[]>();
-  for (const id of rorIds) resultMap.set(id, []);
-
-  const clauses = rorIds.map((id) =>
-    `metadata.creators.affiliations.id:${id} OR metadata.contributors.affiliations.id:${id} OR metadata.funding.funder.id:${id}`
-  );
-  const q = clauses.join(" OR ");
-  const params = new URLSearchParams({ q, all: "1", size: "1000" });
-  const url = `https://authors.library.caltech.edu/api/records?${params}`;
-
-  let response: Response | null = null;
-  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-    response = await fetch(url);
-    if (response.status !== 429) break;
-    const retryAfter = parseInt(
-      response.headers.get("Retry-After") ?? String(RATE_LIMIT_BACKOFF_S),
-      10,
-    );
-    const wait = (retryAfter > 0 ? retryAfter : RATE_LIMIT_BACKOFF_S) *
-      1000;
-    console.error(
-      `Rate limited (429), waiting ${wait / 1000}s before retry ${
-        attempt + 1
-      }/${MAX_RETRIES}...`,
-    );
-    await sleep(wait);
-  }
-
-  if (!response || !response.ok) {
-    console.error(
-      `Warning: failed to fetch batch of ${rorIds.length} ROR IDs (HTTP ${
-        response?.status ?? "no response"
-      })`,
-    );
-    return resultMap;
-  }
-
-  const data = await response.json();
-  const records: RdmRecord[] = data.hits?.hits ?? [];
->>>>>>> Stashed changes
 
   for (const record of records) {
     const creators = record.metadata.creators ?? [];

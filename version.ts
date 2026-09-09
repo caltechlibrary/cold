@@ -1,14 +1,8 @@
 // cold version and license information.
 
-<<<<<<< Updated upstream
 export const version: string = '0.0.51',
 releaseDate: string = '2026-08-24',
 releaseHash: string = '8d8f61d',
-=======
-export const version: string = '0.0.50',
-releaseDate: string = '2026-08-13',
-releaseHash: string = '590705e',
->>>>>>> Stashed changes
 licenseText: string = `
 
 Copyright (c) 2024, Caltech

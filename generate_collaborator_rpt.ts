@@ -49,7 +49,6 @@ export function buildRecordsQueryUrl(
     "q",
     `metadata.creators.person_or_org.identifiers.identifier:"${clpid}" AND metadata.publication_date:[${startDateStr} TO *]`,
   );
-  params.set("all", "1");
   params.set("size", "1000");
   return `${baseUrl}?${params.toString()}`;
 }
@@ -69,7 +68,6 @@ export async function run_report(
 
   const apiUrl = buildRecordsQueryUrl(clpid, startDateStr);
 
-<<<<<<< Updated upstream
   // Fetch records from Invenio RDM API, following pagination
   let hits: unknown[];
   try {
@@ -81,17 +79,6 @@ export async function run_report(
     Deno.exit(1);
   }
   const records: Record[] = hits as Record[];
-=======
-  // Fetch records from Invenio RDM API
-  const response = await fetch(apiUrl);
-  if (!response.ok) {
-    console.log(`Error: Failed to fetch records (HTTP ${response.status})`);
-    console.log(response.text());
-    Deno.exit(1);
-  }
-  const data = await response.json();
-  const records: Record[] = data.hits.hits; //data.hits.hits.map((hit: any) => hit.metadata);
->>>>>>> Stashed changes
 
   // Aggregate coauthors
   const coauthors: { [key: string]: Coauthor } = {};
