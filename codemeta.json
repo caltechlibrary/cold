@@ -69,7 +69,7 @@
     "controlled vocabulary"
   ],
   "name": "cold",
-  "license": "https://caltechlibrary.github.io/cold/LICENSE",
+  "license": "https://software.library.caltech.edu/cold/LICENSE",
   "operatingSystem": [
     "Linux"
   ],

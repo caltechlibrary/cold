@@ -17,7 +17,7 @@ date: November 15, 2024
 section-titles: false
 toc: true
 keywords: [ "code4lib", "microservice", "SQLite3", "Deno", "TypeScript", "Dataset" ]
-url: "https://caltechlibrary.github.io/cold/presentation"
+url: "https://software.library.caltech.edu/cold/presentation"
 ---
 
 # How do manage metadata about People, Groups and controlled vocabularies?
@@ -50,7 +50,7 @@ url: "https://caltechlibrary.github.io/cold/presentation"
 # Our answer, COLD
 
 COLD
-: Controlled Object Lists with [Dataset](https://caltechlibrary.github.io/dataset)
+: Controlled Object Lists with [Dataset](https://software.library.caltech.edu/dataset)
 
 # What does COLD do?
 
@@ -104,7 +104,7 @@ Built in three parts
 # What I used "off the shelf"
 
 - [Deno](https://deno.org) compiled TypeScript to executables
-- [Dataset](https://caltechlibrary.github.io/dataset) JSON API for managing objects
+- [Dataset](https://software.library.caltech.edu/dataset) JSON API for managing objects
   - Using [SQLite3](https://sqlite.org) storage engine
 - Apache+Shibboleth for access control via campus single sign on
 
@@ -182,4 +182,4 @@ Built in three parts
 - [Why did Ryan Dahl, creator of NodeJS, create Deno?](https://stackoverflow.blog/2024/03/19/why-the-creator-of-node-js-r-created-a-new-javascript-runtime/)
 - JavaScript, <https://developer.mozilla.org/en-US/docs/Web/JavaScript>
 - TypeScript, <https://www.TypeScriptlang.org/>
-- Dataset, <https://caltechlibrary.github.io/dataset> and <https://github.com/caltechlibrary/dataset>
+- Dataset, <https://software.library.caltech.edu/dataset> and <https://github.com/caltechlibrary/dataset>

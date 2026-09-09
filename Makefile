@@ -41,7 +41,7 @@ PREFIX = $(HOME)
 
 TS_MODS = $(shell ls -1 *.ts | grep -v _test.ts | grep -v deps.ts | grep -v version.ts)
 
-build: version.ts $(TS_MODS) CITATION.cff about.md INSTALL.md htdocs bin compile installer.sh installer.ps1 $(HTML_PAGES)
+build: version.ts $(TS_MODS) CITATION.cff INSTALL.md htdocs bin compile installer.sh installer.ps1 $(HTML_PAGES)
 
 bin: .FORCE
 	mkdir -p bin
@@ -59,6 +59,8 @@ compile: check $(TS_MODS)
 	bin/generate_collaborator_rpt$(EXT) --help >generate_collaborator_rpt.1.md
 	bin/generate_collaborator_affiliations_rpt$(EXT) --help >generate_collaborator_affiliations_rpt.1.md
 	bin/publications_by_person_identifiers$(EXT) --help >publications_by_person_identifiers.1.md
+	bin/generate_country_collaboration_rpt$(EXT) --help >generate_country_collaboration_rpt.1.md
+	bin/generate_technical_reports_rpt$(EXT) --help >generate_technical_reports_rpt.1.md
 	bin/ror_import$(EXIT) --help >ror_import.1.md
 
 check: $(TS_MODS)
@@ -101,11 +103,6 @@ $(MAN_PAGES_1): .FORCE
 CITATION.cff: codemeta.json .FORCE
 	cmt codemeta.json CITATION.cff
 
-about.md: codemeta.json .FORCE
-	cmt codemeta.json about.md
-	cp about.md htdocs/
-	deno task htdocs
-
 INSTALL.md: codemeta.json .FORCE
 	cmt codemeta.json INSTALL.md
 
@@ -121,9 +118,6 @@ website: $(HTML_PAGES) presentations .FORCE
 
 presentations: .FORCE
 	cd presentations && make || exit 1
-
-publish: website .FORCE
-	./publish.bash
 
 htdocs: .FORCE
 	deno task htdocs

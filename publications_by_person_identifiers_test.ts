@@ -7,7 +7,7 @@
  *   deno test publications_by_person_identifiers_test.ts
  */
 
-import { assertStringIncludes, assertThrows } from "@std/assert";
+import { assertEquals, assertStringIncludes, assertThrows } from "@std/assert";
 import { buildRecordsQueryUrl } from "./publications_by_person_identifiers.ts";
 
 Deno.test("buildRecordsQueryUrl includes the clpid identifier filter", () => {
@@ -41,4 +41,12 @@ Deno.test("buildRecordsQueryUrl requests a page size of 1000 per request (pagina
 
 Deno.test("buildRecordsQueryUrl throws if neither clpid nor orcid is provided", () => {
     assertThrows(() => buildRecordsQueryUrl("", ""));
+});
+
+Deno.test("buildRecordsQueryUrl does not send the undocumented all=1 parameter (DR-0007)", () => {
+    // Verified live 2026-08-25: `all` is unrecognised and silently ignored, and
+    // behaves identically to an invented parameter. Removing it is a no-op at
+    // runtime, so this assertion is the only durable evidence it stayed gone.
+    const url = buildRecordsQueryUrl("Doiel-R-S", "");
+    assertEquals(new URL(url).searchParams.get("all"), null);
 });

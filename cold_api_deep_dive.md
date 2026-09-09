@@ -3,8 +3,8 @@
 `cold_api.yaml` is the configuration file for `datasetd`, the JSON API backend that COLD builds on. It is not read by any TypeScript code — it is consumed entirely by the `datasetd` binary. Everything the middleware and browser can access about stored objects is ultimately controlled by what this file declares.
 
 Reference documentation for the `datasetd` configuration format:
-- <https://caltechlibrary.github.io/dataset/datasetd.1.html>
-- <https://caltechlibrary.github.io/dataset/datasetd_api.5.html>
+- <https://software.library.caltech.edu/dataset/datasetd.1.html>
+- <https://software.library.caltech.edu/dataset/datasetd_api.5.html>
 
 ---
 

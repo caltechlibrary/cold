@@ -2,7 +2,7 @@
 
 This guide walks through everything required to add a new report to the COLD reports system. It covers both simple (non-parameterized) reports and parameterized reports that require user input, using the collaborator report as the worked example for the latter case.
 
-For background on the design intent and security model see `report_design_choices.md`. For a deep dive on the configuration files see `cold_api_deep_dive.md` and `cold_reports_deep_dive.md`.
+For background on the design intent and security model see `report_design_choices.md` (in the DLD workspace, `agents/projects/cold/design/`). For a deep dive on the configuration files see `cold_api_deep_dive.md` and `cold_reports_deep_dive.md`.
 
 ---
 
@@ -401,7 +401,7 @@ Then run the script directly to see its stderr:
 
 ## Security checklist for parameterized reports
 
-Every new parameterized report must address these points. See `report_design_choices.md` for the full rationale.
+Every new parameterized report must address these points. See `report_design_choices.md` in the DLD workspace (`agents/projects/cold/design/`) for the full rationale.
 
 - [ ] **Browser**: The form validates that required fields are non-empty and that values conform to the expected format (regexp or API lookup) before submitting.
 - [ ] **Middleware** (`cold_reports.ts`): `handleReportRequest` reads `cold_reports.yaml` to get the input definitions, merges form values into the `Report` object, and rejects any parameter not declared in the `inputs` list.

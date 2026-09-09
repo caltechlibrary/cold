@@ -75,7 +75,7 @@ Access control is provided by the front end web server integrated with Shibbolet
 
 - [Download](https://github.com/caltechlibrary/cold/releases/latest)
 - [Getting Help, Reporting bugs](https://github.com/caltechlibrary/cold/issues)
-- [LICENSE](https://caltechlibrary.github.io/cold/LICENSE)
+- [LICENSE](https://software.library.caltech.edu/cold/LICENSE)
 - [Installation](INSTALL.md)
 - [About](about.md)
 
