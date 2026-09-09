@@ -160,6 +160,7 @@ export async function run_report(clpid: string, includeRecordIds: boolean) {
 
   const apiUrl = buildRecordsQueryUrl(clpid, startDateStr);
 
+<<<<<<< Updated upstream
   // Fetch records from Invenio RDM API, following pagination
   let hits: unknown[];
   try {
@@ -171,6 +172,16 @@ export async function run_report(clpid: string, includeRecordIds: boolean) {
     Deno.exit(1);
   }
   const records: Record[] = hits as Record[];
+=======
+  // Fetch records from Invenio RDM API
+  const response = await fetch(apiUrl);
+  if (!response.ok) {
+    console.log(`Error: Failed to fetch records (HTTP ${response.status})`);
+    Deno.exit(1);
+  }
+  const data = await response.json();
+  const records: Record[] = data.hits.hits;
+>>>>>>> Stashed changes
 
   // Collect one row per (coauthor, affiliation, record); cache ROR lookups by affId
   const rorCache = new Map<string, { country: string; rorUrl: string }>();

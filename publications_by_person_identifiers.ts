@@ -202,6 +202,7 @@ interface FlatOutputRecord {
   funding: string;
   record_clpid: string;
   record_orcid: string;
+<<<<<<< Updated upstream
 }
 
 /**
@@ -241,6 +242,8 @@ export function buildRecordsQueryUrl(clpid: string, orcid: string): string {
   params.set("size", "1000");
 
   return `${baseUrl}?${params.toString()}`;
+=======
+>>>>>>> Stashed changes
 }
 
 export async function run_report(
@@ -248,6 +251,7 @@ export async function run_report(
   orcid: string,
   format: OutputFormat = "jsonl",
 ): Promise<void> {
+<<<<<<< Updated upstream
   let apiUrl: string;
   try {
     apiUrl = buildRecordsQueryUrl(clpid, orcid);
@@ -266,11 +270,61 @@ export async function run_report(
   } catch (err) {
     console.error(
       `Error: ${err instanceof Error ? err.message : String(err)}`,
+=======
+  const baseUrl = "https://authors.library.caltech.edu/api/records";
+  const params = new URLSearchParams();
+
+  // Build query: match either clpid or orcid or both
+  const conditions: string[] = [];
+  if (clpid) {
+    conditions.push(
+      `metadata.creators.person_or_org.identifiers.identifier:"${clpid}"`,
+    );
+  }
+  if (orcid) {
+    // ORCID might have hyphens, need to handle that
+    const orcidQuery = orcid.replace(/\-/g, "\\-");
+    conditions.push(
+      `metadata.creators.person_or_org.identifiers.identifier:"${orcidQuery}"`,
+    );
+  }
+
+  if (conditions.length === 0) {
+    console.error(
+      "Error: At least one of clpid or orcid must be provided.",
+>>>>>>> Stashed changes
     );
     Deno.exit(1);
   }
 
+<<<<<<< Updated upstream
   const records: Record[] = hits as Record[];
+=======
+  // Combine conditions with OR
+  const query = conditions.length === 1
+    ? conditions[0]
+    : `(${conditions.join(" OR ")})`;
+
+  params.set("q", query);
+  params.set("all", "1");
+  params.set("size", "1000");
+
+  const apiUrl = `${baseUrl}?${params.toString()}`;
+
+  //console.error(`Fetching from: ${apiUrl}`);
+
+  const response = await fetch(apiUrl);
+  if (!response.ok) {
+    console.error(
+      `Error: Failed to fetch records (HTTP ${response.status})`,
+    );
+    console.error(await response.text());
+    Deno.exit(1);
+  }
+
+  const data = await response.json();
+  const records: Record[] = data.hits.hits.map((hit: any) => hit);
+>>>>>>> Stashed changes
 
   // Process records based on format
   if (format === "json") {
