@@ -432,48 +432,48 @@ collections:
     update: true
     # This sets versioning behavior
     versions: true
-  - dataset: rdm_review_queue.ds
+  - dataset: rdm_requests.ds
     query:
       # browser JSON objects by descending updated timestamp
       browse:
         select src
-        from rdm_review_queue
-        order by updated desc
+        from rdm_requests
+        order by src->>'updated' desc
 
       # Search the JSON object for a user provided value
       search: |
         select src
-        from rdm_review_queue
+        from rdm_requests
         where src like ?
-        order by updated desc
+        order by src->>'updated' desc
 
       # search by name
       by_name: |
         select src
-        from rdm_review_queue
+        from rdm_requests
         where exists (
             select 1
             from json_each(src, '$.creators')
             where json_extract(value, '$.person_or_org.name') like ?
         )
-        order by created desc
+        order by src->>'created' desc
 
 
       review_queue_by_name: |
         select src
-        from rdm_review_queue
+        from rdm_requests
         where exists (
             select 1
             from json_each(src, '$.creators')
             where json_extract(value, '$.person_or_org.name') like ?
         )
         AND src->>'status' = 'submitted'
-        order by created desc
+        order by src->>'created' desc
 
       # search by clpid
       by_clpid: |
         SELECT src
-        FROM rdm_review_queue
+        FROM rdm_requests
         WHERE EXISTS (
             SELECT 1
             FROM json_each(src, '$.creators') AS creator
@@ -481,11 +481,11 @@ collections:
             WHERE json_extract(identifier.value, '$.scheme') = 'clpid'
               AND json_extract(identifier.value, '$.identifier') = ?
         )
-        order by created desc
+        order by src->>'created' desc
 
       review_queue_by_clpid: |
         SELECT src
-        FROM rdm_review_queue
+        FROM rdm_requests
         WHERE EXISTS (
             SELECT 1
             FROM json_each(src, '$.creators') AS creator
@@ -494,12 +494,12 @@ collections:
               AND json_extract(identifier.value, '$.identifier') = ?
         )
         AND src->>'status' = 'submitted'
-        order by created desc
+        order by src->>'created' desc
 
       # search by orcid
       by_orcid: |
         SELECT src
-        FROM rdm_review_queue
+        FROM rdm_requests
         WHERE EXISTS (
             SELECT 1
             FROM json_each(src, '$.creators') AS creator
@@ -507,11 +507,11 @@ collections:
             WHERE json_extract(identifier.value, '$.scheme') = 'orcid'
               AND json_extract(identifier.value, '$.identifier') = ?
         )
-        order by created desc
+        order by src->>'created' desc
 
       review_queue_by_orcid: |
         SELECT src
-        FROM rdm_review_queue
+        FROM rdm_requests
         WHERE EXISTS (
             SELECT 1
             FROM json_each(src, '$.creators') AS creator
@@ -520,29 +520,29 @@ collections:
               AND json_extract(identifier.value, '$.identifier') = ?
         )
         AND src->>'status' = 'submitted'
-        order by created desc
+        order by src->>'created' desc
 
       # search by group clgid
       by_clgid: |
         SELECT src
-        FROM rdm_review_queue
+        FROM rdm_requests
         WHERE EXISTS (
             SELECT 1
             FROM json_each(src, '$.custom_fields."caltech:groups"')
             WHERE json_extract(value, '$.id') = ?
         )
-        order by created desc
+        order by src->>'created' desc
 
       review_queue_by_clgid: |
         SELECT src
-        FROM rdm_review_queue
+        FROM rdm_requests
         WHERE EXISTS (
             SELECT 1
             FROM json_each(src, '$.custom_fields."caltech:groups"')
             WHERE json_extract(value, '$.id') = ?
         )
         AND src->>'status' = 'submitted'
-        order by created desc
+        order by src->>'created' desc
 
       # All distinct ROR IDs that appear in any creator affiliation.
       # Used to pre-filter country ROR lists before hitting the CaltechAUTHORS API.
@@ -550,7 +550,7 @@ collections:
         select json_object('ror_id', aff_id) as src
         from (
           select distinct json_extract(affiliation.value, '$.id') as aff_id
-          from rdm_review_queue
+          from rdm_requests
           join json_each(src, '$.creators') as creator
           join json_each(creator.value, '$.affiliations') as affiliation
           where json_extract(affiliation.value, '$.id') is not null
@@ -561,14 +561,14 @@ collections:
       # review queue mentions
       review_queue_mentions: |
         SELECT src
-        FROM rdm_review_queue
+        FROM rdm_requests
         WHERE src->>'status' = 'submitted'
           AND EXISTS (
             SELECT 1
             FROM json_each(src, '$.comments_with_mentions')
             WHERE json_extract(value, '$.content') LIKE ?
         )
-        order by created desc
+        order by src->>'created' desc
 
     keys: true
     read: true

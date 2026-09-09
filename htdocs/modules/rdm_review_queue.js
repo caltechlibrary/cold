@@ -77,20 +77,20 @@ var ClientAPI = class {
     return [];
   }
   /**
-   * getGroupsList returns an array of clgid and group names.  If list can't be retrieved
-   * then an empty list is return.
-   * @returns an array of objects consisting of clgid and group name.
-   */
+     * getGroupsList returns an array of clgid and group names.  If list can't be retrieved
+     * then an empty list is return.
+     * @returns an array of objects consisting of clgid and group name.
+     */
   async getGroupsList() {
     const c_name = "groups";
     const query_name = "group_names";
     return await this.getList(c_name, query_name);
   }
   /**
-   * getPeopleList returns an array of clpid and group names.  If list can't be retrieved
-   * then an empty list is return.
-   * @returns an array of objects consisting of clgid and group name.
-   */
+     * getPeopleList returns an array of clpid and group names.  If list can't be retrieved
+     * then an empty list is return.
+     * @returns an array of objects consisting of clgid and group name.
+     */
   async getPeopleList() {
     const c_name = "people";
     const query_name = "people_names";
@@ -158,7 +158,7 @@ var ClientAPI = class {
 
 // rdm_review_queue.ts
 var RdmReviewQueueUI = class {
-  cName = "rdm_review_queue.ds";
+  cName = "rdm_requests.ds";
   searchElement;
   querySelect;
   queryInput;
@@ -172,7 +172,7 @@ var RdmReviewQueueUI = class {
   autocompleteResults = [];
   selectedReportType = null;
   constructor(options) {
-    options.cName === void 0 ? "rdm_review_queue.ds" : this.cName = options.cName;
+    options.cName === void 0 ? "rdm_requests.ds" : this.cName = options.cName;
     typeof options.searchElement === "string" ? this.searchElement = document.getElementById(options.searchElement) : this.searchElement = options.searchElement;
     this.baseUrl = new URL(options.baseUrl);
     this.basePath = this.baseUrl.pathname;
@@ -426,12 +426,23 @@ function extractAndSortMentions(comments) {
     ...new Set(mentions)
   ].sort();
 }
+function formatTimestamp(ts) {
+  if (!ts) {
+    return "";
+  }
+  const t = ts.indexOf("T");
+  if (t < 0) {
+    return ts;
+  }
+  return `${ts.slice(0, t)} ${ts.slice(t + 1, t + 6)}`;
+}
 function normalizeItem(q_name, q, item) {
   let groups = "";
   let journal_title = "";
   item.custom_fields["caltech:groups"] === void 0 ? item.groups = "" : item.groups = item.custom_fields["caltech:groups"].map((g) => g.id).join("; ");
   item.custom_fields["journal:journal"] === void 0 ? item.journal_title = "" : item.journal_title = item.custom_fields["journal:journal"].title || "";
   item.comments_with_mentions === void 0 ? item.tags = "" : item.tags = extractAndSortMentions(item.comments_with_mentions).join(", ");
+  item.created = formatTimestamp(item.created);
   switch (q_name) {
     case "by_clpid":
     case "review_queue_by_clpid":

@@ -1,16 +1,16 @@
 #!/bin/bash
 
 #
-# Report all submissions retrieved from rdm_review_queue.ds and with useful top level columns
+# Report all submissions retrieved from rdm_requests.ds and with useful top level columns
 #
 cat <<SQL >authors_submissions_csv.sql
 
 SELECT
     json_object(
-       'rdmid', _key,
+       'rdmid', src->>'rdmid',
        'link', src->>'link',
        'status', src->>'status',
-       'created', src->>'created',
+       'created', replace(substr(src->>'created', 1, 16), 'T', ' '),
        'title', src->>'title',
        'publisher', src->>'publisher',
        'publication_date', src->>'publication_date',
@@ -20,11 +20,11 @@ SELECT
            FROM json_each(COALESCE(src->'custom_fields'->'caltech:groups', '[]'))
        ), '')
    ) AS obj
-FROM rdm_review_queue
+FROM rdm_requests
 ORDER BY src->>'created' DESC;
 
 SQL
 
 dsquery -csv "rdmid,link,status,created,title,publisher,publication_date,journal_title,groups" \
   -sql authors_submissions_csv.sql \
-  rdm_review_queue.ds
+  rdm_requests.ds

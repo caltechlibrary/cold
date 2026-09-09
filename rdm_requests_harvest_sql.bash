@@ -68,6 +68,10 @@
 #     Bare record ids to delete: requests that have left the states of
 #     interest, and records whose parent has lost its last present version.
 #
+#   acquire_harvest_lock [MAX_WAIT_SECONDS]
+#   release_harvest_lock
+#     Only one harvest at a time. Returns non-zero if another holds the lock.
+#
 #   load_jsonl_verified C_NAME C_TABLE JSONL_FILE
 #     Load with an 8 MB buffer and refuse to call it a success unless the rows
 #     touched equal the distinct keys in the file (DR-0017). Sets LOAD_MARK,
@@ -396,6 +400,61 @@ WHERE m.parent_id IN (
         SELECT 1 FROM rdm_records_metadata q
         WHERE q.parent_id = m.parent_id AND q.deletion_status = 'P');
 SQL
+}
+
+# Only one harvest may run at a time. The full harvest takes about 26 minutes
+# and the incremental is meant to run every 15, so overlap is scheduled rather
+# than hypothetical -- and both write fixed filenames on the cold host AND on
+# the RDM host, so a second run truncates the JSON-L the first is streaming
+# into. That collision spoiled a run on 2026-09-09 when two harvests were
+# launched by hand.
+#
+# mkdir is the atomic primitive because it works on the Linux host that runs
+# cron and on a developer's macOS; flock(1) is not present on macOS.
+#
+# A lock whose owning process is gone is stale and gets cleared -- three of
+# this project's runs were killed mid-flight on 2026-09-09, and a lock that
+# survives that would wedge the cron entry silently.
+HARVEST_LOCK_DIR="${HARVEST_LOCK_DIR:-rdm_requests_harvest.lock}"
+
+acquire_harvest_lock() {
+    local max_wait="${1:-0}" waited=0
+    local owner_pid owner_when owner_who
+
+    while true; do
+        if mkdir "${HARVEST_LOCK_DIR}" 2>/dev/null; then
+            printf '%s %s %s\n' "$$" "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
+                "$(basename "$0")" >"${HARVEST_LOCK_DIR}/owner"
+            HARVEST_LOCK_HELD=1
+            trap release_harvest_lock EXIT INT TERM
+            return 0
+        fi
+
+        owner_pid=""; owner_when=""; owner_who=""
+        if [ -f "${HARVEST_LOCK_DIR}/owner" ]; then
+            read -r owner_pid owner_when owner_who <"${HARVEST_LOCK_DIR}/owner"
+        fi
+
+        if [ -n "${owner_pid}" ] && ! kill -0 "${owner_pid}" 2>/dev/null; then
+            echo "Clearing a stale lock from ${owner_who:-an unknown script} (pid ${owner_pid}, taken ${owner_when:-unknown})."
+            rm -rf "${HARVEST_LOCK_DIR}"
+            continue
+        fi
+
+        if [ "${waited}" -ge "${max_wait}" ]; then
+            echo "${owner_who:-Another harvest} is already running (pid ${owner_pid:-unknown}, taken ${owner_when:-unknown})."
+            return 1
+        fi
+        sleep 10
+        waited=$((waited + 10))
+    done
+}
+
+release_harvest_lock() {
+    if [ "${HARVEST_LOCK_HELD:-0}" = "1" ]; then
+        rm -rf "${HARVEST_LOCK_DIR}"
+        HARVEST_LOCK_HELD=0
+    fi
 }
 
 # Load a JSON-L file and refuse to report success unless every line landed

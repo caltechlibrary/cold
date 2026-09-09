@@ -1,10 +1,10 @@
 
 SELECT
     json_object(
-       'rdmid', _key,
+       'rdmid', src->>'rdmid',
        'link', src->>'link',
        'status', src->>'status',
-       'created', src->>'created',
+       'created', replace(substr(src->>'created', 1, 16), 'T', ' '),
        'title', src->>'title',
        'publisher', src->>'publisher',
        'publication_date', src->>'publication_date',
@@ -14,7 +14,7 @@ SELECT
            FROM json_each(COALESCE(src->'custom_fields'->'caltech:groups', '[]'))
        ), '')
    ) AS obj
-FROM rdm_review_queue
+FROM rdm_requests
 WHERE src->>'status' = 'submitted'
 ORDER BY src->>'created' DESC;
 

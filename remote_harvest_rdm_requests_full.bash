@@ -182,6 +182,15 @@ echo "RDM_URL:        ${RDM_URL}"
 echo "CONTAINER_NAME: ${CONTAINER_NAME}"
 echo "RDM_DBNAME:     ${RDM_DBNAME}"
 
+# One harvest at a time. The full harvest waits a couple of minutes for an
+# incremental to finish -- those take about 15 seconds -- and treats a
+# persistent lock as unusual, exiting non-zero so cron reports it. The nightly
+# refresh failing to run is something someone should hear about.
+if ! acquire_harvest_lock 120; then
+    echo "Skipping the full harvest."
+    exit 1
+fi
+
 # Initialise the collection if it does not exist. The DSN matches the
 # collection cold already uses for its other sqlstore collections.
 if [ ! -d "${C_NAME}" ]; then

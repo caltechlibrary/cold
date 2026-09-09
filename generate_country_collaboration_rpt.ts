@@ -3,7 +3,7 @@
  *
  * Given an ISO 3166-1 alpha-2 country code, it:
  *   1. Queries ror.ds for all organizations in that country.
- *   2. Pre-filters to only those ROR IDs already seen in rdm_review_queue.ds creator
+ *   2. Pre-filters to only those ROR IDs already seen in rdm_requests.ds creator
  *      affiliations, avoiding thousands of fruitless API calls.
  *   3. Batch-queries CaltechAUTHORS for records where the surviving ROR IDs appear in
  *      creator affiliations, contributor affiliations, or funding entries.
@@ -24,7 +24,7 @@ import { fetchAllRecords } from "./caltechauthors_api.ts";
 
 const appName = "generate_country_collaboration_rpt";
 const dsRor = new Dataset(apiPort, "ror.ds");
-const dsReviewQueue = new Dataset(apiPort, "rdm_review_queue.ds");
+const dsReviewQueue = new Dataset(apiPort, "rdm_requests.ds");
 
 const CALTECH_ROR = "05dxps055";
 const BATCH_SIZE = 20;
@@ -140,7 +140,7 @@ async function getRorsByCountry(countryCode: string): Promise<RorEntry[]> {
 }
 
 /**
- * Returns the set of ROR IDs that actually appear in rdm_review_queue.ds creator
+ * Returns the set of ROR IDs that actually appear in rdm_requests.ds creator
  * affiliations. Used to pre-filter the country list before hitting the remote API.
  */
 async function getUsedRorIds(): Promise<Set<string>> {
@@ -232,8 +232,8 @@ export async function run_report(countryCode: string) {
     `Found ${allRorEntries.length} ROR entries for ${countryCode} in ror.ds.`,
   );
 
-  // Step 2: pre-filter to only ROR IDs that appear in rdm_review_queue.ds
-  console.error(`Loading used ROR IDs from rdm_review_queue.ds...`);
+  // Step 2: pre-filter to only ROR IDs that appear in rdm_requests.ds
+  console.error(`Loading used ROR IDs from rdm_requests.ds...`);
   const usedRorIds = await getUsedRorIds();
   const rorEntries = allRorEntries.filter((e) => usedRorIds.has(e.ror));
   console.error(

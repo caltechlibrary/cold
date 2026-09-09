@@ -143,6 +143,15 @@ if [ ! -f "${LASTMOD_FILE}" ]; then
     exit 1
 fi
 
+# One harvest at a time. Skipping is ROUTINE here: the nightly full harvest
+# runs about 26 minutes and this runs every 15, so it will be locked out twice
+# most nights. Exit 0 so cron does not mail about normal operation -- the
+# watermark is untouched, so the next run covers this window too.
+if ! acquire_harvest_lock 0; then
+    echo "Skipping this incremental; the watermark is unchanged."
+    exit 0
+fi
+
 WATERMARK="$(cat "${LASTMOD_FILE}")"
 if [ -z "${WATERMARK}" ]; then
     echo "Error: ${LASTMOD_FILE} is empty."

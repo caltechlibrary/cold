@@ -1,5 +1,6 @@
 /**
- * rdm_review_queue.ts provides the browser side JavaScript for interacting with the rdm_review_queue.ds via dataset collection JSON API.
+ * rdm_review_queue.ts provides the browser side JavaScript for interacting with the rdm_requests.ds via dataset collection JSON API.
+ * The feature keeps the review-queue name; only the collection was renamed (DR-0013).
  *
  * The module provides a Web Component that encapsulates both the query form and the results. The SQL queries are provided in the YAML
  * configuration for cold as prepared statements. The component is responsible for selecting the related defined query and sending the
@@ -38,7 +39,7 @@
 import { ClientAPI } from "./client_api.ts";
 
 export class RdmReviewQueueUI {
-  private cName: string = "rdm_review_queue.ds";
+  private cName: string = "rdm_requests.ds";
   private searchElement: HTMLSelectElement;
   private querySelect: HTMLSelectElement;
   private queryInput: HTMLInputElement;
@@ -60,7 +61,7 @@ export class RdmReviewQueueUI {
     },
   ) {
     (options.cName === undefined)
-      ? "rdm_review_queue.ds"
+      ? "rdm_requests.ds"
       : this.cName = options.cName;
     (typeof options.searchElement === "string")
       ? this.searchElement = document.getElementById(
@@ -474,6 +475,25 @@ function extractAndSortMentions(
   return [...new Set(mentions)].sort();
 }
 
+/**
+ * formatTimestamp renders an RDM timestamp for display. The harvest now
+ * supplies full ISO timestamps (2026-09-09T15:24:26.196776) instead of bare
+ * dates, so the queue can be ordered within a day -- but microseconds are
+ * noise in a table, so this trims to the minute. A bare date or an empty
+ * value passes through unchanged, which also makes this idempotent: the
+ * table and the CSV both normalise the same item.
+ */
+function formatTimestamp(ts: string): string {
+  if (!ts) {
+    return "";
+  }
+  const t = ts.indexOf("T");
+  if (t < 0) {
+    return ts;
+  }
+  return `${ts.slice(0, t)} ${ts.slice(t + 1, t + 6)}`;
+}
+
 function normalizeItem(q_name: string, q: string, item: Item) {
   let groups: string = "";
   let journal_title: string = "";
@@ -492,6 +512,7 @@ function normalizeItem(q_name: string, q: string, item: Item) {
     : item.tags = extractAndSortMentions(item.comments_with_mentions).join(
       ", ",
     );
+  item.created = formatTimestamp(item.created);
   switch (q_name) {
     case "by_clpid":
     case "review_queue_by_clpid":
