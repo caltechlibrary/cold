@@ -32,26 +32,26 @@
 import { ClientAPI } from "./client_api.ts";
 
 export class CollaboratorAffiliationsReportUI {
-    private cName: string = "people.ds";
-    private reportElement!: HTMLElement;
-    private clpidElement: HTMLInputElement;
-    private baseUrl: URL;
-    private basePath: string = "";
-    private buttonSubmit!: HTMLInputElement;
-    private buttonClear!: HTMLInputElement;
-    private resultSection!: HTMLElement;
-    private clientAPI!: ClientAPI;
+  private cName: string = "people.ds";
+  private reportElement!: HTMLElement;
+  private clpidElement: HTMLInputElement;
+  private baseUrl: URL;
+  private basePath: string = "";
+  private buttonSubmit!: HTMLInputElement;
+  private buttonClear!: HTMLInputElement;
+  private resultSection!: HTMLElement;
+  private clientAPI!: ClientAPI;
 
-    constructor(
-        options: {
-            reportElement: HTMLElement | string;
-            baseUrl: string;
-            clientAPI: ClientAPI;
-            cName?: string;
-        },
-    ) {
-        // Build the search form and results box
-        const formHTML: string = `<form method="get">
+  constructor(
+    options: {
+      reportElement: HTMLElement | string;
+      baseUrl: string;
+      clientAPI: ClientAPI;
+      cName?: string;
+    },
+  ) {
+    // Build the search form and results box
+    const formHTML: string = `<form method="get">
         <label for="clpid">clpid</label>
         <input
             name="clpid"
@@ -73,154 +73,152 @@ export class CollaboratorAffiliationsReportUI {
     </p>
 `;
 
-        this.cName = (options.cName === undefined)
-            ? "people.ds"
-            : options.cName;
-        this.reportElement = typeof options.reportElement === "string"
-            ? document.getElementById(options.reportElement)!
-            : options.reportElement;
-        this.baseUrl = new URL(options.baseUrl);
-        this.basePath = this.baseUrl.pathname;
-        this.clientAPI = options.clientAPI;
+    this.cName = (options.cName === undefined) ? "people.ds" : options.cName;
+    this.reportElement = typeof options.reportElement === "string"
+      ? document.getElementById(options.reportElement)!
+      : options.reportElement;
+    this.baseUrl = new URL(options.baseUrl);
+    this.basePath = this.baseUrl.pathname;
+    this.clientAPI = options.clientAPI;
 
-        // set update form elements
-        this.reportElement.innerHTML = formHTML;
-        this.clpidElement = this.reportElement.querySelector("#clpid")!;
-        this.buttonSubmit = this.reportElement.querySelector(
-            "input[type=submit]",
-        )!;
-        this.buttonClear = this.reportElement.querySelector(
-            "input[type=reset]",
-        )!;
-        this.resultSection = this.reportElement.querySelector("section")!;
+    // set update form elements
+    this.reportElement.innerHTML = formHTML;
+    this.clpidElement = this.reportElement.querySelector("#clpid")!;
+    this.buttonSubmit = this.reportElement.querySelector(
+      "input[type=submit]",
+    )!;
+    this.buttonClear = this.reportElement.querySelector(
+      "input[type=reset]",
+    )!;
+    this.resultSection = this.reportElement.querySelector("section")!;
 
-        // Map in query parameters from the URL.
-        const u = new URL(window.location.href);
-        const params = u.searchParams!;
-        let clpid = params.get("clpid") || "";
-        clpid = clpid.trim();
-        this.populateAutocomplete();
-        if (clpid !== "") {
-            this.clpidElement.value = clpid;
-            this.setupReport(clpid);
-        }
-        // Attach event listener for form submission
-        this.reportElement.querySelector("form")!.addEventListener(
-            "submit",
-            (e) => {
-                e.preventDefault();
-                const clpid = this.clpidElement.value.trim();
-                // Update the URL
-                this.updateURL(clpid);
-                // Now setup the query
-                this.setupReport(clpid);
-            },
-        );
+    // Map in query parameters from the URL.
+    const u = new URL(window.location.href);
+    const params = u.searchParams!;
+    let clpid = params.get("clpid") || "";
+    clpid = clpid.trim();
+    this.populateAutocomplete();
+    if (clpid !== "") {
+      this.clpidElement.value = clpid;
+      this.setupReport(clpid);
+    }
+    // Attach event listener for form submission
+    this.reportElement.querySelector("form")!.addEventListener(
+      "submit",
+      (e) => {
+        e.preventDefault();
+        const clpid = this.clpidElement.value.trim();
+        // Update the URL
+        this.updateURL(clpid);
+        // Now setup the query
+        this.setupReport(clpid);
+      },
+    );
 
-        // Attach event listener for reset button
-        this.buttonClear.addEventListener("click", () => {
-            this.resultSection.innerText = `Enter clpid and press ⚙️`;
-        });
+    // Attach event listener for reset button
+    this.buttonClear.addEventListener("click", () => {
+      this.resultSection.innerText = `Enter clpid and press ⚙️`;
+    });
+  }
+
+  private async populateAutocomplete() {
+    const peopleList = await this.clientAPI.getList(
+      "people.ds",
+      "get_all_clpid",
+    );
+    const dataListElement: HTMLDataListElement = document.getElementById(
+      "clpid-list",
+    );
+    if (dataListElement !== undefined && dataListElement != null) {
+      for (let clpid of peopleList) {
+        let optElem = document.createElement("option");
+        optElem.value = clpid;
+        dataListElement.appendChild(optElem);
+      }
+    }
+  }
+
+  private updateURL(clpid: string) {
+    const newUrl = new URL(window.location.href);
+    newUrl.search = new URLSearchParams({ clpid: clpid }).toString();
+    // Update the URL in the address bar
+    window.history.pushState({}, "", newUrl);
+  }
+
+  private async isValidClpid(clpid: string): Promise<boolean> {
+    let result: { [key: string]: any }[] = await this.clientAPI.getList(
+      "people.ds",
+      "validate_clpid",
+      new URLSearchParams({ "clpid": clpid }),
+    );
+    if (
+      (result === undefined) || (result.length !== 1) ||
+      (result[0].clpid !== clpid)
+    ) {
+      return false;
+    }
+    return true;
+  }
+
+  private async postReportRequest(
+    report_name: string,
+    clpid: string,
+    emails?: string,
+  ): Promise<Response> {
+    const postUrl = "../reports";
+    const formData = new URLSearchParams();
+    formData.append("report_name", report_name);
+    formData.append("clpid", clpid);
+    formData.append("emails", emails);
+    const defaultHeaders = {
+      "Content-Type": "application/x-www-form-urlencoded",
+    };
+    const response = await fetch(postUrl, {
+      method: "POST",
+      headers: defaultHeaders,
+      body: formData.toString(),
+    });
+
+    if (!response.ok) {
+      console.log(`HTTP error! status: ${response.status} ${postUrl}`);
     }
 
-    private async populateAutocomplete() {
-        const peopleList = await this.clientAPI.getList(
-            "people.ds",
-            "get_all_clpid",
-        );
-        const dataListElement: HTMLDataListElement = document.getElementById(
-            "clpid-list",
-        );
-        if (dataListElement !== undefined && dataListElement != null) {
-            for (let clpid of peopleList) {
-                let optElem = document.createElement("option");
-                optElem.value = clpid;
-                dataListElement.appendChild(optElem);
-            }
-        }
+    return response;
+  }
+
+  private async setupReport(clpid: string): Promise<void> {
+    if (clpid === "") {
+      this.resultSection.innerText = `Enter clpid and press ⚙️`;
+      return;
     }
-
-    private updateURL(clpid: string) {
-        const newUrl = new URL(window.location.href);
-        newUrl.search = new URLSearchParams({ clpid: clpid }).toString();
-        // Update the URL in the address bar
-        window.history.pushState({}, "", newUrl);
+    // Make sure clpid is known, then send a post to the middleware.
+    if (!await this.isValidClpid(clpid)) {
+      this.resultSection.innerText =
+        `Invalid clpid '${clpid}', enter clpid and press ⚙️`;
+      return;
     }
-
-    private async isValidClpid(clpid: string): Promise<boolean> {
-        let result: { [key: string]: any }[] = await this.clientAPI.getList(
-            "people.ds",
-            "validate_clpid",
-            new URLSearchParams({ "clpid": clpid }),
-        );
-        if (
-            (result === undefined) || (result.length !== 1) ||
-            (result[0].clpid !== clpid)
-        ) {
-            return false;
-        }
-        return true;
+    // Submit the request to the reports queue for processing.
+    let resp = await this.postReportRequest(
+      "run_collaborator_affiliations_report",
+      clpid,
+      "",
+    );
+    if (resp.ok) {
+      const link = document.createElement("a");
+      link.href = "./reports";
+      link.title = "return to reports page for pickup";
+      link.textContent = "queued";
+      this.resultSection.replaceChildren(
+        document.createTextNode(
+          `The collaborator affiliations report for "${clpid}" is `,
+        ),
+        link,
+      );
+    } else {
+      this.resultSection.innerText =
+        `There was a problem submitting the collaborator affiliations report for "${clpid}", ${
+          JSON.stringify(resp)
+        }`;
     }
-
-    private async postReportRequest(
-        report_name: string,
-        clpid: string,
-        emails?: string,
-    ): Promise<Response> {
-        const postUrl = "../reports";
-        const formData = new URLSearchParams();
-        formData.append("report_name", report_name);
-        formData.append("clpid", clpid);
-        formData.append("emails", emails);
-        const defaultHeaders = {
-            "Content-Type": "application/x-www-form-urlencoded",
-        };
-        const response = await fetch(postUrl, {
-            method: "POST",
-            headers: defaultHeaders,
-            body: formData.toString(),
-        });
-
-        if (!response.ok) {
-            console.log(`HTTP error! status: ${response.status} ${postUrl}`);
-        }
-
-        return response;
-    }
-
-    private async setupReport(clpid: string): Promise<void> {
-        if (clpid === "") {
-            this.resultSection.innerText = `Enter clpid and press ⚙️`;
-            return;
-        }
-        // Make sure clpid is known, then send a post to the middleware.
-        if (!await this.isValidClpid(clpid)) {
-            this.resultSection.innerText =
-                `Invalid clpid '${clpid}', enter clpid and press ⚙️`;
-            return;
-        }
-        // Submit the request to the reports queue for processing.
-        let resp = await this.postReportRequest(
-            "run_collaborator_affiliations_report",
-            clpid,
-            "",
-        );
-        if (resp.ok) {
-            const link = document.createElement("a");
-            link.href = "./reports";
-            link.title = "return to reports page for pickup";
-            link.textContent = "queued";
-            this.resultSection.replaceChildren(
-                document.createTextNode(
-                    `The collaborator affiliations report for "${clpid}" is `,
-                ),
-                link,
-            );
-        } else {
-            this.resultSection.innerText =
-                `There was a problem submitting the collaborator affiliations report for "${clpid}", ${
-                    JSON.stringify(resp)
-                }`;
-        }
-    }
+  }
 }

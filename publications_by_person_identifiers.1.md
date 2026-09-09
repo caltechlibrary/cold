@@ -1,4 +1,8 @@
-%publications_by_person_identifiers(1) user manual | 0.0.51 1e024ce
+<<<<<<< Updated upstream
+%publications_by_person_identifiers(1) user manual | 0.0.51 8d8f61d
+=======
+%publications_by_person_identifiers(1) user manual | 0.0.50 590705e
+>>>>>>> Stashed changes
 % R. S.Doiel
 % 2026-08-24
 

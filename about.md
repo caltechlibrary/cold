@@ -33,7 +33,7 @@ maintainer:
 
 repository_code: https://github.com/caltechlibrary/cold
 version: 0.0.51
-license_url: https://software.library.caltech.edu/cold/LICENSE
+license_url: https://caltechlibrary.github.io/cold/LICENSE
 operating_system:
   - Linux
 
@@ -96,7 +96,7 @@ TypeScript+Deno is used to implement the web UI and report system.
 The JSON API is provided by Dataset&#x27;s datasetd.
 Access control is provided by the front end web server integrated with Shibboleth.
 
-- [License](https://software.library.caltech.edu/cold/LICENSE)
+- [License](https://caltechlibrary.github.io/cold/LICENSE)
 - [Code Repository](https://github.com/caltechlibrary/cold)
   - [Issue Tracker](https://github.com/caltechlibrary/cold/issues)
 

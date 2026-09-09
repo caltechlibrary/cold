@@ -43,52 +43,52 @@ const STYLES = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 
 /** escapeXml escapes the characters XML requires for text content and attribute values. */
 function escapeXml(value: string): string {
-    return value
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&apos;");
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
 }
 
 /** columnLetter converts a zero-based column index to a spreadsheet column letter (0 -> A, 25 -> Z, 26 -> AA, ...). */
 export function columnLetter(index: number): string {
-    let n = index + 1;
-    let letters = "";
-    while (n > 0) {
-        const rem = (n - 1) % 26;
-        letters = String.fromCharCode(65 + rem) + letters;
-        n = Math.floor((n - 1) / 26);
-    }
-    return letters;
+  let n = index + 1;
+  let letters = "";
+  while (n > 0) {
+    const rem = (n - 1) % 26;
+    letters = String.fromCharCode(65 + rem) + letters;
+    n = Math.floor((n - 1) / 26);
+  }
+  return letters;
 }
 
 function workbookXml(sheetName: string): string {
-    // Excel sheet names are limited to 31 characters.
-    const safeName = sheetName.slice(0, 31);
-    return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+  // Excel sheet names are limited to 31 characters.
+  const safeName = sheetName.slice(0, 31);
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
 <sheets><sheet name="${escapeXml(safeName)}" sheetId="1" r:id="rId1"/></sheets>
 </workbook>`;
 }
 
 function worksheetXml(rows: string[][], columnWidth: number): string {
-    const colCount = rows.reduce((max, row) => Math.max(max, row.length), 0);
-    const cols = colCount > 0
-        ? `<cols><col min="1" max="${colCount}" width="${columnWidth}" customWidth="1"/></cols>`
-        : "";
-    const sheetRows = rows.map((row, rowIndex) => {
-        const r = rowIndex + 1;
-        const style = rowIndex === 0 ? ` s="1"` : "";
-        const cells = row.map((value, colIndex) => {
-            const cellRef = `${columnLetter(colIndex)}${r}`;
-            return `<c r="${cellRef}" t="inlineStr"${style}><is><t xml:space="preserve">${
-                escapeXml(value)
-            }</t></is></c>`;
-        }).join("");
-        return `<row r="${r}">${cells}</row>`;
+  const colCount = rows.reduce((max, row) => Math.max(max, row.length), 0);
+  const cols = colCount > 0
+    ? `<cols><col min="1" max="${colCount}" width="${columnWidth}" customWidth="1"/></cols>`
+    : "";
+  const sheetRows = rows.map((row, rowIndex) => {
+    const r = rowIndex + 1;
+    const style = rowIndex === 0 ? ` s="1"` : "";
+    const cells = row.map((value, colIndex) => {
+      const cellRef = `${columnLetter(colIndex)}${r}`;
+      return `<c r="${cellRef}" t="inlineStr"${style}><is><t xml:space="preserve">${
+        escapeXml(value)
+      }</t></is></c>`;
     }).join("");
-    return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+    return `<row r="${r}">${cells}</row>`;
+  }).join("");
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
 ${cols}
 <sheetData>${sheetRows}</sheetData>
@@ -100,28 +100,28 @@ ${cols}
  * string cells. The first row is treated as a header and rendered bold.
  */
 export async function writeXlsx(
-    rows: string[][],
-    options: { sheetName?: string; columnWidth?: number } = {},
+  rows: string[][],
+  options: { sheetName?: string; columnWidth?: number } = {},
 ): Promise<Uint8Array> {
-    const sheetName = options.sheetName ?? "Sheet1";
-    const columnWidth = options.columnWidth ?? 20;
+  const sheetName = options.sheetName ?? "Sheet1";
+  const columnWidth = options.columnWidth ?? 20;
 
-    const zipWriter = new ZipWriter(new BlobWriter("application/zip"));
-    await zipWriter.add("[Content_Types].xml", new TextReader(CONTENT_TYPES));
-    await zipWriter.add("_rels/.rels", new TextReader(ROOT_RELS));
-    await zipWriter.add(
-        "xl/workbook.xml",
-        new TextReader(workbookXml(sheetName)),
-    );
-    await zipWriter.add(
-        "xl/_rels/workbook.xml.rels",
-        new TextReader(WORKBOOK_RELS),
-    );
-    await zipWriter.add("xl/styles.xml", new TextReader(STYLES));
-    await zipWriter.add(
-        "xl/worksheets/sheet1.xml",
-        new TextReader(worksheetXml(rows, columnWidth)),
-    );
-    const blob = await zipWriter.close();
-    return new Uint8Array(await blob.arrayBuffer());
+  const zipWriter = new ZipWriter(new BlobWriter("application/zip"));
+  await zipWriter.add("[Content_Types].xml", new TextReader(CONTENT_TYPES));
+  await zipWriter.add("_rels/.rels", new TextReader(ROOT_RELS));
+  await zipWriter.add(
+    "xl/workbook.xml",
+    new TextReader(workbookXml(sheetName)),
+  );
+  await zipWriter.add(
+    "xl/_rels/workbook.xml.rels",
+    new TextReader(WORKBOOK_RELS),
+  );
+  await zipWriter.add("xl/styles.xml", new TextReader(STYLES));
+  await zipWriter.add(
+    "xl/worksheets/sheet1.xml",
+    new TextReader(worksheetXml(rows, columnWidth)),
+  );
+  const blob = await zipWriter.close();
+  return new Uint8Array(await blob.arrayBuffer());
 }

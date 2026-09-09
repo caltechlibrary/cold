@@ -34,7 +34,7 @@ irm https://software.library.caltech.edu/cold/installer.ps1 | iex
 
 ### If your are running macOS or Windows
 
-You may get security warnings if you are using macOS or Windows. See the notes for the specific operating system you’re using to fix issues.
+You may get security warnings if you are using macOS or Windows. See the notes for the specific operating system you're using to fix issues.
 
 - [INSTALL_NOTES_macOS.md](INSTALL_NOTES_macOS.md)
 - [INSTALL_NOTES_Windows.md](INSTALL_NOTES_Windows.md)
@@ -44,10 +44,10 @@ Installing from source
 
 ### Required software
 
-- Deno >= 2.8.2
-- Dataset >= 2.5.1
-- CMTools >= 0.0.45b
-- yq (mikefarah/yq) >= 4.44
+- Deno &gt;&#x3D; 2.8.2
+- Dataset &gt;&#x3D; 2.5.1
+- CMTools &gt;&#x3D; 0.0.45b
+- yq (mikefarah/yq) &gt;&#x3D; 4.44
 
 ### Steps
 

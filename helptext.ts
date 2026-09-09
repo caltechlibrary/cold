@@ -1,18 +1,18 @@
 export function fmtHelp(
-    txt: string,
-    appName: string,
-    version: string,
-    releaseDate: string,
-    releaseHash: string,
+  txt: string,
+  appName: string,
+  version: string,
+  releaseDate: string,
+  releaseHash: string,
 ): string {
-    return txt.replaceAll("{app_name}", appName)
-        .replaceAll("{version}", version)
-        .replaceAll("{release_date}", releaseDate)
-        .replaceAll("{release_hash}", releaseHash);
+  return txt.replaceAll("{app_name}", appName)
+    .replaceAll("{version}", version)
+    .replaceAll("{release_date}", releaseDate)
+    .replaceAll("{release_hash}", releaseHash);
 }
 
 export const coldHelpText =
-    `%{app_name}(1) user manual | {version} {release_hash}
+  `%{app_name}(1) user manual | {version} {release_hash}
 % R. S.Doiel
 % {release_date}
 
@@ -72,7 +72,7 @@ collections.
 `;
 
 export const coldReportsHelpText =
-    `%{app_name}(1) user manual | {version} {release_hash}
+  `%{app_name}(1) user manual | {version} {release_hash}
 % R. S.Doiel
 % {release_date}
 
@@ -137,7 +137,7 @@ run with the default configuration file, "{app_name}.yaml" in the same working d
 `;
 
 export const directorySyncHelpText =
-    `%{app_name}(1) user manual | {version}  {release_hash}
+  `%{app_name}(1) user manual | {version}  {release_hash}
 % R. S.Doiel
 % {release_date}
 
@@ -192,7 +192,7 @@ directory
 `;
 
 export const journalVocabularyHelpText =
-    `%{app_name}(1) user manual | {version}  {release_hash}
+  `%{app_name}(1) user manual | {version}  {release_hash}
 % R. S.Doiel
 % {release_date}
 
@@ -237,7 +237,7 @@ will do the rest.
 `;
 
 export const thesisOptionVocabularyHelpText =
-    `%{app_name}(1) user manual | {version}  {release_hash}
+  `%{app_name}(1) user manual | {version}  {release_hash}
 % R. S.Doiel
 % {release_date}
 
@@ -282,7 +282,7 @@ will do the rest.
 `;
 
 export const groupVocabularyHelpText =
-    `%{app_name}(1) user manual | {version}  {release_hash}
+  `%{app_name}(1) user manual | {version}  {release_hash}
 % R. S.Doiel
 % {release_date}
 
@@ -326,7 +326,7 @@ will do the rest.
 `;
 
 export const peopleVocabularyHelpText =
-    `%{app_name}(1) user manual | {version}  {release_hash}
+  `%{app_name}(1) user manual | {version}  {release_hash}
 % R. S.Doiel
 % {release_date}
 
@@ -370,7 +370,7 @@ will do the rest.
 `;
 
 export const divisionPeopleHelpText =
-    `%{app_name}(1) user manual | {version} {release_hash}
+  `%{app_name}(1) user manual | {version} {release_hash}
 % R. S.Doiel
 % {release_date}
 
@@ -430,7 +430,7 @@ called "division_people_2025-03-03.csv".
 `;
 
 export const rorImportHelpText =
-    `%{app_name}(1) user manual | {version} {release_hash}
+  `%{app_name}(1) user manual | {version} {release_hash}
 % R. S.Doiel
 % {release_date}
 
@@ -480,7 +480,7 @@ The import process takes a while. Be patient.
 `;
 
 export const coldApiTestHelpText =
-    `%{app_name}(1) user manual | {version} {release_hash}
+  `%{app_name}(1) user manual | {version} {release_hash}
 % R. S.Doiel
 % {release_date}
 
@@ -538,7 +538,7 @@ Even though we are search for one value the parameters are each provided.
 `;
 
 export const generateCollaboratorReportHelpText =
-    `%{app_name}(1) user manual | {version} {release_hash}
+  `%{app_name}(1) user manual | {version} {release_hash}
 % R. S.Doiel
 % {release_date}
 
@@ -591,7 +591,7 @@ generate_collaborator_rpt Newman-D-K --record_ids --format=xlsx >Diane_Newman_Co
 `;
 
 export const generateCollaboratorAffiliationsReportHelpText =
-    `%{app_name}(1) user manual | {version} {release_hash}
+  `%{app_name}(1) user manual | {version} {release_hash}
 % R. S.Doiel
 % {release_date}
 
@@ -663,7 +663,7 @@ Include CaltechAUTHORS record IDs for cross-referencing:
 `;
 
 export const publicationsByPersonIdentifiersHelpText =
-    `%{app_name}(1) user manual | {version} {release_hash}
+  `%{app_name}(1) user manual | {version} {release_hash}
 % R. S.Doiel
 % {release_date}
 
@@ -757,7 +757,7 @@ Retrieve publications with unknown CLPID:
 `;
 
 export const generateCountryCollaborationRptHelpText =
-    `%{app_name}(1) user manual | {version} {release_hash}
+  `%{app_name}(1) user manual | {version} {release_hash}
 % R. S. Doiel
 % {release_date}
 
