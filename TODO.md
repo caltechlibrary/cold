@@ -11,18 +11,39 @@ for the reports; do not start the reports first.
 ### 1. RDM harvest redesign (issue #109) — DR-0013, accepted
 
 Design brief: `agents/projects/cold/design/rdm_requests_harvest.md` (in the DLD
-workspace). Decision: DR-0013. **No implementation plan yet — write that first.**
+workspace). Decisions: DR-0013 and DR-0014 (nine plan-shaping answers,
+2026-09-09), both accepted, plus **DR-0015 (proposed)** — Phase 0 verification
+found the harvest is pinned to the version each record was submitted as, 34% of
+which are superseded, so it now follows the parent's newest present version.
+Plan:
+`agents/projects/cold/plans/rdm_requests_harvest_plan.md`, nine phases, each a
+stopping point. Phase 0 is done; its counts are the expected values every later
+phase is checked against, and Phase 2's done-when now includes confirming
+DR-0015 changed the ~28,225 `creators` and ~4,474 `custom_fields` rows it
+predicted.
 
 The problem in one line: a librarian works on a record, comes back to it later
 in COLD, and it looks like nothing has changed.
 
-- [ ] Write the implementation plan into `agents/projects/cold/plans/`
+- [x] Write the implementation plan into `agents/projects/cold/plans/` --
+      `rdm_requests_harvest_plan.md`, 2026-09-09
+- [x] Phase 0: production verification COMPLETE 2026-09-09 (run from
+      apps.library.caltech.edu; the Mac Mini is outside the RDM ELB's
+      `caltech-ssh` source restriction). `deletion_status` is `'P'` present /
+      `'D'` deleted, expected full harvest is 111,231 rows, and the unindexed
+      scan is 17 ms so no RDM index is needed. KB observations 289-293
+- [ ] Accept or amend DR-0015, then start Phase 1. **Phase 2 is blocked on that
+      record** — it changes the records-side join and what `rdmid` means
 - [ ] `dataset init rdm_requests.ds` — the rename needs no migration, the full
       harvest reproduces everything from RDM
-- [ ] `remote_harvest_rdm_full.bash` — wipe + repopulate, all states of interest
-- [ ] `remote_harvest_rdm_incremental.bash` — three passes, each its own JSON-L:
+- [x] `remote_harvest_rdm_requests_full.bash` + shared `rdm_requests_harvest_sql.bash`
+      — written 2026-09-09, shellcheck clean, semantics verified offline against
+      synthetic fixtures in a throwaway Postgres cluster (21 assertions). Not yet
+      run against production. Named per DR-0016
+- [ ] `remote_harvest_rdm_requests_incremental.bash` — three passes, each its own JSON-L:
       all currently-submitted (~917 rows, unconditional); everything changed
-      since `rdm_lastmod.txt`; prune cancelled/declined/tombstoned
+      since `rdm_requests_lastmod.txt`; prune cancelled/declined/tombstoned. Passes 2
+      and 3 select by parent, not by row (DR-0015)
 - [ ] Retire `remote_harvest_rdm_review_submissions.bash` and
       `remote_harvest_rdm_review_queue.bash` (replaced, not amended)
 - [ ] `cold_api.yaml` — dataset name plus **twelve** `FROM rdm_review_queue`

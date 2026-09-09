@@ -45,5 +45,7 @@ CLAUDE.html
 caltechthesis_full.sql
 caltechthesis_incremental.sql
 caltechthesis_lastmod.txt
+rdm_requests_*.sql
+rdm_requests_lastmod.txt
 prompts/*
 man
