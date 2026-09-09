@@ -2,27 +2,40 @@
 
 # rdm_requests_harvest_sql.bash
 #
-# The shared SQL body for the RDM requests harvest. This file is *sourced* by
-# remote_harvest_rdm_requests_full.bash and
-# remote_harvest_rdm_requests_incremental.bash so that
-# one definition of the selection and one definition of the field list serve
-# both. See DR-0014 decision 8 for why this diverges from the CaltechTHESIS
-# harvest pair, which duplicates its query body between the full and
-# incremental scripts.
+# The shared SQL body and load discipline for the RDM requests harvest. This
+# file is *sourced* by remote_harvest_rdm_requests_full.bash and
+# remote_harvest_rdm_requests_incremental.bash so that one definition of the
+# selection, one definition of the field list, and one definition of "did the
+# load actually complete" serve both. See DR-0014 decision 8 for why this
+# diverges from the CaltechTHESIS harvest pair, which duplicates its query body
+# between the full and incremental scripts. (The name says sql; it also carries
+# the load helper, which belongs with the query it loads.)
 #
-# Two functions are exported:
+# Exported:
+#
+#   emit_request_scope_predicate
+#     Which requests are ours: community-submission to the CaltechAUTHORS
+#     community. Shared so the prune pass cannot drift from the harvest.
 #
 #   emit_filtered_requests_cte
-#     The selection: community-submission requests to the CaltechAUTHORS
-#     community, excluding 'created', 'cancelled' and 'declined'
-#     (DR-0014 decision 1). Emitted as a bare CTE body so the prune pass can
-#     reuse the same predicate.
+#     The selection: the scope above, excluding 'created', 'cancelled' and
+#     'declined' (DR-0014 decision 1).
 #
 #   emit_harvest_sql RDM_URL [EXTRA_PREDICATE]
 #     The whole harvest query. EXTRA_PREDICATE is appended to the final WHERE
 #     clause and must start with AND. The full harvest passes none; the
 #     incremental's pass 1 passes the submitted filter and pass 2 the
 #     watermark comparison.
+#
+#   emit_prune_keys_sql WATERMARK
+#     Bare record ids to delete: requests that have left the states of
+#     interest, and records whose parent has lost its last present version.
+#
+#   load_jsonl_verified C_NAME C_TABLE JSONL_FILE
+#     Load with an 8 MB buffer and refuse to call it a success unless the rows
+#     touched equal the distinct keys in the file (DR-0017). Sets LOAD_MARK,
+#     LOAD_EXPECTED and LOAD_TOUCHED for the caller; the full harvest sweeps on
+#     LOAD_MARK.
 #
 # The records-side metadata is reached through the record's *parent*, not
 # through the version the request names -- see DR-0015. A community-submission
@@ -40,9 +53,30 @@
 
 RDM_COMMUNITY_ID="${RDM_COMMUNITY_ID:-aedd135f-227e-4fdf-9476-5b3fd011bac6}"
 
+# How far back of the saved watermark each incremental pass reaches, so a row
+# committed while the previous harvest was running is not missed (DR-0014
+# decision 5). The arithmetic is done by Postgres rather than by date(1),
+# which keeps this portable between the Linux host that runs cron and a
+# developer's macOS.
+RDM_WATERMARK_OVERLAP="${RDM_WATERMARK_OVERLAP:-5 minutes}"
+
+emit_request_scope_predicate() {
+    cat <<SQL
+json->'receiver'->>'community' = '${RDM_COMMUNITY_ID}'
+    AND json->>'type' = 'community-submission'
+SQL
+}
+
 emit_filtered_requests_cte() {
     cat <<SQL
-filtered_requests AS (
+filtered_requests AS ($(emit_filtered_requests_cte_body))
+SQL
+}
+
+# The same selection as a bare SELECT, for use as a subquery where a CTE name
+# would be in the way.
+emit_filtered_requests_cte_body() {
+    cat <<SQL
   SELECT
     id,
     json->'topic'->>'record'    AS record_id,
@@ -52,10 +86,8 @@ filtered_requests AS (
     created,
     updated
   FROM request_metadata
-  WHERE json->'receiver'->>'community' = '${RDM_COMMUNITY_ID}'
-    AND json->>'type' = 'community-submission'
+  WHERE $(emit_request_scope_predicate)
     AND json->>'status' NOT IN ('created','cancelled','declined')
-)
 SQL
 }
 
@@ -169,6 +201,112 @@ WHERE NOT (sv.parent_id IS NOT NULL AND rec.id IS NULL)
 ${extra_predicate}
 ORDER BY GREATEST(fr.updated, COALESCE(rec.updated, dft.updated)) DESC;
 SQL
+}
+
+emit_prune_keys_sql() {
+    local watermark="$1"
+
+    if [ -z "${watermark}" ]; then
+        echo "emit_prune_keys_sql: WATERMARK is required" >&2
+        return 2
+    fi
+
+    cat <<SQL
+-- Bare record ids to remove from the collection. Two reasons a row goes:
+--
+--   a) the request has left the states librarians care about, and
+--   b) the record's parent has lost its last present version.
+--
+-- (b) is deliberately parent-level. Deleting on "this record's deletion_status
+-- became 'D'" would remove a live record whose FIRST version was tombstoned
+-- while a later version is still present -- production has nine parents in the
+-- mirror configuration, so the case is real.
+
+SELECT json->'topic'->>'record' AS record_id
+FROM request_metadata
+WHERE $(emit_request_scope_predicate)
+  AND updated > ('${watermark}'::timestamp - interval '${RDM_WATERMARK_OVERLAP}')
+  AND json->>'status' IN ('created','cancelled','declined')
+
+UNION
+
+SELECT DISTINCT fr.record_id
+FROM ($(emit_filtered_requests_cte_body)) fr
+JOIN rdm_records_metadata m ON (fr.record_id = m.json->>'id')
+WHERE m.parent_id IN (
+        SELECT parent_id FROM rdm_records_metadata
+        WHERE updated > ('${watermark}'::timestamp - interval '${RDM_WATERMARK_OVERLAP}'))
+  AND NOT EXISTS (
+        SELECT 1 FROM rdm_records_metadata p
+        WHERE p.parent_id = m.parent_id AND p.deletion_status = 'P');
+SQL
+}
+
+# The watermark predicate for the incremental's pass 2. Parent-level on the
+# records side: when a version is DELETED the target falls back to an older row
+# whose updated is old, so asking "did the joined target move" would miss it.
+# Asking "did any version of this parent move" does not (DR-0015).
+emit_changed_since_predicate() {
+    local watermark="$1"
+
+    if [ -z "${watermark}" ]; then
+        echo "emit_changed_since_predicate: WATERMARK is required" >&2
+        return 2
+    fi
+
+    cat <<SQL
+AND ( fr.updated  > ('${watermark}'::timestamp - interval '${RDM_WATERMARK_OVERLAP}')
+   OR dft.updated > ('${watermark}'::timestamp - interval '${RDM_WATERMARK_OVERLAP}')
+   OR sv.parent_id IN (
+        SELECT parent_id FROM rdm_records_metadata
+        WHERE updated > ('${watermark}'::timestamp - interval '${RDM_WATERMARK_OVERLAP}')) )
+SQL
+}
+
+# Load a JSON-L file and refuse to report success unless every line landed
+# (DR-0017). An empty file is a legitimate no-op for the incremental.
+#
+# Sets LOAD_MARK, LOAD_EXPECTED and LOAD_TOUCHED for the caller.
+load_jsonl_verified() {
+    local c_name="$1" c_table="$2" jsonl="$3"
+
+    LOAD_EXPECTED=$(awk 'match($0, /"key"[^"]*"[^"]*"/) {
+        k = substr($0, RSTART, RLENGTH); sub(/^"key"[^"]*"/, "", k); sub(/"$/, "", k)
+        seen[k] = 1
+    } END { print length(seen) }' "${jsonl}")
+
+    if [ -z "${LOAD_EXPECTED}" ]; then
+        echo "Error: could not read keys from ${jsonl}."
+        return 1
+    fi
+
+    LOAD_MARK="$(date -u +"%Y-%m-%d %H:%M:%S")"
+
+    if [ "${LOAD_EXPECTED}" -eq 0 ]; then
+        if [ -s "${jsonl}" ]; then
+            echo "Error: ${jsonl} has content but no parseable keys."
+            return 1
+        fi
+        LOAD_TOUCHED=0
+        return 0
+    fi
+
+    if ! dataset load -overwrite -m 8 "${c_name}" <"${jsonl}"; then
+        echo "Error: dataset load failed for ${jsonl}."
+        return 1
+    fi
+
+    LOAD_TOUCHED=$(dsquery "${c_name}" \
+        "SELECT count(*) FROM ${c_table} WHERE updated >= '${LOAD_MARK}'" |
+        tr -dc '0-9')
+
+    if [ "${LOAD_TOUCHED}" != "${LOAD_EXPECTED}" ]; then
+        echo "Error: ${jsonl} holds ${LOAD_EXPECTED} keys but the load touched ${LOAD_TOUCHED} rows."
+        echo "The load did not complete."
+        return 1
+    fi
+
+    return 0
 }
 
 # Executed rather than sourced: --dump prints the SQL for review, anything else

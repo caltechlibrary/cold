@@ -232,59 +232,28 @@ fi
 RECORD_COUNT=$(wc -l <"${JSONL_FILE}" | tr -d ' ')
 echo "Harvested ${RECORD_COUNT} records."
 
-# Distinct keys, not lines: two requests could in principle name the same topic
-# record, and the completeness check below must not become wrong if they ever
-# do.
-EXPECTED=$(awk 'match($0, /"key"[^"]*"[^"]*"/) {
-    k = substr($0, RSTART, RLENGTH); sub(/^"key"[^"]*"/, "", k); sub(/"$/, "", k)
-    seen[k] = 1
-} END { print length(seen) }' "${JSONL_FILE}")
-if [ -z "${EXPECTED}" ] || [ "${EXPECTED}" -eq 0 ]; then
-    echo "Error: could not extract keys from ${JSONL_FILE}; refusing to load."
-    exit 1
-fi
-echo "Distinct keys in harvest: ${EXPECTED}"
-
-# DR-0017: upsert then sweep, never wipe. T is captured before the load so that
-# "touched by this run" is exactly "updated >= T". dataset's SQLite store bumps
-# updated on every upsert, even a byte-identical one (sqlstore.go, UPDATE ...
-# SET src = ?, updated = datetime()), and a created row takes the column
-# default. Both are UTC, as is date -u here.
-SWEEP_MARK="$(date -u +"%Y-%m-%d %H:%M:%S")"
-
-# -m sizes bufio.Scanner's buffer in megabytes. The default is 1 MB and one
-# CaltechAUTHORS record exceeds it: v62zd-ahy22 carries 2,379 creators and
-# serialises to 1.10 MB. A too-long line does not skip that record -- Scan()
-# returns false and the load STOPS there, which on 2026-09-09 loaded 31,470 of
-# 111,202 rows and reported it as "1 load errors". 82 rows are already over
-# 512 KB, so the headroom here is deliberate.
+# DR-0017: upsert then sweep, never wipe. load_jsonl_verified (shared with the
+# incremental) captures LOAD_MARK before loading, loads with an 8 MB buffer, and
+# refuses to report success unless the rows touched equal the distinct keys in
+# the file. "Touched by this run" is then exactly "updated >= LOAD_MARK":
+# dataset's SQLite store bumps updated on every upsert, even a byte-identical
+# one, and a created row takes the column default.
 echo "Loading into ${C_NAME} (upsert) ..."
-if ! dataset load -overwrite -m 8 "${C_NAME}" <"${JSONL_FILE}"; then
-    echo "Error: dataset load failed. Collection left as it was; nothing swept."
+if ! load_jsonl_verified "${C_NAME}" "${C_TABLE}" "${JSONL_FILE}"; then
+    echo "Nothing swept; ${C_NAME} keeps its previous contents."
     exit 1
 fi
-
-# Completeness gate. A truncated load is reported by dataset as a small number
-# of errors regardless of how many rows it skipped, so count what was actually
-# touched before deleting anything.
-TOUCHED=$(dsquery "${C_NAME}" \
-    "SELECT count(*) FROM ${C_TABLE} WHERE updated >= '${SWEEP_MARK}'" |
-    tr -dc '0-9')
-if [ "${TOUCHED}" != "${EXPECTED}" ]; then
-    echo "Error: load touched ${TOUCHED} rows but the harvest holds ${EXPECTED} keys."
-    echo "The load did not complete. Nothing swept; ${C_NAME} keeps its previous contents."
-    exit 1
-fi
+echo "Distinct keys in harvest: ${LOAD_EXPECTED}"
 
 SWEPT=$(dsquery "${C_NAME}" \
-    "SELECT count(*) FROM ${C_TABLE} WHERE updated < '${SWEEP_MARK}'" |
+    "SELECT count(*) FROM ${C_TABLE} WHERE updated < '${LOAD_MARK}'" |
     tr -dc '0-9')
 echo "Sweeping ${SWEPT} rows this harvest did not touch ..."
-if ! dsquery "${C_NAME}" "DELETE FROM ${C_TABLE} WHERE updated < '${SWEEP_MARK}'" >/dev/null; then
+if ! dsquery "${C_NAME}" "DELETE FROM ${C_TABLE} WHERE updated < '${LOAD_MARK}'" >/dev/null; then
     echo "Error: sweep failed. ${C_NAME} holds this harvest plus ${SWEPT} stale rows."
     exit 1
 fi
 
-echo "Success! ${TOUCHED} records in ${C_NAME}, ${SWEPT} swept."
+echo "Success! ${LOAD_TOUCHED} records in ${C_NAME}, ${SWEPT} swept."
 date -u +"%Y-%m-%d %H:%M:%S" >"${LASTMOD_FILE}"
 echo "Harvest timestamp saved to ${LASTMOD_FILE}." 
