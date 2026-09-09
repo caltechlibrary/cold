@@ -11,70 +11,70 @@ const ds = new Dataset(apiPort, "thesis_options.ds");
  * ThesisOptionInterface
  */
 export interface ThesisOptionInterface {
-  /* option_id identifier for thesis option */
-  option_id: string;
-  /* Name of thesis option */
-  name: string;
-  /* Division offering the option */
-  division: string;
-  /* Internal Notes */
-  internal_notes: string;
-  /* Date record was updated */
-  updated: string;
+    /* option_id identifier for thesis option */
+    option_id: string;
+    /* Name of thesis option */
+    name: string;
+    /* Division offering the option */
+    division: string;
+    /* Internal Notes */
+    internal_notes: string;
+    /* Date record was updated */
+    updated: string;
 }
 
 /**
  * ThesisOption class defines the data shape of the ThesisOption object managed by cold.
  */
 export class ThesisOption implements ThesisOptionInterface {
-  option_id: string = "";
-  name: string = "";
-  division: string = "";
-  internal_notes: string = "";
-  updated: string = "";
+    option_id: string = "";
+    name: string = "";
+    division: string = "";
+    internal_notes: string = "";
+    updated: string = "";
 
-  migrateCsv(row: any): boolean {
-    if (row.hasOwnProperty("option_id") && row.option_id !== "") {
-      this.option_id = row.option_id;
-    } else {
-      return false;
+    migrateCsv(row: any): boolean {
+        if (row.hasOwnProperty("option_id") && row.option_id !== "") {
+            this.option_id = row.option_id;
+        } else {
+            return false;
+        }
+        if (row.hasOwnProperty("name")) {
+            this.name = row.name;
+        }
+        if (row.hasOwnProperty("division")) {
+            this.name = row.divisison;
+        }
+        if (row.hasOwnProperty("Internal Notes")) {
+            this.internal_notes = row.internal_notes;
+        }
+        if (row.hasOwnProperty("updated")) {
+            this.updated = row.updated;
+        } else {
+            this.updated = new Date().toJSON().substring(0, 10);
+        }
+        return true;
     }
-    if (row.hasOwnProperty("name")) {
-      this.name = row.name;
-    }
-    if (row.hasOwnProperty("division")) {
-      this.name = row.divisison;
-    }
-    if (row.hasOwnProperty("Internal Notes")) {
-      this.internal_notes = row.internal_notes;
-    }
-    if (row.hasOwnProperty("updated")) {
-      this.updated = row.updated;
-    } else {
-      this.updated = new Date().toJSON().substring(0, 10);
-    }
-    return true;
-  }
 
-  /**
-   * asObject() returns a simple object version of a instantiated ThesisOption object.
-   */
-  asObject(): Object {
-    return {
-      option_id: this.option_id,
-      name: this.name,
-      division: this.division,
-      internal_notes: this.internal_notes,
-      updated: this.updated,
-    };
-  }
+    /**
+     * asObject() returns a simple object version of a instantiated ThesisOption object.
+     */
+    asObject(): Object {
+        return {
+            option_id: this.option_id,
+            name: this.name,
+            division: this.division,
+            internal_notes: this.internal_notes,
+            updated: this.updated,
+        };
+    }
 
-  /**
-   * toJSON() returns a clean JSON representation of the ThesisOption object.
-   */
-  toJSON(): string {
-    return JSON.stringify(this.asObject());
-  }
+    /**
+     * toJSON() returns a clean JSON representation of the ThesisOption object.
+     */
+    toJSON(): string {
+        return JSON.stringify(this.asObject());
+    }
 }
 
 /**
@@ -87,23 +87,23 @@ export class ThesisOption implements ThesisOptionInterface {
  * @returns {Object}
  */
 export function formDataToThesisOption(form: FormData): object {
-  const obj: { [k: string]: string | string[] | boolean } = {};
-  for (const v of (form as any).entries()) {
-    const key: string = v[0];
-    if (key !== "submit") {
-      const val: any = v[1];
-      if (val === "true" || val === "on") {
-        obj[key] = true;
-      } else if (val === "false" || val === "off") {
-        obj[key] = false;
-      } else {
-        obj[key] = val;
-      }
+    const obj: { [k: string]: string | string[] | boolean } = {};
+    for (const v of (form as any).entries()) {
+        const key: string = v[0];
+        if (key !== "submit") {
+            const val: any = v[1];
+            if (val === "true" || val === "on") {
+                obj[key] = true;
+            } else if (val === "false" || val === "off") {
+                obj[key] = false;
+            } else {
+                obj[key] = val;
+            }
+        }
     }
-  }
-  /*  NOTE: Make sure we update obj.updated */
-  obj["updated"] = timeStamp(new Date());
-  return obj;
+    /*  NOTE: Make sure we update obj.updated */
+    obj["updated"] = timeStamp(new Date());
+    return obj;
 }
 
 /**
@@ -129,20 +129,20 @@ export function formDataToThesisOption(form: FormData): object {
  * @returns {Response}
  */
 export async function handleThesisOption(
-  req: Request,
-  options: { debug: boolean; htdocs: string; apiUrl: string },
+    req: Request,
+    options: { debug: boolean; htdocs: string; apiUrl: string },
 ): Promise<Response> {
-  if (req.method === "GET") {
-    return await handleGetThesisOption(req, options);
-  }
-  if (req.method === "POST") {
-    return await handlePostThesisOption(req, options);
-  }
-  const body = `<html>${req.method} not supported</html>`;
-  return new Response(body, {
-    status: 405,
-    headers: { "content-type": "text/html" },
-  });
+    if (req.method === "GET") {
+        return await handleGetThesisOption(req, options);
+    }
+    if (req.method === "POST") {
+        return await handlePostThesisOption(req, options);
+    }
+    const body = `<html>${req.method} not supported</html>`;
+    return new Response(body, {
+        status: 405,
+        headers: { "content-type": "text/html" },
+    });
 }
 
 /**
@@ -159,61 +159,61 @@ export async function handleThesisOption(
  * - `/{ThesisOption}` indicates retrieving a single object by the Caltech Library ThesisOption option_id
  */
 async function handleGetThesisOption(
-  req: Request,
-  options: { debug: boolean; htdocs: string; apiUrl: string },
+    req: Request,
+    options: { debug: boolean; htdocs: string; apiUrl: string },
 ): Promise<Response> {
-  /* parse the URL */
-  const url = new URL(req.url);
-  const option_id = pathIdentifier(req.url);
-  const params = url.searchParams;
-  let view = params.get("view");
-  let tmpl = "thesis_option_list";
-  if (option_id !== undefined && option_id !== "") {
-    if (view !== undefined && view === "edit") {
-      tmpl = "thesis_option_edit";
-    } else {
-      tmpl = "thesis_option";
-    }
-  } else {
-    if (view !== "undefined" && view === "create") {
-      tmpl = "thesis_option_edit";
-    }
-  }
-
-  if (tmpl === "thesis_option_list") {
-    /* display a list of ThesisOption */
-    const thesis_option_list = await ds.query(
-      "thesis_option_names",
-      [],
-      {},
-    );
-    if (thesis_option_list !== undefined) {
-      return renderPage(tmpl, {
-        base_path: "",
-        thesis_option_list: thesis_option_list,
-      });
-    } else {
-      return renderPage(tmpl, {
-        base_path: "",
-        thesis_option_list: [],
-      });
-    }
-  } else {
-    /* decide if we are in display view or edit view and pick the right template */
-    /* retrieve a specific record */
+    /* parse the URL */
+    const url = new URL(req.url);
     const option_id = pathIdentifier(req.url);
-    const isCreateObject = option_id === "";
-    const obj = await ds.read(option_id);
-    console.log(
-      `We have a GET for thesis option object ${option_id}, view = ${view}`,
-    );
-    return renderPage(tmpl, {
-      base_path: "",
-      isCreateObject: isCreateObject,
-      thesis_option: obj,
-      debug_src: JSON.stringify(obj, null, 2),
-    });
-  }
+    const params = url.searchParams;
+    let view = params.get("view");
+    let tmpl = "thesis_option_list";
+    if (option_id !== undefined && option_id !== "") {
+        if (view !== undefined && view === "edit") {
+            tmpl = "thesis_option_edit";
+        } else {
+            tmpl = "thesis_option";
+        }
+    } else {
+        if (view !== "undefined" && view === "create") {
+            tmpl = "thesis_option_edit";
+        }
+    }
+
+    if (tmpl === "thesis_option_list") {
+        /* display a list of ThesisOption */
+        const thesis_option_list = await ds.query(
+            "thesis_option_names",
+            [],
+            {},
+        );
+        if (thesis_option_list !== undefined) {
+            return renderPage(tmpl, {
+                base_path: "",
+                thesis_option_list: thesis_option_list,
+            });
+        } else {
+            return renderPage(tmpl, {
+                base_path: "",
+                thesis_option_list: [],
+            });
+        }
+    } else {
+        /* decide if we are in display view or edit view and pick the right template */
+        /* retrieve a specific record */
+        const option_id = pathIdentifier(req.url);
+        const isCreateObject = option_id === "";
+        const obj = await ds.read(option_id);
+        console.log(
+            `We have a GET for thesis option object ${option_id}, view = ${view}`,
+        );
+        return renderPage(tmpl, {
+            base_path: "",
+            isCreateObject: isCreateObject,
+            thesis_option: obj,
+            debug_src: JSON.stringify(obj, null, 2),
+        });
+    }
 }
 
 /**
@@ -225,64 +225,64 @@ async function handleGetThesisOption(
  * @returns {Response}
  */
 async function handlePostThesisOption(
-  req: Request,
-  options: { debug: boolean; htdocs: string; apiUrl: string },
+    req: Request,
+    options: { debug: boolean; htdocs: string; apiUrl: string },
 ): Promise<Response> {
-  let option_id = pathIdentifier(req.url);
-  const isCreateObject = option_id === "";
+    let option_id = pathIdentifier(req.url);
+    const isCreateObject = option_id === "";
 
-  if (req.body !== null) {
-    const form = await req.formData();
-    let obj = formDataToThesisOption(form);
-    if (!("option_id" in obj)) {
-      console.log("option_id missing", obj);
-      return new Response(`missing thesis option identifier`, {
+    if (req.body !== null) {
+        const form = await req.formData();
+        let obj = formDataToThesisOption(form);
+        if (!("option_id" in obj)) {
+            console.log("option_id missing", obj);
+            return new Response(`missing thesis option identifier`, {
+                status: 400,
+                headers: { "content-type": "text/html" },
+            });
+        }
+        if (isCreateObject) {
+            option_id = obj.option_id as unknown as string;
+        }
+        if (obj.option_id !== option_id) {
+            return new Response(
+                `mismatched thesis option identifier ${option_id} != ${obj.option_id}`,
+                {
+                    status: 400,
+                    headers: { "content-type": "text/html" },
+                },
+            );
+        }
+        if (isCreateObject) {
+            console.log(`send to dataset create object ${option_id}`);
+            if (!(await ds.create(option_id, obj))) {
+                return new Response(
+                    `<html>problem creating object ${option_id}, try again later`,
+                    {
+                        status: 500,
+                        headers: { "content-type": "text/html" },
+                    },
+                );
+            }
+        } else {
+            console.log(`send to dataset update object ${option_id}`);
+            if (!(await ds.update(option_id, obj))) {
+                return new Response(
+                    `<html>problem updating object ${option_id}, try again later`,
+                    {
+                        status: 500,
+                        headers: { "content-type": "text/html" },
+                    },
+                );
+            }
+        }
+        return new Response(`<html>Redirect to ${option_id}</html>`, {
+            status: 303,
+            headers: { Location: `${option_id}` },
+        });
+    }
+    return new Response(`<html>problem creating thesis option data</html>`, {
         status: 400,
         headers: { "content-type": "text/html" },
-      });
-    }
-    if (isCreateObject) {
-      option_id = obj.option_id as unknown as string;
-    }
-    if (obj.option_id !== option_id) {
-      return new Response(
-        `mismatched thesis option identifier ${option_id} != ${obj.option_id}`,
-        {
-          status: 400,
-          headers: { "content-type": "text/html" },
-        },
-      );
-    }
-    if (isCreateObject) {
-      console.log(`send to dataset create object ${option_id}`);
-      if (!(await ds.create(option_id, obj))) {
-        return new Response(
-          `<html>problem creating object ${option_id}, try again later`,
-          {
-            status: 500,
-            headers: { "content-type": "text/html" },
-          },
-        );
-      }
-    } else {
-      console.log(`send to dataset update object ${option_id}`);
-      if (!(await ds.update(option_id, obj))) {
-        return new Response(
-          `<html>problem updating object ${option_id}, try again later`,
-          {
-            status: 500,
-            headers: { "content-type": "text/html" },
-          },
-        );
-      }
-    }
-    return new Response(`<html>Redirect to ${option_id}</html>`, {
-      status: 303,
-      headers: { Location: `${option_id}` },
     });
-  }
-  return new Response(`<html>problem creating thesis option data</html>`, {
-    status: 400,
-    headers: { "content-type": "text/html" },
-  });
 }

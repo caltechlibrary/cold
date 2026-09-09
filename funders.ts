@@ -2,11 +2,11 @@
  * funders.ts implements the funder object handler for listing, creating, retrieving, updating and delete funder objects.
  */
 import {
-  apiPort,
-  Dataset,
-  formDataToObject,
-  pathIdentifier,
-  renderPage,
+    apiPort,
+    Dataset,
+    formDataToObject,
+    pathIdentifier,
+    renderPage,
 } from "./deps.ts";
 import * as csv from "@std/csv";
 
@@ -16,102 +16,102 @@ const ds = new Dataset(apiPort, "funders.ds");
  * FunderInterface
  */
 export interface FunderInterface {
-  clfid: string;
-  include_in_feeds: boolean;
-  name: string;
-  acronyms: string[];
-  description: string;
-  type: string;
-  url: string;
-  ror: string;
-  ofr: string;
-  doi: string;
-  grant_numbers: string[];
-  updated: string;
+    clfid: string;
+    include_in_feeds: boolean;
+    name: string;
+    acronyms: string[];
+    description: string;
+    type: string;
+    url: string;
+    ror: string;
+    ofr: string;
+    doi: string;
+    grant_numbers: string[];
+    updated: string;
 }
 
 /**
  * Funder class defines the data shape of the funder object managed by cold.
  */
 export class Funder implements FunderInterface {
-  clfid: string = "";
-  include_in_feeds: boolean = false;
-  name: string = "";
-  acronyms: string[] = [];
-  description: string = "";
-  type: string = "";
-  url: string = "";
-  ror: string = "";
-  ofr: string = "";
-  doi: string = "";
-  grant_numbers: string[] = [];
-  updated: string = "";
+    clfid: string = "";
+    include_in_feeds: boolean = false;
+    name: string = "";
+    acronyms: string[] = [];
+    description: string = "";
+    type: string = "";
+    url: string = "";
+    ror: string = "";
+    ofr: string = "";
+    doi: string = "";
+    grant_numbers: string[] = [];
+    updated: string = "";
 
-  migrateCsv(row: any): boolean {
-    if (row.hasOwnProperty("key")) {
-      this.include_in_feeds = true;
-      this.clfid = row.key;
-    } else {
-      return false;
+    migrateCsv(row: any): boolean {
+        if (row.hasOwnProperty("key")) {
+            this.include_in_feeds = true;
+            this.clfid = row.key;
+        } else {
+            return false;
+        }
+        if (row.hasOwnProperty("name")) {
+            this.name = row.name;
+        }
+        if (row.hasOwnProperty("grant_numbers") && row.grant_numbers !== "") {
+            this.grant_numbers = row.grant_numbers.trim().split(/;/g);
+        }
+        if (row.hasOwnProperty("description")) {
+            this.description = row.description;
+        }
+        if (row.hasOwnProperty("type")) {
+            this.type = row.type;
+        }
+        if (row.hasOwnProperty("url")) {
+            this.url = row.rul;
+        }
+        if (row.hasOwnProperty("ror")) {
+            this.ror = row.ror;
+        }
+        if (row.hasOwnProperty("ofr")) {
+            this.ofr = row.ofr;
+        }
+        if (row.hasOwnProperty("doi")) {
+            this.doi = row.doi;
+        }
+        if (row.hasOwnProperty("updated")) {
+            this.updated = row.updated;
+        } else {
+            this.updated = new Date().toJSON().substring(0, 10);
+        }
+        return true;
     }
-    if (row.hasOwnProperty("name")) {
-      this.name = row.name;
-    }
-    if (row.hasOwnProperty("grant_numbers") && row.grant_numbers !== "") {
-      this.grant_numbers = row.grant_numbers.trim().split(/;/g);
-    }
-    if (row.hasOwnProperty("description")) {
-      this.description = row.description;
-    }
-    if (row.hasOwnProperty("type")) {
-      this.type = row.type;
-    }
-    if (row.hasOwnProperty("url")) {
-      this.url = row.rul;
-    }
-    if (row.hasOwnProperty("ror")) {
-      this.ror = row.ror;
-    }
-    if (row.hasOwnProperty("ofr")) {
-      this.ofr = row.ofr;
-    }
-    if (row.hasOwnProperty("doi")) {
-      this.doi = row.doi;
-    }
-    if (row.hasOwnProperty("updated")) {
-      this.updated = row.updated;
-    } else {
-      this.updated = new Date().toJSON().substring(0, 10);
-    }
-    return true;
-  }
 
-  /**
-   * asObject() returns a simple object version of a instantiated funder object.
-   */
-  asObject(): Object {
-    return {
-      clfid: this.clfid,
-      include_in_feeds: this.include_in_feeds,
-      name: this.name,
-      acronyms: this.acronyms,
-      description: this.description,
-      type: this.type,
-      url: this.url,
-      grant_numbers: this.grant_numbers,
-      ror: this.ror,
-      ofr: this.ofr,
-      doi: this.doi,
-      updated: this.updated,
-    };
-  }
+    /**
+     * asObject() returns a simple object version of a instantiated funder object.
+     */
+    asObject(): Object {
+        return {
+            clfid: this.clfid,
+            include_in_feeds: this.include_in_feeds,
+            name: this.name,
+            acronyms: this.acronyms,
+            description: this.description,
+            type: this.type,
+            url: this.url,
+            grant_numbers: this.grant_numbers,
+            ror: this.ror,
+            ofr: this.ofr,
+            doi: this.doi,
+            updated: this.updated,
+        };
+    }
 
-  /**
-   * toJSON() returns a clean JSON representation of the funder object.
-   */
-  toJSON(): string {
-    return JSON.stringify(this.asObject());
-  }
+    /**
+     * toJSON() returns a clean JSON representation of the funder object.
+     */
+    toJSON(): string {
+        return JSON.stringify(this.asObject());
+    }
 }
 
 /**
@@ -137,20 +137,20 @@ export class Funder implements FunderInterface {
  * @returns {Response}
  */
 export async function handleFunders(
-  req: Request,
-  options: { debug: boolean; htdocs: string; apiUrl: string },
+    req: Request,
+    options: { debug: boolean; htdocs: string; apiUrl: string },
 ): Promise<Response> {
-  if (req.method === "GET") {
-    return await handleGetFunders(req, options);
-  }
-  if (req.method === "POST") {
-    return await handlePostFunders(req, options);
-  }
-  const body = `<html>${req.method} not supported</html>`;
-  return new Response(body, {
-    status: 405,
-    headers: { "content-type": "text/html" },
-  });
+    if (req.method === "GET") {
+        return await handleGetFunders(req, options);
+    }
+    if (req.method === "POST") {
+        return await handlePostFunders(req, options);
+    }
+    const body = `<html>${req.method} not supported</html>`;
+    return new Response(body, {
+        status: 405,
+        headers: { "content-type": "text/html" },
+    });
 }
 
 /**
@@ -167,55 +167,55 @@ export async function handleFunders(
  * - `/{clfid}` indicates retrieving a single object by the Caltech Library funder id
  */
 async function handleGetFunders(
-  req: Request,
-  options: { debug: boolean; htdocs: string; apiUrl: string },
+    req: Request,
+    options: { debug: boolean; htdocs: string; apiUrl: string },
 ): Promise<Response> {
-  /* parse the URL */
-  const url = new URL(req.url);
-  const clfid = pathIdentifier(req.url);
-  const params = url.searchParams;
-  let view = params.get("view");
-  let tmpl = "funder_list";
-  if (clfid !== undefined && clfid !== "") {
-    if (view !== undefined && view === "edit") {
-      tmpl = "funder_edit";
-    } else {
-      tmpl = "funder";
-    }
-  } else {
-    if (view !== "undefined" && view === "create") {
-      tmpl = "funder_edit";
-    }
-  }
-
-  if (tmpl === "funder_list") {
-    /* display a list of funders */
-    const funder_list = await ds.query("funder_names", [], {});
-    if (funder_list !== undefined) {
-      return renderPage(tmpl, {
-        base_path: "",
-        funder_list: funder_list,
-      });
-    } else {
-      return renderPage(tmpl, {
-        base_path: "",
-        funder_list: [],
-      });
-    }
-  } else {
-    /* decide if we are in display view or edit view and pick the right template */
-    /* retrieve a specific record */
+    /* parse the URL */
+    const url = new URL(req.url);
     const clfid = pathIdentifier(req.url);
-    const isCreateObject = clfid === "";
-    const obj = await ds.read(clfid);
-    console.log(`We have a GET for funder object ${clfid}, view = ${view}`);
-    return renderPage(tmpl, {
-      base_path: "",
-      isCreateObject: isCreateObject,
-      funder: obj,
-      debug_src: JSON.stringify(obj, null, 2),
-    });
-  }
+    const params = url.searchParams;
+    let view = params.get("view");
+    let tmpl = "funder_list";
+    if (clfid !== undefined && clfid !== "") {
+        if (view !== undefined && view === "edit") {
+            tmpl = "funder_edit";
+        } else {
+            tmpl = "funder";
+        }
+    } else {
+        if (view !== "undefined" && view === "create") {
+            tmpl = "funder_edit";
+        }
+    }
+
+    if (tmpl === "funder_list") {
+        /* display a list of funders */
+        const funder_list = await ds.query("funder_names", [], {});
+        if (funder_list !== undefined) {
+            return renderPage(tmpl, {
+                base_path: "",
+                funder_list: funder_list,
+            });
+        } else {
+            return renderPage(tmpl, {
+                base_path: "",
+                funder_list: [],
+            });
+        }
+    } else {
+        /* decide if we are in display view or edit view and pick the right template */
+        /* retrieve a specific record */
+        const clfid = pathIdentifier(req.url);
+        const isCreateObject = clfid === "";
+        const obj = await ds.read(clfid);
+        console.log(`We have a GET for funder object ${clfid}, view = ${view}`);
+        return renderPage(tmpl, {
+            base_path: "",
+            isCreateObject: isCreateObject,
+            funder: obj,
+            debug_src: JSON.stringify(obj, null, 2),
+        });
+    }
 }
 
 /**
@@ -227,81 +227,85 @@ async function handleGetFunders(
  * @returns {Response}
  */
 async function handlePostFunders(
-  req: Request,
-  options: { debug: boolean; htdocs: string; apiUrl: string },
+    req: Request,
+    options: { debug: boolean; htdocs: string; apiUrl: string },
 ): Promise<Response> {
-  let clfid = pathIdentifier(req.url);
-  const isCreateObject = clfid === "";
+    let clfid = pathIdentifier(req.url);
+    const isCreateObject = clfid === "";
 
-  if (req.body !== null) {
-    const form = await req.formData();
-    let obj = formDataToObject(form);
-    if (!("clfid" in obj)) {
-      console.log("clfid missing", obj);
-      return new Response(`missing funder identifier`, {
+    if (req.body !== null) {
+        const form = await req.formData();
+        let obj = formDataToObject(form);
+        if (!("clfid" in obj)) {
+            console.log("clfid missing", obj);
+            return new Response(`missing funder identifier`, {
+                status: 400,
+                headers: { "content-type": "text/html" },
+            });
+        }
+        if ("acronyms" in obj) {
+            const acronymData = csv.parse(obj.acronyms as unknown as string);
+            // Need to extract the single column into an array
+            let acronyms: string[] = [];
+            for (const row of acronymData) {
+                row[0] === undefined || row[0] === ""
+                    ? ""
+                    : acronyms.push(row[0]);
+            }
+            obj.acronyms = acronyms;
+        }
+        if ("grant_numbers" in obj) {
+            const grantData = csv.parse(obj.grant_numbers as unknown as string);
+            let grant_numbers: string[] = [];
+            for (const row of grantData) {
+                row[0] === undefined || row[0] === ""
+                    ? ""
+                    : grant_numbers.push(row[0]);
+            }
+            obj.grant_numbers = grant_numbers;
+        }
+        if (isCreateObject) {
+            clfid = obj.clfid as unknown as string;
+        }
+        if (obj.clfid !== clfid) {
+            return new Response(
+                `mismatched funder identifier ${clfid} != ${obj.clfid}`,
+                {
+                    status: 400,
+                    headers: { "content-type": "text/html" },
+                },
+            );
+        }
+        if (isCreateObject) {
+            console.log(`send to dataset create object ${clfid}`);
+            if (!(await ds.create(clfid, obj))) {
+                return new Response(
+                    `<html>problem creating object ${clfid}, try again later`,
+                    {
+                        status: 500,
+                        headers: { "content-type": "text/html" },
+                    },
+                );
+            }
+        } else {
+            console.log(`send to dataset update object ${clfid}`);
+            if (!(await ds.update(clfid, obj))) {
+                return new Response(
+                    `<html>problem updating object ${clfid}, try again later`,
+                    {
+                        status: 500,
+                        headers: { "content-type": "text/html" },
+                    },
+                );
+            }
+        }
+        return new Response(`<html>Redirect to ${clfid}</html>`, {
+            status: 303,
+            headers: { Location: `${clfid}` },
+        });
+    }
+    return new Response(`<html>problem creating funder data</html>`, {
         status: 400,
         headers: { "content-type": "text/html" },
-      });
-    }
-    if ("acronyms" in obj) {
-      const acronymData = csv.parse(obj.acronyms as unknown as string);
-      // Need to extract the single column into an array
-      let acronyms: string[] = [];
-      for (const row of acronymData) {
-        row[0] === undefined || row[0] === "" ? "" : acronyms.push(row[0]);
-      }
-      obj.acronyms = acronyms;
-    }
-    if ("grant_numbers" in obj) {
-      const grantData = csv.parse(obj.grant_numbers as unknown as string);
-      let grant_numbers: string[] = [];
-      for (const row of grantData) {
-        row[0] === undefined || row[0] === "" ? "" : grant_numbers.push(row[0]);
-      }
-      obj.grant_numbers = grant_numbers;
-    }
-    if (isCreateObject) {
-      clfid = obj.clfid as unknown as string;
-    }
-    if (obj.clfid !== clfid) {
-      return new Response(
-        `mismatched funder identifier ${clfid} != ${obj.clfid}`,
-        {
-          status: 400,
-          headers: { "content-type": "text/html" },
-        },
-      );
-    }
-    if (isCreateObject) {
-      console.log(`send to dataset create object ${clfid}`);
-      if (!(await ds.create(clfid, obj))) {
-        return new Response(
-          `<html>problem creating object ${clfid}, try again later`,
-          {
-            status: 500,
-            headers: { "content-type": "text/html" },
-          },
-        );
-      }
-    } else {
-      console.log(`send to dataset update object ${clfid}`);
-      if (!(await ds.update(clfid, obj))) {
-        return new Response(
-          `<html>problem updating object ${clfid}, try again later`,
-          {
-            status: 500,
-            headers: { "content-type": "text/html" },
-          },
-        );
-      }
-    }
-    return new Response(`<html>Redirect to ${clfid}</html>`, {
-      status: 303,
-      headers: { Location: `${clfid}` },
     });
-  }
-  return new Response(`<html>problem creating funder data</html>`, {
-    status: 400,
-    headers: { "content-type": "text/html" },
-  });
 }
