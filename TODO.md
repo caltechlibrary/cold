@@ -20,8 +20,10 @@ harvest upserts and sweeps instead of wiping, after the first production run's
 load truncated at a 1.10 MB record and left the collection two-thirds empty.
 DR-0018 (accepted): the harvest SQL is restructured around indexed
 resolution through `pidstore_pid` and pick-before-detoast, after pass 1 of the
-incremental ran 32 minutes for 918 rows. All six records are accepted; the
-restructure itself is the next task. Hand-off:
+incremental ran 32 minutes for 918 rows. DR-0019 (accepted): the full
+harvest and the incremental need different plans, so the emitter takes a mode.
+**Open: there is no measured baseline for the pre-restructure full harvest, so
+it is unknown whether 26m27s is a regression — time `38ba5b9`'s version once.** Hand-off:
 `agents/hand-off/2026-09-09T190000Z-cold-rdm-harvest-phases-0-through-2-and-the-incremental-redesign.spmd`.
 Plan:
 `agents/projects/cold/plans/rdm_requests_harvest_plan.md`, nine phases, each a
@@ -53,17 +55,22 @@ in COLD, and it looks like nothing has changed.
       pre-0015 baseline on 28,223/4,469 — within a handful of Phase 0c's
       predictions. `parent_id` confirmed unindexed, so the materialised CTE was
       required. See plan Phase 2 "Results".
-- [ ] `remote_harvest_rdm_requests_incremental.bash` — WRITTEN 2026-09-09 and
-      passing offline tests, but the first production run of pass 1 ran **32
-      minutes for 918 rows** and was killed. Two causes: a selective predicate
+- [x] `remote_harvest_rdm_requests_incremental.bash` — WORKING 2026-09-09.
+      All three passes in **15 seconds** (pass 1 alone was 32 minutes before
+      DR-0018/DR-0019). Passes 2 and 3 returned zero rows on a quiet database,
+      so they are exercised but not demonstrated; acceptance tests 3a and 3b
+      (publish a new version, delete a version) still need a live RDM.
+      History, for context: Two causes: a selective predicate
       on the outer WHERE flipped the planner to nested loops over an unindexed
       expression join, and `target_version` detoasted all 1.5 GB of
       `rdm_records_metadata`'s jsonb before picking a winner. **DR-0018
       (proposed) restructures the SQL** — resolve through `pidstore_pid`'s
       unique index, pick from heap columns then fetch json by primary key,
-      restrict the pick to the parents in play, materialise the CTEs.
-      Restructure, re-test offline, `EXPLAIN` the whole query, then re-verify
-      against Phase 2's numbers. Three passes, each its own JSON-L:
+      restrict the pick to the parents in play, materialise the CTEs. DR-0019
+      then split that into two modes — the full harvest streams (bulk, 26m27s),
+      the incremental picks before detoasting (keyed, 0.96s for pass 1) — and
+      the fixture suite asserts both return identical rows. Re-verified against
+      Phase 2's numbers on production: identical. Three passes, each its own JSON-L:
       all currently-submitted (~917 rows, unconditional); everything changed
       since `rdm_requests_lastmod.txt`; prune cancelled/declined/tombstoned. Passes 2
       and 3 select by parent, not by row (DR-0015)

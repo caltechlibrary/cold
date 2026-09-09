@@ -199,7 +199,10 @@ echo "CONTAINER_ID -> ${CONTAINER_ID}"
 
 # The full harvest passes no extra predicate: every request the selection
 # matches is harvested.
-if ! emit_harvest_sql "${RDM_URL}" "" >"${SQL_FILE}"; then
+# bulk: one sequential pass. The full harvest returns 99% of the corpus, so
+# the incremental's pick-then-fetch shape would turn that into 110,000 random
+# TOAST fetches (DR-0019).
+if ! emit_harvest_sql "${RDM_URL}" "" "" bulk >"${SQL_FILE}"; then
     echo "Error: could not generate ${SQL_FILE}."
     exit 1
 fi

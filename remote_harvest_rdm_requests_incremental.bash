@@ -16,7 +16,8 @@
 #      version is a new row, and a deleted version makes the target fall back
 #      to an older row whose timestamp is old, so asking "did the joined
 #      version move" misses both. Asking "did any version of this parent move"
-#      does not (DR-0015).
+#      does not (DR-0015). The changed set is computed in CTEs that read heap
+#      columns only, then narrows the selection from inside (DR-0018).
 #
 #   3. A prune: requests that have left the states librarians care about, and
 #      records whose parent has lost its last present version.
@@ -186,7 +187,10 @@ CMD
 
 echo
 echo "Pass 1: all currently-submitted requests ..."
-emit_harvest_sql "${RDM_URL}" "AND fr.status = 'submitted'" >rdm_requests_pass1.sql || exit 1
+# The pass predicate goes inside filtered_requests, so it reads the raw column
+# rather than the alias (DR-0018 decision 1).
+emit_harvest_sql "${RDM_URL}" "" "AND json->>'status' = 'submitted'" \
+    >rdm_requests_pass1.sql || exit 1
 run_remote_query rdm_requests_pass1.sql rdm_requests_pass1.jsonl || exit 1
 
 if ! load_jsonl_verified "${C_NAME}" "${C_TABLE}" rdm_requests_pass1.jsonl; then
@@ -199,7 +203,9 @@ echo "Pass 1: ${LOAD_TOUCHED} submitted requests upserted."
 
 echo
 echo "Pass 2: records changed since the watermark ..."
-emit_harvest_sql "${RDM_URL}" "$(emit_changed_since_predicate "${WATERMARK}")" \
+emit_harvest_sql "${RDM_URL}" \
+    "$(emit_changed_since_ctes "${WATERMARK}")" \
+    "$(emit_changed_since_predicate "${WATERMARK}")" \
     >rdm_requests_pass2.sql || exit 1
 run_remote_query rdm_requests_pass2.sql rdm_requests_pass2.jsonl || exit 1
 
