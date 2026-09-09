@@ -375,8 +375,10 @@ emit_prune_keys_sql() {
 --
 -- (b) is deliberately parent-level. Deleting on "this record's deletion_status
 -- became 'D'" would remove a live record whose FIRST version was tombstoned
--- while a later version is still present -- production has nine parents in the
--- mirror configuration, so the case is real.
+-- while a later version is still present. Rechecked 2026-09-09: no parent in
+-- the selection is in that state today -- all 29 whose latest version is
+-- deleted are wholly tombstoned -- so this is robustness against a state RDM
+-- allows rather than one currently observed.
 --
 -- Neither half joins the request selection: a key that was never harvested is
 -- harmless to delete, and dataset delete tolerates it. That keeps this off the
