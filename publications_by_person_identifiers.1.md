@@ -1,4 +1,4 @@
-%publications_by_person_identifiers(1) user manual | 0.0.51 1e024ce
+%publications_by_person_identifiers(1) user manual | 0.0.51 8d8f61d
 % R. S.Doiel
 % 2026-08-24
 

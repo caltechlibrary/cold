@@ -226,7 +226,7 @@ ssh "${RDM_HOST}" "bash docker_cmd_review_queue.bash"
 scp "${RDM_HOST}":"${RDM_DBNAME}_review_queue.jsonl" ./
 if [ -f "${RDM_DBNAME}_review_queue.jsonl" ]; then
     echo "Loading ${RDM_DBNAME}_review_queue.jsonl into rdm_review_queue.ds"
-    if dataset load -overwrite rdm_review_queue.ds <"${RDM_DBNAME}_review_queue.jsonl"; then
+    if dataset load -m 8 -overwrite rdm_review_queue.ds <"${RDM_DBNAME}_review_queue.jsonl"; then
         echo "Success!"
     else
         echo "Something went wrong"

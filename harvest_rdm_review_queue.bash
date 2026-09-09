@@ -62,4 +62,4 @@ psql "${RDM_DBNAME}" -c "
 # Load into a dataset collection
 #
 echo "Loading ${RDM_DBNAME}.jsonl into ${C_NAME}"
-../dataset/bin/dataset load -overwrite "${C_NAME}" <"${RDM_DBNAME}.jsonl"
+../dataset/bin/dataset load -m 8 -overwrite "${C_NAME}" <"${RDM_DBNAME}.jsonl"

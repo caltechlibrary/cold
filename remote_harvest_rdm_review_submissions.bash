@@ -208,7 +208,7 @@ ssh "${RDM_HOST}" "bash docker_cmd_submissions.bash"
 scp "${RDM_HOST}":"${RDM_DBNAME}_review_submissions.jsonl" ./
 if [ -f "${RDM_DBNAME}_review_submissions.jsonl" ]; then
     echo "Loading ${RDM_DBNAME}_review_submissions.jsonl into rdm_review_queue.ds"
-    if dataset load -overwrite rdm_review_queue.ds <"${RDM_DBNAME}_review_submissions.jsonl"; then
+    if dataset load -m 8 -overwrite rdm_review_queue.ds <"${RDM_DBNAME}_review_submissions.jsonl"; then
         echo "Cleanup canceled and declined records"
         # ["accepted","cancelled","created","declined","submitted"]
         dsquery rdm_review_queue.ds "DELETE FROM rdm_review_queue WHERE src->>'status' = 'created' OR src->>'status' = 'cancelled' OR src->>'status' = 'declined'" >/dev/null

@@ -13,8 +13,8 @@ import { stringify } from "jsr:@std/csv";
 import { apiPort, Dataset } from "./deps.ts";
 import { licenseText, releaseDate, releaseHash, version } from "./version.ts";
 import {
-    fmtHelp,
-    generateCollaboratorAffiliationsReportHelpText,
+  fmtHelp,
+  generateCollaboratorAffiliationsReportHelpText,
 } from "./helptext.ts";
 import { fetchAllRecords } from "./caltechauthors_api.ts";
 
@@ -22,49 +22,49 @@ const appName = "generate_collaborator_affiliations_rpt";
 const dsRor = new Dataset(apiPort, "ror.ds");
 
 interface Author {
-    person_or_org: {
-        name: string;
-        type: string;
-        identifiers?: Array<{ scheme: string; identifier: string }>;
-    };
-    affiliations?: Array<{ name: string; id?: string }>;
+  person_or_org: {
+    name: string;
+    type: string;
+    identifiers?: Array<{ scheme: string; identifier: string }>;
+  };
+  affiliations?: Array<{ name: string; id?: string }>;
 }
 
 interface AdditionalDescription {
-    description: string;
-    type: { id?: string; en?: string; title?: { en?: string } };
-    lang?: { id?: string };
+  description: string;
+  type: { id?: string; en?: string; title?: { en?: string } };
+  lang?: { id?: string };
 }
 
 interface Record {
-    id: string;
-    metadata: {
-        publication_date?: string;
-        creators: Author[];
-        additional_descriptions?: AdditionalDescription[];
-    };
+  id: string;
+  metadata: {
+    publication_date?: string;
+    creators: Author[];
+    additional_descriptions?: AdditionalDescription[];
+  };
 }
 
 interface AffiliationRow {
-    name: string;
-    affiliation_name: string;
-    ror_id: string;
-    country: string;
-    year: string;
-    record_id: string;
-    acknowledgements: string;
-    additional_information: string;
+  name: string;
+  affiliation_name: string;
+  ror_id: string;
+  country: string;
+  year: string;
+  record_id: string;
+  acknowledgements: string;
+  additional_information: string;
 }
 
 function extractDescriptionsByType(
-    descriptions: AdditionalDescription[] | undefined,
-    typeName: string,
+  descriptions: AdditionalDescription[] | undefined,
+  typeName: string,
 ): string {
-    if (!descriptions) return "";
-    return descriptions
-        .filter((d) => (d.type?.en ?? d.type?.title?.en ?? "") === typeName)
-        .map((d) => d.description)
-        .join("\n\n");
+  if (!descriptions) return "";
+  return descriptions
+    .filter((d) => (d.type?.en ?? d.type?.title?.en ?? "") === typeName)
+    .map((d) => d.description)
+    .join("\n\n");
 }
 
 /**
@@ -72,33 +72,33 @@ function extractDescriptionsByType(
  * Handles both ROR v2 (locations[].geonames_details) and v1 (country object) formats.
  */
 export function extractCountry(data: { [key: string]: any }): string {
-    // ROR v2: locations array with geonames_details
-    if (Array.isArray(data.locations) && data.locations.length > 0) {
-        const loc = data.locations[0];
-        if (loc.geonames_details?.country_name) {
-            return loc.geonames_details.country_name;
-        }
-        if (loc.geonames_details?.country) return loc.geonames_details.country;
-        if (loc.country_name) return loc.country_name;
-        if (loc.country_code) return loc.country_code;
+  // ROR v2: locations array with geonames_details
+  if (Array.isArray(data.locations) && data.locations.length > 0) {
+    const loc = data.locations[0];
+    if (loc.geonames_details?.country_name) {
+      return loc.geonames_details.country_name;
     }
-    // ROR v1: country object or string
-    if (data.country) {
-        if (typeof data.country === "string") return data.country;
-        if (data.country.country_name) return data.country.country_name;
-        if (data.country.name) return data.country.name;
-        if (data.country.code) return data.country.code;
+    if (loc.geonames_details?.country) return loc.geonames_details.country;
+    if (loc.country_name) return loc.country_name;
+    if (loc.country_code) return loc.country_code;
+  }
+  // ROR v1: country object or string
+  if (data.country) {
+    if (typeof data.country === "string") return data.country;
+    if (data.country.country_name) return data.country.country_name;
+    if (data.country.name) return data.country.name;
+    if (data.country.code) return data.country.code;
+  }
+  // addresses fallback (pre-v1 format)
+  if (Array.isArray(data.addresses) && data.addresses.length > 0) {
+    const addr = data.addresses[0];
+    if (addr.geonames_details?.country_name) {
+      return addr.geonames_details.country_name;
     }
-    // addresses fallback (pre-v1 format)
-    if (Array.isArray(data.addresses) && data.addresses.length > 0) {
-        const addr = data.addresses[0];
-        if (addr.geonames_details?.country_name) {
-            return addr.geonames_details.country_name;
-        }
-        if (addr.country_name) return addr.country_name;
-        if (addr.country_code) return addr.country_code;
-    }
-    return "";
+    if (addr.country_name) return addr.country_name;
+    if (addr.country_code) return addr.country_code;
+  }
+  return "";
 }
 
 /**
@@ -106,25 +106,25 @@ export function extractCountry(data: { [key: string]: any }): string {
  * @param rorId - ROR identifier with or without prefix ("0333a7d27" or "https://ror.org/0333a7d27")
  */
 export async function lookupRorCountry(
-    rorId: string,
+  rorId: string,
 ): Promise<{ country: string; rorUrl: string }> {
-    const lookupId = rorId.replace(/^https:\/\/ror\.org\//, "");
-    if (!lookupId) {
-        return { country: "", rorUrl: "" };
+  const lookupId = rorId.replace(/^https:\/\/ror\.org\//, "");
+  if (!lookupId) {
+    return { country: "", rorUrl: "" };
+  }
+  const fullUrl = `https://ror.org/${lookupId}`;
+  try {
+    const data = await dsRor.read(lookupId) as
+      | { [key: string]: any }
+      | undefined;
+    if (!data) {
+      return { country: "", rorUrl: fullUrl };
     }
-    const fullUrl = `https://ror.org/${lookupId}`;
-    try {
-        const data = await dsRor.read(lookupId) as
-            | { [key: string]: any }
-            | undefined;
-        if (!data) {
-            return { country: "", rorUrl: fullUrl };
-        }
-        return { country: extractCountry(data), rorUrl: fullUrl };
-    } catch (err) {
-        console.error(`Error looking up ROR ${lookupId}:`, err);
-        return { country: "", rorUrl: fullUrl };
-    }
+    return { country: extractCountry(data), rorUrl: fullUrl };
+  } catch (err) {
+    console.error(`Error looking up ROR ${lookupId}:`, err);
+    return { country: "", rorUrl: fullUrl };
+  }
 }
 
 /**
@@ -137,222 +137,221 @@ export async function lookupRorCountry(
  * clpid, restricted to publications on or after startDateStr (yyyy-MM-dd).
  */
 export function buildRecordsQueryUrl(
-    clpid: string,
-    startDateStr: string,
+  clpid: string,
+  startDateStr: string,
 ): string {
-    const baseUrl = "https://authors.library.caltech.edu/api/records";
-    const params = new URLSearchParams();
-    params.set(
-        "q",
-        `metadata.creators.person_or_org.identifiers.identifier:"${clpid}" AND metadata.publication_date:[${startDateStr} TO *]`,
-    );
-    params.set("all", "1");
-    params.set("size", "1000");
-    return `${baseUrl}?${params.toString()}`;
+  const baseUrl = "https://authors.library.caltech.edu/api/records";
+  const params = new URLSearchParams();
+  params.set(
+    "q",
+    `metadata.creators.person_or_org.identifiers.identifier:"${clpid}" AND metadata.publication_date:[${startDateStr} TO *]`,
+  );
+  params.set("all", "1");
+  params.set("size", "1000");
+  return `${baseUrl}?${params.toString()}`;
 }
 
 export async function run_report(clpid: string, includeRecordIds: boolean) {
-    // Calculate start date (48 months ago)
-    const currentDate = new Date();
-    const startDate = new Date(currentDate);
-    startDate.setMonth(currentDate.getMonth() - 48);
-    const startDateStr = format(startDate, "yyyy-MM-dd");
+  // Calculate start date (48 months ago)
+  const currentDate = new Date();
+  const startDate = new Date(currentDate);
+  startDate.setMonth(currentDate.getMonth() - 48);
+  const startDateStr = format(startDate, "yyyy-MM-dd");
 
-    const apiUrl = buildRecordsQueryUrl(clpid, startDateStr);
+  const apiUrl = buildRecordsQueryUrl(clpid, startDateStr);
 
-    // Fetch records from Invenio RDM API, following pagination
-    let hits: unknown[];
-    try {
-        hits = await fetchAllRecords(apiUrl);
-    } catch (err) {
-        console.error(
-            `Error: ${err instanceof Error ? err.message : String(err)}`,
-        );
-        Deno.exit(1);
+  // Fetch records from Invenio RDM API, following pagination
+  let hits: unknown[];
+  try {
+    hits = await fetchAllRecords(apiUrl);
+  } catch (err) {
+    console.error(
+      `Error: ${err instanceof Error ? err.message : String(err)}`,
+    );
+    Deno.exit(1);
+  }
+  const records: Record[] = hits as Record[];
+
+  // Collect one row per (coauthor, affiliation, record); cache ROR lookups by affId
+  const rorCache = new Map<string, { country: string; rorUrl: string }>();
+  const seen = new Set<string>(); // "collaboratorKey::affName::affId::recordId"
+  const affiliationRows: AffiliationRow[] = [];
+
+  for (const article of records) {
+    if (!article.metadata?.publication_date) {
+      console.error(
+        `Warning: Skipping record ${article.id} due to missing publication_date.`,
+      );
+      continue;
     }
-    const records: Record[] = hits as Record[];
+    const year = article.metadata.publication_date.split("-")[0];
+    const authors = article.metadata.creators;
+    const recordId = article.id;
+    const acknowledgements = extractDescriptionsByType(
+      article.metadata.additional_descriptions,
+      "Acknowledgement",
+    );
+    const additionalInformation = extractDescriptionsByType(
+      article.metadata.additional_descriptions,
+      "Additional Information",
+    );
 
-    // Collect one row per (coauthor, affiliation, record); cache ROR lookups by affId
-    const rorCache = new Map<string, { country: string; rorUrl: string }>();
-    const seen = new Set<string>(); // "collaboratorKey::affName::affId::recordId"
-    const affiliationRows: AffiliationRow[] = [];
-
-    for (const article of records) {
-        if (!article.metadata?.publication_date) {
-            console.error(
-                `Warning: Skipping record ${article.id} due to missing publication_date.`,
-            );
-            continue;
+    for (const author of authors) {
+      const name = author.person_or_org.name;
+      if (author.person_or_org.type === "personal") {
+        const identifiers = author.person_or_org.identifiers || [];
+        let authorClpid: string | null = null;
+        let orcid: string | null = null;
+        for (const id of identifiers) {
+          if (id.scheme === "clpid") authorClpid = id.identifier;
+          if (id.scheme === "orcid") orcid = id.identifier;
         }
-        const year = article.metadata.publication_date.split("-")[0];
-        const authors = article.metadata.creators;
-        const recordId = article.id;
-        const acknowledgements = extractDescriptionsByType(
-            article.metadata.additional_descriptions,
-            "Acknowledgement",
-        );
-        const additionalInformation = extractDescriptionsByType(
-            article.metadata.additional_descriptions,
-            "Additional Information",
-        );
+        const collaboratorKey = authorClpid || orcid || name;
+        if (collaboratorKey && collaboratorKey !== clpid) {
+          const affiliations = author.affiliations || [];
 
-        for (const author of authors) {
-            const name = author.person_or_org.name;
-            if (author.person_or_org.type === "personal") {
-                const identifiers = author.person_or_org.identifiers || [];
-                let authorClpid: string | null = null;
-                let orcid: string | null = null;
-                for (const id of identifiers) {
-                    if (id.scheme === "clpid") authorClpid = id.identifier;
-                    if (id.scheme === "orcid") orcid = id.identifier;
-                }
-                const collaboratorKey = authorClpid || orcid || name;
-                if (collaboratorKey && collaboratorKey !== clpid) {
-                    const affiliations = author.affiliations || [];
-
-                    if (affiliations.length === 0) {
-                        const seenKey = `${collaboratorKey}::::${recordId}`;
-                        if (!seen.has(seenKey)) {
-                            seen.add(seenKey);
-                            affiliationRows.push({
-                                name,
-                                affiliation_name: "",
-                                ror_id: "",
-                                country: "",
-                                year,
-                                record_id: recordId,
-                                acknowledgements,
-                                additional_information: additionalInformation,
-                            });
-                        }
-                    } else {
-                        for (const aff of affiliations) {
-                            const affName = aff.name || "";
-                            const affId = aff.id || "";
-                            const seenKey =
-                                `${collaboratorKey}::${affName}::${affId}::${recordId}`;
-                            if (!seen.has(seenKey)) {
-                                seen.add(seenKey);
-                                let rorInfo = rorCache.get(affId);
-                                if (!rorInfo) {
-                                    rorInfo = await lookupRorCountry(affId);
-                                    rorCache.set(affId, rorInfo);
-                                }
-                                affiliationRows.push({
-                                    name,
-                                    affiliation_name: affName,
-                                    ror_id: rorInfo.rorUrl,
-                                    country: rorInfo.country,
-                                    year,
-                                    record_id: recordId,
-                                    acknowledgements,
-                                    additional_information:
-                                        additionalInformation,
-                                });
-                            }
-                        }
-                    }
-                }
+          if (affiliations.length === 0) {
+            const seenKey = `${collaboratorKey}::::${recordId}`;
+            if (!seen.has(seenKey)) {
+              seen.add(seenKey);
+              affiliationRows.push({
+                name,
+                affiliation_name: "",
+                ror_id: "",
+                country: "",
+                year,
+                record_id: recordId,
+                acknowledgements,
+                additional_information: additionalInformation,
+              });
             }
+          } else {
+            for (const aff of affiliations) {
+              const affName = aff.name || "";
+              const affId = aff.id || "";
+              const seenKey =
+                `${collaboratorKey}::${affName}::${affId}::${recordId}`;
+              if (!seen.has(seenKey)) {
+                seen.add(seenKey);
+                let rorInfo = rorCache.get(affId);
+                if (!rorInfo) {
+                  rorInfo = await lookupRorCountry(affId);
+                  rorCache.set(affId, rorInfo);
+                }
+                affiliationRows.push({
+                  name,
+                  affiliation_name: affName,
+                  ror_id: rorInfo.rorUrl,
+                  country: rorInfo.country,
+                  year,
+                  record_id: recordId,
+                  acknowledgements,
+                  additional_information: additionalInformation,
+                });
+              }
+            }
+          }
         }
+      }
     }
+  }
 
-    // Prepare CSV output
-    const headers = [
-        "4",
-        "Name:",
-        "Organizational Affiliation",
-        "ROR ID",
-        "Country",
-        "Optional (email, Department)",
-        "Last Active",
-        "Acknowledgements",
-        "Additional Information",
+  // Prepare CSV output
+  const headers = [
+    "4",
+    "Name:",
+    "Organizational Affiliation",
+    "ROR ID",
+    "Country",
+    "Optional (email, Department)",
+    "Last Active",
+    "Acknowledgements",
+    "Additional Information",
+  ];
+  if (includeRecordIds) {
+    headers.push("CaltechAUTHORS Record ID (do not include in NSF report)");
+  }
+
+  const rows = affiliationRows.map((row: AffiliationRow) => {
+    const csvRow = [
+      "A:",
+      row.name,
+      row.affiliation_name,
+      row.ror_id,
+      row.country,
+      "",
+      row.year,
+      row.acknowledgements,
+      row.additional_information,
     ];
     if (includeRecordIds) {
-        headers.push("CaltechAUTHORS Record ID (do not include in NSF report)");
+      csvRow.push(row.record_id);
     }
+    return csvRow;
+  });
 
-    const rows = affiliationRows.map((row: AffiliationRow) => {
-        const csvRow = [
-            "A:",
-            row.name,
-            row.affiliation_name,
-            row.ror_id,
-            row.country,
-            "",
-            row.year,
-            row.acknowledgements,
-            row.additional_information,
-        ];
-        if (includeRecordIds) {
-            csvRow.push(row.record_id);
-        }
-        return csvRow;
-    });
+  // Sort by name, then affiliation name, then year descending
+  rows.sort((a, b) => {
+    const nameCompare = a[1].localeCompare(b[1]);
+    if (nameCompare !== 0) return nameCompare;
+    const affCompare = a[2].localeCompare(b[2]);
+    if (affCompare !== 0) return affCompare;
+    return b[6].localeCompare(a[6]); // year descending
+  });
 
-    // Sort by name, then affiliation name, then year descending
-    rows.sort((a, b) => {
-        const nameCompare = a[1].localeCompare(b[1]);
-        if (nameCompare !== 0) return nameCompare;
-        const affCompare = a[2].localeCompare(b[2]);
-        if (affCompare !== 0) return affCompare;
-        return b[6].localeCompare(a[6]); // year descending
-    });
-
-    // Output CSV to stdout
-    const csv = stringify([headers, ...rows]);
-    console.log(csv);
+  // Output CSV to stdout
+  const csv = stringify([headers, ...rows]);
+  console.log(csv);
 }
 
 //
 // Main processing
 //
 async function main() {
-    const app = parseArgs(Deno.args, {
-        alias: {
-            help: "h",
-            license: "l",
-            version: "v",
-            record_ids: "record_id",
-        },
-        default: {
-            help: false,
-            version: false,
-            license: false,
-            record_ids: false,
-        },
-    });
-    if (app.help) {
-        console.log(
-            fmtHelp(
-                generateCollaboratorAffiliationsReportHelpText,
-                appName,
-                version,
-                releaseDate,
-                releaseHash,
-            ),
-        );
-        Deno.exit(0);
-    }
-    if (app.version) {
-        console.log(`${appName} ${version} ${releaseHash}`);
-        Deno.exit(0);
-    }
-    if (app.license) {
-        console.log(`${licenseText}`);
-        Deno.exit(0);
-    }
+  const app = parseArgs(Deno.args, {
+    alias: {
+      help: "h",
+      license: "l",
+      version: "v",
+      record_ids: "record_id",
+    },
+    default: {
+      help: false,
+      version: false,
+      license: false,
+      record_ids: false,
+    },
+  });
+  if (app.help) {
+    console.log(
+      fmtHelp(
+        generateCollaboratorAffiliationsReportHelpText,
+        appName,
+        version,
+        releaseDate,
+        releaseHash,
+      ),
+    );
+    Deno.exit(0);
+  }
+  if (app.version) {
+    console.log(`${appName} ${version} ${releaseHash}`);
+    Deno.exit(0);
+  }
+  if (app.license) {
+    console.log(`${licenseText}`);
+    Deno.exit(0);
+  }
 
-    const args = app._ as string[];
-    const clpid: string = args.length > 0 ? args[0] : "";
-    const includeRecordIds: boolean = app.record_ids;
+  const args = app._ as string[];
+  const clpid: string = args.length > 0 ? args[0] : "";
+  const includeRecordIds: boolean = app.record_ids;
 
-    if (!clpid) {
-        console.error("Error: author_identifier (clpid) is required.");
-        Deno.exit(1);
-    }
-    await run_report(clpid, includeRecordIds);
+  if (!clpid) {
+    console.error("Error: author_identifier (clpid) is required.");
+    Deno.exit(1);
+  }
+  await run_report(clpid, includeRecordIds);
 }
 
 if (import.meta.main) await main();
