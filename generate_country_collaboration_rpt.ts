@@ -17,8 +17,8 @@ import { stringify } from "jsr:@std/csv";
 import { apiPort, Dataset } from "./deps.ts";
 import { licenseText, releaseDate, releaseHash, version } from "./version.ts";
 import {
-  fmtHelp,
-  generateCountryCollaborationRptHelpText,
+    fmtHelp,
+    generateCountryCollaborationRptHelpText,
 } from "./helptext.ts";
 import { fetchAllRecords } from "./caltechauthors_api.ts";
 
@@ -33,110 +33,110 @@ const RATE_LIMIT_BACKOFF_S = 60;
 const MAX_RETRIES = 3;
 
 interface RorEntry {
-  ror: string;
-  name: string;
-  country_code: string;
-  country_name: string;
+    ror: string;
+    name: string;
+    country_code: string;
+    country_name: string;
 }
 
 interface AdditionalDescription {
-  description: string;
-  type: { id?: string; en?: string; title?: { en?: string } };
-  lang?: { id?: string };
+    description: string;
+    type: { id?: string; en?: string; title?: { en?: string } };
+    lang?: { id?: string };
 }
 
 function extractDescriptionsByType(
-  descriptions: AdditionalDescription[] | undefined,
-  typeName: string,
+    descriptions: AdditionalDescription[] | undefined,
+    typeName: string,
 ): string {
-  if (!descriptions) return "";
-  return descriptions
-    .filter((d) => (d.type?.en ?? d.type?.title?.en ?? "") === typeName)
-    .map((d) => d.description)
-    .join("\n\n");
+    if (!descriptions) return "";
+    return descriptions
+        .filter((d) => (d.type?.en ?? d.type?.title?.en ?? "") === typeName)
+        .map((d) => d.description)
+        .join("\n\n");
 }
 
 interface PersonOrOrg {
-  name: string;
-  type: string;
-  identifiers?: Array<{ scheme: string; identifier: string }>;
+    name: string;
+    type: string;
+    identifiers?: Array<{ scheme: string; identifier: string }>;
 }
 
 interface AuthorEntry {
-  person_or_org: PersonOrOrg;
-  affiliations?: Array<{ id?: string; name?: string }>;
-  role?: { id: string };
+    person_or_org: PersonOrOrg;
+    affiliations?: Array<{ id?: string; name?: string }>;
+    role?: { id: string };
 }
 
 interface FundingEntry {
-  funder: { id: string; name?: string };
+    funder: { id: string; name?: string };
 }
 
 interface RdmRecord {
-  id: string;
-  metadata: {
-    title?: string;
-    publication_date?: string;
-    creators: AuthorEntry[];
-    contributors?: AuthorEntry[];
-    funding?: FundingEntry[];
-    additional_descriptions?: AdditionalDescription[];
-  };
-  custom_fields?: {
-    "journal:journal"?: { title?: string };
-  };
+    id: string;
+    metadata: {
+        title?: string;
+        publication_date?: string;
+        creators: AuthorEntry[];
+        contributors?: AuthorEntry[];
+        funding?: FundingEntry[];
+        additional_descriptions?: AdditionalDescription[];
+    };
+    custom_fields?: {
+        "journal:journal"?: { title?: string };
+    };
 }
 
 function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function isCaltechAffiliated(author: AuthorEntry): boolean {
-  if ((author.affiliations ?? []).some((aff) => aff.id === CALTECH_ROR)) {
-    return true;
-  }
-  // A clpid identifier means the person is in CaltechPEOPLE
-  return (author.person_or_org.identifiers ?? []).some(
-    (id) => id.scheme === "clpid",
-  );
+    if ((author.affiliations ?? []).some((aff) => aff.id === CALTECH_ROR)) {
+        return true;
+    }
+    // A clpid identifier means the person is in CaltechPEOPLE
+    return (author.person_or_org.identifiers ?? []).some(
+        (id) => id.scheme === "clpid",
+    );
 }
 
 function formatCaltechAuthor(author: AuthorEntry): string {
-  const name = author.person_or_org.name;
-  const ids = author.person_or_org.identifiers ?? [];
-  const clpid = ids.find((id) => id.scheme === "clpid")?.identifier;
-  const orcid = ids.find((id) => id.scheme === "orcid")?.identifier;
-  const tag = clpid ?? orcid;
-  const label = tag ? `${name} (${tag})` : name;
-  const affs = (author.affiliations ?? [])
-    .filter((aff) => aff.id !== CALTECH_ROR && aff.name)
-    .map((aff) => aff.name!);
-  return affs.length > 0 ? `${label} [${affs.join(", ")}]` : label;
+    const name = author.person_or_org.name;
+    const ids = author.person_or_org.identifiers ?? [];
+    const clpid = ids.find((id) => id.scheme === "clpid")?.identifier;
+    const orcid = ids.find((id) => id.scheme === "orcid")?.identifier;
+    const tag = clpid ?? orcid;
+    const label = tag ? `${name} (${tag})` : name;
+    const affs = (author.affiliations ?? [])
+        .filter((aff) => aff.id !== CALTECH_ROR && aff.name)
+        .map((aff) => aff.name!);
+    return affs.length > 0 ? `${label} [${affs.join(", ")}]` : label;
 }
 
 function hasRorAffiliation(author: AuthorEntry, rorId: string): boolean {
-  return (author.affiliations ?? []).some((aff) => aff.id === rorId);
+    return (author.affiliations ?? []).some((aff) => aff.id === rorId);
 }
 
 function publicationYear(record: RdmRecord): string {
-  return (record.metadata.publication_date ?? "").split("-")[0];
+    return (record.metadata.publication_date ?? "").split("-")[0];
 }
 
 function publicationTitle(record: RdmRecord): string {
-  return record.metadata.title ?? "";
+    return record.metadata.title ?? "";
 }
 
 function journalTitle(record: RdmRecord): string {
-  return record.custom_fields?.["journal:journal"]?.title ?? "";
+    return record.custom_fields?.["journal:journal"]?.title ?? "";
 }
 
 async function getRorsByCountry(countryCode: string): Promise<RorEntry[]> {
-  const results = await dsRor.query(
-    "ror_by_country_code",
-    ["country_code"],
-    { country_code: countryCode },
-  ) as RorEntry[] | undefined;
-  return results ?? [];
+    const results = await dsRor.query(
+        "ror_by_country_code",
+        ["country_code"],
+        { country_code: countryCode },
+    ) as RorEntry[] | undefined;
+    return results ?? [];
 }
 
 /**
@@ -144,16 +144,16 @@ async function getRorsByCountry(countryCode: string): Promise<RorEntry[]> {
  * affiliations. Used to pre-filter the country list before hitting the remote API.
  */
 async function getUsedRorIds(): Promise<Set<string>> {
-  const results = await dsReviewQueue.query(
-    "unique_creator_ror_ids",
-    [],
-    {},
-  ) as Array<{ ror_id: string }> | undefined;
-  const ids = new Set<string>();
-  for (const row of results ?? []) {
-    if (row.ror_id) ids.add(row.ror_id);
-  }
-  return ids;
+    const results = await dsReviewQueue.query(
+        "unique_creator_ror_ids",
+        [],
+        {},
+    ) as Array<{ ror_id: string }> | undefined;
+    const ids = new Set<string>();
+    for (const row of results ?? []) {
+        if (row.ror_id) ids.add(row.ror_id);
+    }
+    return ids;
 }
 
 /**
@@ -175,78 +175,99 @@ export function buildBatchQueryUrl(rorIds: string[]): string {
 }
 
 async function fetchRecordsForBatch(
-  rorIds: string[],
+    rorIds: string[],
 ): Promise<Map<string, RdmRecord[]>> {
-  const resultMap = new Map<string, RdmRecord[]>();
-  for (const id of rorIds) resultMap.set(id, []);
+    const resultMap = new Map<string, RdmRecord[]>();
+    for (const id of rorIds) resultMap.set(id, []);
 
-  const clauses = rorIds.map((id) =>
-    `metadata.creators.affiliations.id:${id} OR metadata.contributors.affiliations.id:${id} OR metadata.funding.funder.id:${id}`
-  );
-  const q = clauses.join(" OR ");
-  const params = new URLSearchParams({ q, all: "1", size: "1000" });
-  const url = `https://authors.library.caltech.edu/api/records?${params}`;
-
-  let hits: unknown[];
-  try {
-    hits = await fetchAllRecords(url, {
-      maxRetries: MAX_RETRIES,
-      defaultBackoffSeconds: RATE_LIMIT_BACKOFF_S,
-    });
-  } catch (err) {
-    console.error(
-      `Warning: failed to fetch batch of ${rorIds.length} ROR IDs: ${
-        err instanceof Error ? err.message : String(err)
-      }`,
+    const clauses = rorIds.map((id) =>
+        `metadata.creators.affiliations.id:${id} OR metadata.contributors.affiliations.id:${id} OR metadata.funding.funder.id:${id}`
     );
-    return resultMap;
-  }
-  const records: RdmRecord[] = hits as RdmRecord[];
+    const q = clauses.join(" OR ");
+    const params = new URLSearchParams({ q, all: "1", size: "1000" });
+    const url = `https://authors.library.caltech.edu/api/records?${params}`;
 
-  for (const record of records) {
-    const creators = record.metadata.creators ?? [];
-    const contributors = record.metadata.contributors ?? [];
-    const funding = record.metadata.funding ?? [];
-
-    for (const rorId of rorIds) {
-      const match = creators.some((a) => hasRorAffiliation(a, rorId)) ||
-        contributors.some((a) => hasRorAffiliation(a, rorId)) ||
-        funding.some((f) => f.funder?.id === rorId);
-      if (match) {
-        resultMap.get(rorId)!.push(record);
-      }
+    let hits: unknown[];
+    try {
+        hits = await fetchAllRecords(url, {
+            maxRetries: MAX_RETRIES,
+            defaultBackoffSeconds: RATE_LIMIT_BACKOFF_S,
+        });
+    } catch (err) {
+        console.error(
+            `Warning: failed to fetch batch of ${rorIds.length} ROR IDs: ${
+                err instanceof Error ? err.message : String(err)
+            }`,
+        );
+        return resultMap;
     }
-  }
+    const records: RdmRecord[] = hits as RdmRecord[];
 
-  return resultMap;
+    for (const record of records) {
+        const creators = record.metadata.creators ?? [];
+        const contributors = record.metadata.contributors ?? [];
+        const funding = record.metadata.funding ?? [];
+
+        for (const rorId of rorIds) {
+            const match = creators.some((a) => hasRorAffiliation(a, rorId)) ||
+                contributors.some((a) => hasRorAffiliation(a, rorId)) ||
+                funding.some((f) => f.funder?.id === rorId);
+            if (match) {
+                resultMap.get(rorId)!.push(record);
+            }
+        }
+    }
+
+    return resultMap;
 }
 
 export async function run_report(countryCode: string) {
-  // Step 1: get all ROR IDs for the country
-  const allRorEntries = await getRorsByCountry(countryCode);
-  if (allRorEntries.length === 0) {
-    console.error(`No ROR entries found for country code: ${countryCode}`);
-    Deno.exit(1);
-  }
-  console.error(
-    `Found ${allRorEntries.length} ROR entries for ${countryCode} in ror.ds.`,
-  );
-
-  // Step 2: pre-filter to only ROR IDs that appear in rdm_requests.ds
-  console.error(`Loading used ROR IDs from rdm_requests.ds...`);
-  const usedRorIds = await getUsedRorIds();
-  const rorEntries = allRorEntries.filter((e) => usedRorIds.has(e.ror));
-  console.error(
-    `Pre-filter: ${rorEntries.length} of ${allRorEntries.length} ROR IDs appear in CaltechAUTHORS creator affiliations.`,
-  );
-
-  if (rorEntries.length === 0) {
+    // Step 1: get all ROR IDs for the country
+    const allRorEntries = await getRorsByCountry(countryCode);
+    if (allRorEntries.length === 0) {
+        console.error(`No ROR entries found for country code: ${countryCode}`);
+        Deno.exit(1);
+    }
     console.error(
-      `No CaltechAUTHORS records found with affiliations from ${countryCode}.`,
+        `Found ${allRorEntries.length} ROR entries for ${countryCode} in ror.ds.`,
     );
-    // Still emit header row so the report file is valid CSV
-    console.log(
-      stringify([[
+
+    // Step 2: pre-filter to only ROR IDs that appear in rdm_requests.ds
+    console.error(`Loading used ROR IDs from rdm_requests.ds...`);
+    const usedRorIds = await getUsedRorIds();
+    const rorEntries = allRorEntries.filter((e) => usedRorIds.has(e.ror));
+    console.error(
+        `Pre-filter: ${rorEntries.length} of ${allRorEntries.length} ROR IDs appear in CaltechAUTHORS creator affiliations.`,
+    );
+
+    if (rorEntries.length === 0) {
+        console.error(
+            `No CaltechAUTHORS records found with affiliations from ${countryCode}.`,
+        );
+        // Still emit header row so the report file is valid CSV
+        console.log(
+            stringify([[
+                "year",
+                "journal",
+                "title",
+                "caltech_authors",
+                "rdm_record_id",
+                "ror",
+                "organization",
+                "country",
+                "acknowledgements",
+                "additional_information",
+            ]]),
+        );
+        Deno.exit(0);
+    }
+
+    const totalBatches = Math.ceil(rorEntries.length / BATCH_SIZE);
+    console.error(
+        `Querying CaltechAUTHORS in ${totalBatches} batches of up to ${BATCH_SIZE}...`,
+    );
+
+    const headers = [
         "year",
         "journal",
         "title",
@@ -257,148 +278,127 @@ export async function run_report(countryCode: string) {
         "country",
         "acknowledgements",
         "additional_information",
-      ]]),
-    );
-    Deno.exit(0);
-  }
+    ];
 
-  const totalBatches = Math.ceil(rorEntries.length / BATCH_SIZE);
-  console.error(
-    `Querying CaltechAUTHORS in ${totalBatches} batches of up to ${BATCH_SIZE}...`,
-  );
+    const csvRows: string[][] = [];
+    const seen = new Set<string>(); // "rorId::recordId"
 
-  const headers = [
-    "year",
-    "journal",
-    "title",
-    "caltech_authors",
-    "rdm_record_id",
-    "ror",
-    "organization",
-    "country",
-    "acknowledgements",
-    "additional_information",
-  ];
+    for (let i = 0; i < rorEntries.length; i += BATCH_SIZE) {
+        const batch = rorEntries.slice(i, i + BATCH_SIZE);
+        const batchIds = batch.map((e) => e.ror);
+        const batchNum = Math.floor(i / BATCH_SIZE) + 1;
 
-  const csvRows: string[][] = [];
-  const seen = new Set<string>(); // "rorId::recordId"
+        console.error(`Batch ${batchNum}/${totalBatches}...`);
+        const batchResults = await fetchRecordsForBatch(batchIds);
 
-  for (let i = 0; i < rorEntries.length; i += BATCH_SIZE) {
-    const batch = rorEntries.slice(i, i + BATCH_SIZE);
-    const batchIds = batch.map((e) => e.ror);
-    const batchNum = Math.floor(i / BATCH_SIZE) + 1;
+        for (const entry of batch) {
+            const rorId = entry.ror;
+            const rorUrl = `https://ror.org/${rorId}`;
+            const countryName = entry.country_name || countryCode;
+            const records = batchResults.get(rorId) ?? [];
 
-    console.error(`Batch ${batchNum}/${totalBatches}...`);
-    const batchResults = await fetchRecordsForBatch(batchIds);
+            for (const record of records) {
+                const key = `${rorId}::${record.id}`;
+                if (seen.has(key)) continue;
+                seen.add(key);
 
-    for (const entry of batch) {
-      const rorId = entry.ror;
-      const rorUrl = `https://ror.org/${rorId}`;
-      const countryName = entry.country_name || countryCode;
-      const records = batchResults.get(rorId) ?? [];
+                const creators = record.metadata.creators ?? [];
+                const contributors = record.metadata.contributors ?? [];
+                const year = publicationYear(record);
+                const title = publicationTitle(record);
+                const journal = journalTitle(record);
+                const acknowledgements = extractDescriptionsByType(
+                    record.metadata.additional_descriptions,
+                    "Acknowledgement",
+                );
+                const additionalInformation = extractDescriptionsByType(
+                    record.metadata.additional_descriptions,
+                    "Additional Information",
+                );
 
-      for (const record of records) {
-        const key = `${rorId}::${record.id}`;
-        if (seen.has(key)) continue;
-        seen.add(key);
+                const caltechAuthors = [
+                    ...creators.filter((a) => isCaltechAffiliated(a)),
+                    ...contributors.filter((a) => isCaltechAffiliated(a)),
+                ].map(formatCaltechAuthor);
 
-        const creators = record.metadata.creators ?? [];
-        const contributors = record.metadata.contributors ?? [];
-        const year = publicationYear(record);
-        const title = publicationTitle(record);
-        const journal = journalTitle(record);
-        const acknowledgements = extractDescriptionsByType(
-          record.metadata.additional_descriptions,
-          "Acknowledgement",
-        );
-        const additionalInformation = extractDescriptionsByType(
-          record.metadata.additional_descriptions,
-          "Additional Information",
-        );
+                csvRows.push([
+                    year,
+                    journal,
+                    title,
+                    caltechAuthors.join("; "),
+                    record.id,
+                    rorUrl,
+                    entry.name,
+                    countryName,
+                    acknowledgements,
+                    additionalInformation,
+                ]);
+            }
+        }
 
-        const caltechAuthors = [
-          ...creators.filter((a) => isCaltechAffiliated(a)),
-          ...contributors.filter((a) => isCaltechAffiliated(a)),
-        ].map(formatCaltechAuthor);
-
-        csvRows.push([
-          year,
-          journal,
-          title,
-          caltechAuthors.join("; "),
-          record.id,
-          rorUrl,
-          entry.name,
-          countryName,
-          acknowledgements,
-          additionalInformation,
-        ]);
-      }
+        if (i + BATCH_SIZE < rorEntries.length) {
+            await sleep(BATCH_DELAY_MS);
+        }
     }
 
-    if (i + BATCH_SIZE < rorEntries.length) {
-      await sleep(BATCH_DELAY_MS);
-    }
-  }
+    console.error(`Done. ${csvRows.length} rows collected.`);
 
-  console.error(`Done. ${csvRows.length} rows collected.`);
+    // Sort by year desc, journal asc, title asc
+    // Indices: 0=year, 1=journal, 2=title
+    csvRows.sort((a, b) => {
+        const y = b[0].localeCompare(a[0]); // year descending
+        if (y !== 0) return y;
+        const j = a[1].localeCompare(b[1]);
+        if (j !== 0) return j;
+        return a[2].localeCompare(b[2]);
+    });
 
-  // Sort by year desc, journal asc, title asc
-  // Indices: 0=year, 1=journal, 2=title
-  csvRows.sort((a, b) => {
-    const y = b[0].localeCompare(a[0]); // year descending
-    if (y !== 0) return y;
-    const j = a[1].localeCompare(b[1]);
-    if (j !== 0) return j;
-    return a[2].localeCompare(b[2]);
-  });
-
-  console.log(stringify([headers, ...csvRows]));
+    console.log(stringify([headers, ...csvRows]));
 }
 
 async function main() {
-  const app = parseArgs(Deno.args, {
-    alias: { help: "h", license: "l", version: "v" },
-    default: { help: false, version: false, license: false },
-  });
+    const app = parseArgs(Deno.args, {
+        alias: { help: "h", license: "l", version: "v" },
+        default: { help: false, version: false, license: false },
+    });
 
-  if (app.help) {
-    console.log(
-      fmtHelp(
-        generateCountryCollaborationRptHelpText,
-        appName,
-        version,
-        releaseDate,
-        releaseHash,
-      ),
-    );
-    Deno.exit(0);
-  }
-  if (app.version) {
-    console.log(`${appName} ${version} ${releaseHash}`);
-    Deno.exit(0);
-  }
-  if (app.license) {
-    console.log(licenseText);
-    Deno.exit(0);
-  }
+    if (app.help) {
+        console.log(
+            fmtHelp(
+                generateCountryCollaborationRptHelpText,
+                appName,
+                version,
+                releaseDate,
+                releaseHash,
+            ),
+        );
+        Deno.exit(0);
+    }
+    if (app.version) {
+        console.log(`${appName} ${version} ${releaseHash}`);
+        Deno.exit(0);
+    }
+    if (app.license) {
+        console.log(licenseText);
+        Deno.exit(0);
+    }
 
-  const args = app._ as string[];
-  const countryCode = args.length > 0
-    ? String(args[0]).trim().toUpperCase()
-    : "";
-  if (!countryCode) {
-    console.error("Error: country_code is required (e.g. AU, DE, JP).");
-    Deno.exit(1);
-  }
-  if (!/^[A-Z]{2}$/.test(countryCode)) {
-    console.error(
-      `Error: invalid country_code "${countryCode}": must be an ISO 3166-1 alpha-2 code (e.g. AU, DE, JP).`,
-    );
-    Deno.exit(1);
-  }
+    const args = app._ as string[];
+    const countryCode = args.length > 0
+        ? String(args[0]).trim().toUpperCase()
+        : "";
+    if (!countryCode) {
+        console.error("Error: country_code is required (e.g. AU, DE, JP).");
+        Deno.exit(1);
+    }
+    if (!/^[A-Z]{2}$/.test(countryCode)) {
+        console.error(
+            `Error: invalid country_code "${countryCode}": must be an ISO 3166-1 alpha-2 code (e.g. AU, DE, JP).`,
+        );
+        Deno.exit(1);
+    }
 
-  await run_report(countryCode);
+    await run_report(countryCode);
 }
 
 if (import.meta.main) await main();
