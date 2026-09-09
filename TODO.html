@@ -26,10 +26,159 @@
 </nav>
 <section id="main-content">
 <h1 id="action-items">Action items</h1>
+<h2 id="start-here-2026-09-09">Start here — 2026-09-09</h2>
+<p>Two pieces of work, in this order. The harvest redesign is a
+<strong>prerequisite</strong> for the reports; do not start the reports
+first.</p>
+<h3 id="rdm-harvest-redesign-issue-109-dr-0013-accepted">1. RDM harvest
+redesign (issue #109) — DR-0013, accepted</h3>
+<p>Design brief:
+<code>agents/projects/cold/design/rdm_requests_harvest.md</code> (in the
+DLD workspace). Decisions: DR-0013 and DR-0014 (nine plan-shaping
+answers, 2026-09-09), both accepted. DR-0015 (accepted): the harvest was
+pinned to the version each record was submitted as, 34% of which are
+superseded, so it now follows the parent’s newest present version.
+DR-0016 (accepted): every file in this harvest carries the collection
+basename. DR-0017 (accepted): the full harvest upserts and sweeps
+instead of wiping, after the first production run’s load truncated at a
+1.10 MB record and left the collection two-thirds empty. DR-0018
+(accepted): the harvest SQL is restructured around indexed resolution
+through <code>pidstore_pid</code> and pick-before-detoast, after pass 1
+of the incremental ran 32 minutes for 918 rows. DR-0019 (accepted): the
+full harvest and the incremental need different plans, so the emitter
+takes a mode. <strong>Open: there is no measured baseline for the
+pre-restructure full harvest, so it is unknown whether 26m27s is a
+regression — time <code>38ba5b9</code>’s version once.</strong>
+Hand-off:
+<code>agents/hand-off/2026-09-09T190000Z-cold-rdm-harvest-phases-0-through-2-and-the-incremental-redesign.spmd</code>.
+Plan:
+<code>agents/projects/cold/plans/rdm_requests_harvest_plan.md</code>,
+nine phases, each a stopping point. Phase 0 is done; its counts are the
+expected values every later phase is checked against, and Phase 2’s
+done-when now includes confirming DR-0015 changed the ~28,225
+<code>creators</code> and ~4,474 <code>custom_fields</code> rows it
+predicted.</p>
+<p>The problem in one line: a librarian works on a record, comes back to
+it later in COLD, and it looks like nothing has changed.</p>
+<ul class="task-list">
+<li><label><input type="checkbox" checked="" />Write the implementation
+plan into <code>agents/projects/cold/plans/</code> –
+<code>rdm_requests_harvest_plan.md</code>, 2026-09-09</label></li>
+<li><label><input type="checkbox" checked="" />Phase 0: production
+verification COMPLETE 2026-09-09 (run from apps.library.caltech.edu; the
+Mac Mini is outside the RDM ELB’s <code>caltech-ssh</code> source
+restriction). <code>deletion_status</code> is <code>'P'</code> present /
+<code>'D'</code> deleted, expected full harvest is 111,231 rows, and the
+unindexed scan is 17 ms so no RDM index is needed. KB observations
+289-293</label></li>
+<li><label><input type="checkbox" />Accept or amend DR-0015, then start
+Phase 1. <strong>Phase 2 is blocked on that record</strong> — it changes
+the records-side join and what <code>rdmid</code> means</label></li>
+<li><label><input
+type="checkbox" /><code>dataset init rdm_requests.ds</code> — the rename
+needs no migration, the full harvest reproduces everything from
+RDM</label></li>
+<li><label><input type="checkbox"
+checked="" /><code>remote_harvest_rdm_requests_full.bash</code> + shared
+<code>rdm_requests_harvest_sql.bash</code> — DONE 2026-09-09. Shellcheck
+clean; semantics verified offline against synthetic fixtures in a
+throwaway Postgres cluster (21 assertions); run against production
+twice. Final run: 111,202 rows, 0 swept. Verification reconciles exactly
+(111,231 selected − 29 wholly-tombstoned parents), with
+<code>is_latest</code> false on 37,178 and creators/custom_fields
+differing from the pre-0015 baseline on 28,223/4,469 — within a handful
+of Phase 0c’s predictions. <code>parent_id</code> confirmed unindexed,
+so the materialised CTE was required. See plan Phase 2
+“Results”.</label></li>
+<li><label><input type="checkbox"
+checked="" /><code>remote_harvest_rdm_requests_incremental.bash</code> —
+WORKING 2026-09-09. All three passes in <strong>15 seconds</strong>
+(pass 1 alone was 32 minutes before DR-0018/DR-0019). Passes 2 and 3
+returned zero rows on a quiet database, so they are exercised but not
+demonstrated; acceptance tests 3a and 3b (publish a new version, delete
+a version) still need a live RDM. History, for context: Two causes: a
+selective predicate on the outer WHERE flipped the planner to nested
+loops over an unindexed expression join, and <code>target_version</code>
+detoasted all 1.5 GB of <code>rdm_records_metadata</code>’s jsonb before
+picking a winner. <strong>DR-0018 (proposed) restructures the
+SQL</strong> — resolve through <code>pidstore_pid</code>’s unique index,
+pick from heap columns then fetch json by primary key, restrict the pick
+to the parents in play, materialise the CTEs. DR-0019 then split that
+into two modes — the full harvest streams (bulk, 26m27s), the
+incremental picks before detoasting (keyed, 0.96s for pass 1) — and the
+fixture suite asserts both return identical rows. Re-verified against
+Phase 2’s numbers on production: identical. Three passes, each its own
+JSON-L: all currently-submitted (~917 rows, unconditional); everything
+changed since <code>rdm_requests_lastmod.txt</code>; prune
+cancelled/declined/tombstoned. Passes 2 and 3 select by parent, not by
+row (DR-0015)</label></li>
+<li><label><input type="checkbox" />Retire
+<code>remote_harvest_rdm_review_submissions.bash</code> and
+<code>remote_harvest_rdm_review_queue.bash</code> (replaced, not
+amended)</label></li>
+<li><label><input type="checkbox" /><code>cold_api.yaml</code> — dataset
+name plus <strong>twelve</strong> <code>FROM rdm_review_queue</code>
+query bodies (a collection’s SQL table name is its basename), restart
+<code>datasetd</code></label></li>
+<li><label><input type="checkbox" />Update the other references to the
+old collection name: <code>generate_country_collaboration_rpt.ts</code>,
+<code>authors_review_queue_csv.sql</code>,
+<code>authors_submissions_csv.sql</code>, <code>deno.json</code>,
+<code>list_mentions.bash</code>, docs</label></li>
+<li><label><input type="checkbox" />Document the new cadence in
+<code>crontab-example</code> — it has CaltechTHESIS entries but
+<strong>no RDM entries at all</strong> today</label></li>
+<li><label><input type="checkbox" /><strong>Verify
+<code>deletion_status</code>’s value domain against production before
+trusting the tombstone exclusion.</strong> <code>'P'</code> looks like
+the present state but that is inferred from schema context, not
+observed. Everything else in the design was checked offline; this one
+could not be.</label></li>
+</ul>
+<p>Do not rename the review-queue <em>feature</em> — the browser module,
+page and UI keep their names. Only the collection was misnamed.</p>
+<h3 id="technical-reports-group-custom-numbering-reports-issue-105">2.
+Technical reports + group custom numbering reports (issue #105)</h3>
+<p>Ships the release cycle <em>after</em> the harvest work. DR-0008,
+DR-0011, DR-0012. Plan:
+<code>agents/projects/cold/plans/technical_reports_report_plan.md</code>
+— <strong>needs rewriting</strong>, it still describes the
+CaltechAUTHORS-API approach that DR-0012 superseded.</p>
+<ul class="task-list">
+<li><label><input type="checkbox" />Rewrite the plan against DR-0012
+(source from <code>rdm_requests.ds</code> via a
+<code>cold_api.yaml</code> named query, not the CaltechAUTHORS
+API)</label></li>
+<li><label><input type="checkbox" />Revise
+<code>generate_technical_reports_rpt_test.ts</code> — 23 tests exist and
+pass; the 4 URL-builder tests go, and <code>recordToRow</code>’s input
+shape changes from API-nested (<code>metadata.title</code>) to the flat
+harvested JSON (<code>title</code>)</label></li>
+<li><label><input type="checkbox" />Revise
+<code>generate_technical_reports_rpt.ts</code> —
+<code>Dataset.query()</code> replaces <code>fetchAllRecords()</code>;
+<code>recordToRow</code>/<code>compareRows</code>/<code>buildCsv</code>
+survive</label></li>
+<li><label><input type="checkbox" />Rewrite
+<code>generateTechnicalReportsRptHelpText</code> — it describes the old
+selection, and it is the man-page source</label></li>
+<li><label><input type="checkbox" />Build wiring in
+<code>deno.json</code> and <code>Makefile</code> is <strong>already
+done</strong> and stands</label></li>
+<li><label><input type="checkbox" />Re-measure the expected row count
+after the re-harvest (DR-0011’s 19,429 was API-derived and will not
+match)</label></li>
+<li><label><input type="checkbox" />Tony’s group-custom-numbering report
+— still blocked on him confirming which groups</label></li>
+</ul>
+<p>Worth raising with Tom independently: the technical reports
+population is ~19,429 on the agreed selection, not the ~5,000 he
+estimated.</p>
 <h2 id="bug">bug</h2>
 <ul>
 <li>CaltechAUTHORS API pagination (see
-<code>caltechauthors_api_pagination.md</code>) – RESOLVED 2026-08-24,
+<code>caltechauthors_api_pagination.md</code>, now in
+<code>agents/projects/cold/design/</code>) – RESOLVED 2026-08-24,
 confirmed fixed on a local dev run of the original problem report,
 released as v0.0.51
 <ul class="task-list">

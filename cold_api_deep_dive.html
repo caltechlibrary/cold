@@ -34,10 +34,11 @@ access about stored objects is ultimately controlled by what this file
 declares.</p>
 <p>Reference documentation for the <code>datasetd</code> configuration
 format: - <a
-href="https://caltechlibrary.github.io/dataset/datasetd.1.html"
-class="uri">https://caltechlibrary.github.io/dataset/datasetd.1.html</a>
-- <a href="https://caltechlibrary.github.io/dataset/datasetd_api.5.html"
-class="uri">https://caltechlibrary.github.io/dataset/datasetd_api.5.html</a></p>
+href="https://software.library.caltech.edu/dataset/datasetd.1.html"
+class="uri">https://software.library.caltech.edu/dataset/datasetd.1.html</a>
+- <a
+href="https://software.library.caltech.edu/dataset/datasetd_api.5.html"
+class="uri">https://software.library.caltech.edu/dataset/datasetd_api.5.html</a></p>
 <hr />
 <h2 id="top-level-fields">Top-level fields</h2>
 <div class="sourceCode" id="cb1"><pre
@@ -570,10 +571,36 @@ as a query endpoint, not a DELETE HTTP method. The
 <code>ror_import.ts</code> tool calls it before loading a fresh ROR data
 dump.</p>
 <hr />
-<h3 id="rdm_review_queue.ds">rdm_review_queue.ds</h3>
-<p>Stores records from the RDM (Research Data Management) submission
-review queue. Records are deposited here from the InvenioRDM system for
-curator review.</p>
+<h3 id="rdm_requests.ds">rdm_requests.ds</h3>
+<p>A mirror of RDM’s request-and-record state: one row per
+community-submission request in a state librarians care about, harvested
+from the InvenioRDM Postgres database. The librarians’ review queue is a
+<em>view</em> over this collection, filtered to
+<code>status = 'submitted'</code> — which is why the queries below come
+in plain and <code>review_queue_</code> pairs, and why the browser
+module and page keep the review-queue name while the collection does
+not.</p>
+<p>Requests that are cancelled, declined, never submitted, or whose
+record is wholly deleted are not harvested at all, so they never appear
+here.</p>
+<p><strong>Two fields do not mean what a reader tends to
+assume.</strong> A request names one specific record <em>version</em>,
+and publishing a new version in RDM does not create a second request —
+so the row’s key is the version that was originally submitted, while
+<code>rdmid</code> is the newest version that has not been deleted,
+which is what RDM currently serves. On CaltechAUTHORS those differ on
+about a third of the collection. <code>is_latest</code> says whether
+they are the same, and <code>submitted_rdmid</code> carries the key’s
+value inside the object for consumers that would otherwise have to read
+the key. See DR-0015 in the DLD workspace.</p>
+<p><code>created</code> and <code>updated</code> are full ISO timestamps
+rather than dates, so a day’s activity can be ordered;
+<code>updated</code> is the newest of the request’s own timestamp and
+the harvested version’s.</p>
+<p>The collection is filled by
+<code>remote_harvest_rdm_requests_full.bash</code> nightly and kept
+current by <code>remote_harvest_rdm_requests_incremental.bash</code>;
+see <code>crontab-example</code>.</p>
 <p><strong>Named queries:</strong></p>
 <table>
 <colgroup>
@@ -592,7 +619,7 @@ curator review.</p>
 <tr>
 <td><code>browse</code></td>
 <td>none</td>
-<td>All records ordered by <code>updated</code> descending</td>
+<td>All records ordered by RDM’s <code>updated</code> descending</td>
 </tr>
 <tr>
 <td><code>search</code></td>

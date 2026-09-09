@@ -1,4 +1,4 @@
-%ror_import(1) user manual | 0.0.52 9c46d8a
+%ror_import(1) user manual | 0.0.52 bfa0872
 % R. S.Doiel
 % 2026-09-09
 
