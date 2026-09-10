@@ -16,20 +16,20 @@ const DEFAULT_MAX_RETRIES = 3;
 const DEFAULT_BACKOFF_SECONDS = 60;
 
 export interface FetchAllRecordsOptions {
-    /** Safety ceiling on the number of pages followed via links.next. */
-    maxPages?: number;
-    /** How many times to retry a single page after a 429 response. */
-    maxRetries?: number;
-    /** Backoff (seconds) used when a 429 response has no Retry-After header. */
-    defaultBackoffSeconds?: number;
-    /** Injectable fetch, for testing without network access. */
-    fetchFn?: typeof fetch;
-    /** Injectable sleep, for testing without waiting out real backoffs. */
-    sleepFn?: (ms: number) => Promise<void>;
+  /** Safety ceiling on the number of pages followed via links.next. */
+  maxPages?: number;
+  /** How many times to retry a single page after a 429 response. */
+  maxRetries?: number;
+  /** Backoff (seconds) used when a 429 response has no Retry-After header. */
+  defaultBackoffSeconds?: number;
+  /** Injectable fetch, for testing without network access. */
+  fetchFn?: typeof fetch;
+  /** Injectable sleep, for testing without waiting out real backoffs. */
+  sleepFn?: (ms: number) => Promise<void>;
 }
 
 function sleep(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 /**
@@ -45,69 +45,67 @@ function sleep(ms: number): Promise<void> {
  * far are returned rather than looping indefinitely.
  */
 export async function fetchAllRecords(
-    apiUrl: string,
-    opts: FetchAllRecordsOptions = {},
+  apiUrl: string,
+  opts: FetchAllRecordsOptions = {},
 ): Promise<unknown[]> {
-    const maxPages = opts.maxPages ?? DEFAULT_MAX_PAGES;
-    const maxRetries = opts.maxRetries ?? DEFAULT_MAX_RETRIES;
-    const defaultBackoffSeconds = opts.defaultBackoffSeconds ??
-        DEFAULT_BACKOFF_SECONDS;
-    const fetchFn = opts.fetchFn ?? fetch;
-    const sleepFn = opts.sleepFn ?? sleep;
+  const maxPages = opts.maxPages ?? DEFAULT_MAX_PAGES;
+  const maxRetries = opts.maxRetries ?? DEFAULT_MAX_RETRIES;
+  const defaultBackoffSeconds = opts.defaultBackoffSeconds ??
+    DEFAULT_BACKOFF_SECONDS;
+  const fetchFn = opts.fetchFn ?? fetch;
+  const sleepFn = opts.sleepFn ?? sleep;
 
-    const records: unknown[] = [];
-    let nextUrl: string | undefined = apiUrl;
-    let pageCount = 0;
+  const records: unknown[] = [];
+  let nextUrl: string | undefined = apiUrl;
+  let pageCount = 0;
 
-    while (nextUrl && pageCount < maxPages) {
-        const url: string = nextUrl;
-        let response: Response | undefined;
+  while (nextUrl && pageCount < maxPages) {
+    const url: string = nextUrl;
+    let response: Response | undefined;
 
-        for (let attempt = 0; attempt <= maxRetries; attempt++) {
-            response = await fetchFn(url);
-            if (response.status !== 429) break;
-            if (attempt === maxRetries) {
-                throw new Error(
-                    `fetchAllRecords: exhausted ${maxRetries} retries on HTTP 429 (rate limited) for ${url}`,
-                );
-            }
-            const retryAfter = parseInt(
-                response.headers.get("Retry-After") ?? "",
-                10,
-            );
-            const waitSeconds = retryAfter > 0
-                ? retryAfter
-                : defaultBackoffSeconds;
-            console.error(
-                `fetchAllRecords: rate limited (429), waiting ${waitSeconds}s before retry ${
-                    attempt + 1
-                }/${maxRetries} for ${url}`,
-            );
-            await sleepFn(waitSeconds * 1000);
-        }
-
-        if (!response) {
-            throw new Error(`fetchAllRecords: no response received for ${url}`);
-        }
-        if (!response.ok) {
-            const body = await response.text();
-            throw new Error(
-                `fetchAllRecords: failed to fetch records (HTTP ${response.status}) for ${url}: ${body}`,
-            );
-        }
-
-        const data = await response.json();
-        const hits = data?.hits?.hits ?? [];
-        records.push(...hits);
-        pageCount++;
-        nextUrl = data?.links?.next;
-    }
-
-    if (nextUrl && pageCount >= maxPages) {
-        console.error(
-            `fetchAllRecords: reached the ${maxPages}-page safety ceiling with more results available (next: ${nextUrl}); returning ${records.length} records collected so far`,
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      response = await fetchFn(url);
+      if (response.status !== 429) break;
+      if (attempt === maxRetries) {
+        throw new Error(
+          `fetchAllRecords: exhausted ${maxRetries} retries on HTTP 429 (rate limited) for ${url}`,
         );
+      }
+      const retryAfter = parseInt(
+        response.headers.get("Retry-After") ?? "",
+        10,
+      );
+      const waitSeconds = retryAfter > 0 ? retryAfter : defaultBackoffSeconds;
+      console.error(
+        `fetchAllRecords: rate limited (429), waiting ${waitSeconds}s before retry ${
+          attempt + 1
+        }/${maxRetries} for ${url}`,
+      );
+      await sleepFn(waitSeconds * 1000);
     }
 
-    return records;
+    if (!response) {
+      throw new Error(`fetchAllRecords: no response received for ${url}`);
+    }
+    if (!response.ok) {
+      const body = await response.text();
+      throw new Error(
+        `fetchAllRecords: failed to fetch records (HTTP ${response.status}) for ${url}: ${body}`,
+      );
+    }
+
+    const data = await response.json();
+    const hits = data?.hits?.hits ?? [];
+    records.push(...hits);
+    pageCount++;
+    nextUrl = data?.links?.next;
+  }
+
+  if (nextUrl && pageCount >= maxPages) {
+    console.error(
+      `fetchAllRecords: reached the ${maxPages}-page safety ceiling with more results available (next: ${nextUrl}); returning ${records.length} records collected so far`,
+    );
+  }
+
+  return records;
 }

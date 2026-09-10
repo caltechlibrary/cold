@@ -8,17 +8,17 @@ import { $ } from "@david/dax";
 import { send_email } from "./send_mail.ts";
 
 import {
-    apiPort,
-    Dataset,
-    formDataToObject,
-    licenseText,
-    OptionsProcessor,
-    path,
-    releaseDate,
-    releaseHash,
-    renderJSON,
-    renderPage,
-    version,
+  apiPort,
+  Dataset,
+  formDataToObject,
+  licenseText,
+  OptionsProcessor,
+  path,
+  releaseDate,
+  releaseHash,
+  renderJSON,
+  renderPage,
+  version,
 } from "./deps.ts";
 import { coldReportsHelpText, fmtHelp } from "./helptext.ts";
 
@@ -32,160 +32,158 @@ const appName = "cold_reports";
 // This can be accomplishled by adding a timestamp to the object. In this way similar
 // report requests can be distriguished from one anther.
 async function genId(o: object): Promise<string> {
-    const now = new Date();
-    const utf8Encoder = new TextEncoder();
-    const signature = utf8Encoder.encode(
-        JSON.stringify({ "payload": o, "generated": now }),
-    );
-    return (await v5.generate(NAMESPACE_URL, signature)).toString();
+  const now = new Date();
+  const utf8Encoder = new TextEncoder();
+  const signature = utf8Encoder.encode(
+    JSON.stringify({ "payload": o, "generated": now }),
+  );
+  return (await v5.generate(NAMESPACE_URL, signature)).toString();
 }
 
 /**
  * ReportInterface describes a report request obejct.
  */
 export interface ReportInterface {
-    // id is the identifier for the report object in the queue
-    id: string;
-    // report_name is the report name defined in the cold_reports.yaml file
-    report_name: string;
-    // options holds program options (not form data).
-    options: string[];
-    // inputs holds any parameter definitions for a parameterized report and may temporarily hold value of the inputs
-    inputs: InputsInterface[];
-    // emails holds a comma delimited string of email addresses to notify when report is completed
-    emails: string;
-    // requested holds the timestamp of when the request was made
-    requested: string;
-    // updated holds the timestamp of when the request was updated
-    updated: string;
-    // expire should hold the timestamp of when the report can be purged automatically
-    // in practice I'm just purging the reports every night.
-    expire: string;
-    // status holds the current processing state of the report (requested, processing, aborted, completed)
-    status: string;
-    // link is the URL to where the report can be found in the COLD web UI
-    link: string;
+  // id is the identifier for the report object in the queue
+  id: string;
+  // report_name is the report name defined in the cold_reports.yaml file
+  report_name: string;
+  // options holds program options (not form data).
+  options: string[];
+  // inputs holds any parameter definitions for a parameterized report and may temporarily hold value of the inputs
+  inputs: InputsInterface[];
+  // emails holds a comma delimited string of email addresses to notify when report is completed
+  emails: string;
+  // requested holds the timestamp of when the request was made
+  requested: string;
+  // updated holds the timestamp of when the request was updated
+  updated: string;
+  // expire should hold the timestamp of when the report can be purged automatically
+  // in practice I'm just purging the reports every night.
+  expire: string;
+  // status holds the current processing state of the report (requested, processing, aborted, completed)
+  status: string;
+  // link is the URL to where the report can be found in the COLD web UI
+  link: string;
 }
 
 /**
  * Report implements a report request object
  */
 export class Report implements ReportInterface {
-    id: string = "";
-    report_name: string = "";
-    options: string[] = [];
-    inputs: InputsInterface[] = [];
-    emails: string = "";
-    requested: string = "";
-    updated: string = "";
-    expire: string = "";
-    status: string = "";
-    link: string = "";
-    private config_yaml: string = "cold_reports.yaml";
+  id: string = "";
+  report_name: string = "";
+  options: string[] = [];
+  inputs: InputsInterface[] = [];
+  emails: string = "";
+  requested: string = "";
+  updated: string = "";
+  expire: string = "";
+  status: string = "";
+  link: string = "";
+  private config_yaml: string = "cold_reports.yaml";
 
-    constructor(config_yaml?: string) {
-        if (config_yaml !== undefined) {
-            this.config_yaml = config_yaml;
+  constructor(config_yaml?: string) {
+    if (config_yaml !== undefined) {
+      this.config_yaml = config_yaml;
+    }
+  }
+
+  async get_report_inputs(report_name: string): Promise<boolean> {
+    // FIXME: open this.config_yaml and find the report
+    const src = Deno.readTextFileSync(this.config_yaml);
+    if (src === undefined || src === "") {
+      //FIXME: log the error that we can't read config_yaml
+      return false;
+    }
+    const cfg = yaml.parse(src) as {
+      [key: string]: { [key: string]: Runnable };
+    };
+    // Now find and return our report interface object.
+    if (cfg.reports !== undefined) {
+      for (const [k, v] of Object.entries(cfg.reports)) {
+        if (k === report_name) {
+          // FIXME: Before assignment I should validate against type.
+          this.inputs = v.inputs;
+          return true;
         }
+      }
     }
+    return false;
+  }
 
-    async get_report_inputs(report_name: string): Promise<boolean> {
-        // FIXME: open this.config_yaml and find the report
-        const src = Deno.readTextFileSync(this.config_yaml);
-        if (src === undefined || src === "") {
-            //FIXME: log the error that we can't read config_yaml
-            return false;
+  // merge_inputs takes an object holding key/value pairs (like from our form) and updates the value
+  // of the input is it matches the form's pair.
+  merge_inputs(formObject: Record<string, string>): void {
+    this.inputs = this.inputs.map((obj) => {
+      for (let k in formObject) {
+        if (k === obj.id) {
+          obj.value = "";
+          obj.value = formObject[k];
+          break;
         }
-        const cfg = yaml.parse(src) as {
-            [key: string]: { [key: string]: Runnable };
-        };
-        // Now find and return our report interface object.
-        if (cfg.reports !== undefined) {
-            for (const [k, v] of Object.entries(cfg.reports)) {
-                if (k === report_name) {
-                    // FIXME: Before assignment I should validate against type.
-                    this.inputs = v.inputs;
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
+      }
+      return obj;
+    });
+  }
 
-    // merge_inputs takes an object holding key/value pairs (like from our form) and updates the value
-    // of the input is it matches the form's pair.
-    merge_inputs(formObject: Record<string, string>): void {
-        this.inputs = this.inputs.map((obj) => {
-            for (let k in formObject) {
-                if (k === obj.id) {
-                    obj.value = "";
-                    obj.value = formObject[k];
-                    break;
-                }
-            }
-            return obj;
-        });
+  // request_report operates a little bit like a constructure. It updates the report object
+  // to reflect the report being requested. The parameter "o" forms normalized form elements.
+  // These are vetted. If the values match expected inputs then they will be merged into
+  // the Report object instance.
+  async request_report(o: object): Promise<boolean> {
+    if (!o.hasOwnProperty("report_name")) {
+      return false;
     }
+    const id = await genId(o);
+    this.id = id;
+    const parts = "report_name" in o ? `${o.report_name}`.split(";", 2) : "";
+    const report_name = parts[0].trim();
+    const content_type = parts.length > 1 ? parts[1].trim() : "text/plain";
 
-    // request_report operates a little bit like a constructure. It updates the report object
-    // to reflect the report being requested. The parameter "o" forms normalized form elements.
-    // These are vetted. If the values match expected inputs then they will be merged into
-    // the Report object instance.
-    async request_report(o: object): Promise<boolean> {
-        if (!o.hasOwnProperty("report_name")) {
-            return false;
-        }
-        const id = await genId(o);
-        this.id = id;
-        const parts = "report_name" in o
-            ? `${o.report_name}`.split(";", 2)
-            : "";
-        const report_name = parts[0].trim();
-        const content_type = parts.length > 1 ? parts[1].trim() : "text/plain";
-
-        this.report_name = report_name;
-        this.options = "options" in o ? o.options as unknown[] as string[] : [];
-        // Now that we know the report name, the inputs definitions need to be retrieved
-        // then updated to hold the values too.
-        if (await this.get_report_inputs(this.report_name)) {
-            if (this.inputs !== undefined) {
-                this.merge_inputs(o as Record<string, string>);
-            }
-        } else {
-            this.inputs = [];
-        }
-        this.emails = "emails" in o ? `${o.emails}` : ``;
-        const now = new Date();
-        const expire_in_days = 7;
-        const expire = (new Date()).setDate(
-            now.getDate() + expire_in_days,
-        ) as unknown as Date;
-        this.expire = expire.toString();
-        this.requested = now.toISOString();
-        this.updated = now.toISOString();
-        this.status = "requested";
-        this.link = "";
-        return true;
+    this.report_name = report_name;
+    this.options = "options" in o ? o.options as unknown[] as string[] : [];
+    // Now that we know the report name, the inputs definitions need to be retrieved
+    // then updated to hold the values too.
+    if (await this.get_report_inputs(this.report_name)) {
+      if (this.inputs !== undefined) {
+        this.merge_inputs(o as Record<string, string>);
+      }
+    } else {
+      this.inputs = [];
     }
+    this.emails = "emails" in o ? `${o.emails}` : ``;
+    const now = new Date();
+    const expire_in_days = 7;
+    const expire = (new Date()).setDate(
+      now.getDate() + expire_in_days,
+    ) as unknown as Date;
+    this.expire = expire.toString();
+    this.requested = now.toISOString();
+    this.updated = now.toISOString();
+    this.status = "requested";
+    this.link = "";
+    return true;
+  }
 
-    asObject(): Object {
-        return {
-            id: this.id,
-            report_name: this.report_name,
-            options: this.options,
-            inputs: this.inputs,
-            emails: this.emails,
-            requested: this.requested,
-            updated: this.updated,
-            expire: this.expire,
-            status: this.status,
-            link: this.link,
-        };
-    }
+  asObject(): Object {
+    return {
+      id: this.id,
+      report_name: this.report_name,
+      options: this.options,
+      inputs: this.inputs,
+      emails: this.emails,
+      requested: this.requested,
+      updated: this.updated,
+      expire: this.expire,
+      status: this.status,
+      link: this.link,
+    };
+  }
 
-    toJSON(): string {
-        return JSON.stringify(this.asObject());
-    }
+  toJSON(): string {
+    return JSON.stringify(this.asObject());
+  }
 }
 
 /**
@@ -204,20 +202,20 @@ export class Report implements ReportInterface {
  * @returns {Response}
  */
 export async function handleReports(
-    req: Request,
-    options: { debug: boolean; htdocs: string },
+  req: Request,
+  options: { debug: boolean; htdocs: string },
 ): Promise<Response> {
-    if (req.method === "GET") {
-        return await handleReportsList(req, options);
-    }
-    if (req.method === "POST") {
-        return await handleReportRequest(req, options);
-    }
-    const body = `<html>${req.method} not supported</html>`;
-    return new Response(body, {
-        status: 405,
-        headers: { "content-type": "text/html" },
-    });
+  if (req.method === "GET") {
+    return await handleReportsList(req, options);
+  }
+  if (req.method === "POST") {
+    return await handleReportRequest(req, options);
+  }
+  const body = `<html>${req.method} not supported</html>`;
+  return new Response(body, {
+    status: 405,
+    headers: { "content-type": "text/html" },
+  });
 }
 
 /**
@@ -234,26 +232,26 @@ export async function handleReports(
  * - `/{clpid}` indicates retrieving a single object by the Caltech Library people id
  */
 async function handleReportsList(
-    req: Request,
-    options: { debug: boolean; htdocs: string },
+  req: Request,
+  options: { debug: boolean; htdocs: string },
 ): Promise<Response> {
-    /* parse the URL */
-    const url = new URL(req.url);
-    const params = url.searchParams;
-    let tmpl = "report_list";
-    /* display a list queued report requests */
-    const report_list = await ds.query("report_list", [], {});
-    if (report_list !== undefined) {
-        return renderPage(tmpl, {
-            base_path: "",
-            report_list: report_list,
-        });
-    } else {
-        return renderPage(tmpl, {
-            base_path: "",
-            report_list: [],
-        });
-    }
+  /* parse the URL */
+  const url = new URL(req.url);
+  const params = url.searchParams;
+  let tmpl = "report_list";
+  /* display a list queued report requests */
+  const report_list = await ds.query("report_list", [], {});
+  if (report_list !== undefined) {
+    return renderPage(tmpl, {
+      base_path: "",
+      report_list: report_list,
+    });
+  } else {
+    return renderPage(tmpl, {
+      base_path: "",
+      report_list: [],
+    });
+  }
 }
 
 /**
@@ -265,197 +263,197 @@ async function handleReportsList(
  * @returns {Promise<Response>}
  */
 async function handleReportRequest(
-    req: Request,
-    options: { debug: boolean; htdocs: string },
+  req: Request,
+  options: { debug: boolean; htdocs: string },
 ): Promise<Response> {
-    const wantsJSON = (req.headers.get("Accept") || "").includes(
-        "application/json",
-    );
-    if (req.body !== null) {
-        // Request a report to be run
-        const form = await req.formData();
-        // NOTE: obj holds some normalized but unvalidated form content
-        let obj = formDataToObject(form);
-        const rpt = new Report("cold_reports.yaml");
-        // NOTE: request_report is mapping the obj need to validate that it is a report request,
-        // and the form contents so any additional inputs can be mapped to the report inputs.
-        const ok = await rpt.request_report(obj);
-        if (ok) {
-            // We want to create the record and return success. If the record
-            // has already been created then we should distriguish that error from
-            // other types of error.
-            if ((await ds.create(rpt.id, rpt.asObject()))) {
-                if (wantsJSON) {
-                    return renderJSON({
-                        ok: true,
-                        id: rpt.id,
-                        report_name: rpt.report_name,
-                        status: "requested",
-                    }, 200);
-                }
-                let msgs: string[] = [];
-                msgs.push(`Report request ${rpt.report_name}`);
-                if (rpt.report_name !== rpt.id) {
-                    msgs.push(` (${rpt.id}) received.`);
-                } else {
-                    msgs.push(" received.");
-                }
-                if (rpt.emails !== "") {
-                    msgs.push(
-                        `notification(s) will be sent to ${rpt.emails} when report is available.`,
-                    );
-                }
-                msgs.push(' <a href="reports">back to reports list</a>');
-                return new Response(
-                    `<html><head><meta charset="UTF-8" />  <meta http-equiv="Refresh" content="${wait_in_seconds}; URL=reports" /></head><body>${
-                        msgs.join(" ")
-                    }. Redirecting to reports page in ${wait_in_seconds} seconds.</body></html>`,
-                    {
-                        status: 200,
-                        headers: { "content-type": "text/html" },
-                    },
-                );
-            }
-            // Handle the case of previously created record.
-            const readObject = await ds.read(rpt.id);
-            if (readObject !== undefined) {
-                if (wantsJSON) {
-                    return renderJSON({
-                        ok: true,
-                        id: rpt.id,
-                        report_name: rpt.report_name,
-                        status: (readObject as Record<string, string>).status ??
-                            "requested",
-                    }, 200);
-                }
-                let msgs: string[] = [];
-                msgs.push(`Report request ${rpt.report_name}`);
-                if (rpt.report_name !== rpt.id) {
-                    msgs.push(` (${rpt.id}) previously received.`);
-                } else {
-                    msgs.push(" previously received.");
-                }
-                if (rpt.emails !== "") {
-                    msgs.push(
-                        `notification(s) will be sent to ${rpt.emails} when report is available.`,
-                    );
-                }
-                msgs.push(' <a href="reports">back to reports list</a>');
-                return new Response(
-                    `<html><head><meta charset="UTF-8" />  <meta http-equiv="Refresh" content="${wait_in_seconds}; URL=reports" /></head><body>${
-                        msgs.join(" ")
-                    }. Redirecting to reports page in ${wait_in_seconds} seconds.</body></html>`,
-                    {
-                        status: 200,
-                        headers: { "content-type": "text/html" },
-                    },
-                );
-            }
-            if (wantsJSON) {
-                return renderJSON({
-                    ok: false,
-                    report_name: rpt.report_name,
-                    id: rpt.id,
-                    msg: "failed to create report request, try again later",
-                }, 500);
-            }
-            return new Response(
-                `<html>there was a problem generating report request for ${rpt.report_name}, ${rpt.id} -> ${rpt.toJSON()}, try again later.  <a href="reports">back to reports list</a>`,
-                {
-                    status: 500,
-                    headers: { "content-type": "text/html" },
-                },
-            );
+  const wantsJSON = (req.headers.get("Accept") || "").includes(
+    "application/json",
+  );
+  if (req.body !== null) {
+    // Request a report to be run
+    const form = await req.formData();
+    // NOTE: obj holds some normalized but unvalidated form content
+    let obj = formDataToObject(form);
+    const rpt = new Report("cold_reports.yaml");
+    // NOTE: request_report is mapping the obj need to validate that it is a report request,
+    // and the form contents so any additional inputs can be mapped to the report inputs.
+    const ok = await rpt.request_report(obj);
+    if (ok) {
+      // We want to create the record and return success. If the record
+      // has already been created then we should distriguish that error from
+      // other types of error.
+      if ((await ds.create(rpt.id, rpt.asObject()))) {
+        if (wantsJSON) {
+          return renderJSON({
+            ok: true,
+            id: rpt.id,
+            report_name: rpt.report_name,
+            status: "requested",
+          }, 200);
         }
+        let msgs: string[] = [];
+        msgs.push(`Report request ${rpt.report_name}`);
+        if (rpt.report_name !== rpt.id) {
+          msgs.push(` (${rpt.id}) received.`);
+        } else {
+          msgs.push(" received.");
+        }
+        if (rpt.emails !== "") {
+          msgs.push(
+            `notification(s) will be sent to ${rpt.emails} when report is available.`,
+          );
+        }
+        msgs.push(' <a href="reports">back to reports list</a>');
+        return new Response(
+          `<html><head><meta charset="UTF-8" />  <meta http-equiv="Refresh" content="${wait_in_seconds}; URL=reports" /></head><body>${
+            msgs.join(" ")
+          }. Redirecting to reports page in ${wait_in_seconds} seconds.</body></html>`,
+          {
+            status: 200,
+            headers: { "content-type": "text/html" },
+          },
+        );
+      }
+      // Handle the case of previously created record.
+      const readObject = await ds.read(rpt.id);
+      if (readObject !== undefined) {
+        if (wantsJSON) {
+          return renderJSON({
+            ok: true,
+            id: rpt.id,
+            report_name: rpt.report_name,
+            status: (readObject as Record<string, string>).status ??
+              "requested",
+          }, 200);
+        }
+        let msgs: string[] = [];
+        msgs.push(`Report request ${rpt.report_name}`);
+        if (rpt.report_name !== rpt.id) {
+          msgs.push(` (${rpt.id}) previously received.`);
+        } else {
+          msgs.push(" previously received.");
+        }
+        if (rpt.emails !== "") {
+          msgs.push(
+            `notification(s) will be sent to ${rpt.emails} when report is available.`,
+          );
+        }
+        msgs.push(' <a href="reports">back to reports list</a>');
+        return new Response(
+          `<html><head><meta charset="UTF-8" />  <meta http-equiv="Refresh" content="${wait_in_seconds}; URL=reports" /></head><body>${
+            msgs.join(" ")
+          }. Redirecting to reports page in ${wait_in_seconds} seconds.</body></html>`,
+          {
+            status: 200,
+            headers: { "content-type": "text/html" },
+          },
+        );
+      }
+      if (wantsJSON) {
+        return renderJSON({
+          ok: false,
+          report_name: rpt.report_name,
+          id: rpt.id,
+          msg: "failed to create report request, try again later",
+        }, 500);
+      }
+      return new Response(
+        `<html>there was a problem generating report request for ${rpt.report_name}, ${rpt.id} -> ${rpt.toJSON()}, try again later.  <a href="reports">back to reports list</a>`,
+        {
+          status: 500,
+          headers: { "content-type": "text/html" },
+        },
+      );
     }
-    // Method not supported.
-    console.log("Bad request", req.url.toString());
-    if (wantsJSON) {
-        return renderJSON({ ok: false, msg: "Bad Request" }, 400);
-    }
-    return new Response(`Bad Request`, {
-        status: 400,
-        headers: { "content-type": "text/html" },
-    });
+  }
+  // Method not supported.
+  console.log("Bad request", req.url.toString());
+  if (wantsJSON) {
+    return renderJSON({ ok: false, msg: "Bad Request" }, 400);
+  }
+  return new Response(`Bad Request`, {
+    status: 400,
+    headers: { "content-type": "text/html" },
+  });
 }
 
 export interface InputsInterface {
-    id: string;
-    type: string;
-    value: string;
-    required: boolean;
+  id: string;
+  type: string;
+  value: string;
+  required: boolean;
 }
 
 export class Inputs implements InputsInterface {
-    id: string = "";
-    type: string = "text";
-    value: string = "";
-    required: boolean = false;
+  id: string = "";
+  type: string = "text";
+  value: string = "";
+  required: boolean = false;
 }
 
 export interface RunnableInterface {
-    report_name: string;
-    cmd: string;
-    options: string[];
-    basename: string;
-    append_datestamp: boolean;
-    content_type: string;
-    final_status: string;
-    link: string;
-    // List of inputs holds an ordered list of Input id, type, required and value
-    inputs: Inputs[];
+  report_name: string;
+  cmd: string;
+  options: string[];
+  basename: string;
+  append_datestamp: boolean;
+  content_type: string;
+  final_status: string;
+  link: string;
+  // List of inputs holds an ordered list of Input id, type, required and value
+  inputs: Inputs[];
 }
 
 export class Runnable implements RunnableInterface {
-    report_name: string;
-    cmd: string;
-    options: string[];
-    basename: string;
-    append_datestamp: boolean;
-    content_type: string;
-    final_status: string;
-    link: string;
-    // List of inputs holds a list of Input id, type, required and value
-    inputs: Inputs[];
+  report_name: string;
+  cmd: string;
+  options: string[];
+  basename: string;
+  append_datestamp: boolean;
+  content_type: string;
+  final_status: string;
+  link: string;
+  // List of inputs holds a list of Input id, type, required and value
+  inputs: Inputs[];
 
-    constructor(
-        report_name: string,
-        cmd: string,
-        basename: string,
-        inputs: Inputs[],
-        append_datestamp: boolean,
-        content_type: string,
-    ) {
-        this.report_name = report_name;
-        this.cmd = cmd;
-        this.basename = basename;
-        this.inputs = inputs;
-        this.append_datestamp = append_datestamp;
-        this.content_type = content_type;
-        this.options = [];
-        this.final_status = "";
-        this.link = "";
-    }
+  constructor(
+    report_name: string,
+    cmd: string,
+    basename: string,
+    inputs: Inputs[],
+    append_datestamp: boolean,
+    content_type: string,
+  ) {
+    this.report_name = report_name;
+    this.cmd = cmd;
+    this.basename = basename;
+    this.inputs = inputs;
+    this.append_datestamp = append_datestamp;
+    this.content_type = content_type;
+    this.options = [];
+    this.final_status = "";
+    this.link = "";
+  }
 
-    filenameTemplate(template: string, inputs: Inputs[]): string {
-        // Replace each placeholder in the template with the corresponding input value.
-        // Strip non-safe characters from substituted values to prevent path traversal.
-        return template.replace(/\{\{(\w+)\}\}/g, (_, key) => {
-            const input = inputs.find((input) => input.id === key);
-            const value = input ? input.value : `_${key}_`;
-            return value.replace(/[^A-Za-z0-9_\-]/g, "_");
-        });
-    }
+  filenameTemplate(template: string, inputs: Inputs[]): string {
+    // Replace each placeholder in the template with the corresponding input value.
+    // Strip non-safe characters from substituted values to prevent path traversal.
+    return template.replace(/\{\{(\w+)\}\}/g, (_, key) => {
+      const input = inputs.find((input) => input.id === key);
+      const value = input ? input.value : `_${key}_`;
+      return value.replace(/[^A-Za-z0-9_\-]/g, "_");
+    });
+  }
 
-    // Run executables the program implementing the report. It's calling out to the operating system to run it.
-    // The report program is expected to return a link written to standard out on success. Otherwise return an
-    // empty string or short error message using the protocol `error://`.
-    async run(options: string[]): Promise<string> {
-        //FIXME: Need to execute command line program and capture result link or error message from standard out then hand it back.
-        console.log(
-            `Running: ${this.cmd}, inputs ${JSON.stringify(this.inputs)}`,
-        );
-        /*
+  // Run executables the program implementing the report. It's calling out to the operating system to run it.
+  // The report program is expected to return a link written to standard out on success. Otherwise return an
+  // empty string or short error message using the protocol `error://`.
+  async run(options: string[]): Promise<string> {
+    //FIXME: Need to execute command line program and capture result link or error message from standard out then hand it back.
+    console.log(
+      `Running: ${this.cmd}, inputs ${JSON.stringify(this.inputs)}`,
+    );
+    /*
     let txt: string;
     try {
       // FIXME: if inputs are defined then they need to be validated before forming the command sequence to execute
@@ -464,295 +462,295 @@ export class Runnable implements RunnableInterface {
       txt = "error://" + err;
     }
     */
-        // txt carries the "error://..." sentinel on failure. On success, the
-        // command's raw stdout bytes are kept in outputBytes and written to
-        // disk as-is (see below) — txt is NOT reconstructed from those bytes,
-        // since decoding arbitrary output (e.g. binary XLSX/zip content) as
-        // UTF-8 and re-encoding it is lossy and would corrupt it.
-        let txt: string = "";
-        let outputBytes: Uint8Array | undefined;
-        try {
-            // Validate inputs if they exist
-            if (this.inputs && this.inputs.length > 0) {
-                // Example: Ensure inputs are strings and escape them if needed
-                const validatedInputs: string[] = this.inputs.map((input) => {
-                    if (typeof input.value !== "string") {
-                        throw new Error(
-                            `All command line parameters must be strings for ${this.report_name} -> ${
-                                JSON.stringify(input)
-                            } <-- ${JSON.stringify(this.inputs)}`,
-                        );
-                    }
-                    return input.value;
-                });
-
-                // Construct the command with parameters
-                // Use Deno's Command API for safer parameter handling
-                const cmd = new Deno.Command(this.cmd, {
-                    args: validatedInputs,
-                });
-                const { code, stdout, stderr } = await cmd.output();
-
-                if (code !== 0) {
-                    const errMsg = new TextDecoder().decode(stderr).trim();
-                    throw new Error(
-                        errMsg || `command exited with code ${code}`,
-                    );
-                }
-
-                outputBytes = stdout;
-            } else {
-                // Fallback: execute without parameters. dax's .text() only exposes
-                // decoded text, so this path remains text-only; every report using
-                // it today is a text content-type (e.g. text/csv).
-                txt = await $`${this.cmd}`.text();
-            }
-        } catch (err: unknown) {
-            txt = "error://" + String(err);
-        }
-
-        // the URL would be returned by the runner when final desitantion is available.
-        let filename: string = this.basename;
-        // FIXME: If `{{` and `}}` are in filename we need to resolve these against the required templated elements
-        if (this.inputs.length > 0 && filename.indexOf("{{") > -1) {
-            // We have a templated filename that needs to be updated.
-            // Build a map between the inputs name and the options passed in report request.
-            //console.log(`FIXME: need to render the template here`);
-            //return "error://basename templates not implemented yet";
-            filename = path.basename(
-                this.filenameTemplate(this.basename, this.inputs),
+    // txt carries the "error://..." sentinel on failure. On success, the
+    // command's raw stdout bytes are kept in outputBytes and written to
+    // disk as-is (see below) — txt is NOT reconstructed from those bytes,
+    // since decoding arbitrary output (e.g. binary XLSX/zip content) as
+    // UTF-8 and re-encoding it is lossy and would corrupt it.
+    let txt: string = "";
+    let outputBytes: Uint8Array | undefined;
+    try {
+      // Validate inputs if they exist
+      if (this.inputs && this.inputs.length > 0) {
+        // Example: Ensure inputs are strings and escape them if needed
+        const validatedInputs: string[] = this.inputs.map((input) => {
+          if (typeof input.value !== "string") {
+            throw new Error(
+              `All command line parameters must be strings for ${this.report_name} -> ${
+                JSON.stringify(input)
+              } <-- ${JSON.stringify(this.inputs)}`,
             );
-        }
-        // FIXME: See if I need at add a prefix
-        let ext: string = ".txt";
-        switch (this.content_type) {
-            case "text/plain":
-                ext = ".txt";
-                break;
-            case "text/csv":
-                ext = ".csv";
-                break;
-            case "application/json":
-                ext = ".json";
-                break;
-            case "text/markdown":
-                ext = ".md";
-                break;
-            case "application/yaml":
-                ext = ".yaml";
-                break;
-            case "application/vnd.ms-excel":
-                ext = ".xlsx";
-                break;
-            default:
-                ext = "";
-                break;
-        }
-        console.log("INFO: file extension set to ", ext, this.content_type);
-        if (this.append_datestamp) {
-            let datestamp = (new Date()).toJSON().substring(0, 10);
-            filename = `${filename}_${datestamp}${ext}`;
-        } else {
-            filename = `${filename}${ext}`;
-        }
-        console.log("INFO: filename should be", filename);
+          }
+          return input.value;
+        });
 
-        if (txt.startsWith("error://")) {
-            return txt;
+        // Construct the command with parameters
+        // Use Deno's Command API for safer parameter handling
+        const cmd = new Deno.Command(this.cmd, {
+          args: validatedInputs,
+        });
+        const { code, stdout, stderr } = await cmd.output();
+
+        if (code !== 0) {
+          const errMsg = new TextDecoder().decode(stderr).trim();
+          throw new Error(
+            errMsg || `command exited with code ${code}`,
+          );
         }
-        // FIXME: output location for report should not be hardcoded.
-        const basedir: string = "./htdocs/rpt";
-        // FIXME: base URL of report should not be hardcoded
-        const base_url: string = "rpt";
-        // Prefer the command's raw stdout bytes so binary output (e.g. XLSX)
-        // survives untouched; only text-only code paths fall back to encoding txt.
-        const data = outputBytes ?? new TextEncoder().encode(txt);
-        try {
-            await Deno.mkdir(basedir, { recursive: true });
-            await Deno.writeFile(`${basedir}/${filename}`, data, {
-                create: true,
-            });
-        } catch (err) {
-            return "error://" + err;
-        }
-        return `${base_url}/${filename}`;
+
+        outputBytes = stdout;
+      } else {
+        // Fallback: execute without parameters. dax's .text() only exposes
+        // decoded text, so this path remains text-only; every report using
+        // it today is a text content-type (e.g. text/csv).
+        txt = await $`${this.cmd}`.text();
+      }
+    } catch (err: unknown) {
+      txt = "error://" + String(err);
     }
+
+    // the URL would be returned by the runner when final desitantion is available.
+    let filename: string = this.basename;
+    // FIXME: If `{{` and `}}` are in filename we need to resolve these against the required templated elements
+    if (this.inputs.length > 0 && filename.indexOf("{{") > -1) {
+      // We have a templated filename that needs to be updated.
+      // Build a map between the inputs name and the options passed in report request.
+      //console.log(`FIXME: need to render the template here`);
+      //return "error://basename templates not implemented yet";
+      filename = path.basename(
+        this.filenameTemplate(this.basename, this.inputs),
+      );
+    }
+    // FIXME: See if I need at add a prefix
+    let ext: string = ".txt";
+    switch (this.content_type) {
+      case "text/plain":
+        ext = ".txt";
+        break;
+      case "text/csv":
+        ext = ".csv";
+        break;
+      case "application/json":
+        ext = ".json";
+        break;
+      case "text/markdown":
+        ext = ".md";
+        break;
+      case "application/yaml":
+        ext = ".yaml";
+        break;
+      case "application/vnd.ms-excel":
+        ext = ".xlsx";
+        break;
+      default:
+        ext = "";
+        break;
+    }
+    console.log("INFO: file extension set to ", ext, this.content_type);
+    if (this.append_datestamp) {
+      let datestamp = (new Date()).toJSON().substring(0, 10);
+      filename = `${filename}_${datestamp}${ext}`;
+    } else {
+      filename = `${filename}${ext}`;
+    }
+    console.log("INFO: filename should be", filename);
+
+    if (txt.startsWith("error://")) {
+      return txt;
+    }
+    // FIXME: output location for report should not be hardcoded.
+    const basedir: string = "./htdocs/rpt";
+    // FIXME: base URL of report should not be hardcoded
+    const base_url: string = "rpt";
+    // Prefer the command's raw stdout bytes so binary output (e.g. XLSX)
+    // survives untouched; only text-only code paths fall back to encoding txt.
+    const data = outputBytes ?? new TextEncoder().encode(txt);
+    try {
+      await Deno.mkdir(basedir, { recursive: true });
+      await Deno.writeFile(`${basedir}/${filename}`, data, {
+        create: true,
+      });
+    } catch (err) {
+      return "error://" + err;
+    }
+    return `${base_url}/${filename}`;
+  }
 }
 
 interface RunnerInterface {
-    report_map: { [key: string]: RunnableInterface };
+  report_map: { [key: string]: RunnableInterface };
 }
 
 class Runner implements RunnerInterface {
-    readonly report_map: { [key: string]: Runnable } = {};
+  readonly report_map: { [key: string]: Runnable } = {};
 
-    constructor(config_yaml: string) {
-        const src = Deno.readTextFileSync(config_yaml);
-        const cfg = yaml.parse(src) as {
-            [key: string]: { [key: string]: Runnable };
-        };
-        if (cfg.reports !== undefined) {
-            for (const [k, v] of Object.entries(cfg.reports)) {
-                if (v === undefined) {
-                    continue;
-                }
-                this.report_map[k] = new Runnable(
-                    k,
-                    v.cmd,
-                    v.basename,
-                    v.inputs,
-                    v.append_datestamp,
-                    v.content_type,
-                );
-            }
+  constructor(config_yaml: string) {
+    const src = Deno.readTextFileSync(config_yaml);
+    const cfg = yaml.parse(src) as {
+      [key: string]: { [key: string]: Runnable };
+    };
+    if (cfg.reports !== undefined) {
+      for (const [k, v] of Object.entries(cfg.reports)) {
+        if (v === undefined) {
+          continue;
         }
+        this.report_map[k] = new Runnable(
+          k,
+          v.cmd,
+          v.basename,
+          v.inputs,
+          v.append_datestamp,
+          v.content_type,
+        );
+      }
     }
+  }
 }
 
 function resolveCommandInputs(
-    cmdInputs: Inputs[],
-    reqInputs: Inputs[],
+  cmdInputs: Inputs[],
+  reqInputs: Inputs[],
 ): Inputs[] {
-    let inputs: Inputs[] = [];
-    let empty: Inputs = new Inputs();
-    if (cmdInputs !== undefined) {
-        for (let i = 0; i < cmdInputs.length; i++) {
-            // Make sure these match then add it to the inputs array, if not add an empty input element
-            if (
-                reqInputs[i] !== undefined &&
-                (cmdInputs[i].id === reqInputs[i].id) &&
-                (cmdInputs[i].type === reqInputs[i].type)
-            ) {
-                inputs.push(reqInputs[i]);
-            } else {
-                // Push an empty
-                empty.id = cmdInputs[i].id;
-                empty.type = cmdInputs[i].type;
-                empty.value = "";
-                inputs.push(empty);
-            }
-        }
+  let inputs: Inputs[] = [];
+  let empty: Inputs = new Inputs();
+  if (cmdInputs !== undefined) {
+    for (let i = 0; i < cmdInputs.length; i++) {
+      // Make sure these match then add it to the inputs array, if not add an empty input element
+      if (
+        reqInputs[i] !== undefined &&
+        (cmdInputs[i].id === reqInputs[i].id) &&
+        (cmdInputs[i].type === reqInputs[i].type)
+      ) {
+        inputs.push(reqInputs[i]);
+      } else {
+        // Push an empty
+        empty.id = cmdInputs[i].id;
+        empty.type = cmdInputs[i].type;
+        empty.value = "";
+        inputs.push(empty);
+      }
     }
-    return inputs;
+  }
+  return inputs;
 }
 
 // process_request is responsible updating report queue, assembling and making the request, and updating the report request object
 // when completed (or error condition returned).
 async function process_request(
-    cmd: Runnable,
-    id: string,
-    request: Report,
+  cmd: Runnable,
+  id: string,
+  request: Report,
 ): Promise<boolean> {
-    // I want a copy of the object passed in so that response doesn't .
-    request.status = "processing";
-    request.updated = (new Date()).toJSON();
-    if (request.inputs !== undefined) {
-        cmd.inputs = resolveCommandInputs(cmd.inputs, request.inputs);
-    }
+  // I want a copy of the object passed in so that response doesn't .
+  request.status = "processing";
+  request.updated = (new Date()).toJSON();
+  if (request.inputs !== undefined) {
+    cmd.inputs = resolveCommandInputs(cmd.inputs, request.inputs);
+  }
+  console.log(
+    `INFO: updated request object to processing ${request.report_name}`,
+  );
+  if (await ds.update(request.id, request)) {
     console.log(
-        `INFO: updated request object to processing ${request.report_name}`,
+      `INFO: launching request ${request.report_name} ${request.id}`,
     );
-    if (await ds.update(request.id, request)) {
-        console.log(
-            `INFO: launching request ${request.report_name} ${request.id}`,
-        );
-    } else {
-        console.log(
-            `ERROR: updated of request ${request} failed, aborting request runner`,
-        );
-        Deno.exit(1);
-    }
-    console.log(`INFO: running command ${cmd.cmd} ${cmd.options}`);
-    //FIXME: Need to evaluate if inputs are defined then valiate inputs before processing the requested report
-    const link = await cmd.run([]);
-    if (link === undefined || link === "") {
-        request.link = "no link returned from report";
-        request.status = "error";
-        request.updated = (new Date()).toJSON();
-    } else if (link.indexOf("error://") > -1) {
-        request.link = link; /*link.replace("error://", "");*/
-        request.status = "error";
-        request.updated = (new Date()).toJSON();
-    } else {
-        request.link = link;
-        request.status = "completed";
-        request.updated = (new Date()).toJSON();
-    }
-    if (request.emails !== undefined && request.emails !== "") {
-        //FIXME: the URL should not be hard coded
-        await send_email(
-            request.emails,
-            request.report_name,
-            `report request: ${request.status} <https://apps.library.caltech.edu/cold/${request.link}> ${request.updated}`,
-        );
-    }
-    return (await ds.update(id, request));
+  } else {
+    console.log(
+      `ERROR: updated of request ${request} failed, aborting request runner`,
+    );
+    Deno.exit(1);
+  }
+  console.log(`INFO: running command ${cmd.cmd} ${cmd.options}`);
+  //FIXME: Need to evaluate if inputs are defined then valiate inputs before processing the requested report
+  const link = await cmd.run([]);
+  if (link === undefined || link === "") {
+    request.link = "no link returned from report";
+    request.status = "error";
+    request.updated = (new Date()).toJSON();
+  } else if (link.indexOf("error://") > -1) {
+    request.link = link; /*link.replace("error://", "");*/
+    request.status = "error";
+    request.updated = (new Date()).toJSON();
+  } else {
+    request.link = link;
+    request.status = "completed";
+    request.updated = (new Date()).toJSON();
+  }
+  if (request.emails !== undefined && request.emails !== "") {
+    //FIXME: the URL should not be hard coded
+    await send_email(
+      request.emails,
+      request.report_name,
+      `report request: ${request.status} <https://apps.library.caltech.edu/cold/${request.link}> ${request.updated}`,
+    );
+  }
+  return (await ds.update(id, request));
 }
 
 // servicing_requests checks the reports table, gets a list of pending requests, invokes process_request
 async function servicing_requests(runner: Runner): Promise<void> {
-    //console.log("INFO: entered servicing_requests");
-    let requests = await ds.query("next_request", [], {}) as Report[];
-    if (requests.length > 0) {
-        for (let request of requests) {
-            let report_name = request.report_name;
-            let runnable = runner.report_map[report_name];
-            if (runnable !== undefined) {
-                (report_name !== undefined && report_name !== "")
-                    ? console.log(
-                        `INFO: Processing requests for ${report_name} ${
-                            JSON.stringify(request)
-                        }`,
-                    )
-                    : "";
-                if (!await process_request(runnable, request.id, request)) {
-                    console.log(
-                        `ERROR: processing request ${request}, ${
-                            JSON.stringify(request)
-                        } failed, aborting request runner`,
-                    );
-                    Deno.exit(1);
-                } else {
-                    (report_name !== undefined && report_name !== "")
-                        ? console.log(
-                            `INFO: Process completed for ${report_name}`,
-                        )
-                        : "";
-                }
-            } else {
-                request.status = "aborting, unknown report";
-                request.link = "";
-                request.updated = (new Date()).toJSON();
-                if (!await ds.update(request.id, request)) {
-                    console.log(
-                        `ERROR: updated of request error ${request} failed, aborting request runner`,
-                    );
-                    Deno.exit(1);
-                }
-                console.log(
-                    `WARNING unknown report name ${request.report_name}`,
-                );
-            }
+  //console.log("INFO: entered servicing_requests");
+  let requests = await ds.query("next_request", [], {}) as Report[];
+  if (requests.length > 0) {
+    for (let request of requests) {
+      let report_name = request.report_name;
+      let runnable = runner.report_map[report_name];
+      if (runnable !== undefined) {
+        (report_name !== undefined && report_name !== "")
+          ? console.log(
+            `INFO: Processing requests for ${report_name} ${
+              JSON.stringify(request)
+            }`,
+          )
+          : "";
+        if (!await process_request(runnable, request.id, request)) {
+          console.log(
+            `ERROR: processing request ${request}, ${
+              JSON.stringify(request)
+            } failed, aborting request runner`,
+          );
+          Deno.exit(1);
+        } else {
+          (report_name !== undefined && report_name !== "")
+            ? console.log(
+              `INFO: Process completed for ${report_name}`,
+            )
+            : "";
         }
+      } else {
+        request.status = "aborting, unknown report";
+        request.link = "";
+        request.updated = (new Date()).toJSON();
+        if (!await ds.update(request.id, request)) {
+          console.log(
+            `ERROR: updated of request error ${request} failed, aborting request runner`,
+          );
+          Deno.exit(1);
+        }
+        console.log(
+          `WARNING unknown report name ${request.report_name}`,
+        );
+      }
     }
+  }
 }
 
 // report_runner implements the report runner. It checks the reports collections for the "next" report to run, spawns the job then on to the next.
 // When the queue is empty will will sleep for a time then try the process again.
 async function report_runner(config_yaml: string): Promise<number> {
-    try {
-        await Deno.lstat(config_yaml);
-    } catch (err) {
-        console.log(err);
-        return 1;
-    }
-    const runner = new Runner(config_yaml);
-    if (runner === undefined) {
-        return 1;
-    }
-    await servicing_requests(runner);
-    //console.log("INFO: caught up on requests");
-    return 0;
+  try {
+    await Deno.lstat(config_yaml);
+  } catch (err) {
+    console.log(err);
+    return 1;
+  }
+  const runner = new Runner(config_yaml);
+  if (runner === undefined) {
+    return 1;
+  }
+  await servicing_requests(runner);
+  //console.log("INFO: caught up on requests");
+  return 0;
 }
 
 /*
@@ -760,52 +758,52 @@ async function report_runner(config_yaml: string): Promise<number> {
  * is the path to the YAML configuration file.
  */
 async function main(): Promise<void> {
-    const op: OptionsProcessor = new OptionsProcessor();
+  const op: OptionsProcessor = new OptionsProcessor();
 
-    op.booleanVar("help", false, "display help");
-    op.booleanVar("license", false, "display license");
-    op.booleanVar("version", false, "display version");
-    op.booleanVar("debug", false, "turn on debug logging");
+  op.booleanVar("help", false, "display help");
+  op.booleanVar("license", false, "display license");
+  op.booleanVar("version", false, "display version");
+  op.booleanVar("debug", false, "turn on debug logging");
 
-    op.parse(Deno.args);
+  op.parse(Deno.args);
 
-    const options = op.options;
-    let args = op.args;
+  const options = op.options;
+  let args = op.args;
 
-    if (options.help) {
-        console.log(
-            fmtHelp(
-                coldReportsHelpText,
-                appName,
-                version,
-                releaseDate,
-                releaseHash,
-            ),
-        );
-        Deno.exit(0);
-    }
-    if (options.license) {
-        console.log(licenseText);
-        Deno.exit(0);
-    }
-    if (options.version) {
-        console.log(`${appName} ${version} ${releaseHash}`);
-        Deno.exit(0);
-    }
-
-    let config_yaml: string = args.length > 0
-        ? args.shift() as unknown as string
-        : "";
-    if (config_yaml === "") {
-        config_yaml = "cold_reports.yaml";
-    }
-    // Start up the service.
-    setInterval(
-        await (async function () {
-            await report_runner(config_yaml);
-        }),
-        10000,
+  if (options.help) {
+    console.log(
+      fmtHelp(
+        coldReportsHelpText,
+        appName,
+        version,
+        releaseDate,
+        releaseHash,
+      ),
     );
+    Deno.exit(0);
+  }
+  if (options.license) {
+    console.log(licenseText);
+    Deno.exit(0);
+  }
+  if (options.version) {
+    console.log(`${appName} ${version} ${releaseHash}`);
+    Deno.exit(0);
+  }
+
+  let config_yaml: string = args.length > 0
+    ? args.shift() as unknown as string
+    : "";
+  if (config_yaml === "") {
+    config_yaml = "cold_reports.yaml";
+  }
+  // Start up the service.
+  setInterval(
+    await (async function () {
+      await report_runner(config_yaml);
+    }),
+    10000,
+  );
 }
 
 // Run main()

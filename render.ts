@@ -5,14 +5,14 @@
 import { Handlebars, HandlebarsConfig } from "@danet/handlebars";
 
 const DEFAULT_HANDLEBARS_CONFIG: HandlebarsConfig = {
-    baseDir: "views",
-    extname: ".hbs",
-    layoutsDir: "layouts/",
-    partialsDir: "partials/",
-    cachePartials: true,
-    defaultLayout: "",
-    helpers: undefined,
-    compilerOptions: undefined,
+  baseDir: "views",
+  extname: ".hbs",
+  layoutsDir: "layouts/",
+  partialsDir: "partials/",
+  cachePartials: true,
+  defaultLayout: "",
+  helpers: undefined,
+  compilerOptions: undefined,
 };
 
 const handle = new Handlebars(DEFAULT_HANDLEBARS_CONFIG);
@@ -24,35 +24,35 @@ const handle = new Handlebars(DEFAULT_HANDLEBARS_CONFIG);
  * @returns {Promise<Response>} returns a response once everything is ready.
  */
 export async function renderJSON(
-    obj: { [k: string]: any },
-    status?: number,
+  obj: { [k: string]: any },
+  status?: number,
 ): Promise<Response> {
-    let src: string = "";
-    let statusNo: number = 0;
-    if (status === undefined) {
-        statusNo = 200;
+  let src: string = "";
+  let statusNo: number = 0;
+  if (status === undefined) {
+    statusNo = 200;
+  } else {
+    if (isNaN(status)) {
+      statusNo = 500;
     } else {
-        if (isNaN(status)) {
-            statusNo = 500;
-        } else {
-            statusNo = status as number;
-        }
+      statusNo = status as number;
     }
-    try {
-        src = JSON.stringify(obj, null, 2);
-    } catch (err) {
-        return new Response(`${err}`, {
-            status: 404,
-            headers: { "content-type": "text/plain" },
-        });
-    }
-    return new Response(src, {
-        status: statusNo,
-        headers: {
-            "content-type": "application/json",
-            "Access-Control-Allow-Origin": "*",
-        },
+  }
+  try {
+    src = JSON.stringify(obj, null, 2);
+  } catch (err) {
+    return new Response(`${err}`, {
+      status: 404,
+      headers: { "content-type": "text/plain" },
     });
+  }
+  return new Response(src, {
+    status: statusNo,
+    headers: {
+      "content-type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+    },
+  });
 }
 
 /**
@@ -63,22 +63,22 @@ export async function renderJSON(
  * @returns {Promise<Response>} returns a response once everything is ready.
  */
 export async function renderPage(
-    template: string,
-    page_object: { [k: string]: string | object | boolean | undefined },
+  template: string,
+  page_object: { [k: string]: string | object | boolean | undefined },
 ): Promise<Response> {
-    let body: string = await handle.renderView(template, page_object);
-    if (body !== undefined) {
-        return new Response(body, {
-            status: 200,
-            headers: { "content-type": "text/html" },
-        });
-    }
-    body =
-        `<doctype html>\n<html lang="en">something went wrong, failed to render ${template}.</html>`;
+  let body: string = await handle.renderView(template, page_object);
+  if (body !== undefined) {
     return new Response(body, {
-        status: 501,
-        headers: { "content-type": "text/html" },
+      status: 200,
+      headers: { "content-type": "text/html" },
     });
+  }
+  body =
+    `<doctype html>\n<html lang="en">something went wrong, failed to render ${template}.</html>`;
+  return new Response(body, {
+    status: 501,
+    headers: { "content-type": "text/html" },
+  });
 }
 
 /**
@@ -89,12 +89,12 @@ export async function renderPage(
  * @returns {Promise<string>} returns a string once everything is ready.
  */
 export async function makePage(
-    template: string,
-    page_object: { [k: string]: string | object },
+  template: string,
+  page_object: { [k: string]: string | object },
 ): Promise<string> {
-    let body = await handle.renderView(template, page_object);
-    if (body !== undefined) {
-        return body;
-    }
-    return `<doctype html>\n<html lang="en">something went wrong, failed to render ${template}.</html>`;
+  let body = await handle.renderView(template, page_object);
+  if (body !== undefined) {
+    return body;
+  }
+  return `<doctype html>\n<html lang="en">something went wrong, failed to render ${template}.</html>`;
 }

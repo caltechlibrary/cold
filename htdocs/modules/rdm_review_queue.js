@@ -77,20 +77,20 @@ var ClientAPI = class {
     return [];
   }
   /**
-     * getGroupsList returns an array of clgid and group names.  If list can't be retrieved
-     * then an empty list is return.
-     * @returns an array of objects consisting of clgid and group name.
-     */
+   * getGroupsList returns an array of clgid and group names.  If list can't be retrieved
+   * then an empty list is return.
+   * @returns an array of objects consisting of clgid and group name.
+   */
   async getGroupsList() {
     const c_name = "groups";
     const query_name = "group_names";
     return await this.getList(c_name, query_name);
   }
   /**
-     * getPeopleList returns an array of clpid and group names.  If list can't be retrieved
-     * then an empty list is return.
-     * @returns an array of objects consisting of clgid and group name.
-     */
+   * getPeopleList returns an array of clpid and group names.  If list can't be retrieved
+   * then an empty list is return.
+   * @returns an array of objects consisting of clgid and group name.
+   */
   async getPeopleList() {
     const c_name = "people";
     const query_name = "people_names";
