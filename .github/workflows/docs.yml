@@ -1,0 +1,66 @@
+name: Docs
+
+# Builds the documentation site from docs/ and publishes it to GitHub Pages.
+#
+# Replaces static.yml, which uploaded the entire repository as the site. That
+# published the Makefile, the .ts sources, the .sql queries, cold_api.yaml and
+# htdocs/ -- the running application's own front end -- alongside the docs, and
+# it served whatever HTML happened to be committed rather than rendering the
+# Markdown. The cost of that was measured: INSTALL.html went on serving install
+# commands for the retired caltechlibrary.github.io hostname after INSTALL.md
+# had been corrected, because nothing regenerated the committed page.
+#
+# The build itself lives in caltechlibrary/workflows, so a fix there reaches
+# this site on the next run with nothing written back into this repository.
+# See workspace DR-0010; cold is the pilot for this on a datasetd-backed
+# application.
+#
+# This calls the reusable workflow rather than the build-pandoc action.
+# CL-Web-Components needs the action because it must run `deno task build`
+# first and a caller cannot add steps to a job it did not write. cold has no
+# such constraint -- its `deno task build` compiles the 14 CLI binaries and
+# contributes nothing to this site, which is Markdown only.
+#
+# NOTE: htdocs/ is deliberately absent from everything below. It is the
+# application served from apps.library.caltech.edu/cold, not documentation.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  docs:
+    uses: caltechlibrary/workflows/.github/workflows/docs-pandoc.yml@v1
+    with:
+      docs-dir: docs
+
+      # Markdown kept at the repository root because that is where it belongs
+      # there, but still published. Listed one per line rather than as a *.md
+      # glob on purpose: a glob would also publish CLAUDE.md.
+      extra-sources: |
+        README.md
+        INSTALL.md
+        TODO.md
+
+      # Files the pages reference, which static.yml only served because it
+      # uploaded everything. Each one is here because something links to it:
+      #
+      #   LICENSE                 linked from README.md
+      #   installer.sh/.ps1       the two install commands in INSTALL.md
+      #   presentations           user_manual.md links to both decks, and the
+      #                           shared build has no Markdown-to-slides path,
+      #                           so the built HTML ships verbatim
+      #   in_feeds.csv-example    linked from deployment.md
+      include: |
+        LICENSE
+        installer.sh
+        installer.ps1
+        presentations
+        in_feeds.csv-example

@@ -17,17 +17,17 @@ BRANCH = $(shell git branch | grep '* ' | cut -d\  -f 2)
 
 PACKAGE = $(shell ls -1 *.ts | grep -v 'version.ts')
 
-MAN_PAGES_1 = $(shell ls -1 *.1.md | sed -E 's/\.1.md/.1/g')
+# Man page sources live in docs/ with the rest of the documentation; these
+# hold the bare page names (cold.1), so the recipes below read docs/$@.md.
+MAN_PAGES_1 = $(shell ls -1 docs/*.1.md 2>/dev/null | sed -E 's|^docs/||; s/\.1.md/.1/g')
 
-MAN_PAGES_3 = $(shell ls -1 *.3.md | sed -E 's/\.3.md/.3/g')
+MAN_PAGES_3 = $(shell ls -1 docs/*.3.md 2>/dev/null | sed -E 's|^docs/||; s/\.3.md/.3/g')
 
-MAN_PAGES_7 = $(shell ls -1 *.7.md | sed -E 's/\.7.md/.7/g')
+MAN_PAGES_7 = $(shell ls -1 docs/*.7.md 2>/dev/null | sed -E 's|^docs/||; s/\.7.md/.7/g')
 
 RELEASE_DATE=$(shell date +'%Y-%m-%d')
 
 RELEASE_HASH=$(shell git log --pretty=format:'%h' -n 1)
-
-HTML_PAGES = $(shell ls -1 *.html)
 
 OS = $(shell uname)
 
@@ -41,26 +41,28 @@ PREFIX = $(HOME)
 
 TS_MODS = $(shell ls -1 *.ts | grep -v _test.ts | grep -v deps.ts | grep -v version.ts)
 
-build: version.ts $(TS_MODS) CITATION.cff htdocs bin compile installer.sh installer.ps1 $(HTML_PAGES)
+# The documentation site is no longer built here -- GitHub Actions renders
+# docs/ with caltechlibrary/workflows. See .github/workflows/docs.yml.
+build: version.ts $(TS_MODS) CITATION.cff htdocs bin compile installer.sh installer.ps1
 
 bin: .FORCE
 	mkdir -p bin
 
 compile: check $(TS_MODS)
 	deno task build
-	bin/cold$(EXT) --help >cold.1.md
-	bin/directory_sync$(EXT) --help >directory_sync.1.md
-	bin/cold_reports$(EXT) --help >cold_reports.1.md
-	bin/group_vocabulary$(EXT) --help >group_vocabulary.1.md
-	bin/people_vocabulary$(EXT) --help >people_vocabulary.1.md
-	bin/thesis_option_vocabulary$(EXT) --help >thesis_option_vocabulary.1.md
-	bin/journal_vocabulary$(EXT) --help >journal_vocabulary.1.md
-	bin/division_people$(EXT) --help >division_people.1.md
-	bin/generate_collaborator_rpt$(EXT) --help >generate_collaborator_rpt.1.md
-	bin/generate_collaborator_affiliations_rpt$(EXT) --help >generate_collaborator_affiliations_rpt.1.md
-	bin/publications_by_person_identifiers$(EXT) --help >publications_by_person_identifiers.1.md
-	bin/generate_country_collaboration_rpt$(EXT) --help >generate_country_collaboration_rpt.1.md
-	bin/ror_import$(EXIT) --help >ror_import.1.md
+	bin/cold$(EXT) --help >docs/cold.1.md
+	bin/directory_sync$(EXT) --help >docs/directory_sync.1.md
+	bin/cold_reports$(EXT) --help >docs/cold_reports.1.md
+	bin/group_vocabulary$(EXT) --help >docs/group_vocabulary.1.md
+	bin/people_vocabulary$(EXT) --help >docs/people_vocabulary.1.md
+	bin/thesis_option_vocabulary$(EXT) --help >docs/thesis_option_vocabulary.1.md
+	bin/journal_vocabulary$(EXT) --help >docs/journal_vocabulary.1.md
+	bin/division_people$(EXT) --help >docs/division_people.1.md
+	bin/generate_collaborator_rpt$(EXT) --help >docs/generate_collaborator_rpt.1.md
+	bin/generate_collaborator_affiliations_rpt$(EXT) --help >docs/generate_collaborator_affiliations_rpt.1.md
+	bin/publications_by_person_identifiers$(EXT) --help >docs/publications_by_person_identifiers.1.md
+	bin/generate_country_collaboration_rpt$(EXT) --help >docs/generate_country_collaboration_rpt.1.md
+	bin/ror_import$(EXIT) --help >docs/ror_import.1.md
 
 check: $(TS_MODS)
 	deno task check
@@ -97,7 +99,7 @@ man: $(MAN_PAGES_1) # $(MAN_PAGES_3) $(MAN_PAGES_7)
 
 $(MAN_PAGES_1): .FORCE
 	mkdir -p man/man1
-	pandoc $@.md --from markdown --to man -s >man/man1/$@
+	pandoc docs/$@.md --from markdown --to man -s >man/man1/$@
 
 CITATION.cff: codemeta.json .FORCE
 	cmt codemeta.json CITATION.cff
@@ -114,9 +116,13 @@ save:
 	if [ "$(msg)" != "" ]; then git commit -am "$(msg)"; else git commit -am "Quick Save"; fi
 	git push origin $(BRANCH)
 
-website: $(HTML_PAGES) presentations .FORCE
-	make -f website.mak
-
+# The `website` target and website.mak are gone: the documentation site is
+# rendered from docs/ by caltechlibrary/workflows in CI, not built here and
+# committed. See .github/workflows/docs.yml and workspace DR-0010.
+#
+# `presentations` stays, because the shared build has no Markdown-to-slides
+# path -- the two Slidy decks are built here and shipped verbatim by the
+# workflow's include:. Run it by hand when a deck's Markdown changes.
 presentations: .FORCE
 	cd presentations && make || exit 1
 
@@ -140,21 +146,21 @@ clean:
 	if [ -d bin ]; then rm -fR bin/*; fi
 	if [ -d dist ]; then rm -fR dist/*; fi
 
-release: clean build man website distribute_docs dist/Linux-x86_64 dist/Linux-aarch64 dist/macOS-x86_64 dist/macOS-arm64 dist/Windows-x86_64
+release: clean build man distribute_docs dist/Linux-x86_64 dist/Linux-aarch64 dist/macOS-x86_64 dist/macOS-arm64 dist/Windows-x86_64
 	echo "Ready to do ./release.bash"
 
 setup_dist: .FORCE
 	@rm -fR dist
 	@mkdir -p dist
 
-distribute_docs: website man setup_dist
+distribute_docs: man setup_dist
 	@cp README.md dist/
 	@cp LICENSE dist/
 	@cp codemeta.json dist/
 	@cp CITATION.cff dist/
-	@cp *.1.md dist/
+	@cp docs/*.1.md dist/
 	@cp INSTALL.md dist/
-	@cp deployment.md dist/
+	@cp docs/deployment.md dist/
 	@cp -vR man dist/
 
 dist/Linux-x86_64: .FORCE
