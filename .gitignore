@@ -14,7 +14,6 @@ tmp
 people.csv
 groups.csv
 issn_journal_publisher.*
-TODO.html
 *.env
 *.service
 cdh.yaml
@@ -41,7 +40,6 @@ load_rdm_records.bash
 *_review_submissions.sql
 docker_*.bash
 load_dataset_with_jsonl.bash
-CLAUDE.html
 caltechthesis_full.sql
 caltechthesis_incremental.sql
 caltechthesis_lastmod.txt
@@ -50,3 +48,30 @@ rdm_requests_lastmod.txt
 rdm_requests_harvest.lock/
 prompts/*
 man
+
+#
+# Generated documentation site artifacts (workspace DR-0010).
+#
+# The site is rendered from docs/ by caltechlibrary/workflows and published
+# straight to GitHub Pages, so nothing in the repository regenerates these.
+# Committing them is what let INSTALL.html go on serving the retired
+# caltechlibrary.github.io install URLs after INSTALL.md had been corrected.
+#
+# Each rule below is anchored or directory-scoped deliberately. A bare
+# pattern in this file matches at any depth, and these must not reach
+# htdocs/ -- that is the application served from apps.library.caltech.edu,
+# not documentation -- nor presentations/, whose two Slidy decks are built
+# by hand and shipped verbatim by the docs workflow's include:.
+#
+# NOTE: comments here are on their own lines because git has no trailing
+# comment syntax. `pagefind/  # search index` is one literal pattern that
+# matches nothing, and it fails silently.
+
+# Rendered pages. Root only: docs/ holds the sources, not output.
+/*.html
+
+# Assembled by the docs workflow, uploaded as a Pages artifact.
+/_site/
+
+# Pagefind search index, rebuilt by the index-site action on every run.
+pagefind/
