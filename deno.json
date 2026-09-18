@@ -1,6 +1,14 @@
 {
   "fmt": {
-    "indentWidth": 2
+    "indentWidth": 2,
+    "include": [
+      "**/*.ts",
+      "**/*.tsx",
+      "**/*.js",
+      "**/*.jsx",
+      "**/*.mjs",
+      "**/*.cjs"
+    ]
   },
   "tasks": {
     "setup": "dataset init people.ds ; dataset init groups.ds ; dataset init funders.ds ; dataset init journals.ds ; dataset init doi_prefix.ds ; dataset init subjects.ds ; dataset init test.ds ; dataset init reports.ds ; dataset init thesis_options.ds ; dataset init ror.ds ",
