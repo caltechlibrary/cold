@@ -331,7 +331,7 @@
       "jsr:@std/path@^1.1.6",
       "jsr:@std/uuid@^1.1.1",
       "jsr:@std/yaml@^1.2.0",
-      "jsr:@zip-js/zip-js@^2.8.59"
+      "jsr:@zip-js/zip-js@^2.15.0"
     ]
   }
 }

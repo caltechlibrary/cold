@@ -76,7 +76,7 @@
     "@std/path": "jsr:@std/path@^1.1.6",
     "@std/uuid": "jsr:@std/uuid@^1.1.1",
     "@std/yaml": "jsr:@std/yaml@^1.2.0",
-    "@zip-js/zip-js": "jsr:@zip-js/zip-js@^2.8.59"
+    "@zip-js/zip-js": "jsr:@zip-js/zip-js@^2.15.0"
   },
   "compilerOptions": {
     "lib": [
