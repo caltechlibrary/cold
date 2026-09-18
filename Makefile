@@ -68,6 +68,7 @@ compile: check $(TS_MODS)
 	bin/generate_collaborator_affiliations_rpt$(EXT) --help >docs/generate_collaborator_affiliations_rpt.1.md
 	bin/publications_by_person_identifiers$(EXT) --help >docs/publications_by_person_identifiers.1.md
 	bin/generate_country_collaboration_rpt$(EXT) --help >docs/generate_country_collaboration_rpt.1.md
+	bin/generate_technical_reports_rpt$(EXT) --help >docs/generate_technical_reports_rpt.1.md
 	bin/ror_import$(EXT) --help >docs/ror_import.1.md
 
 check: $(TS_MODS)

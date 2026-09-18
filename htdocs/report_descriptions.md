@@ -33,6 +33,8 @@ pubDate: 2026-08-19
   - (authors_records.csv) This is a report on all records from the request metadata, drafts metadata and records metadata tables.
 - __Generate Authors' Review Queue CSV file__
   - (authors_review_queue.csv) This is a report of things currently in the review queue based on metadata in the request metadata table and drafts metadata table.
+- __Generate Technical Reports CSV file__
+  - (technical_reports.csv) A metadata triage report, not a listing. It covers every record typed Technical Report together with every record carrying custom series metadata whatever its type, so it shows technical reports with incomplete metadata, technical reports missing their series numbering, and records filed under the wrong type that are really technical reports. Sorted by series, so a misclassified record appears next to its correctly-typed siblings. About 19,400 rows; the resource type column varies and that is the point. Only as fresh as the last RDM harvest.
 
 ## RDM Vocabularies
 

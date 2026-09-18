@@ -558,6 +558,43 @@ collections:
         )
         order by aff_id
 
+      # The technical reports report's selection (cold#105). DR-0011 fixed it
+      # as the UNION of every record typed publication-technicalnote and every
+      # record carrying any of the four custom series fields -- the union is
+      # what makes a misclassified record visible, which a type-restricted
+      # query cannot do.
+      #
+      # DR-0022: filter record_state, NOT is_latest. Every row here is already
+      # its parent's newest present version (DR-0015), so is_latest means
+      # "unchanged since submission" and filtering on it would drop ~30% of the
+      # corpus for having been re-versioned. Expect ~19,430 rows; ~13,600 means
+      # the is_latest filter came back.
+      #
+      # resource_type is the RDM object {"id": ...}, so the type test must go
+      # through '$.resource_type.id'. Against '$.resource_type' it matches
+      # nothing and silently returns only the series half of the union.
+      #
+      # Projected rather than returning whole rows: 8 MB instead of 83 MB over
+      # the wire, for the five fields the report reads. The projected names and
+      # shapes are exactly the harvested ones, so recordToRow reads the same
+      # paths either way. Full scan of 111k rows, measured at 1.4 s.
+      technical_reports_selection: |
+        select json_object(
+            'rdmid', src->>'rdmid',
+            'title', src->>'title',
+            'publication_date', src->>'publication_date',
+            'resource_type', json_extract(src, '$.resource_type'),
+            'custom_fields', json_extract(src, '$.custom_fields')
+          ) as src
+        from rdm_requests
+        where src->>'record_state' = 'published'
+          and ( json_extract(src, '$.resource_type.id') = 'publication-technicalnote'
+             or json_extract(src, '$.custom_fields."caltech:series"') is not null
+             or json_extract(src, '$.custom_fields."caltech:series_number"') is not null
+             or json_extract(src, '$.custom_fields."caltech:other_num_name"') is not null
+             or json_extract(src, '$.custom_fields."caltech:other_num_id"') is not null )
+        order by json_extract(rdm_requests.src, '$.rdmid')
+
       # review queue mentions
       review_queue_mentions: |
         SELECT src

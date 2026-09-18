@@ -70,6 +70,11 @@ reports:
     basename: authors_review_queue
     append_datestamp: false
     content_type: text/csv
+  run_technical_reports_report:
+    cmd: ./run_technical_reports_report.bash
+    basename: technical_reports
+    append_datestamp: false
+    content_type: text/csv
   run_collaborator_report:
     cmd: ./run_collaborator_report.bash
     inputs:
