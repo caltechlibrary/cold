@@ -2,55 +2,63 @@
 Action items
 ============
 
-Start here — v0.0.53
---------------------
+Start here — after v0.0.53
+--------------------------
 
-**Issue #109 is DONE and released as v0.0.52 (2026-09-09).** The RDM harvest
-redesign shipped: `rdm_requests.ds`, a full/incremental pair, version-following,
-upsert-and-sweep, a harvest lock, and the cut-over of `cold_api.yaml`. Eight
-decision records, DR-0013 through DR-0020, all accepted. Hand-off:
-`agents/hand-off/2026-09-09T190000Z-cold-rdm-harvest-phases-0-through-2-and-the-incremental-redesign.spmd`.
+**Issue #105 is DONE and goes out in v0.0.53.** The technical reports report is
+built, registered and verified end to end through the reports UI: 19,431 rows,
+16 resource types, zero column shifts. Key record is **DR-0022** — never filter
+`is_latest`. Also in this release: the docs site moved to CI from `docs/`
+(DR-0021), `make`/`make test` are CMTools-free, every import resolves through
+the import map with a lint gate enforcing it, and `bundle.ts` is gone.
+
+**Issue #109 shipped in v0.0.52 and is deployed.** An earlier version of this
+file said production "still runs the retired harvest scripts" — that was wrong.
+Production has run the new pair against `rdm_requests.ds` since the release.
 
 ### Not done, and it is the first thing
 
-- [ ] **Deploy v0.0.52 to production.** It still runs the retired harvest
-      scripts against `rdm_review_queue.ds`. The first full harvest takes about
-      26 minutes; the queue then shows 918 rows rather than 917.
-- [ ] **Warn Tom and Phil before that run, not after.** 28,223 rows have
-      corrected creator lists and the ROR set grew from 5,853 to 6,805, so the
-      collaborator, affiliation and country-collaboration reports will produce
-      different numbers. The change is a correction — those rows described 2023
-      versions — but it will look like a regression if it arrives unannounced.
+- [ ] **Nothing watches whether a harvest succeeded.** Both RDM cron lines end
+      `>/dev/null 2>&1`, and on 2026-09-18 that hid an **8-day total outage**:
+      the caltechauthors-v13 cutover changed the load balancer's SSH host keys,
+      every 15-minute harvest died at `REMOTE HOST IDENTIFICATION HAS CHANGED`,
+      and the review queue UI plus every RDM-derived report served 2026-09-10
+      data for eight days. Fixed, but only because someone happened to look at
+      a timestamp. `rdm_requests_lastmod.txt` holds a UTC timestamp written
+      only on success, so "older than an hour during working hours" is a
+      cheap alarm. The same shape applies to the CaltechTHESIS pair on the
+      same crontab. Wants a decision record — see `cold` observations 370 and
+      371.
+- [ ] **Deploy v0.0.53** once cut, so the technical reports report reaches
+      production.
 
-### Issue #105, the technical reports report — v0.0.53
+### Issue #105 follow-ups
 
-- [ ] **Settle the definition with Phil first; this is not a coding task.** His
-      wording is "at least one of the 4 custom series fields **or groups
-      field**". Taken literally that is **51,450** rows, because
-      `caltech:groups` is populated on 41,983 records. DR-0011 read it as
-      series-only, which measures **19,548** — within 0.6% of the 19,429 it
-      derived from the API. Tom estimated ~5,000. See observation 300.
+- [x] ~~Settle the definition with Phil~~ — shipped on DR-0011's reading, the
+      union of the four custom series fields with the technical report resource
+      type, which measures 19,431. Phil's literal "or groups field" wording
+      would be 51,450 rows and was **not** adopted; if he wants that, it is a
+      change request, not a bug. See observation 300.
 - [ ] Tony has still never confirmed which groups his variant covers.
-- [ ] Rewrite `agents/projects/cold/plans/technical_reports_report_plan.md`. It
-      describes the CaltechAUTHORS API approach DR-0012 superseded, and DR-0015
-      and DR-0018 then changed the field shape underneath it.
-- [ ] `generate_technical_reports_rpt.ts` and its 23 tests are **untracked** in
-      the working tree. v0.0.52 removed the `deno.json` and `Makefile`
-      references to them, since committed build config pointed at a file no
-      clean checkout has. Both come back together.
-- [ ] `recordToRow` reads a different object now: `rdmid` is the current
-      version, `submitted_rdmid` is the submitted one, `is_latest` matters, and
-      timestamps are full ISO.
+- [ ] **`generate_country_collaboration_rpt.ts:147` conflates a failed query
+      with an empty one** (`return results ?? []`), the defect the technical
+      reports report deliberately avoids. Filed upstream as `dataset` and
+      `ts_dataset` TODO items; the local fix is independent of those.
 
 ### Carried over
 
 - [ ] **No measured baseline for the pre-restructure full harvest.** 26m27s may
       or may not be a regression; timing `38ba5b9`'s version once settles it
       (DR-0019).
-- [ ] `htdocs/modules/mdt.js` is uncommitted — a rebuild carrying a different
-      metadatatools version, which changes what the app ships.
-- [ ] Twelve `.1.md` man pages are generated; `generate_technical_reports_rpt.1.md`
-      was removed in v0.0.52 and returns with its program.
+- [ ] **`deno.lock` oscillates between three sizes** because 16 `deno bundle`
+      tasks pass `--config tsconfig.json`, which rewrites the project lock to
+      that config's graph. `make` prunes it, a test run restores it. Options:
+      `--no-lock` on those tasks, a separate `--lock=htdocs.lock`, or moving
+      `tsconfig.json` out of the project root.
+- [ ] 82 unused local variables reported by `deno lint`, and 50 of 62 root
+      modules are absent from the `check` task — most are covered transitively,
+      but an entrypoint nothing imports is invisible, which is how `bundle.ts`
+      stayed broken.
 
 ### Duplicate record report — new, requested 2026-09-16
 
