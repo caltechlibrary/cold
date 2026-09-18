@@ -1,6 +1,6 @@
 import { parseArgs } from "@std/cli";
-import { format as formatDate } from "jsr:@std/datetime";
-import { stringify } from "jsr:@std/csv";
+import { format as formatDate } from "@std/datetime";
+import { stringify } from "@std/csv";
 
 import { licenseText, releaseDate, releaseHash, version } from "./version.ts";
 import { fmtHelp, generateCollaboratorReportHelpText } from "./helptext.ts";

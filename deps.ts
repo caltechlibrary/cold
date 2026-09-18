@@ -3,7 +3,7 @@ export * as http from "@std/http";
 export * as path from "@std/path";
 export * as dotenv from "@std/dotenv";
 export * as yaml from "@std/yaml";
-export * as uuid from "jsr:@std/uuid";
+export * as uuid from "@std/uuid";
 export { serveDir, serveFile } from "@std/http/file-server";
 export { existsSync } from "@std/fs";
 export { parse as csv_parse } from "@std/csv";
@@ -11,7 +11,7 @@ export { assert, assertStrictEquals } from "@std/assert";
 export { walk } from "@std/fs";
 
 /* Deno stuff that isn't jsr */
-export * as common_mark from "https://deno.land/x/rusty_markdown/mod.ts";
+export * as common_mark from "rusty_markdown";
 
 /* Caltech Library Modules */
 export {
@@ -40,8 +40,8 @@ export { fetchAllRecords } from "./caltechauthors_api.ts";
 export type { FetchAllRecordsOptions } from "./caltechauthors_api.ts";
 
 /* directory_sync setup */
-export { DOMParser, Document, Element } from "jsr:@b-fuze/deno-dom";
-export { sleepRandomAmountOfSeconds } from "https://deno.land/x/sleep/mod.ts"
+export { DOMParser, Document, Element } from "@b-fuze/deno-dom";
+export { sleepRandomAmountOfSeconds } from "sleep"
 
 /* COLD related packages */
 export { directoryUrl } from "./directory_config.ts";

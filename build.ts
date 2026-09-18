@@ -2,10 +2,10 @@
 
 import { common_mark, makePage, path } from "./deps.ts";
 import { extractYaml } from "@std/front-matter";
-import { transpile } from "@deno/emit";
 import { ERROR_COLOR } from "./colors.ts";
 
-/* Transpile directory_client.ts to JavaScript to be used by the people edit form. */
+/* Browser modules are bundled by the `deno bundle` tasks in deno.json since the
+   v2.7 upgrade; this path only ensures the output directory exists. */
 const modules_path = path.join("htdocs", "modules");
 
 export async function renderHtdocs(startDir: string) {
@@ -16,15 +16,18 @@ export async function renderHtdocs(startDir: string) {
       const document = await Deno.readTextFile(
         path.join(startDir, f_name),
       );
-      let text: string = "";
+      // extractYaml returns the parsed front matter plus the remaining body,
+      // not a string. The old `let text: string` annotation was wrong and only
+      // went unnoticed because build.ts was absent from the check task.
+      let extracted: ReturnType<typeof extractYaml>;
       try {
-        text = extractYaml(document);
+        extracted = extractYaml(document);
       } catch (err) {
         console.warn(`WARNING: ${path.join(startDir, f_name)}, ${err}`);
         continue;
       }
 
-      const tokens = common_mark.tokens(text.body);
+      const tokens = common_mark.tokens(extracted.body);
       const src = common_mark.html(tokens);
       const o_name = path.join(
         startDir,
@@ -42,65 +45,8 @@ export async function renderHtdocs(startDir: string) {
   }
 }
 
-// transpileJavaScript accepts a list of TypeScript files to be rendered
-// as JavaScript for use in the browser. It relies on the "emit" package.
-// @params javaScriptFiles (array of string) to be processed
-// @params targetPath (string) the target of where to render the JavaScript files to.
-export async function transpileToJavaScript(
-  javaScriptFiles: string[],
-  targetPath: string,
-): Promise<boolean> {
-  console.log(
-    `%ctranspiling ${javaScriptFiles} to ${modules_path}`,
-    "color: green",
-  );
-  for (const fname of javaScriptFiles) {
-    console.log(`%creading ${fname}`, "color: green");
-    const url = new URL(fname, import.meta.url);
-    let result: Map<string, string>;
-    try {
-      result = await transpile(url);
-    } catch (err) {
-      console.log(`%ctranspile error: ${err}`, ERROR_COLOR);
-      return false;
-    }
-    const src: string | undefined = result.get(url.href);
-    if (src === undefined) {
-      console.log(`failed to compile ${fname}, not output.`);
-      return false;
-    }
-    const targetName = path.join(targetPath, fname.replace(/.ts$/, ".js"));
-    console.log(`%cwriting ${targetName}`, "color: yellow");
-    try {
-      await Deno.writeTextFile(targetName, src);
-    } catch (err) {
-      console.log(`%cfailed to write ${targetName}, ${err}`, ERROR_COLOR);
-      return false;
-    }
-  }
-  return true;
-}
-
 // Run build.ts
 if (import.meta.main) {
   await renderHtdocs("./htdocs");
   await Deno.mkdir(modules_path, { mode: 0o775, recursive: true });
-  // NOTE: Switched to deno bundle with v2.7 deno ugrade, RSD 2026-04-20
-  let transpileFiles = [
-    //    "client_api.ts",
-    //    "orcid_api.ts",
-    //    "directory_client.ts",
-  ];
-  let ok: boolean = await transpileToJavaScript(transpileFiles, modules_path);
-  if (
-    ok
-  ) {
-    console.log(`transpile ${transpileFiles} success!`);
-  } else {
-    console.log(
-      `%cERROR: failed to transpile ${javaScriptFiles}`,
-      ERROR_COLOR,
-    );
-    Deno.exit(1);
-  }
 }

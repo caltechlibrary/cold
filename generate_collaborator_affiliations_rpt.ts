@@ -7,8 +7,8 @@
  * available in the regular collaborator report.
  */
 import { parseArgs } from "@std/cli";
-import { format } from "jsr:@std/datetime";
-import { stringify } from "jsr:@std/csv";
+import { format } from "@std/datetime";
+import { stringify } from "@std/csv";
 
 import { apiPort, Dataset } from "./deps.ts";
 import { licenseText, releaseDate, releaseHash, version } from "./version.ts";

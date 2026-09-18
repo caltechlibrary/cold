@@ -12,7 +12,7 @@
  * Each Caltech author is listed with their affiliations. One row per (foreign org, record).
  */
 import { parseArgs } from "@std/cli";
-import { stringify } from "jsr:@std/csv";
+import { stringify } from "@std/csv";
 
 import { apiPort, Dataset } from "./deps.ts";
 import { licenseText, releaseDate, releaseHash, version } from "./version.ts";

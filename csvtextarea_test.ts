@@ -2,7 +2,7 @@
 /// <reference lib="dom" />
 /// <reference lib="dom.iterable" />
 
-import { assertEquals } from "https://deno.land/std@0.200.0/assert/mod.ts";
+import { assertEquals } from "@std/assert";
 import { parseCSVRow } from "./parseCSV.ts";
 
 // Mock class for testing without extending HTMLElement
