@@ -3,14 +3,20 @@
 
 Deploying cold on a remote system requires manual setup.  You will need the following software to successfully build and deploy.
 
-- Deno >= 2.2.0 (for compiling COLD)
+- Deno >= 2.7 (for compiling COLD; 2.7 is where this project's browser-module
+  bundling moved to `deno bundle`)
 - Dataset >= 2.1.23
-- CMTools >= 0.0.18 (for generating version.ts, about.md, CITATION.cff)
-- Pandoc >= 3.1 (for compiling documentation)
-- GNU Make 
+- Pandoc >= 3.1 (for `installer.sh`/`installer.ps1` and the man pages)
+- GNU Make
 - Git
 - Tmux highly recommended
-- eLinks or Lynx recommended (to test form the console)
+- eLinks or Lynx recommended (to test from the console)
+
+**CMTools is not required to deploy.** It used to be listed here, and that has
+been wrong since `version.ts` and `CITATION.cff` moved out of the `build`
+target into `release`. `cmt` is now needed only when cutting a release, which
+happens on the maintainer's own machine — see the comment above `release:` in
+the `Makefile`. A deployment needs none of it.
 
 ## Deployment steps
 

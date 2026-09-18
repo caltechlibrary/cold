@@ -46,7 +46,6 @@ Installing from source
 
 - Deno &gt;&#x3D; 2.8.2
 - Dataset &gt;&#x3D; 2.5.1
-- CMTools &gt;&#x3D; 0.0.45b
 - yq (mikefarah/yq) &gt;&#x3D; 4.44
 
 ### Steps

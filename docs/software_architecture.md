@@ -104,4 +104,5 @@ TypeScript modules in the repo are **transpiled** into plain JavaScript and plac
 - **Data storage**: Dataset collections (SQLite under the hood), accessed via datasetd's JSON API
 - **Templating**: Handlebars (`.hbs` files in `views/`)
 - **Frontend**: Vanilla HTML5/CSS/JS — no frameworks
-- **Build tooling**: `deno.json` tasks + `Makefile` + CMTools + Pandoc
+- **Build tooling**: `deno.json` tasks + `Makefile` + Pandoc (CMTools is used
+  only when cutting a release, not to build or deploy)
