@@ -2,8 +2,8 @@
  * vocabulary.css defines the styles applied to the vocabulary web components.
  */
 .vocabulary-identifier {
-    font-weight: bold;
+  font-weight: bold;
 }
 .vocabulary-name {
-    font-style: italic;
+  font-style: italic;
 }
