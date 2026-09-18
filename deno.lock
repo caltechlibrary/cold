@@ -43,6 +43,7 @@
     "jsr:@std/uuid@*": "1.1.1",
     "jsr:@std/uuid@^1.1.1": "1.1.1",
     "jsr:@std/yaml@^1.2.0": "1.2.0",
+    "jsr:@zip-js/zip-js@^2.15.0": "2.15.0",
     "npm:handlebars@4.7.7": "4.7.7"
   },
   "jsr": {
@@ -209,6 +210,9 @@
     },
     "@std/yaml@1.2.0": {
       "integrity": "20beb41e4983ba3437dbefac62b14061ab058e8a187596f19d28ff9035f6e6cf"
+    },
+    "@zip-js/zip-js@2.15.0": {
+      "integrity": "d042bf2649842410e60cc926846fb6f15836d23c829546a7e122b773f7941268"
     }
   },
   "npm": {
