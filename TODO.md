@@ -27,8 +27,9 @@ Production has run the new pair against `rdm_requests.ds` since the release.
       a timestamp. `rdm_requests_lastmod.txt` holds a UTC timestamp written
       only on success, so "older than an hour during working hours" is a
       cheap alarm. The same shape applies to the CaltechTHESIS pair on the
-      same crontab. Wants a decision record — see `cold` observations 370 and
-      371.
+      same crontab. Now tracked as **issue #111**, scoped wider than a cron
+      check: a general alerting facility surfaced in COLD itself, displayed in
+      the UI and possibly emailed. See `cold` observations 370 and 371.
 - [ ] **Deploy v0.0.53** once cut, so the technical reports report reaches
       production.
 
@@ -39,11 +40,37 @@ Production has run the new pair against `rdm_requests.ds` since the release.
       type, which measures 19,431. Phil's literal "or groups field" wording
       would be 51,450 rows and was **not** adopted; if he wants that, it is a
       change request, not a bug. See observation 300.
-- [ ] Tony has still never confirmed which groups his variant covers.
+- [x] ~~Tony has still never confirmed which groups his variant covers~~ —
+      moot. **Issue #110 was cancelled on 2026-09-21**, the day it was
+      designed: the technical reports report already answers the need, read
+      into a spreadsheet and pivoted by group. No code was written and the one
+      `cold_api.yaml` change was reverted. See **DR-0024** (which supersedes
+      DR-0023) and `cold` observation 381; the feature request, design brief
+      and implementation plan are kept under `agents/projects/cold/` as the
+      record of what was designed.
 - [ ] **`generate_country_collaboration_rpt.ts:147` conflates a failed query
       with an empty one** (`return results ?? []`), the defect the technical
       reports report deliberately avoids. Filed upstream as `dataset` and
       `ts_dataset` TODO items; the local fix is independent of those.
+
+### Found while designing #110 — outlived it, each wants its own record
+
+- [ ] **The middleware never enforces an input's `required` flag.**
+      `Inputs.required` is declared in `cold_reports.ts` and read from
+      `cold_reports.yaml`, but nothing checks it before the command runs, so
+      the runner's shell guard is load-bearing rather than belt-and-braces.
+      That contradicts DR-0002's "every layer re-validates". Affects all four
+      existing mediated reports.
+- [ ] **`generate_collaborator_rpt` and `publications_by_person_identifiers`
+      ship in no release tarball.** Both are built into `bin/` by
+      `deno task build` but appear in none of the six `release_*` tasks in
+      `deno.json` (verified 2026-09-21). Registering a report in `build` is
+      not the same as shipping it. Note also that the `Makefile`'s `PROGRAMS`
+      variable is declared and never referenced anywhere in the file.
+- [ ] **The report queue table shows only `report_name`**, so two runs of the
+      same parameterized report for different inputs are indistinguishable in
+      the list — only the link filename tells them apart. Gets worse with a
+      fifth mediated report people will run repeatedly.
 
 ### Carried over
 

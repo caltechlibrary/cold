@@ -89,12 +89,12 @@
   "softwareRequirements": [
     "Deno >= 2.8.2",
     "Dataset >= 2.5.1",
-    "CMTools >= 0.0.45b",
     "yq (mikefarah/yq) >= 4.44"
   ],
   "softwareSuggestions": [
     "GNU Make",
-    "Pandoc >= 3.9"
+    "Pandoc >= 3.9",
+    "CMTools >= 0.0.45b"
   ],
   "version": "0.0.53",
   "developmentStatus": "active",
