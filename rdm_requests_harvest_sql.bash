@@ -192,6 +192,7 @@ filtered_requests AS ${mat} (
     json->>'status'             AS status,
     json->'title'               AS title,
     json->'created_by'->>'user' AS created_by_user,
+    json->'reviewers'           AS reviewers,
     created,
     updated
   FROM request_metadata
@@ -243,6 +244,24 @@ mentions AS ${mat} (
   WHERE re.request_id IN (SELECT id FROM filtered_requests WHERE status = 'submitted')
     AND re.json->'payload'->>'content' ~ '@[a-zA-Z0-9_-]+'
   GROUP BY re.request_id
+),
+
+-- Reviewer usernames, aggregated the same way mentions is: one pass over a
+-- small per-request array, not a per-row lookup (cold#104, DR-0025). Only
+-- "user"-type entries resolve -- a "group" entry is carried through in the
+-- raw reviewers field below but not named here (decision 1; verified zero
+-- group-type entries in production as of 2026-09-24). A user id with no
+-- matching accounts_user row is silently excluded from the aggregate rather
+-- than erroring, since this is a plain JOIN, not a LEFT JOIN.
+reviewer_names AS ${mat} (
+  SELECT
+    fr.id AS request_id,
+    string_agg(au.username, '; ' ORDER BY au.username) AS reviewer_names
+  FROM filtered_requests fr
+  JOIN LATERAL jsonb_array_elements(COALESCE(fr.reviewers, '[]'::jsonb)) AS elem ON true
+  JOIN accounts_user au ON (au.id::text = elem->>'user')
+  WHERE elem ? 'user'
+  GROUP BY fr.id
 )
 
 SELECT json_build_object(
@@ -285,6 +304,8 @@ SELECT json_build_object(
       END,
     'version_index', rec."index",
     'submitted_by', au.username,
+    'reviewers', fr.reviewers,
+    'reviewer_names', rn.reviewer_names,
     'created', fr.created,
     'updated', GREATEST(fr.updated, COALESCE(rec.updated, dft.updated)),
     'comments_with_mentions', mn.items
@@ -299,6 +320,7 @@ ${join_block}
 LEFT JOIN rdm_drafts_metadata dft ON (dft.id = COALESCE(rec.id, r.object_uuid))
 LEFT JOIN accounts_user au ON (fr.created_by_user = au.id::text)
 LEFT JOIN mentions mn ON (mn.request_id = fr.id)
+LEFT JOIN reviewer_names rn ON (rn.request_id = fr.id)
 -- Drop a request whose record exists but whose parent has no present version
 -- left: the whole record is tombstoned. A record tombstoned at version 1 but
 -- still present at version 2 is kept, and harvested at version 2.
