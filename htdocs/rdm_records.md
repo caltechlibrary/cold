@@ -1,12 +1,14 @@
 ---
-title: Review RDM Records
+title: Search RDM Records
 ---
 
-# Review RDM Records
+# Search RDM Records
 
-- [Browse all submitted requests](rdm_review_queue.html?q_name=review_queue_browse)
+Search every harvested CaltechAUTHORS RDM request, any status -- not just
+the currently-submitted review queue. See
+[Review RDM Records](rdm_review_queue.html) for that bounded view.
 
-## Search Review Queue
+## Search RDM Records
 
 <div id="search">Loading search form... </div>
 
@@ -16,14 +18,14 @@ title: Review RDM Records
 <script type="module">
   import { RdmReviewQueueUI } from "./modules/rdm_review_queue.js";
   const baseUrl = URL.parse(window.location.href);
-  baseUrl.pathname = baseUrl.pathname.replace(/rdm_review_queue.html$/g, '');
+  baseUrl.pathname = baseUrl.pathname.replace(/rdm_records.html$/g, '');
   baseUrl.search = "";
   const searchElement = document.getElementById("search");
   window.addEventListener('DOMContentLoaded', (event) => {
     const rdmReviewQueueUI = new RdmReviewQueueUI({
         baseUrl: baseUrl,
         searchElement: searchElement,
-        scope: "review_queue"
+        scope: "records"
     });
   });
 </script>

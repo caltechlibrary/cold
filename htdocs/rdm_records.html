@@ -2,7 +2,7 @@
 <html lang="en-US">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <title>Welcome to COLD</title>
+    <title>Search RDM Records</title>
     <link rel="stylesheet" href="/css/site.css">
 	<link rel="stylesheet" href="/css/webform.css">
     <link rel="stylesheet" href="/css/spinner.css">
@@ -22,28 +22,28 @@
 </nav>
 <section id="main-content">
 
-<h1>Welcome to Controlled Object Lists and Datum</h1>
-<p>COLD lets you manage Caltech People, Groups and Funders used in Caltech Library's repositories and feeds systems.</p>
-<ul>
-<li><a href="./people/" title="Curate CaltechPEOPLE">People</a></li>
-<li><a href="./groups/" title="Curate CaltechGROUPS">Groups</a></li>
-<li><a href="./funders/" title="Curate CaltechFUNDERS">Funders</a></li>
-</ul>
-<p>It also lets you manage lists of subjects, issn mappings to cannonical names and doi prefixes.</p>
-<ul>
-<li><a href="./journals/" title="Journals mapping">Journals</a></li>
-<li><a href="./thesis_options/" title="Thesis options mapping">Thesis Options</a></li>
-<li><a href="./subjects/">Subjects</a></li>
-<li><a href="./doi_prefix/">DOI Prefix</a></li>
-</ul>
-<h2>Tools</h2>
-<ul>
-<li><a href="./reports">Reports</a></li>
-<li><a href="./rdm_records.html">Search RDM Records</a></li>
-<li><a href="./rdm_review_queue.html">Review RDM Queue</a></li>
-<li><a href="./thesis_search.html">Search CaltechTHESIS</a></li>
-<li><a href="./rename/people">Re-assign clpid in CaltechPEOPLE</a></li>
-</ul>
+<h1>Search RDM Records</h1>
+<p>Search every harvested CaltechAUTHORS RDM request, any status -- not just
+the currently-submitted review queue. See
+<a href="rdm_review_queue.html">Review RDM Records</a> for that bounded view.</p>
+<h2>Search RDM Records</h2>
+<div id="search">Loading search form... </div>
+<p><noscript>JavaScript required for search to be available</noscript></p>
+<script type="module" src="./modules/sortable_table.js"></script>
+<script type="module">
+  import { RdmReviewQueueUI } from "./modules/rdm_review_queue.js";
+  const baseUrl = URL.parse(window.location.href);
+  baseUrl.pathname = baseUrl.pathname.replace(/rdm_records.html$/g, '');
+  baseUrl.search = "";
+  const searchElement = document.getElementById("search");
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const rdmReviewQueueUI = new RdmReviewQueueUI({
+        baseUrl: baseUrl,
+        searchElement: searchElement,
+        scope: "records"
+    });
+  });
+</script>
 
 
 </section>

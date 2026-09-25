@@ -24,11 +24,12 @@
 
 <h1>Review RDM Records</h1>
 <ul>
-<li><a href="rdm_review_queue.html?q_name=review_queue_by_name&amp;q=*">List all review queue records</a></li>
+<li><a href="rdm_review_queue.html?q_name=review_queue_browse">Browse all submitted requests</a></li>
 </ul>
-<h2>Seearch Review Queue</h2>
+<h2>Search Review Queue</h2>
 <div id="search">Loading search form... </div>
 <p><noscript>JavaScript required for search to be available</noscript></p>
+<script type="module" src="./modules/sortable_table.js"></script>
 <script type="module">
   import { RdmReviewQueueUI } from "./modules/rdm_review_queue.js";
   const baseUrl = URL.parse(window.location.href);
@@ -38,7 +39,8 @@
   window.addEventListener('DOMContentLoaded', (event) => {
     const rdmReviewQueueUI = new RdmReviewQueueUI({
         baseUrl: baseUrl,
-        searchElement: searchElement
+        searchElement: searchElement,
+        scope: "review_queue"
     });
   });
 </script>
