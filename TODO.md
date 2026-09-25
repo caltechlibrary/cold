@@ -5,7 +5,9 @@ Action items
 Start here — after v0.0.55
 --------------------------
 
-**Issue #104 is DONE, both halves, and goes out in v0.0.55. Issue closed.**
+**Issue #104's reviewer column ships in v0.0.55. The issue stays open** —
+title/publisher search, the URL-path split and matching `irdm-queue-portal`'s
+sort/order UI are a follow-up design cycle, in progress; see below.
 v0.0.54 shipped the harvest half (`reviewers`/`reviewer_names` on every
 request, DR-0025). This release ships the UI half: `cold_api.yaml` gains
 `review_queue_by_reviewer`, a paired `by_reviewer` (all-records), and
@@ -31,11 +33,25 @@ needed `reviewer_names` added by hand. Also caught: `deno task build` does
 not rebuild `htdocs/modules/*.js` (that's `deno task htdocs`, or the
 Makefile's own `make build` target, which is a different thing despite the
 name) — see `docs/release_process.md`'s Traps section and observation 426.
-**Remaining asks from later comments on #104** — title/publisher search, a
-client-side sortable-table rearchitecture, splitting the live queue into its
-own URL path, matching `irdm-queue-portal`'s sort/order UI — are explicitly
-out of scope for this cycle and stay open as separate, not-yet-designed work
-if/when someone asks for them again.
+**Remaining asks from later comments on #104** — title/publisher search (or a
+client-side sortable-table rearchitecture, tmorrell offered both as
+alternatives), splitting the live queue into its own URL path, matching
+`irdm-queue-portal`'s sort/order UI — are being taken through their own
+design/decide/plan cycle before this issue closes, per RSDOIEL's explicit
+call that the release waits on all of #104's comments being addressed, not
+just the reviewer column.
+
+**Issue #112 (A11y: wrong `<title>` on every htdocs page) fixed in v0.0.55.**
+`build.ts` hard-coded `page_title: "COLD Public API"` for all seven
+generated pages, discarding each page's own front-matter `title:` — a WCAG
+2.4.2 Page Titled defect. Now reads `attrs.title`. Found while triaging open
+issues for this release, not part of #104.
+
+**Issue #113 (`codemeta.json` still listing CMTools as a requirement)
+already fixed, closed via v0.0.55's release comment.** Commit `a815d41`
+(2026-09-24, predates this cycle) had already moved it to
+`softwareSuggestions`; the issue was just never closed. No code change
+needed — found while triaging open issues for this release.
 
 **Issue #105 shipped in v0.0.53 and is deployed.** The technical reports
 report is live in production, registered and verified end to end through the
