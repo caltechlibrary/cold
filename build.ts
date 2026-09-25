@@ -34,8 +34,14 @@ export async function renderHtdocs(startDir: string) {
         f_name.replace(/\.md$/, ".html"),
       );
 
+      // Each page's front matter declares its own title (WCAG 2.4.2 Page
+      // Titled) -- fall back only if a page is missing one, never override
+      // a declared title with a fixed string (cold#112).
+      const attrs = extracted.attrs as { title?: string };
+      const page_title = attrs.title ?? "COLD Public API";
+
       const body = await makePage("page", {
-        page_title: "COLD Public API",
+        page_title: page_title,
         base_path: "",
         page: { body: src },
       });
