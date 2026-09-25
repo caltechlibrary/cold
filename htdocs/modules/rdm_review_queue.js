@@ -157,8 +157,31 @@ var ClientAPI = class {
 };
 
 // rdm_review_queue.ts
+function buildSearchTypeOptions(scope) {
+  if (scope === "review_queue") {
+    return `
+      <optgroup label="Review Queue Only">
+        <option value="review_queue_by_name" title="review queue by name">by name</option>
+        <option value="review_queue_by_clpid" title="review queue by clpid">by clpid</option>
+        <option value="review_queue_by_orcid" title"review queue by orcid">by orcid</option>
+        <option value="review_queue_by_clgid" title="review queue by clgid">by clgid (group identifier)</option>
+        <option value="review_queue_by_reviewer" title="review queue by reviewer">by reviewer</option>
+        <option value="review_queue_browse" title="browse all submitted requests">browse all</option>
+        <option value="review_queue_mentions" title="review queue search by @tag">by @tags</option>
+      </optgroup>`;
+  }
+  return `
+      <optgroup label="All Records">
+        <option value="by_name" title="all records by name">all records by name</option>
+        <option value="by_clpid" title="all records by clpid">all records by clpid</option>
+        <option value="by_orcid" title="all records by orcid">all records by orcid</option>
+        <option value="by_clgid" title="all records by clgid">all records by clgid (group identifier)</option>
+        <option value="by_reviewer" title="all records by reviewer">all records by reviewer</option>
+      </optgroup>`;
+}
 var RdmReviewQueueUI = class {
   cName = "rdm_requests.ds";
+  scope;
   searchElement;
   querySelect;
   queryInput;
@@ -172,6 +195,7 @@ var RdmReviewQueueUI = class {
   autocompleteResults = [];
   selectedReportType = null;
   constructor(options) {
+    this.scope = options.scope;
     options.cName === void 0 ? "rdm_requests.ds" : this.cName = options.cName;
     typeof options.searchElement === "string" ? this.searchElement = document.getElementById(options.searchElement) : this.searchElement = options.searchElement;
     this.baseUrl = new URL(options.baseUrl);
@@ -179,23 +203,7 @@ var RdmReviewQueueUI = class {
     this.clientAPI = new ClientAPI(this.baseUrl.toString());
     const formHTML = `<form method="get">
     <label set="query_name">Search</label> <select name="q_name" id="q_name">
-      <hr />
-      <optgroup label="Review Queue Only">
-        <option value="review_queue_by_name" title="review queue by name">by name</option>
-        <option value="review_queue_by_clpid" title="review queue by clpid">by clpid</option>
-        <option value="review_queue_by_orcid" title"review queue by orcid">by orcid</option>
-        <option value="review_queue_by_clgid" title="review queue by clgid">by clgid (group identifier)</option>
-        <option value="review_queue_by_reviewer" title="review queue by reviewer">by reviewer</option>
-        <option value="review_queue_mentions" title="review queue search by @tag">by @tags</option>
-      </optgroup>
-      <hr />
-      <optgroup label="All Records">
-        <option value="by_name" title="all records by name">all records by name</option>
-        <option value="by_clpid" title="all records by clpid">all records by clpid</option>
-        <option value="by_orcid" title="all records by orcid">all records by orcid</option>
-        <option value="by_clgid" title="all records by clgid">all records by clgid (group identifier)</option>
-        <option value="by_reviewer" title="all records by reviewer">all records by reviewer</option>
-      </optgroup>
+      ${buildSearchTypeOptions(this.scope)}
     </select> <input id="q" name="q" type="search"
                   list="autocomplete-container"
                   placeholder="use '*' as a wild card with names and @tag for at tags" value="" size="40"
@@ -299,7 +307,8 @@ var RdmReviewQueueUI = class {
     }
   }
   async setupQuery(q_name, q) {
-    if (q_name === "" || q === "") {
+    const isBrowse = q_name === "review_queue_browse";
+    if (q_name === "" || !isBrowse && q === "") {
       this.resultSection.innerText = `select search type, enter search term and press \u{1F50E}`;
       return;
     }
@@ -315,7 +324,7 @@ var RdmReviewQueueUI = class {
     } else {
       query_label = `all records ${query_label}`;
     }
-    this.resultSection.innerHTML = `Searching ${query_label} for <em>"${q}"</em> <span id="spinner">\u{1F453}</span>`;
+    this.resultSection.innerHTML = isBrowse ? `Browsing all submitted requests <span id="spinner">\u{1F453}</span>` : `Searching ${query_label} for <em>"${q}"</em> <span id="spinner">\u{1F453}</span>`;
     let query = q.indexOf("*") > -1 ? q.replace(/\*/g, "%") : q;
     if (q_name === "review_queue_mentions") {
       if (!query.startsWith("@")) {
@@ -324,8 +333,8 @@ var RdmReviewQueueUI = class {
       query = `%${query}%`;
     }
     try {
-      const results = await this.fetchResults(q_name, query);
-      this.resultSection.innerHTML = `${results.length}  items found, ${query_label} <em>"${q}"</em>`;
+      const results = isBrowse ? await this.fetchBrowseResults(q_name) : await this.fetchResults(q_name, query);
+      this.resultSection.innerHTML = isBrowse ? `${results.length} submitted requests` : `${results.length}  items found, ${query_label} <em>"${q}"</em>`;
       if (results.length > 0) {
         const tableText = formatJsonAsHtmlTable(q_name, query, results);
         const csvText = formatJsonAsCSV(q_name, query, results);
@@ -333,7 +342,7 @@ var RdmReviewQueueUI = class {
         const download = csvToDownloadElements(csvText, downloadName);
         this.resultSection.appendChild(download);
         this.resultSection.appendChild(document.createElement("p"));
-        this.resultSection.insertAdjacentHTML("beforeend", tableText);
+        this.resultSection.insertAdjacentHTML("beforeend", `<sortable-table>${tableText}</sortable-table>`);
       }
     } catch (error) {
       this.resultSection.innerHTML = `Error: ${q_name}(${query}) ${error}`;
@@ -345,6 +354,18 @@ var RdmReviewQueueUI = class {
     url.search = new URLSearchParams({
       q
     }).toString();
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return await response.json();
+  }
+  // fetchBrowseResults calls a zero-parameter query directly -- no /q
+  // field-name segment, no bound value -- matching get_all_reviewer_usernames's
+  // shape. review_queue_browse's SQL has no `?` placeholder at all.
+  async fetchBrowseResults(q_name) {
+    const url = new URL(this.baseUrl);
+    url.pathname = `${this.basePath}api/${this.cName}/${q_name}`;
     const response = await fetch(url);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -580,6 +601,8 @@ function genDownloadName(q_name, q, ext) {
       return `at_${stripNonAlphanumericUTF8(q)}_${q_name}${ext}`;
     case "review_queue_by_reviewer":
       return `${stripNonAlphanumericUTF8(q)}_${q_name}${ext}`;
+    case "review_queue_browse":
+      return `all_submitted_${q_name}${ext}`;
     default:
       return `${q}_${q_name}${ext}`;
   }
@@ -589,6 +612,7 @@ function stripNonAlphanumericUTF8(input) {
 }
 export {
   RdmReviewQueueUI,
+  buildSearchTypeOptions,
   formatJsonAsCSV,
   formatJsonAsHtmlTable,
   genDownloadName,

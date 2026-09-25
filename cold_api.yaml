@@ -440,6 +440,20 @@ collections:
         from rdm_requests
         order by src->>'updated' desc
 
+      # Browse every currently-submitted request, unconditionally -- the
+      # entry point for whole-review-queue title/publisher search via
+      # <sortable-table> client-side filtering (cold#104, DR-0027 decision
+      # 1). Deliberately not review_queue_by_name with a wildcard q=*: that
+      # only returns rows whose creators array happens to carry a name to
+      # match against, which is incidental, not a guarantee. No bound
+      # parameter -- zero `?` in this query, so the browser side must call
+      # it without a trailing field-name segment (see rdm_review_queue.ts).
+      review_queue_browse:
+        select src
+        from rdm_requests
+        where src->>'status' = 'submitted'
+        order by src->>'created' desc
+
       # Search the JSON object for a user provided value
       search: |
         select src

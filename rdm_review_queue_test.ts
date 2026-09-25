@@ -1,5 +1,6 @@
 import { assertEquals, assertStringIncludes } from "@std/assert";
 import {
+  buildSearchTypeOptions,
   formatJsonAsCSV,
   formatJsonAsHtmlTable,
   genDownloadName,
@@ -107,4 +108,27 @@ Deno.test("genDownloadName: review_queue_by_reviewer", () => {
 Deno.test("genDownloadName: by_reviewer falls through to the default case", () => {
   const name = genDownloadName("by_reviewer", "pjaffe", ".csv");
   assertEquals(name, "pjaffe_by_reviewer.csv");
+});
+
+Deno.test("genDownloadName: review_queue_browse ignores q, uses a fixed name", () => {
+  const name = genDownloadName("review_queue_browse", "", ".csv");
+  assertEquals(name, "all_submitted_review_queue_browse.csv");
+});
+
+Deno.test("buildSearchTypeOptions(review_queue) includes review_queue_browse and excludes All Records options", () => {
+  const html = buildSearchTypeOptions("review_queue");
+  assertStringIncludes(html, "review_queue_browse");
+  assertStringIncludes(html, "review_queue_by_reviewer");
+  assertEquals(html.includes('value="by_name"'), false);
+  assertEquals(html.includes('value="by_clpid"'), false);
+  assertEquals(html.includes('value="by_reviewer"'), false);
+});
+
+Deno.test("buildSearchTypeOptions(records) includes All Records options and excludes review_queue_* options and browse", () => {
+  const html = buildSearchTypeOptions("records");
+  assertStringIncludes(html, 'value="by_name"');
+  assertStringIncludes(html, 'value="by_clpid"');
+  assertStringIncludes(html, 'value="by_reviewer"');
+  assertEquals(html.includes("review_queue_browse"), false);
+  assertEquals(html.includes("review_queue_by_reviewer"), false);
 });
