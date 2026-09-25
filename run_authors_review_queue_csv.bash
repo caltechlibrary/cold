@@ -18,7 +18,8 @@ SELECT
        'groups', COALESCE((
            SELECT GROUP_CONCAT(value->>'id', ';')
            FROM json_each(COALESCE(src->'custom_fields'->'caltech:groups', '[]'))
-       ), '')
+       ), ''),
+       'reviewer_names', COALESCE(src->>'reviewer_names', '')
    ) AS obj
 FROM rdm_requests
 WHERE src->>'status' = 'submitted'
@@ -26,6 +27,6 @@ ORDER BY src->>'created' DESC;
 
 SQL
 
-dsquery -csv "rdmid,link,status,created,title,publisher,publication_date,journal_title,groups" \
+dsquery -csv "rdmid,link,status,created,title,publisher,publication_date,journal_title,groups,reviewer_names" \
   -sql authors_review_queue_csv.sql \
   rdm_requests.ds

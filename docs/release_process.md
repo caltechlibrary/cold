@@ -45,6 +45,7 @@ is wasted work that the next build overwrites.
 edit codemeta.json, htdocs/about.md, TODO.md
 make version.ts CITATION.cff     # cmt; regenerates the derived version files
 deno task build                  # rebuild binaries so --help reports the new version
+deno task htdocs                 # rebundle browser-side modules -- see Traps
 make compile                     # regenerate docs/*.1.md from --help
 deno task test                   # 164 + 7, and the lint_imports gate
 make release                     # clean, build, man, distribute_docs, dist/*
@@ -77,3 +78,18 @@ lock is the union of the app, test and check graphs.
 **Regenerating `docs/*.1.md` needs a rebuild first.** They come from each
 binary's `--help`, so running `make compile` against stale binaries writes the
 *old* version number into all fourteen files.
+
+**`deno task build` does not rebuild the browser-side bundles.** This is a
+naming collision, not an oversight: the Makefile's `build` target depends on
+`htdocs` (line 52) and *does* rebundle everything under `htdocs/modules/`,
+but `deno task build` -- the deno.json task this doc's own Order list calls
+by the same word -- only rebuilds the backend binaries (`cold`,
+`cold_reports`, the report generators, ...). Any release that touches a
+browser-side `.ts` file (anything bundled by `deno task htdocs`, e.g.
+`rdm_review_queue.ts`) needs `deno task htdocs` run explicitly, or the
+release ships a stale `htdocs/modules/*.js` with the old behavior even
+though every backend file and version number is correct. Caught 2026-09-25
+during manual testing of the cold#104 UI-half release (v0.0.55): the
+`Reviewer` column was invisible in the browser because
+`htdocs/modules/rdm_review_queue.js` was hours stale, despite the source
+`.ts`, the harvest, and the SQL all being correct and already tested.

@@ -2,20 +2,40 @@
 Action items
 ============
 
-Start here — after v0.0.54
+Start here — after v0.0.55
 --------------------------
 
-**Issue #104 (harvest half only) is DONE and goes out in v0.0.54.**
-`rdm_requests.ds` now carries `reviewers` and `reviewer_names` on every
-request — RDM's own first-class request-reviewer data
-(`REQUESTS_REVIEWERS_ENABLED`), not derived from community membership. Key
-record is **DR-0025** — four scoping decisions: users only this cut (no
-production request has a group-type reviewer to resolve), `; `-joined
-matching the `groups` column's convention, `username` not `full_name`
-matching `submitted_by`'s, ships alone. Already verified live in production
-(743 requests currently carry a reviewer) before this release formalized it.
-**The UI half is a separate, not-yet-started cycle** — no `cold_api.yaml`
-query, no `Reviewer` column in `rdm_review_queue.ts` — so #104 stays open.
+**Issue #104 is DONE, both halves, and goes out in v0.0.55. Issue closed.**
+v0.0.54 shipped the harvest half (`reviewers`/`reviewer_names` on every
+request, DR-0025). This release ships the UI half: `cold_api.yaml` gains
+`review_queue_by_reviewer`, a paired `by_reviewer` (all-records), and
+`get_all_reviewer_usernames` for autocomplete; `rdm_review_queue.ts` gains a
+`Reviewer` column (table + CSV) and matching search-dropdown options. Key
+record is **DR-0026** — three scoping decisions: pair `by_reviewer` with
+`review_queue_by_reviewer` for consistency even though only the review-queue
+case was originally asked for, place the column after `Submitted By`, and
+back autocomplete with a new `reviewer_usernames` harvest field (a JSON
+array alongside the existing `reviewer_names` string) rather than parsing
+`reviewer_names` client-side. That field required a second full re-harvest
+to backfill, already run in production. Two real bugs were found and fixed
+building `get_all_reviewer_usernames` — both in how SQLite's `json_each`
+interacts with `datasetd`'s response encoding, neither in the query logic —
+see `cold` observations 424–425 for the detail, worth reading before writing
+any future `cold_api.yaml` query that sources from `json_each`. Manual
+testing before release also caught a gap the design brief didn't cover:
+`run_authors_review_queue_csv.bash` and its all-records sibling
+`run_authors_records_csv.bash` are separate report scripts, each with their
+own hand-picked column list read straight from `rdm_requests.ds` via
+`dsquery` — the UI-half work didn't touch them automatically, so both
+needed `reviewer_names` added by hand. Also caught: `deno task build` does
+not rebuild `htdocs/modules/*.js` (that's `deno task htdocs`, or the
+Makefile's own `make build` target, which is a different thing despite the
+name) — see `docs/release_process.md`'s Traps section and observation 426.
+**Remaining asks from later comments on #104** — title/publisher search, a
+client-side sortable-table rearchitecture, splitting the live queue into its
+own URL path, matching `irdm-queue-portal`'s sort/order UI — are explicitly
+out of scope for this cycle and stay open as separate, not-yet-designed work
+if/when someone asks for them again.
 
 **Issue #105 shipped in v0.0.53 and is deployed.** The technical reports
 report is live in production, registered and verified end to end through the

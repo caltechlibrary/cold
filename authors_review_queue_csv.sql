@@ -12,7 +12,8 @@ SELECT
        'groups', COALESCE((
            SELECT GROUP_CONCAT(value->>'id', ';')
            FROM json_each(COALESCE(src->'custom_fields'->'caltech:groups', '[]'))
-       ), '')
+       ), ''),
+       'reviewer_names', COALESCE(src->>'reviewer_names', '')
    ) AS obj
 FROM rdm_requests
 WHERE src->>'status' = 'submitted'

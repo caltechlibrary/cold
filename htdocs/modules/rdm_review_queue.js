@@ -185,6 +185,7 @@ var RdmReviewQueueUI = class {
         <option value="review_queue_by_clpid" title="review queue by clpid">by clpid</option>
         <option value="review_queue_by_orcid" title"review queue by orcid">by orcid</option>
         <option value="review_queue_by_clgid" title="review queue by clgid">by clgid (group identifier)</option>
+        <option value="review_queue_by_reviewer" title="review queue by reviewer">by reviewer</option>
         <option value="review_queue_mentions" title="review queue search by @tag">by @tags</option>
       </optgroup>
       <hr />
@@ -193,6 +194,7 @@ var RdmReviewQueueUI = class {
         <option value="by_clpid" title="all records by clpid">all records by clpid</option>
         <option value="by_orcid" title="all records by orcid">all records by orcid</option>
         <option value="by_clgid" title="all records by clgid">all records by clgid (group identifier)</option>
+        <option value="by_reviewer" title="all records by reviewer">all records by reviewer</option>
       </optgroup>
     </select> <input id="q" name="q" type="search"
                   list="autocomplete-container"
@@ -237,6 +239,9 @@ var RdmReviewQueueUI = class {
   async get_all_clgid() {
     return this.clientAPI.getStringList("groups.ds", "get_all_clgid");
   }
+  async get_all_reviewer_usernames() {
+    return this.clientAPI.getStringList("rdm_requests.ds", "get_all_reviewer_usernames");
+  }
   // fetchAutocompleteResults supports auto complete with clpid and clgid
   async fetchAutocompleteResults(reportType) {
     switch (reportType) {
@@ -248,6 +253,10 @@ var RdmReviewQueueUI = class {
         return await this.get_all_clgid();
       case "by_clgid":
         return await this.get_all_clgid();
+      case "review_queue_by_reviewer":
+        return await this.get_all_reviewer_usernames();
+      case "by_reviewer":
+        return await this.get_all_reviewer_usernames();
       default:
         return [];
     }
@@ -289,24 +298,6 @@ var RdmReviewQueueUI = class {
       this.querySelect.value = q_name;
     }
   }
-  genDownloadName(q_name, q, ext) {
-    switch (q_name) {
-      case "by_name":
-        if (q === "*") {
-          return `all_records_${q_name}${ext}`;
-        }
-        return `${stripNonAlphanumericUTF8(q)}_${q_name}${ext}`;
-      case "review_queue_by_name":
-        if (q === "*") {
-          return `all_{q_name}${ext}`;
-        }
-        return `${stripNonAlphanumericUTF8(q)}_${q_name}${ext}`;
-      case "review_queue_mentions":
-        return `at_${stripNonAlphanumericUTF8(q)}_${q_name}${ext}`;
-      default:
-        return `${q}_${q_name}${ext}`;
-    }
-  }
   async setupQuery(q_name, q) {
     if (q_name === "" || q === "") {
       this.resultSection.innerText = `select search type, enter search term and press \u{1F50E}`;
@@ -338,7 +329,7 @@ var RdmReviewQueueUI = class {
       if (results.length > 0) {
         const tableText = formatJsonAsHtmlTable(q_name, query, results);
         const csvText = formatJsonAsCSV(q_name, query, results);
-        const downloadName = this.genDownloadName(q_name, query, ".csv");
+        const downloadName = genDownloadName(q_name, query, ".csv");
         const download = csvToDownloadElements(csvText, downloadName);
         this.resultSection.appendChild(download);
         this.resultSection.appendChild(document.createElement("p"));
@@ -466,7 +457,8 @@ function normalizeItem(q_name, q, item) {
   [
     "status",
     "link",
-    "publisher"
+    "publisher",
+    "reviewer_names"
   ].forEach(function(key) {
     if (key in item && (item[key] === void 0 || item[key] === null)) {
       item[key] = "";
@@ -487,6 +479,7 @@ function formatJsonAsHtmlTable(q_name, q, items) {
                 <td>${item.tags}</td>
                 <td>${item.created}</td>
                 <td>${item.submitted_by}</td>
+                <td>${item.reviewer_names}</td>
                 <td>${item.groups}</td>
             </tr>
         `;
@@ -504,6 +497,7 @@ function formatJsonAsHtmlTable(q_name, q, items) {
                     <th>Tags</th>
                     <th>Created Date</th>
                     <th>Submitted By</th>
+                    <th>Reviewer</th>
                     <th>Caltech Groups</th>
                 </tr>
             </thead>
@@ -527,17 +521,17 @@ function formatJsonAsCSV(q_name, q, items) {
     case "review_queue_by_orcid":
     case "by_name":
     case "review_queue_by_name":
-      csvHeader = "Query,found clpid,found orcid,Tags,RDMID,Link,Status,Title,Publisher,Journal Title,Publication Date,Created Date,Submitted By,Caltech Groups";
+      csvHeader = "Query,found clpid,found orcid,Tags,RDMID,Link,Status,Title,Publisher,Journal Title,Publication Date,Created Date,Submitted By,Reviewer,Caltech Groups";
       csvRows = items.map((item) => {
         normalizeItem(q_name, q_normal, item);
-        return `"${q_normal}","${item.query_clpid}","${item.query_orcid}","${item.tags}","${item.rdmid}","${item.link.replace(/"/g, '""')}","${item.status}","${item.title.replace(/"/g, '""')}","${item.publisher.replace(/"/g, '""')}","${item.journal_title.replace(/"/g, '""')}","${item.publication_date}","${item.created}","${item.submitted_by}","${item.groups.replace(/"/g, '""')}"`;
+        return `"${q_normal}","${item.query_clpid}","${item.query_orcid}","${item.tags}","${item.rdmid}","${item.link.replace(/"/g, '""')}","${item.status}","${item.title.replace(/"/g, '""')}","${item.publisher.replace(/"/g, '""')}","${item.journal_title.replace(/"/g, '""')}","${item.publication_date}","${item.created}","${item.submitted_by}","${item.reviewer_names.replace(/"/g, '""')}","${item.groups.replace(/"/g, '""')}"`;
       }).join("\n");
       break;
     default:
-      csvHeader = "Query,Tags,RDMID,Link,Status,Title,Publisher,Journal Title,Publication Date,Created Date,Submitted By,Caltech Groups";
+      csvHeader = "Query,Tags,RDMID,Link,Status,Title,Publisher,Journal Title,Publication Date,Created Date,Submitted By,Reviewer,Caltech Groups";
       csvRows = items.map((item) => {
         normalizeItem(q_name, q_normal, item);
-        return `"${q_normal}","${item.tags}","${item.rdmid}","${item.link.replace(/"/g, '""')}","${item.status}","${item.title.replace(/"/g, '""')}","${item.publisher.replace(/"/g, '""')}","${item.journal_title.replace(/"/g, '""')}","${item.publication_date}","${item.created}","${item.submitted_by}","${item.groups.replace(/"/g, '""')}"`;
+        return `"${q_normal}","${item.tags}","${item.rdmid}","${item.link.replace(/"/g, '""')}","${item.status}","${item.title.replace(/"/g, '""')}","${item.publisher.replace(/"/g, '""')}","${item.journal_title.replace(/"/g, '""')}","${item.publication_date}","${item.created}","${item.submitted_by}","${item.reviewer_names.replace(/"/g, '""')}","${item.groups.replace(/"/g, '""')}"`;
       }).join("\n");
       break;
   }
@@ -570,9 +564,33 @@ function csvToDownloadElements(csvContent, fileName = "data.csv") {
   container.appendChild(dataElement);
   return container;
 }
+function genDownloadName(q_name, q, ext) {
+  switch (q_name) {
+    case "by_name":
+      if (q === "*") {
+        return `all_records_${q_name}${ext}`;
+      }
+      return `${stripNonAlphanumericUTF8(q)}_${q_name}${ext}`;
+    case "review_queue_by_name":
+      if (q === "*") {
+        return `all_{q_name}${ext}`;
+      }
+      return `${stripNonAlphanumericUTF8(q)}_${q_name}${ext}`;
+    case "review_queue_mentions":
+      return `at_${stripNonAlphanumericUTF8(q)}_${q_name}${ext}`;
+    case "review_queue_by_reviewer":
+      return `${stripNonAlphanumericUTF8(q)}_${q_name}${ext}`;
+    default:
+      return `${q}_${q_name}${ext}`;
+  }
+}
 function stripNonAlphanumericUTF8(input) {
   return input.replace(/[^\p{L}\p{N}]/gu, "");
 }
 export {
-  RdmReviewQueueUI
+  RdmReviewQueueUI,
+  formatJsonAsCSV,
+  formatJsonAsHtmlTable,
+  genDownloadName,
+  normalizeItem
 };
