@@ -544,6 +544,53 @@ collections:
         AND src->>'status' = 'submitted'
         order by src->>'created' desc
 
+      # search by reviewer username (cold#104, DR-0026). reviewer_names is
+      # already a flat `; `-joined string on the harvested row, so a plain
+      # LIKE is enough -- no json_each needed for the predicate itself.
+      by_reviewer: |
+        select src
+        from rdm_requests
+        where src->>'reviewer_names' like ?
+        order by src->>'created' desc
+
+      review_queue_by_reviewer: |
+        select src
+        from rdm_requests
+        where src->>'reviewer_names' like ?
+        AND src->>'status' = 'submitted'
+        order by src->>'created' desc
+
+      # Distinct reviewer usernames across the whole collection, for the
+      # reviewer-search autocomplete list (cold#104, DR-0026). Unlike
+      # get_all_clpid/get_all_clgid, there is no dedicated roster collection
+      # to draw this from -- reviewer_usernames is a JSON array field the
+      # harvest itself resolves, so this reads json_each the same way
+      # get_all_clgid reads custom_fields."caltech:groups", just sourced from
+      # this collection instead of a separate one.
+      #
+      # The `value is not null` filter is load-bearing, not defensive
+      # styling: reviewer_usernames is harvested as JSON null (not an absent
+      # key) on every row with no resolved reviewer, and sqlite's json_each
+      # treats a scalar null as ONE row with value = NULL rather than zero
+      # rows -- without the filter this returns a spurious blank entry
+      # representing every unpopulated row in the collection (110,581 of
+      # them, verified locally 2026-09-25), not just the real usernames.
+      #
+      # json_quote(value) is also load-bearing, not stylistic: json_each's
+      # `value` column is the raw decoded scalar ("briney", unquoted), but
+      # datasetd's response encoding expects each result column to already
+      # be valid JSON text -- get_all_clpid/get_all_clgid get this for free
+      # via `src->'clpid'` (`->`, not `->>`, keeps the JSON quoting).
+      # Without json_quote here, datasetd fails every row with "invalid
+      # character 'b' looking for beginning of value" (verified locally
+      # 2026-09-25, through cold.ts's real query-mapping path, not raw
+      # datasetd).
+      get_all_reviewer_usernames: |
+        select distinct json_quote(value) as value
+        from rdm_requests, json_each(src, '$.reviewer_usernames')
+        where value is not null
+        order by value
+
       # All distinct ROR IDs that appear in any creator affiliation.
       # Used to pre-filter country ROR lists before hitting the CaltechAUTHORS API.
       unique_creator_ror_ids: |
