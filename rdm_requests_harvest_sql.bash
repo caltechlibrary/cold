@@ -253,10 +253,18 @@ mentions AS ${mat} (
 -- group-type entries in production as of 2026-09-24). A user id with no
 -- matching accounts_user row is silently excluded from the aggregate rather
 -- than erroring, since this is a plain JOIN, not a LEFT JOIN.
+--
+-- Two aggregations of the same joined rows (cold#104, DR-0026): reviewer_names
+-- is the display string the review queue table/CSV already shows; the new
+-- reviewer_usernames JSON array exists only so cold_api.yaml can json_each
+-- over it to build the reviewer autocomplete list -- the same shape
+-- get_all_clgid uses against custom_fields."caltech:groups", now sourced from
+-- this collection instead of a dedicated roster collection.
 reviewer_names AS ${mat} (
   SELECT
     fr.id AS request_id,
-    string_agg(au.username, '; ' ORDER BY au.username) AS reviewer_names
+    string_agg(au.username, '; ' ORDER BY au.username) AS reviewer_names,
+    json_agg(au.username ORDER BY au.username) AS reviewer_usernames
   FROM filtered_requests fr
   JOIN LATERAL jsonb_array_elements(COALESCE(fr.reviewers, '[]'::jsonb)) AS elem ON true
   JOIN accounts_user au ON (au.id::text = elem->>'user')
@@ -306,6 +314,7 @@ SELECT json_build_object(
     'submitted_by', au.username,
     'reviewers', fr.reviewers,
     'reviewer_names', rn.reviewer_names,
+    'reviewer_usernames', rn.reviewer_usernames,
     'created', fr.created,
     'updated', GREATEST(fr.updated, COALESCE(rec.updated, dft.updated)),
     'comments_with_mentions', mn.items
