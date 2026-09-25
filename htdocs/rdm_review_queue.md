@@ -4,8 +4,6 @@ title: Review RDM Records
 
 # Review RDM Records
 
-- [Browse all submitted requests](rdm_review_queue.html?q_name=review_queue_browse)
-
 ## Search Review Queue
 
 <div id="search">Loading search form... </div>
