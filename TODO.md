@@ -2,19 +2,27 @@
 Action items
 ============
 
-Start here — after v0.0.53
+Start here — after v0.0.54
 --------------------------
 
-**Issue #105 is DONE and goes out in v0.0.53.** The technical reports report is
-built, registered and verified end to end through the reports UI: 19,431 rows,
-16 resource types, zero column shifts. Key record is **DR-0022** — never filter
-`is_latest`. Also in this release: the docs site moved to CI from `docs/`
-(DR-0021), `make`/`make test` are CMTools-free, every import resolves through
-the import map with a lint gate enforcing it, and `bundle.ts` is gone.
+**Issue #104 (harvest half only) is DONE and goes out in v0.0.54.**
+`rdm_requests.ds` now carries `reviewers` and `reviewer_names` on every
+request — RDM's own first-class request-reviewer data
+(`REQUESTS_REVIEWERS_ENABLED`), not derived from community membership. Key
+record is **DR-0025** — four scoping decisions: users only this cut (no
+production request has a group-type reviewer to resolve), `; `-joined
+matching the `groups` column's convention, `username` not `full_name`
+matching `submitted_by`'s, ships alone. Already verified live in production
+(743 requests currently carry a reviewer) before this release formalized it.
+**The UI half is a separate, not-yet-started cycle** — no `cold_api.yaml`
+query, no `Reviewer` column in `rdm_review_queue.ts` — so #104 stays open.
 
-**Issue #109 shipped in v0.0.52 and is deployed.** An earlier version of this
-file said production "still runs the retired harvest scripts" — that was wrong.
-Production has run the new pair against `rdm_requests.ds` since the release.
+**Issue #105 shipped in v0.0.53 and is deployed.** The technical reports
+report is live in production, registered and verified end to end through the
+reports UI. Key record is **DR-0022** — never filter `is_latest`.
+
+**Issue #109 shipped in v0.0.52 and is deployed.** Production has run the
+harvest pair against `rdm_requests.ds` since that release.
 
 ### Not done, and it is the first thing
 
@@ -30,8 +38,8 @@ Production has run the new pair against `rdm_requests.ds` since the release.
       same crontab. Now tracked as **issue #111**, scoped wider than a cron
       check: a general alerting facility surfaced in COLD itself, displayed in
       the UI and possibly emailed. See `cold` observations 370 and 371.
-- [ ] **Deploy v0.0.53** once cut, so the technical reports report reaches
-      production.
+- [x] ~~Deploy v0.0.53~~ — released and deployed 2026-09-18, technical reports
+      report live in production.
 
 ### Issue #105 follow-ups
 
