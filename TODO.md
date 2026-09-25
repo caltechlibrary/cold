@@ -121,11 +121,19 @@ harvest pair against `rdm_requests.ds` since that release.
 - [ ] **No measured baseline for the pre-restructure full harvest.** 26m27s may
       or may not be a regression; timing `38ba5b9`'s version once settles it
       (DR-0019).
-- [ ] **`deno.lock` oscillates between three sizes** because 16 `deno bundle`
-      tasks pass `--config tsconfig.json`, which rewrites the project lock to
-      that config's graph. `make` prunes it, a test run restores it. Options:
-      `--no-lock` on those tasks, a separate `--lock=htdocs.lock`, or moving
-      `tsconfig.json` out of the project root.
+- [x] ~~`deno.lock` oscillates between three sizes~~ — **fixed 2026-09-25.**
+      All 16 `deno bundle --config tsconfig.json` tasks in `deno.json` now
+      also pass `--lock=htdocs.lock`, so they read/write a separate lock
+      file instead of rewriting the main `deno.lock` down to just their own
+      (all locally-only, no external-dependency) graph. Verified: running
+      every bundle task individually and via `deno task htdocs` (all 16 at
+      once) leaves the main `deno.lock` with zero diff. `htdocs.lock` itself
+      never actually materializes under normal operation, since none of the
+      16 browser-side entry points currently import anything external
+      (jsr:/npm:) — harmless; it'll appear the day one of them does. No more
+      "check `git diff deno.lock` before committing a release" step needed
+      in `docs/release_process.md`'s Traps section, though that note stays
+      as history of why the discipline existed.
 - [ ] 82 unused local variables reported by `deno lint`, and 50 of 62 root
       modules are absent from the `check` task — most are covered transitively,
       but an entrypoint nothing imports is invisible, which is how `bundle.ts`

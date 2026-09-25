@@ -69,11 +69,17 @@ the Makefile. The other is that CMTools is being retired in favour of
 `make test` and a deployment need no CMTools at all — see `deployment.md`. Do
 not reintroduce it into the `build` path.
 
-**`make` prunes `deno.lock`.** The sixteen `deno bundle` tasks pass
-`--config tsconfig.json`, which rewrites the project lockfile to that config's
-much smaller graph. A test run then restores it. Check `git diff deno.lock`
-before committing a release and do not commit the pruned version; the complete
-lock is the union of the app, test and check graphs.
+**`make` no longer prunes `deno.lock` — fixed 2026-09-25.** The sixteen
+`deno bundle --config tsconfig.json` tasks used to rewrite the project
+lockfile down to their own much smaller graph, requiring a `git diff
+deno.lock` check before every release to catch and undo it. They now also
+pass `--lock=htdocs.lock`, a separate lock file scoped to just those tasks,
+so the main `deno.lock` is untouched by any of them — verified against both
+individual bundle tasks and the full `deno task htdocs` sweep. `htdocs.lock`
+itself won't appear until one of the 16 browser-side entry points actually
+imports something external; none currently do. The `git diff deno.lock`
+release-prep step is no longer needed, though a habit of checking costs
+nothing.
 
 **Regenerating `docs/*.1.md` needs a rebuild first.** They come from each
 binary's `--help`, so running `make compile` against stale binaries writes the
