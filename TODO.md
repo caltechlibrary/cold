@@ -5,41 +5,54 @@ Action items
 Start here — after v0.0.55
 --------------------------
 
-**Issue #104's reviewer column ships in v0.0.55. The issue stays open** —
-title/publisher search, the URL-path split and matching `irdm-queue-portal`'s
-sort/order UI are a follow-up design cycle, in progress; see below.
-v0.0.54 shipped the harvest half (`reviewers`/`reviewer_names` on every
-request, DR-0025). This release ships the UI half: `cold_api.yaml` gains
-`review_queue_by_reviewer`, a paired `by_reviewer` (all-records), and
-`get_all_reviewer_usernames` for autocomplete; `rdm_review_queue.ts` gains a
-`Reviewer` column (table + CSV) and matching search-dropdown options. Key
-record is **DR-0026** — three scoping decisions: pair `by_reviewer` with
-`review_queue_by_reviewer` for consistency even though only the review-queue
-case was originally asked for, place the column after `Submitted By`, and
-back autocomplete with a new `reviewer_usernames` harvest field (a JSON
-array alongside the existing `reviewer_names` string) rather than parsing
-`reviewer_names` client-side. That field required a second full re-harvest
-to backfill, already run in production. Two real bugs were found and fixed
-building `get_all_reviewer_usernames` — both in how SQLite's `json_each`
-interacts with `datasetd`'s response encoding, neither in the query logic —
-see `cold` observations 424–425 for the detail, worth reading before writing
-any future `cold_api.yaml` query that sources from `json_each`. Manual
-testing before release also caught a gap the design brief didn't cover:
-`run_authors_review_queue_csv.bash` and its all-records sibling
-`run_authors_records_csv.bash` are separate report scripts, each with their
-own hand-picked column list read straight from `rdm_requests.ds` via
-`dsquery` — the UI-half work didn't touch them automatically, so both
-needed `reviewer_names` added by hand. Also caught: `deno task build` does
-not rebuild `htdocs/modules/*.js` (that's `deno task htdocs`, or the
-Makefile's own `make build` target, which is a different thing despite the
-name) — see `docs/release_process.md`'s Traps section and observation 426.
-**Remaining asks from later comments on #104** — title/publisher search (or a
-client-side sortable-table rearchitecture, tmorrell offered both as
-alternatives), splitting the live queue into its own URL path, matching
-`irdm-queue-portal`'s sort/order UI — are being taken through their own
-design/decide/plan cycle before this issue closes, per RSDOIEL's explicit
-call that the release waits on all of #104's comments being addressed, not
-just the reviewer column.
+**Issue #104 is DONE, all of it, and closes with v0.0.55.** v0.0.54 shipped
+the harvest half (`reviewers`/`reviewer_names` on every request, DR-0025).
+This release ships both the reviewer-column UI half (DR-0026) and the
+follow-up cycle answering the issue's three remaining comments (DR-0027).
+
+*Reviewer column (DR-0026):* `cold_api.yaml` gains `review_queue_by_reviewer`,
+a paired `by_reviewer` (all-records), and `get_all_reviewer_usernames` for
+autocomplete; `rdm_review_queue.ts` gains a `Reviewer` column (table + CSV)
+and matching search-dropdown options, backed by a new `reviewer_usernames`
+harvest field (a JSON array alongside the existing `reviewer_names` string).
+That field required a second full re-harvest to backfill, already run in
+production. Two real bugs were found and fixed building
+`get_all_reviewer_usernames` — both in how SQLite's `json_each` interacts
+with `datasetd`'s response encoding, neither in the query logic — see `cold`
+observations 424–425 before writing any future `cold_api.yaml` query that
+sources from `json_each`. Manual testing before release also caught two
+gaps: `run_authors_review_queue_csv.bash` and its all-records sibling
+`run_authors_records_csv.bash` are separate report scripts reading
+`rdm_requests.ds` directly via `dsquery`, each needing `reviewer_names`
+added by hand; and `deno task build` does not rebuild `htdocs/modules/*.js`
+(that's `deno task htdocs`) — see `docs/release_process.md`'s Traps section
+and observation 426.
+
+*Search & sort UX (DR-0027):* title/publisher search is answered by
+wrapping every results table in `<sortable-table>` — a Web Component built
+and tested in an earlier cycle, never wired into any page until now —
+rather than adding dedicated search queries. Fed by a new
+`review_queue_browse` query, scoped to the review queue only, not "All
+Records" (111K+ rows, too large a payload to load client-side for a title
+filter). The live queue is split into its own page: `rdm_review_queue.html`
+keeps its name and becomes review-queue-scope only (plus the browse-all
+entry); a new `rdm_records.html` takes over the old "All Records" search
+group. No default multi-column sort was added — click-to-sort is enough
+given the SQL's own ordering. **No pagination anywhere `<sortable-table>`
+is used, an explicit decision, not an oversight** — RSDOIEL protested on
+engineering grounds and was overruled: Tom Morrell and the librarians who
+use this tool were consulted and chose to accept loading everything up
+front. Do not add pagination speculatively without a new issue asking for
+it; see DR-0027. Manual testing also caught the `deno.lock` oscillation
+problem (fixed — see below) and prompted several dashboard polish items:
+the redundant "browse all" link removed now that it's a dropdown option
+too, the review-queue link relabeled "Search RDM Queue" and moved ahead of
+"Search RDM Records," and the Tools section split into two `<ul>` groups.
+
+**`deno.lock` no longer oscillates.** All 16 `htdocs` bundle tasks now pass
+`--lock=htdocs.lock`, a separate lock file, instead of rewriting the main
+`deno.lock` down to just their own graph on every run. Verified against
+every individual bundle task and the full `deno task htdocs` sweep.
 
 **Issue #112 (A11y: wrong `<title>` on every htdocs page) fixed in v0.0.55.**
 `build.ts` hard-coded `page_title: "COLD Public API"` for all seven

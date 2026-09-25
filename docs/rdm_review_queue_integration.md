@@ -37,6 +37,24 @@
 > UI half of #104, closing out the cycle DR-0025 started. See
 > `agents/projects/cold/decisions/0026-rdm-review-queue-reviewer-column-three-ui-half.md`.
 
+> **Update, 2026-09-25.** #104's three remaining comments (title/publisher
+> search, splitting the live queue into its own URL path, matching
+> `irdm-queue-portal`'s sort/order UX) are answered without any further
+> harvest change — every field they need was already present. A new
+> `review_queue_browse` query (zero SQL parameters, every currently-submitted
+> request) feeds a `<sortable-table>` Web Component — built and tested in an
+> earlier cycle, never wired into any page until now — wrapped around every
+> results table, giving click-to-sort headers and a column-scoped filter for
+> free across every search type, not just the new browse-everything path.
+> That whole-collection client-side search is deliberately scoped to the
+> review queue only; "All Records" stays query-only (111K+ rows is too large
+> a payload for a client-side title filter). The page itself split in two:
+> `rdm_review_queue.html` kept its name and became review-queue-scope only,
+> and a new `rdm_records.html` took over the old "All Records" search group.
+> No pagination was added anywhere `<sortable-table>` is used — a deliberate,
+> stakeholder-overruled-the-engineer decision, not an oversight; see
+> `agents/projects/cold/decisions/0027-rdm-review-queue-search-and-sort-ux-five-scoping.md`.
+
 ## NOTES
 
 What follows were the main request details to add to COLD.
