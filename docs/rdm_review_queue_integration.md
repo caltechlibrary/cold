@@ -13,6 +13,18 @@
 > (DR-0015). See `agents/projects/cold/design/rdm_requests_harvest.md` in the
 > DLD workspace for the redesign, and issue #109 for what prompted it.
 
+> **Update, 2026-09-25.** The collection also carries `reviewers` — the raw
+> `request.reviewers` array from RDM (`{"user": "<id>"}` / `{"group": "<id>"}`
+> entries, gated by `REQUESTS_REVIEWERS_ENABLED`) — and `reviewer_names`, a
+> `; `-joined list of reviewer usernames, the same aggregation shape as
+> `comments_with_mentions`. Only `user`-type entries resolve into
+> `reviewer_names`; a `group`-type entry is carried in `reviewers` but left out
+> of `reviewer_names` on purpose, not because resolving it was missed — zero
+> production requests carried a group-type reviewer when this shipped, so
+> there was nothing to resolve against (DR-0025 decision 1). See
+> `agents/projects/cold/decisions/0025-rdm-review-queue-reviewer-harvest-four-scoping.md`
+> and issue #104.
+
 ## NOTES
 
 What follows were the main request details to add to COLD.
