@@ -25,6 +25,18 @@
 > `agents/projects/cold/decisions/0025-rdm-review-queue-reviewer-harvest-four-scoping.md`
 > and issue #104.
 
+> **Update, 2026-09-25.** The collection also carries `reviewer_usernames`, a
+> JSON array of the same resolved `user`-type reviewer usernames
+> `reviewer_names` joins into a string — it exists only so `cold_api.yaml`
+> can `json_each` over it to build the reviewer-search autocomplete list,
+> the same shape `get_all_clgid` uses for group identifiers, just sourced
+> from this collection instead of a dedicated roster one. `cold_api.yaml`
+> gained three queries (`review_queue_by_reviewer`, `by_reviewer`,
+> `get_all_reviewer_usernames`) and `rdm_review_queue.ts` gained a `Reviewer`
+> column, matching search dropdown options, and autocomplete wiring — the
+> UI half of #104, closing out the cycle DR-0025 started. See
+> `agents/projects/cold/decisions/0026-rdm-review-queue-reviewer-column-three-ui-half.md`.
+
 ## NOTES
 
 What follows were the main request details to add to COLD.
