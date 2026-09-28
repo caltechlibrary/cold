@@ -4,7 +4,7 @@
  */
 import { parse as parseCSV } from "@std/csv/parse";
 import { ERROR_COLOR, GREEN, MAROON, YELLOW } from "./colors.ts";
-import { apiPort, Dataset } from "./deps.ts";
+import { apiPort, Dataset, mdt } from "./deps.ts";
 import { People } from "./people.ts";
 import { stringify as stringifyCSV } from "@std/csv";
 
@@ -106,6 +106,32 @@ export function apiPathParse(
  */
 export function timeStamp(dt: Date): string {
   return dt.toISOString().replace("T", " ").substring(0, 19);
+}
+
+/**
+ * splitAndValidateEmails takes a comma delimited string of email addresses,
+ * trims each one, drops anything mdt.validateEMAIL rejects (logging a
+ * warning for each dropped address), and returns the surviving addresses.
+ * Trims only -- does not run normalizeEMAIL, since that silently repairs
+ * a typo (e.g. internal whitespace) into a different, wrong address rather
+ * than rejecting it.
+ * @param raw: string
+ * @returns string[]
+ */
+export function splitAndValidateEmails(raw: string): string[] {
+  const emails: string[] = [];
+  for (const candidate of raw.split(",")) {
+    const trimmed = candidate.trim();
+    if (trimmed === "") {
+      continue;
+    }
+    if (mdt.validateEMAIL(trimmed)) {
+      emails.push(trimmed);
+    } else {
+      console.log(`WARNING: dropping malformed email address "${trimmed}"`);
+    }
+  }
+  return emails;
 }
 
 /**

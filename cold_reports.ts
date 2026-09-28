@@ -6,6 +6,7 @@ import { v5 } from "@std/uuid";
 import * as yaml from "@std/yaml";
 import { $ } from "@david/dax";
 import { send_email } from "./send_mail.ts";
+import { splitAndValidateEmails } from "./utils.ts";
 
 import {
   apiPort,
@@ -402,6 +403,13 @@ export interface RunnableInterface {
   link: string;
   // List of inputs holds an ordered list of Input id, type, required and value
   inputs: Inputs[];
+  // watermark, threshold_minutes and label are set only on alert reports
+  // (cold DR-0028) -- the path a staleness check watches, how many minutes
+  // old it may be before firing, and the human-readable name for the thing
+  // being watched.
+  watermark?: string;
+  threshold_minutes?: number;
+  label?: string;
 }
 
 export class Runnable implements RunnableInterface {
@@ -415,6 +423,9 @@ export class Runnable implements RunnableInterface {
   link: string;
   // List of inputs holds a list of Input id, type, required and value
   inputs: Inputs[];
+  watermark?: string;
+  threshold_minutes?: number;
+  label?: string;
 
   constructor(
     report_name: string,
@@ -423,6 +434,9 @@ export class Runnable implements RunnableInterface {
     inputs: Inputs[],
     append_datestamp: boolean,
     content_type: string,
+    watermark?: string,
+    threshold_minutes?: number,
+    label?: string,
   ) {
     this.report_name = report_name;
     this.cmd = cmd;
@@ -430,6 +444,9 @@ export class Runnable implements RunnableInterface {
     this.inputs = inputs;
     this.append_datestamp = append_datestamp;
     this.content_type = content_type;
+    this.watermark = watermark;
+    this.threshold_minutes = threshold_minutes;
+    this.label = label;
     this.options = [];
     this.final_status = "";
     this.link = "";
@@ -448,7 +465,10 @@ export class Runnable implements RunnableInterface {
   // Run executables the program implementing the report. It's calling out to the operating system to run it.
   // The report program is expected to return a link written to standard out on success. Otherwise return an
   // empty string or short error message using the protocol `error://`.
-  async run(options: string[]): Promise<string> {
+  async run(
+    options: string[],
+    envOverrides?: Record<string, string>,
+  ): Promise<string> {
     //FIXME: Need to execute command line program and capture result link or error message from standard out then hand it back.
     console.log(
       `Running: ${this.cmd}, inputs ${JSON.stringify(this.inputs)}`,
@@ -503,7 +523,17 @@ export class Runnable implements RunnableInterface {
         // Fallback: execute without parameters. dax's .text() only exposes
         // decoded text, so this path remains text-only; every report using
         // it today is a text content-type (e.g. text/csv).
-        txt = await $`${this.cmd}`.text();
+        // watermark/threshold_minutes/label are set only on alert reports
+        // (cold DR-0028); envOverrides carries per-request values such as
+        // the validated recipient list, since that must track request.emails
+        // rather than a Runnable-level default. Empty strings are harmless
+        // for every non-alert report.
+        txt = await $`${this.cmd}`.env({
+          WATERMARK: this.watermark ?? "",
+          THRESHOLD_MINUTES: this.threshold_minutes?.toString() ?? "",
+          LABEL: this.label ?? "",
+          ...envOverrides,
+        }).text();
       }
     } catch (err: unknown) {
       txt = "error://" + String(err);
@@ -601,6 +631,9 @@ class Runner implements RunnerInterface {
           v.inputs,
           v.append_datestamp,
           v.content_type,
+          v.watermark,
+          v.threshold_minutes,
+          v.label,
         );
       }
     }
@@ -662,7 +695,13 @@ async function process_request(
   }
   console.log(`INFO: running command ${cmd.cmd} ${cmd.options}`);
   //FIXME: Need to evaluate if inputs are defined then valiate inputs before processing the requested report
-  const link = await cmd.run([]);
+  // EMAILS carries the same validated recipient list send_email will use
+  // below, so an alert script's "Notified:" line reports who will actually
+  // be mailed, not the raw unvalidated request.emails field.
+  const validatedEmails = request.emails
+    ? splitAndValidateEmails(request.emails).join(", ")
+    : "";
+  const link = await cmd.run([], { EMAILS: validatedEmails });
   if (link === undefined || link === "") {
     request.link = "no link returned from report";
     request.status = "error";

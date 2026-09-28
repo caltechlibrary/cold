@@ -4,6 +4,7 @@ import {
   pathIdentifier,
   apiPathParse,
 } from "./deps.ts";
+import { splitAndValidateEmails } from "./utils.ts";
 
 Deno.test("testApiPathParse", () => {
   let uri = "http://localhost:8111/api/groups?q=" + encodeURIComponent("This is a bit thing/widget");
@@ -86,4 +87,41 @@ Deno.test("testDataToObject", () => {
   const hasSubmit = "submit" in obj;
 
   assertStrictEquals(hasSubmit, false, "expected submit to be removed");
+});
+
+Deno.test("testSplitAndValidateEmails", () => {
+  assertStrictEquals(
+    JSON.stringify(splitAndValidateEmails("rsdoiel@caltech.edu")),
+    JSON.stringify(["rsdoiel@caltech.edu"]),
+  );
+  assertStrictEquals(
+    JSON.stringify(splitAndValidateEmails("  jane.doe@example.edu  ")),
+    JSON.stringify(["jane.doe@example.edu"]),
+    "expected surrounding whitespace to be trimmed",
+  );
+  assertStrictEquals(
+    JSON.stringify(splitAndValidateEmails("tmorrell@caltech.edu, rsdoiel@caltech.edu")),
+    JSON.stringify(["tmorrell@caltech.edu", "rsdoiel@caltech.edu"]),
+    "expected a comma delimited list to split into individually validated addresses",
+  );
+  assertStrictEquals(
+    JSON.stringify(splitAndValidateEmails("notanemail")),
+    JSON.stringify([]),
+    "expected a malformed address to be dropped",
+  );
+  assertStrictEquals(
+    JSON.stringify(splitAndValidateEmails("")),
+    JSON.stringify([]),
+    "expected an empty string to yield no addresses",
+  );
+  assertStrictEquals(
+    JSON.stringify(splitAndValidateEmails("notanemail, rsdoiel@caltech.edu")),
+    JSON.stringify(["rsdoiel@caltech.edu"]),
+    "expected a malformed address to be dropped while its valid neighbor survives",
+  );
+  assertStrictEquals(
+    JSON.stringify(splitAndValidateEmails("two words@example.edu")),
+    JSON.stringify(["two words@example.edu"]),
+    "expected internal whitespace to survive unrepaired, not be silently normalized",
+  );
 });
