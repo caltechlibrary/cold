@@ -25,7 +25,7 @@
 </div>
 
 <div>
-<label set="orcid">ORCID</label> <input type="text" id="orcid" name="orcid" pattern="https://orcid.org/[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9X]|[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9X]" value="{{people.orcid}}" size="36">
+<label set="orcid">ORCID</label> <input type="text" id="orcid" name="orcid" pattern="https://orcid.org/[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9X]|[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9X]" value="{{people.orcid}}" size="36">{{#if people.orcid}} <a href="https://orcid.org/{{people.orcid}}" target="_blank">view &#8599;</a>{{/if}}
 </div>
 
 <hr>
@@ -67,7 +67,7 @@
 <div class="identifiers">
 
 <div>
-<label set="ror">Affiliation (ROR for CaltechAUTHORS)</label> <input type="text" id="ror" name="ror" placeholder="https://ror.org/05dxps055" value="{{people.ror}}" >
+<label set="ror">Affiliation (ROR for CaltechAUTHORS)</label> <input type="text" id="ror" name="ror" placeholder="https://ror.org/05dxps055" value="{{people.ror}}" >{{#if people.ror}} <a href="{{people.ror}}" target="_blank">view &#8599;</a>{{/if}}
 </div>
 
 <div>
@@ -91,19 +91,19 @@
 </div>
 
 <div>
-<label set="archivesspace_id">ArchivesSpace ID</label> <input type="text" id="archivesspace_id" name="archivesspace_id" value="{{people.archivesspace_id}}" >
+<label set="archivesspace_id">ArchivesSpace ID</label> <input type="text" id="archivesspace_id" name="archivesspace_id" value="{{people.archivesspace_id}}" >{{#if people.archivesspace_id}} <a href="https://collections.archives.caltech.edu/agents/people/{{people.archivesspace_id}}" target="_blank">view &#8599;</a>{{/if}}
 </div>
 
 <div>
-<label set="authors_id">CaltechAUTHORS ID (historic data)</label> <input type="text" id="authors_id" name="authors_id" value="{{people.authors_id}}" >
+<label set="authors_id">CaltechAUTHORS ID (historic data)</label> <input type="text" id="authors_id" name="authors_id" value="{{people.authors_id}}" >{{#if people.authors_id}} <a href="https://authors.library.caltech.edu/search?q=metadata.creators.person_or_org.identifiers.identifier%3A%22{{people.authors_id}}%22&l=list&p=1&s=10&sort=bestmatch" target="_blank">view &#8599;</a>{{/if}}
 </div>
 
 <div>
-<label set="thesis_id">CaltechTHESIS ID</label> <input type="text" id="thesis_id" name="thesis_id" value="{{people.thesis_id}}" >
+<label set="thesis_id">CaltechTHESIS ID</label> <input type="text" id="thesis_id" name="thesis_id" value="{{people.thesis_id}}" >{{#if people.thesis_id}} <a href="https://thesis.library.caltech.edu/view/author/{{people.thesis_id}}.html" target="_blank">view &#8599;</a>{{/if}}
 </div>
 
 <div>
-<label set="advisors_id">CaltechTHESIS Advisor ID</label> <input type="text" id="advisors_id" name="advisors_id" value="{{people.advisors_id}}" >
+<label set="advisors_id">CaltechTHESIS Advisor ID</label> <input type="text" id="advisors_id" name="advisors_id" value="{{people.advisors_id}}" >{{#if people.advisors_id}} <a href="https://thesis.library.caltech.edu/view/advisor/{{people.advisors_id}}.html" target="_blank">view &#8599;</a>{{/if}}
 </div>
 </div>
 
