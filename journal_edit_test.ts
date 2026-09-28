@@ -1,6 +1,6 @@
 import { assert, assertEquals } from "@std/assert";
 
-const mockAlternativeNamesElem = {
+const mockAltNameElem = {
   toCSV: () => "Journal of Science\nSci. J.\n",
 };
 
@@ -27,7 +27,7 @@ async function handleJournalEditSubmit(
   formAction: string,
   formMethod: string,
   formData: FormData,
-  alternativeNamesElem: { toCSV: () => string } | null,
+  altNameElem: { toCSV: () => string } | null,
   fetchFn: (
     url: string,
     opts: RequestInit,
@@ -35,8 +35,8 @@ async function handleJournalEditSubmit(
   navigateFn: (url: string) => void,
 ): Promise<void> {
   event.preventDefault();
-  if (alternativeNamesElem !== null) {
-    formData.set("alternative_names", alternativeNamesElem.toCSV());
+  if (altNameElem !== null) {
+    formData.set("alt_name", altNameElem.toCSV());
   }
   try {
     const response = await fetchFn(formAction, {
@@ -63,7 +63,7 @@ Deno.test("handleJournalEditSubmit navigates to response.url on success", async 
     "http://localhost:8111/journals/",
     "post",
     formData,
-    mockAlternativeNamesElem,
+    mockAltNameElem,
     mockFetchOk,
     (url) => { navigatedTo = url; },
   );
@@ -81,7 +81,7 @@ Deno.test("handleJournalEditSubmit does not navigate on server error", async () 
     "http://localhost:8111/journals/",
     "post",
     formData,
-    mockAlternativeNamesElem,
+    mockAltNameElem,
     mockFetchFail,
     (url) => { navigatedTo = url; },
   );
@@ -89,7 +89,7 @@ Deno.test("handleJournalEditSubmit does not navigate on server error", async () 
   assertEquals(navigatedTo, "");
 });
 
-Deno.test("handleJournalEditSubmit sets alternative_names from csv-textarea", async () => {
+Deno.test("handleJournalEditSubmit sets alt_name from csv-textarea", async () => {
   let capturedBody: FormData | null = null;
   const formData = new FormData();
   formData.set("issn", "1234-567X");
@@ -99,7 +99,7 @@ Deno.test("handleJournalEditSubmit sets alternative_names from csv-textarea", as
     "http://localhost:8111/journals/",
     "post",
     formData,
-    mockAlternativeNamesElem,
+    mockAltNameElem,
     async (_url, opts) => {
       capturedBody = opts.body as FormData;
       return { ok: true, url: "http://localhost:8111/journals/1234-567X", status: 200 };
@@ -109,12 +109,12 @@ Deno.test("handleJournalEditSubmit sets alternative_names from csv-textarea", as
 
   assert(capturedBody !== null);
   assertEquals(
-    (capturedBody as unknown as FormData).get("alternative_names"),
+    (capturedBody as unknown as FormData).get("alt_name"),
     "Journal of Science\nSci. J.\n",
   );
 });
 
-Deno.test("handleJournalEditSubmit handles null alternativeNamesElem gracefully", async () => {
+Deno.test("handleJournalEditSubmit handles null altNameElem gracefully", async () => {
   let navigatedTo = "";
   const formData = new FormData();
   formData.set("issn", "1234-567X");

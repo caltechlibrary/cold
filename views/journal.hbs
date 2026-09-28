@@ -17,12 +17,12 @@
 
 <div class="identifier">ISSN: {{journal.issn}}</div>
 
-{{#if journal.alternative_names}}
+{{#if journal.alt_name}}
 Other names:
 <ul>
-{{#journal.alternative_names}}
+{{#journal.alt_name}}
   <li>{{ . }}</li>
-{{/journal.alternative_names}}
+{{/journal.alt_name}}
 </ul>
 {{/if}}
 

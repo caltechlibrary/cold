@@ -16,7 +16,7 @@ export interface JournalInterface {
   /* Name of Journal */
   name: string;
   /* Other Journal names */
-  alternate_names: string[];
+  alt_name: string[];
   /* Publisher Name */
   publisher_name: string;
   /* Publisher Address */
@@ -37,7 +37,7 @@ export interface JournalInterface {
 export class Journal implements JournalInterface {
   issn: string = "";
   name: string = "";
-  alternate_names: string[] = [];
+  alt_name: string[] = [];
   publisher_name: string = "";
   publisher_location: string = "";
   publisher_address: string = "";
@@ -63,8 +63,8 @@ export class Journal implements JournalInterface {
     if (row.hasOwnProperty("Internal Notes")) {
       this.internal_notes = row.internal_notes;
     }
-    if (row.hasOwnProperty("alternate_names")) {
-      this.alternate_names = row.alernate_name.split(/;/g);
+    if (row.hasOwnProperty("alt_name")) {
+      this.alt_name = row.alt_name.split(/;/g);
     }
     if (row.hasOwnProperty("publisher_name")) {
       this.publisher_name = row.publisher_name;
@@ -93,7 +93,7 @@ export class Journal implements JournalInterface {
     return {
       issn: this.issn,
       name: this.name,
-      alternate_names: this.alternate_names,
+      alt_name: this.alt_name,
       publisher_name: this.publisher_name,
       publisher_location: this.publisher_location,
       publisher_address: this.publisher_address,
@@ -126,7 +126,7 @@ export function formDataToJournal(form: FormData): object {
     const key: string = v[0];
     if (key !== "submit") {
       const val: any = v[1];
-      if (key === "alternative_names") {
+      if (key === "alt_name") {
         const alt_names: string = (v[1] as any as string).trim();
         if (alt_names != "") {
           obj[key] = alt_names.split(/\n/g) as string[];

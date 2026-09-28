@@ -1,5 +1,5 @@
 // journal_edit.ts provides the browser side TypeScript for the journal edit form.
-// It intercepts form submission to extract alternative_names from the
+// It intercepts form submission to extract alt_name from the
 // csv-textarea custom element before posting to the middleware.
 
 interface CSVTextareaElement extends HTMLElement {
@@ -10,15 +10,15 @@ const issnEditForm = document.getElementById(
   "issn-edit-form",
 ) as HTMLFormElement | null;
 
-const alternativeNamesElem = document.getElementById(
-  "alternative_names",
+const altNameElem = document.getElementById(
+  "alt_name",
 ) as CSVTextareaElement | null;
 
 issnEditForm?.addEventListener("submit", async function (event: Event) {
   event.preventDefault();
   const formData = new FormData(issnEditForm);
-  if (alternativeNamesElem !== null) {
-    formData.set("alternative_names", alternativeNamesElem.toCSV());
+  if (altNameElem !== null) {
+    formData.set("alt_name", altNameElem.toCSV());
   }
   try {
     const response = await fetch(issnEditForm.action, {
