@@ -100,12 +100,36 @@ async function updateClpid() {
   }
 }
 
+function updateOrcidSearchLink() {
+  const linkElem = document.getElementById(
+    "orcid_search_link",
+  ) as HTMLAnchorElement | null;
+  if (linkElem === null) return;
+  const familyNameElem = document.getElementById(
+    "family_name",
+  ) as HTMLInputElement | null;
+  const givenNameElem = document.getElementById(
+    "given_name",
+  ) as HTMLInputElement | null;
+  const family = familyNameElem?.value.trim() ?? "";
+  const given = givenNameElem?.value.trim() ?? "";
+  const searchQuery = `${given} ${family}`.trim();
+  linkElem.href = searchQuery === ""
+    ? "https://orcid.org/orcid-search/search"
+    : `https://orcid.org/orcid-search/search?searchQuery=${
+      encodeURIComponent(searchQuery)
+    }`;
+}
+
 document.addEventListener("focusout", (event: FocusEvent) => {
   const target = event.target as HTMLElement;
   if (target.id === "family_name" || target.id === "given_name") {
     updateClpid();
+    updateOrcidSearchLink();
   }
 });
+
+updateOrcidSearchLink();
 
 const caltechElem = document.getElementById("caltech") as
   | HTMLInputElement

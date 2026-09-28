@@ -217,12 +217,24 @@ async function updateClpid() {
     clpidElem.value = proposed;
   }
 }
+function updateOrcidSearchLink() {
+  const linkElem = document.getElementById("orcid_search_link");
+  if (linkElem === null) return;
+  const familyNameElem = document.getElementById("family_name");
+  const givenNameElem = document.getElementById("given_name");
+  const family = familyNameElem?.value.trim() ?? "";
+  const given = givenNameElem?.value.trim() ?? "";
+  const searchQuery = `${given} ${family}`.trim();
+  linkElem.href = searchQuery === "" ? "https://orcid.org/orcid-search/search" : `https://orcid.org/orcid-search/search?searchQuery=${encodeURIComponent(searchQuery)}`;
+}
 document.addEventListener("focusout", (event) => {
   const target = event.target;
   if (target.id === "family_name" || target.id === "given_name") {
     updateClpid();
+    updateOrcidSearchLink();
   }
 });
+updateOrcidSearchLink();
 var caltechElem = document.getElementById("caltech");
 var rorElem = document.getElementById("ror");
 caltechElem?.addEventListener("change", function() {
