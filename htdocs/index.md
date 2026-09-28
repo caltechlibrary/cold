@@ -7,6 +7,17 @@ pubDate: 2024-05-07
 
 # Welcome to Controlled Object Lists and Datum
 
+<div id="alerts" role="status" aria-live="polite"></div>
+
+<noscript>JavaScript required to show active alerts</noscript>
+
+<script type="module">
+  import { ColdAlertsUI } from "./modules/cold_alerts.js";
+  window.addEventListener('DOMContentLoaded', (event) => {
+    new ColdAlertsUI({ mountElement: document.getElementById("alerts") });
+  });
+</script>
+
 COLD lets you manage Caltech People, Groups and Funders used in Caltech Library's repositories and feeds systems.
 
 - [People](./people/ "Curate CaltechPEOPLE")
