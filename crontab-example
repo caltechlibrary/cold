@@ -52,3 +52,9 @@
 #
 # The full harvest must run once before the first incremental, to create the
 # collection and write rdm_requests_lastmod.txt.
+
+# Alerting facility (cold DR-0028): reconciles every alert_* entry in
+# cold_reports.yaml against its watermark's staleness. Business hours only --
+# a stale check firing overnight or on a weekend would be actionable by no
+# one. Idempotent: running it by hand clears a resolved alert early.
+0 8-17 * * 1-5 /Sites/cold/check_alerts.bash
