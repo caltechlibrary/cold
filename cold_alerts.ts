@@ -4,6 +4,11 @@
  * DOMContentLoaded, filtered client-side for completed alert_* reports --
  * no polling, since idle tabs left open on the dashboard must not
  * generate traffic.
+ *
+ * No dismiss control (live-tested and dropped, cold#111): the artifact is
+ * the alert's state, so a firing alert stays visible on every visit until
+ * the underlying condition actually clears -- there is nothing for a
+ * session-scoped dismissal to usefully hide.
  */
 
 export interface ReportListItem {
@@ -29,30 +34,6 @@ export function filterActiveAlerts(
   );
 }
 
-const DISMISSED_KEY = "cold_alerts_dismissed";
-
-function readDismissed(): Set<string> {
-  try {
-    const raw = sessionStorage.getItem(DISMISSED_KEY);
-    const parsed = raw ? JSON.parse(raw) : [];
-    return new Set(Array.isArray(parsed) ? parsed : []);
-  } catch {
-    // sessionStorage unavailable (e.g. private browsing) -- dismissal
-    // just will not persist this session, which is a safe failure mode.
-    return new Set();
-  }
-}
-
-function rememberDismissed(reportName: string): void {
-  try {
-    const dismissed = readDismissed();
-    dismissed.add(reportName);
-    sessionStorage.setItem(DISMISSED_KEY, JSON.stringify([...dismissed]));
-  } catch {
-    // Same fallback as readDismissed -- nothing to do if storage is unavailable.
-  }
-}
-
 export class ColdAlertsUI {
   mountElement: HTMLElement;
 
@@ -70,10 +51,7 @@ export class ColdAlertsUI {
       console.log("ERROR: failed to fetch report_list for alerts", err);
       return;
     }
-    const dismissed = readDismissed();
-    const active = filterActiveAlerts(reports).filter((r) =>
-      !dismissed.has(r.report_name)
-    );
+    const active = filterActiveAlerts(reports);
     if (active.length === 0) {
       return;
     }
@@ -84,7 +62,9 @@ export class ColdAlertsUI {
     // The container ships empty in the page's own markup with
     // role="status" aria-live="polite" already set -- content is added
     // here, after the live region is already registered, never at the
-    // same moment it is created.
+    // same moment it is created. Its visual treatment (the yellow
+    // announcement box) is CSS-driven off :not(:empty), so an alert-free
+    // page never shows a bordered box with nothing in it.
     const summary = document.createElement("button");
     summary.type = "button";
     summary.className = "cold-alerts-summary";
@@ -109,25 +89,8 @@ export class ColdAlertsUI {
       const since = document.createElement("span");
       since.textContent = ` — firing since ${r.updated}`;
 
-      const dismissBtn = document.createElement("button");
-      dismissBtn.type = "button";
-      dismissBtn.textContent = "Dismiss";
-      dismissBtn.setAttribute(
-        "aria-label",
-        `Dismiss alert ${r.report_name}`,
-      );
-      dismissBtn.addEventListener("click", () => {
-        rememberDismissed(r.report_name);
-        item.remove();
-        if (details.childElementCount === 0) {
-          summary.remove();
-          details.remove();
-        }
-      });
-
       item.appendChild(link);
       item.appendChild(since);
-      item.appendChild(dismissBtn);
       details.appendChild(item);
     }
 

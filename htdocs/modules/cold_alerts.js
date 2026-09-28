@@ -2,26 +2,6 @@
 function filterActiveAlerts(reports) {
   return reports.filter((r) => typeof r.report_name === "string" && r.report_name.startsWith("alert_") && r.status === "completed");
 }
-var DISMISSED_KEY = "cold_alerts_dismissed";
-function readDismissed() {
-  try {
-    const raw = sessionStorage.getItem(DISMISSED_KEY);
-    const parsed = raw ? JSON.parse(raw) : [];
-    return new Set(Array.isArray(parsed) ? parsed : []);
-  } catch {
-    return /* @__PURE__ */ new Set();
-  }
-}
-function rememberDismissed(reportName) {
-  try {
-    const dismissed = readDismissed();
-    dismissed.add(reportName);
-    sessionStorage.setItem(DISMISSED_KEY, JSON.stringify([
-      ...dismissed
-    ]));
-  } catch {
-  }
-}
 var ColdAlertsUI = class {
   mountElement;
   constructor(options) {
@@ -37,8 +17,7 @@ var ColdAlertsUI = class {
       console.log("ERROR: failed to fetch report_list for alerts", err);
       return;
     }
-    const dismissed = readDismissed();
-    const active = filterActiveAlerts(reports).filter((r) => !dismissed.has(r.report_name));
+    const active = filterActiveAlerts(reports);
     if (active.length === 0) {
       return;
     }
@@ -62,21 +41,8 @@ var ColdAlertsUI = class {
       link.textContent = r.report_name;
       const since = document.createElement("span");
       since.textContent = ` \u2014 firing since ${r.updated}`;
-      const dismissBtn = document.createElement("button");
-      dismissBtn.type = "button";
-      dismissBtn.textContent = "Dismiss";
-      dismissBtn.setAttribute("aria-label", `Dismiss alert ${r.report_name}`);
-      dismissBtn.addEventListener("click", () => {
-        rememberDismissed(r.report_name);
-        item.remove();
-        if (details.childElementCount === 0) {
-          summary.remove();
-          details.remove();
-        }
-      });
       item.appendChild(link);
       item.appendChild(since);
-      item.appendChild(dismissBtn);
       details.appendChild(item);
     }
     summary.addEventListener("click", () => {

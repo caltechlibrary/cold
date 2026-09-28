@@ -427,3 +427,41 @@ a.visually-hidden {
     border: 0;
 }
 
+/* Alerting facility (cold DR-0028). Styled off :not(:empty) so the empty,
+   always-present aria-live container never renders a box when nothing is
+   firing -- content only appears once cold_alerts.ts populates it. Reuses
+   .announcement's black-on-yellow, bordered treatment for consistency
+   with the rest of the site rather than introducing a new color. */
+#alerts:not(:empty) {
+    color: black;
+    background-color: yellow;
+    padding: 1em;
+    margin-bottom: 1em;
+    border: 1px solid black;
+}
+
+.cold-alerts-summary {
+    display: block;
+    width: 100%;
+    text-align: left;
+    font: inherit;
+    font-weight: bold;
+    color: black;
+    background-color: inherit;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+.cold-alerts-details {
+    margin-top: 0.5em;
+}
+
+.cold-alerts-item {
+    margin-top: 0.25em;
+}
+
+.cold-alerts-item a {
+    color: #FF6E1E;
+}
+
