@@ -117,3 +117,25 @@ reports:
     basename: "{{country_name}}_country_collaboration_report"
     append_datestamp: false
     content_type: text/csv
+  # Alert reports (cold DR-0028): one generic watermark-staleness script,
+  # discovered by check_alerts.bash from the "alert_" key prefix. Adding a
+  # new watermark alert is a stanza here, not a new script or reconciler
+  # edit -- see agents/projects/cold/design/alerting_facility.md.
+  alert_rdm_harvest_stale:
+    cmd: ./run_alert_watermark_stale.bash
+    basename: alert_rdm_harvest_stale
+    append_datestamp: false
+    content_type: text/plain
+    emails: ""
+    watermark: rdm_requests_lastmod.txt
+    threshold_minutes: 120
+    label: "RDM harvest"
+  alert_caltechthesis_harvest_stale:
+    cmd: ./run_alert_watermark_stale.bash
+    basename: alert_caltechthesis_harvest_stale
+    append_datestamp: false
+    content_type: text/plain
+    emails: ""
+    watermark: caltechthesis_lastmod.txt
+    threshold_minutes: 120
+    label: "CaltechTHESIS harvest"
