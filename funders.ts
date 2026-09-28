@@ -20,6 +20,7 @@ export interface FunderInterface {
   include_in_feeds: boolean;
   name: string;
   acronyms: string[];
+  alt_name: string[];
   description: string;
   type: string;
   url: string;
@@ -38,6 +39,7 @@ export class Funder implements FunderInterface {
   include_in_feeds: boolean = false;
   name: string = "";
   acronyms: string[] = [];
+  alt_name: string[] = [];
   description: string = "";
   type: string = "";
   url: string = "";
@@ -59,6 +61,9 @@ export class Funder implements FunderInterface {
     }
     if (row.hasOwnProperty("grant_numbers") && row.grant_numbers !== "") {
       this.grant_numbers = row.grant_numbers.trim().split(/;/g);
+    }
+    if (row.hasOwnProperty("alt_name") && row.alt_name !== "") {
+      this.alt_name = row.alt_name.trim().split(/;/g);
     }
     if (row.hasOwnProperty("description")) {
       this.description = row.description;
@@ -95,6 +100,7 @@ export class Funder implements FunderInterface {
       include_in_feeds: this.include_in_feeds,
       name: this.name,
       acronyms: this.acronyms,
+      alt_name: this.alt_name,
       description: this.description,
       type: this.type,
       url: this.url,
@@ -259,6 +265,14 @@ async function handlePostFunders(
         row[0] === undefined || row[0] === "" ? "" : grant_numbers.push(row[0]);
       }
       obj.grant_numbers = grant_numbers;
+    }
+    if ("alt_name" in obj) {
+      const altNameData = csv.parse(obj.alt_name as unknown as string);
+      let alt_name: string[] = [];
+      for (const row of altNameData) {
+        row[0] === undefined || row[0] === "" ? "" : alt_name.push(row[0]);
+      }
+      obj.alt_name = alt_name;
     }
     if (isCreateObject) {
       clfid = obj.clfid as unknown as string;

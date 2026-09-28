@@ -38,6 +38,19 @@
 </div>
 
 <div>
+<label set="alt_name">Alternate Names (one per line)</label><br >
+<csv-textarea id="alt_name" name="alt_name" column-headings="alt_name" title="Curate the alternate names for a funder. Enter one per row. Add rows as needed. Cleanup removes empty rows.">
+<datalist id="column-0"></datalist>
+
+<textarea id="alt_name" name="alt_name" rows="10" cols="60" title="enter alternate names, one per line">
+{{#funder.alt_name}}
+{{ . }}
+{{/funder.alt_name}}
+</textarea>
+</csv-textarea>
+</div>
+
+<div>
 <label set="grant_numbers">Grant Numbers (one per line)</label><br >
 <csv-textarea id="grant_numbers" name="grant_numbers"  column-headings="grant_number" title="Curate the grant numbers for an funder. Enter one per row. Add rows as needed. Cleanup removes empty rows.">
 <datalist id="column-0"></datalist>

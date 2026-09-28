@@ -11,6 +11,7 @@ import {
   renderPage,
 } from "./deps.ts";
 import { timeStamp } from "./utils.ts";
+import * as csv from "@std/csv";
 
 const ds = new Dataset(apiPort, "people.ds");
 
@@ -23,6 +24,7 @@ export interface PeopleInterface {
   display_name: string;
   family_name: string;
   given_name: string;
+  alt_name: string[];
   email: string;
   archivesspace_id: string;
   directory_user_id: string;
@@ -66,6 +68,7 @@ export class People implements PeopleInterface {
   display_name: string = "";
   family_name: string = "";
   given_name: string = "";
+  alt_name: string[] = [];
   email: string = "";
   archivesspace_id: string = "";
   directory_user_id: string = "";
@@ -121,6 +124,9 @@ export class People implements PeopleInterface {
     }
     if (row.hasOwnProperty("given_name")) {
       this.given_name = row.given_name;
+    }
+    if (row.hasOwnProperty("alt_name") && row.alt_name !== "") {
+      this.alt_name = row.alt_name.trim().split(/;/g);
     }
     if (row.hasOwnProperty("archivesspace_id")) {
       this.archivesspace_id = row.archivesspace_id;
@@ -262,6 +268,9 @@ export class People implements PeopleInterface {
     (obj.given_name === undefined || obj.given_name === "")
       ? this.given_name = ""
       : this.given_name = obj.given_name as unknown as string;
+    (obj.alt_name === undefined)
+      ? this.alt_name = []
+      : this.alt_name = obj.alt_name as unknown as string[];
     (obj.email === undefined || obj.email === "" ||
         obj.email === "[email protected]")
       ? this.email = ""
@@ -367,6 +376,7 @@ export class People implements PeopleInterface {
       include_in_feeds: this.include_in_feeds,
       family_name: this.family_name,
       given_name: this.given_name,
+      alt_name: this.alt_name,
       email: this.email,
       archivesspace_id: this.archivesspace_id,
       directory_user_id: this.directory_user_id,
@@ -655,6 +665,14 @@ async function handlePostPeople(
           headers: { "content-type": "text/html" },
         },
       );
+    }
+    if ("alt_name" in obj) {
+      const altNameData = csv.parse(obj.alt_name as unknown as string);
+      let alt_name: string[] = [];
+      for (const row of altNameData) {
+        row[0] === undefined || row[0] === "" ? "" : alt_name.push(row[0]);
+      }
+      obj.alt_name = alt_name;
     }
     if (isCreateObject) {
       //console.log(`POST /people sending to datasetd create ${clpid}:`, JSON.stringify(obj, null, 2));

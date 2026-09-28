@@ -29,6 +29,10 @@
 
 {{#if funder.include_in_feeds}}<div class="feeds_link">View in feeds: <a href="https://feeds.library.caltech.edu/funders/{{funder.clfid}}" title="funder in feeds" target="_blank">{{funder.clfid}}</a></div>{{/if}}
 
+{{#if funder.alt_name}}
+<div id="alt_name" class="alt_name">Alternate Names: {{#each funder.alt_name}}{{#if @first}}{{.}}{{else}}, {{.}}{{/if}}{{/each}}</div>
+{{/if}}
+
 {{#if funder.grant_numbers}}
 <div id="grant_numbers" class="grant_numbers">Grant Numbers: {{#each funder.grant_numbers}}{{#if @first}}{{.}}{{else}}, {{.}}{{/if}}{{/each}}</div>
 {{/if}}

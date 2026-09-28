@@ -23,6 +23,10 @@
 
 <div class="identifier">Caltech Library ID: {{#if people.include_in_feeds}}<a href="https://feeds.library.caltech.edu/people/{{people.clpid}}" target="_blank">{{people.clpid}}</a>{{else}}{{people.clpid}}{{/if}}</div>
 
+{{#if people.alt_name}}
+<div id="alt_name" class="alt_name">Alternate Names: {{#each people.alt_name}}{{#if @first}}{{.}}{{else}}, {{.}}{{/if}}{{/each}}</div>
+{{/if}}
+
 {{#if people.title}}<p><div class="title">Title: {{people.title}}</div>{{/if}}
 
 {{#if people.bio}}<p><div class="boi">BIO: {{people.bio}}</div>{{/if}}
