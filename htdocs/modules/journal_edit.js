@@ -1,11 +1,11 @@
 // journal_edit.ts
 var issnEditForm = document.getElementById("issn-edit-form");
-var alternativeNamesElem = document.getElementById("alternative_names");
+var altNameElem = document.getElementById("alt_name");
 issnEditForm?.addEventListener("submit", async function(event) {
   event.preventDefault();
   const formData = new FormData(issnEditForm);
-  if (alternativeNamesElem !== null) {
-    formData.set("alternative_names", alternativeNamesElem.toCSV());
+  if (altNameElem !== null) {
+    formData.set("alt_name", altNameElem.toCSV());
   }
   try {
     const response = await fetch(issnEditForm.action, {
