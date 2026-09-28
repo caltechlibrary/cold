@@ -10,6 +10,7 @@ import {
   renderJSON,
   renderPage,
 } from "./deps.ts";
+import * as csv from "@std/csv";
 
 import { timeStamp } from "./utils.ts";
 import { YELLOW } from "./colors.ts";
@@ -366,6 +367,14 @@ async function handlePostGroups(
         }`,
         YELLOW,
       );
+    }
+    if ("alternative" in obj) {
+      const alternativeData = csv.parse(obj.alternative as unknown as string);
+      let alternative: string[] = [];
+      for (const row of alternativeData) {
+        row[0] === undefined || row[0] === "" ? "" : alternative.push(row[0]);
+      }
+      obj.alternative = alternative;
     }
     if (isCreateObject) {
       clgid = obj.clgid as unknown as string;
