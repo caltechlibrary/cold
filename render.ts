@@ -43,7 +43,7 @@ export async function renderJSON(
   } catch (err) {
     return new Response(`${err}`, {
       status: 404,
-      headers: { "content-type": "text/plain" },
+      headers: { "content-type": "text/plain", "Cache-Control": "no-store" },
     });
   }
   return new Response(src, {
@@ -51,6 +51,7 @@ export async function renderJSON(
     headers: {
       "content-type": "application/json",
       "Access-Control-Allow-Origin": "*",
+      "Cache-Control": "no-store",
     },
   });
 }
@@ -70,14 +71,14 @@ export async function renderPage(
   if (body !== undefined) {
     return new Response(body, {
       status: 200,
-      headers: { "content-type": "text/html" },
+      headers: { "content-type": "text/html", "Cache-Control": "no-store" },
     });
   }
   body =
     `<doctype html>\n<html lang="en">something went wrong, failed to render ${template}.</html>`;
   return new Response(body, {
     status: 501,
-    headers: { "content-type": "text/html" },
+    headers: { "content-type": "text/html", "Cache-Control": "no-store" },
   });
 }
 
