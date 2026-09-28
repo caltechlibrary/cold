@@ -1,6 +1,6 @@
 // validator.ts
 function isValidClpid(clpid) {
-  const pattern = /^[^\s\d]+(?:-[^\s\d]+)*(?:-|\.)?$/u;
+  const pattern = /^[^\s]+(?:-[^\s]+)*(?:-|\.)?$/u;
   return pattern.test(clpid);
 }
 export {
