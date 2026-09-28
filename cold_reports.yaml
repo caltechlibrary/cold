@@ -126,7 +126,7 @@ reports:
     basename: alert_rdm_harvest_stale
     append_datestamp: false
     content_type: text/plain
-    emails: "rsdoiel@caltech.edu"
+    emails: ""
     watermark: rdm_requests_lastmod.txt
     threshold_minutes: 120
     label: "RDM harvest"
@@ -135,7 +135,7 @@ reports:
     basename: alert_caltechthesis_harvest_stale
     append_datestamp: false
     content_type: text/plain
-    emails: "rsdoiel@caltech.edu"
+    emails: ""
     watermark: caltechthesis_lastmod.txt
     threshold_minutes: 120
     label: "CaltechTHESIS harvest"
