@@ -1,6 +1,6 @@
-%ror_import(1) user manual | 0.0.55 246207e
+%ror_import(1) user manual | 0.1.0 7252f74
 % R. S.Doiel
-% 2026-09-25
+% 2026-09-28
 
 # NAME
 
