@@ -8,6 +8,19 @@ Deno.test('test clpid validator', () => {
 	}
 });
 
+// Regression test for cold#114: real production clgid values contain
+// digits (COVID-19, S2I), and the pattern used to exclude digits entirely.
+Deno.test('test clgid validator accepts digit-bearing identifiers', () => {
+	const validClgids = [
+		'COVID-19',
+		'Caltech-Center-for-Sensing-to-Intelligence-(S2I)',
+	];
+	for (let clgid of validClgids) {
+		let result = validator.isValidClpid(clgid)
+		assertStrictEquals(result, true, `expected isValidClpid(${clgid}) to return true, failed test, got ${result}`);
+	}
+});
+
 const validClpids = [
 	"Aagard-Brad-Thomas",
 	"Aakalu-Girish-Nanda",
