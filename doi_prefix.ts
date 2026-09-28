@@ -243,7 +243,7 @@ async function handlePostDOIPrefix(
     }
     return new Response(`<html>Redirect to ${doi_prefix}</html>`, {
       status: 303,
-      headers: { Location: `${doi_prefix}` },
+      headers: { Location: encodeURIComponent(doi_prefix) },
     });
   }
   return new Response(`<html>problem creating doi prefix data</html>`, {

@@ -418,7 +418,7 @@ async function handlePostGroups(
     }
     return new Response(`<html>Redirect to ${clgid}</html>`, {
       status: 303,
-      headers: { Location: `${clgid}` },
+      headers: { Location: encodeURIComponent(clgid) },
     });
   }
   return new Response(`<html>problem creating group data</html>`, {

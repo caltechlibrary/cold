@@ -537,7 +537,7 @@ async function handlePostPeopleRename(
 
   return new Response(`<html>Redirect to ${newClpid}</html>`, {
     status: 303,
-    headers: { Location: `../people/${newClpid}` },
+    headers: { Location: `../people/${encodeURIComponent(newClpid)}` },
   });
 }
 
@@ -681,7 +681,7 @@ async function handlePostPeople(
     }
     return new Response(`<html>Redirect to ${clpid}</html>`, {
       status: 303,
-      headers: { Location: `${clpid}` },
+      headers: { Location: encodeURIComponent(clpid) },
     });
   }
   return new Response(`<html>problem creating people data</html>`, {

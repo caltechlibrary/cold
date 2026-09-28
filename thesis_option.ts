@@ -278,7 +278,7 @@ async function handlePostThesisOption(
     }
     return new Response(`<html>Redirect to ${option_id}</html>`, {
       status: 303,
-      headers: { Location: `${option_id}` },
+      headers: { Location: encodeURIComponent(option_id) },
     });
   }
   return new Response(`<html>problem creating thesis option data</html>`, {

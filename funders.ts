@@ -297,7 +297,7 @@ async function handlePostFunders(
     }
     return new Response(`<html>Redirect to ${clfid}</html>`, {
       status: 303,
-      headers: { Location: `${clfid}` },
+      headers: { Location: encodeURIComponent(clfid) },
     });
   }
   return new Response(`<html>problem creating funder data</html>`, {

@@ -248,7 +248,7 @@ async function handlePostSubjects(
     }
     return new Response(`<html>Redirect to ${clsid}</html>`, {
       status: 303,
-      headers: { Location: `${clsid}` },
+      headers: { Location: encodeURIComponent(clsid) },
     });
   }
   return new Response(`<html>problem creating subject data</html>`, {

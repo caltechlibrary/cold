@@ -318,7 +318,7 @@ async function handlePostJournals(
     }
     return new Response(`<html>Redirect to ${issn}</html>`, {
       status: 303,
-      headers: { Location: `${issn}` },
+      headers: { Location: encodeURIComponent(issn) },
     });
   }
   return new Response(`<html>problem creating issn data</html>`, {
