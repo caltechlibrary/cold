@@ -23,22 +23,77 @@
 <section id="main-content">
 
 <h1>About this software</h1>
-<h2>cold 0.0.55</h2>
+<h2>cold 0.1.0</h2>
 <ul>
-<li>Issue #104 (UI half): cold_api.yaml gains review_queue_by_reviewer, a paired by_reviewer (all-records) query, and get_all_reviewer_usernames for autocomplete; rdm_review_queue.ts gains a Reviewer column in the results table/CSV and matching search-dropdown options. DR-0026: pair by_reviewer with review_queue_by_reviewer for consistency with the other four search types even though only the review-queue case was originally requested, place the column directly after Submitted By, and back autocomplete with a new reviewer_usernames harvest field rather than parsing reviewer_names client-side</li>
-<li>rdm_requests_harvest_sql.bash gains reviewer_usernames, a JSON array alongside the existing reviewer_names string, needed only so cold_api.yaml can json_each over it for the autocomplete list. Backfilled with a second full re-harvest; the incremental picked it up automatically on its next tick, same as the harvest half</li>
-<li>Two real bugs found and fixed building get_all_reviewer_usernames, both in how SQLite's json_each interacts with datasetd's response encoding rather than in the query logic: json_each returns one NULL-valued row for a scalar JSON null instead of skipping it (fixed with a <code>value is not null</code> filter), and json_each's raw scalar value isn't valid JSON on its own (fixed with json_quote()). Neither surfaced testing datasetd directly -- only through the real cold.ts -&gt; datasetd request-mapping path (see cold observations 424-425)</li>
-<li>rdm_review_queue.ts had no test coverage before this release. formatJsonAsHtmlTable, formatJsonAsCSV, genDownloadName and normalizeItem are now exported and covered by a new rdm_review_queue_test.ts (10 tests); genDownloadName was pulled out of its class since it never used <code>this</code></li>
-<li><code>run_authors_review_queue_csv.bash</code> and its all-records sibling <code>run_authors_records_csv.bash</code> gain a <code>reviewer_names</code> CSV column too, found missing during manual testing before release. These are separate report scripts from <code>rdm_review_queue.ts</code> and <code>cold_api.yaml</code> -- each reads <code>rdm_requests.ds</code> directly via <code>dsquery</code> with its own hand-picked column list -- so the earlier UI-half work did not touch them automatically</li>
-<li>#104's reviewer column, paired search and autocomplete ship in this release (DR-0025/DR-0026), and so does the follow-up cycle answering its three remaining comments (DR-0027). #104 is now fully closed</li>
-<li>Title/publisher search is answered by wrapping every results table in a <code>&lt;sortable-table&gt;</code> component -- built and tested earlier in a prior cycle, never wired into any page until now -- rather than adding dedicated search queries. Fed by a new <code>review_queue_browse</code> query, scoped to the review queue only, not &quot;All Records&quot; (111K+ rows -- too large a payload to load client-side for a title filter)</li>
-<li>The live queue is split into its own page: <code>rdm_review_queue.html</code> keeps its name and becomes review-queue-scope only (plus the new browse-all entry); a new <code>rdm_records.html</code> takes over the old &quot;All Records&quot; search group</li>
-<li>No default multi-column sort was added to <code>&lt;sortable-table&gt;</code>; click-to-sort is sufficient given the SQL's own ordering</li>
-<li>No pagination anywhere <code>&lt;sortable-table&gt;</code> is used, including <code>rdm_records.html</code>'s already-large searches -- an explicit decision, not an oversight. RSDOIEL protested on engineering grounds and was overruled: Tom Morrell and the librarians who use this tool were consulted and chose to accept loading everything up front over adding pagination</li>
-<li><code>build.ts</code> hard-coded the same page_title for every generated htdocs/*.html page, discarding each page's own front-matter <code>title:</code> -- an accessibility defect under WCAG 2.4.2 Page Titled (cold#112). Now reads <code>attrs.title</code>, falling back to the old default only if a page has none</li>
-<li><code>codemeta.json</code>'s <code>softwareRequirements</code> no longer lists CMTools (cold#113) -- already fixed in commit a815d41 before this cycle started, closing the issue rather than reopening the work</li>
-<li>The 16 <code>htdocs</code> bundle tasks (<code>deno bundle --config tsconfig.json</code>) now pass <code>--lock=htdocs.lock</code>, a separate lock file, instead of rewriting the main <code>deno.lock</code> down to just their own graph on every run -- a long-carried TODO.md item, fixed</li>
-<li>Dashboard polish found during manual testing: the redundant &quot;browse all submitted requests&quot; link removed from <code>rdm_review_queue.html</code> now that <code>review_queue_browse</code> is a dropdown option too; the review-queue link relabeled &quot;Search RDM Queue&quot; and moved ahead of &quot;Search RDM Records&quot; (used more often); the Tools section split into two <code>&lt;ul&gt;</code> groups, search tools and other tools</li>
+<li>An alert system for cold (#111, DR-0028): a stale RDM/CaltechTHESIS harvest now surfaces as a dashboard alert instead of going unnoticed. &quot;An alert is a report&quot; -- cold_reports.yaml's alert_rdm_harvest_stale and alert_caltechthesis_harvest_stale stanzas run the same generic run_alert_watermark_stale.bash, discovered by check_alerts.bash scanning for the alert_ key prefix rather than one hardcoded check per instance. The artifact's existence is the whole state machine: no alerts.ds, no ok/firing flags. check_alerts.bash reconciles watermark staleness against artifact existence (stale+no-artifact enqueues, fresh+artifact clears), installed hourly during business hours via crontab-example. Runnable/Runner gained optional watermark/threshold_minutes/label fields and an envOverrides path so a report script can read its alert parameters from the environment; send_mail.ts was rewritten for bsd-mailx and fixed four real bugs along the way (unquoted subject interpolation, recipients as separate arguments, .noThrow() replacing a truthy-object check that reported failure on every successful send, shared email validation via a new splitAndValidateEmails helper). The dashboard element (cold_alerts.ts) is a single fetch of /api/reports.ds/report_list on load, no polling, built to the design brief's A11y requirements (role=&quot;status&quot; aria-live=&quot;polite&quot; already present in the markup before content lands, collapsed one-line summary, real <button> dismissal, nothing calls .focus()). Two decisions changed after live use: no client-side dismiss control (clearing an alert is SSH-gated, so a librarian-facing dismiss button was backwards) and the alert box now uses site.css's existing black-on-yellow .announcement treatment. Real recipient emails are deliberately left empty on both stanzas pending the next developer meeting; monitoring until then is via the dashboard.</li>
+<li>Fix #83: a repeatable alt_name field for funders and people, stored as a real JSON array via csv.parse() on save (the pattern funders.ts already used for acronyms/grant_numbers), not the raw-text-block scheme groups.alternative had. Purely additive to both collections.</li>
+<li>Fix #115: groups.alternative was never parsed on save (handlePostGroups didn't run it through csv.parse(), unlike handlePostFunders), so any group with more than one alt name -- or none -- ended up with a raw multi-line string instead of an array, silently breaking the json_each()-based alt-name lookup behind the group-name autocomplete (cold_api.yaml's lookup_name/lookup_name_or_clgid). Fixed to match handlePostFunders's pattern; group.hbs's display updated to iterate the array (one name per line) so group_view.ts's client-side bulleted-list rendering keeps working. Migrated groups.ds in production: 82 of 110 records converted from string to array (not just the ones with actual multiple names -- includes empty-string records normalizing to []); verified live that the display page and the previously-broken alt-name autocomplete query both work correctly afterward.</li>
+<li>Fix #117: journal_edit.hbs's csv-textarea posted to &quot;alternative_names&quot;, but journals.ts stored it under &quot;alternate_names&quot; -- the read path never saw what the write path saved. Standardized on alt_name across journals.ts, journal_edit.ts/journal_edit_test.ts, and both journal views, matching the convention funders.alt_name/people.alt_name already established. Migrated journals.ds in production: 4812 of 4813 records renamed from alternate_names/alternative_names to alt_name.</li>
+<li>#116 (survey of other multi-valued fields still stored as raw text) closed as nothing currently actionable: funders.acronyms/alt_name/grant_numbers and people.alt_name already save correctly as arrays, but have zero populated records in either local or production data, so there is nothing to migrate today. Revisit if that changes.</li>
+<li>Fix #53: a &quot;search ORCID&quot; link on the people edit page, opening ORCID's public search pre-filled with the person's name, kept in sync client-side as family_name/given_name change.</li>
+<li>Fix #42: &quot;view&quot; links next to ORCID/ROR/ArchivesSpace/CaltechAUTHORS/CaltechTHESIS identifier fields on the people edit page, matching the links the display page already had; guarded so an empty field shows no link.</li>
+<li>Fix #114: the clpid/clgid validator regex excluded digits from every segment, rejecting real production identifiers like COVID-19 and Caltech-Center-for-Sensing-to-Intelligence-(S2I). Re-verified against all 9,217 people.ds and all 110 groups.ds keys: 0 failures either way after the fix.</li>
+<li>Fix #85: every save handler's redirect Location header was built from the raw identifier, which throws outright for a code point outside Latin-1 (RFC 7230 3.2.6) and sends invalid UTF-8 even for an in-range diacritic. Now percent-encoded before use, decoded back correctly through the existing pathIdentifier()/decodeURI path.</li>
+<li>Fix #87: renderPage and renderJSON -- used by every list/detail page and /api JSON endpoint -- set no cache header at all, so a browser could serve a stale list after a record changed. Both now send Cache-Control: no-store; static assets via serveDir are unaffected.</li>
+</ul>
+<h2>Authors</h2>
+<ul>
+<li><a href="https://orcid.org/0000-0003-0900-6903">R. S. Doiel</a></li>
+</ul>
+<h2>Contributors</h2>
+<ul>
+<li><a href="https://orcid.org/0000-0002-0026-2516">Kathy Johnson</a></li>
+<li><a href="https://orcid.org/0000-0001-9266-5146">Thomas E Morrell</a></li>
+</ul>
+<h2>Maintainers</h2>
+<ul>
+<li><a href="https://orcid.org/0000-0003-0900-6903">R. S. Doiel</a></li>
+</ul>
+<p>Caltech Library maintains a list of people, groups and funders and their related identifiers. For many years these were managed using a spreadsheets. That has become cumbersome. <strong>COLD</strong> manages data as JSON objects in <a href="https://github.com/caltechlibrary/dataset">dataset</a> collections.</p>
+<p><strong>COLD</strong> is implemented as three web web services</p>
+<ul>
+<li>cold web UI</li>
+<li>cold JSON API (provided by datasetd)</li>
+<li>cold reports (the report request system)</li>
+</ul>
+<p>Reports are implemented as a set of programs or bash scripts.</p>
+<p>TypeScript+Deno is used to implement the web UI and report system.
+The JSON API is provided by Dataset's datasetd.
+Access control is provided by the front end web server integrated with Shibboleth.</p>
+<ul>
+<li><a href="https://software.library.caltech.edu/cold/LICENSE">License</a></li>
+<li><a href="https://github.com/caltechlibrary/cold">Code Repository</a>
+<ul>
+<li><a href="https://github.com/caltechlibrary/cold/issues">Issue Tracker</a></li>
+</ul>
+</li>
+</ul>
+<h2>Programming languages</h2>
+<ul>
+<li>CSS</li>
+<li>HTML</li>
+<li>JavaScript</li>
+<li>JSON</li>
+<li>shell (Bash)</li>
+<li>SQL</li>
+<li>Typescript</li>
+<li>YAML</li>
+</ul>
+<h2>Operating Systems</h2>
+<ul>
+<li>Linux</li>
+</ul>
+<h2>Software Requirements</h2>
+<ul>
+<li>Deno &gt;= 2.8.2</li>
+<li>Dataset &gt;= 2.5.1</li>
+<li>yq (mikefarah/yq) &gt;= 4.44</li>
+</ul>
+<h2>Software Suggestions</h2>
+<ul>
+<li>GNU Make</li>
+<li>Pandoc &gt;= 3.9</li>
+<li>CMTools &gt;= 0.0.45b</li>
 </ul>
 
 
