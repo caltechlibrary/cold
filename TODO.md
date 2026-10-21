@@ -90,6 +90,22 @@ harvest pair against `rdm_requests.ds` since that release.
 - [x] ~~Deploy v0.0.53~~ — released and deployed 2026-09-18, technical reports
       report live in production.
 
+### Proposed: missing person identifier report (filed 2026-10-21)
+
+- [ ] **A report to find person entries missing a clpid or ORCID**, for record
+      cleanup and normalization of identifiers by person. Inputs: name (a
+      regular expression), clpid, ORCID, plus a creators/contributors/both
+      option. Returns `rdmid`, `title`, `name`, `clpid`, `orcid` (and a `role`
+      column) for entries where any supplied value matches. Prompted by the
+      manual three-search comparison for Greene, Thomas P on Search RDM Records.
+      **Nothing is agreed.** Feature request:
+      `agents/projects/cold/feature_requests/missing-person-identifier-report.md`.
+      Start by checking one harvested `rdm_requests` record for a `contributors`
+      key — if it is absent, the report needs a harvest change first. Then
+      decide the data source (harvest vs live API), the regular expression
+      dialect (SQLite has no `REGEXP`), and form vs generated CSV report. The
+      design brief comes next, on your go-ahead.
+
 ### Issue #105 follow-ups
 
 - [x] ~~Settle the definition with Phil~~ — shipped on DR-0011's reading, the
