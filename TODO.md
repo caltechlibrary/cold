@@ -244,6 +244,31 @@ next
     - The internal notes field's content should be populated by the existing record's internal notes (so we don't loose the cummulative notes)
 - In the Search RDM Records tool
   - [ ] Add a "reviewer" column to the exported CSV generated from the Download button
+- `people.csv` / `groups.csv` downloads are stale (found 2026-10-28, feeds_v1.6)
+  - **Symptom:** `htdocs/rpt/people.csv` on apps was last written
+    2026-08-11 (owned by root, written by the `cold_reports` runner), so
+    https://feeds.library.caltech.edu/people/people.csv carried 9,184 rows
+    while `people.ds` held 9,232. `htdocs/rpt/groups.csv` does not exist.
+  - **Cause:** two writers, one reader. Cron (`rpt_people_csv.bash`,
+    `rpt_groups_csv.bash`, 6x/day, as rsdoiel) rebuilds
+    `/Sites/cold/people.csv` and `/Sites/cold/groups.csv`, which nothing
+    serves. The runner's `run_people_csv` report is the one that writes
+    `htdocs/rpt/people.csv`, and it only runs when something asks for it.
+    Why it stopped refreshing around 2026-08-11 is NOT yet known.
+  - **Stopgap (done in feeds_v1.6):** `fetch_people_and_groups.bash` now
+    copies the cron-built files from `/Sites/cold/`.
+  - [ ] Find out why `rpt/people.csv` stopped refreshing (check what
+        changed in cold around 2026-08-11) and why `rpt/groups.csv` is gone
+  - [ ] Pick ONE writer for each file. Prefer the runner (cold_reports) on
+        a schedule, with the cron script retired, so the public download
+        and feeds read the same artifact; or have cron publish into
+        `htdocs/rpt/`
+  - [ ] Add a freshness alert (`check_alerts.bash` / cold#111 facility) when
+        `htdocs/rpt/people.csv` is older than a day
+  - [ ] Make `fetch_people_and_groups.bash` fail loudly: it logs "failed to
+        copy" and carries on, which hid this for months. Also consider a
+        sanity check that max `updated` is recent
+  - [ ] Once fixed, point feeds back at the single official path
 
 Someday, maybe
 --------------
