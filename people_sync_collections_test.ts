@@ -217,6 +217,90 @@ Deno.test("people sync collections and named queries", async (t) => {
     );
 
     await t.step(
+      "possible alternate names sort after every other outcome in a run's items",
+      async () => {
+        await api.create(
+          RUNS,
+          "r6",
+          runRow("r6", "all", "2026-11-11 08:00:00"),
+        );
+        const rows: [string, string, string][] = [
+          ["r6-00001", "Alt-Zed", "info"],
+          ["r6-00002", "Applied-Two", "applied"],
+          ["r6-00003", "Alt-Abe", "info"],
+          ["r6-00004", "Human-Three", "needs_human"],
+        ];
+        for (const [key, clpid, outcome] of rows) {
+          await api.create(ITEMS, key, {
+            ...itemRow("r6", clpid, outcome, "2026-11-11 08:00:01"),
+            action: outcome === "info" ? "alt_name_candidate" : "conflict",
+          });
+        }
+        const got = await api.query(ITEMS, "people_sync_run_items", {
+          run_id: "r6",
+        });
+        assertEquals(got.map((i) => i.outcome), [
+          "needs_human",
+          "applied",
+          "info",
+          "info",
+        ]);
+        // and by clpid inside the group, so the table is stable between reloads
+        assertEquals(got.slice(2).map((i) => i.clpid), ["Alt-Abe", "Alt-Zed"]);
+      },
+    );
+
+    await t.step(
+      "a person with a problem and a suggestion in the same run gets the problem as their latest item, whichever was stored first",
+      async () => {
+        // The suggestion is stored FIRST in one case and LAST in the other, so a
+        // query that left ties to scan order could not pass both.
+        const at = "2026-11-11 09:00:01";
+        await api.create(ITEMS, "r7-00001", {
+          ...itemRow("r7", "Both-One", "info", at),
+          action: "alt_name_candidate",
+        });
+        await api.create(ITEMS, "r7-00002", {
+          ...itemRow("r7", "Both-One", "needs_human", at),
+          action: "conflict",
+        });
+        await api.create(ITEMS, "r7-00003", {
+          ...itemRow("r7", "Both-Two", "needs_human", at),
+          action: "conflict",
+        });
+        await api.create(ITEMS, "r7-00004", {
+          ...itemRow("r7", "Both-Two", "info", at),
+          action: "alt_name_candidate",
+        });
+        for (const clpid of ["Both-One", "Both-Two"]) {
+          const got = await api.query(ITEMS, "people_sync_latest_item", {
+            clpid,
+          });
+          assertEquals(got.length, 1);
+          assertEquals(got[0].outcome, "needs_human", clpid);
+        }
+        // a person with only a suggestion still gets it
+        await api.create(ITEMS, "r7-00005", {
+          ...itemRow("r7", "Only-Alt", "info", at),
+          action: "alt_name_candidate",
+        });
+        const only = await api.query(ITEMS, "people_sync_latest_item", {
+          clpid: "Only-Alt",
+        });
+        assertEquals(only[0].action, "alt_name_candidate");
+        // newest still wins over severity: a newer suggestion beats an older problem
+        await api.create(ITEMS, "r8-00001", {
+          ...itemRow("r8", "Both-One", "info", "2026-11-11 10:00:00"),
+          action: "alt_name_candidate",
+        });
+        const newer = await api.query(ITEMS, "people_sync_latest_item", {
+          clpid: "Both-One",
+        });
+        assertEquals(newer[0].run_id, "r8");
+      },
+    );
+
+    await t.step(
       "a run over many no-ORCID people stores counts but no rows for them",
       async () => {
         // The wrapper's rule (plan Phase 3): only applied, needs_human,

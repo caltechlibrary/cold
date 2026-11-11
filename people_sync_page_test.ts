@@ -153,7 +153,7 @@ interface World {
 }
 
 /** world installs the fake DOM and a fetch that answers like COLD's API. */
-function world(requests: unknown[]): World {
+function world(requests: unknown[], items: unknown[] = ITEMS): World {
   ids.clear();
   const w: World = { posts: [], intervals: 0, restore: () => {} };
   const g = globalThis as Record<string, unknown>;
@@ -187,15 +187,15 @@ function world(requests: unknown[]): World {
     if (url.includes("report_list")) return json(requests);
     if (url.includes("people_sync_latest_full_run")) return json([RUN]);
     if (url.includes("people_sync_latest_run")) return json([RUN]);
-    if (url.includes("people_sync_run_items")) return json(ITEMS);
+    if (url.includes("people_sync_run_items")) return json(items);
     return Promise.resolve(new Response("[]", { status: 200 }));
   };
   w.restore = () => Object.assign(g, saved);
   return w;
 }
 
-async function page(requests: unknown[] = []) {
-  const w = world(requests);
+async function page(requests: unknown[] = [], items: unknown[] = ITEMS) {
+  const w = world(requests, items);
   const { PeopleSyncUI } = await import("./people_sync_page.ts");
   const mount = new FakeEl("div");
   const ui = new PeopleSyncUI({
@@ -375,6 +375,152 @@ Deno.test("page: only a COLD-fixable item offers a rerun, labelled with the pers
   }
 });
 
+// ---- possible alternate names (plan, Phase 5 decision 1, 2026-11-11) ----------------------
+
+const CANDIDATES = [
+  {
+    run_id: "r-full",
+    clpid: "Doe-Jane",
+    rdm_id: "abcde-12345",
+    action: "alt_name_candidate",
+    outcome: "info",
+    message: "RDM name form 'Doe, J.' could be an alt_name of Doe-Jane",
+    scheme: "alt_name",
+    value: "Doe, J.",
+    recorded: "2026-11-10 23:05:30",
+    detail: {
+      fix: "cold",
+      cold: { "Doe-Jane": { orcid: "0000-0002-0000-0001", isni: "" } },
+      rdm: {
+        ids: ["abcde-12345"],
+        clpids: ["Doe-Jane"],
+        orcids: [],
+        isnis: [],
+      },
+    },
+  },
+  {
+    run_id: "r-full",
+    clpid: "Roe-Rae",
+    rdm_id: "fghij-67890",
+    action: "alt_name_candidate",
+    outcome: "info",
+    message: "RDM name form 'Roe, R.' could be an alt_name of Roe-Rae",
+    scheme: "alt_name",
+    value: "Roe, R.",
+    recorded: "2026-11-10 23:05:30",
+    detail: {
+      fix: "cold",
+      cold: { "Roe-Rae": { orcid: "", isni: "" } },
+      rdm: { ids: ["fghij-67890"], clpids: ["Roe-Rae"], orcids: [], isnis: [] },
+    },
+  },
+];
+
+Deno.test("page: possible alternate names get their own heading and table, apart from the items to act on", async () => {
+  const { w, mount } = await page(idle, [...ITEMS, ...CANDIDATES]);
+  try {
+    const tables = mount.tag("table");
+    assertEquals(tables.length, 2);
+    // the first table is exactly the items that were there before
+    assertEquals(tables[0].tag("tbody")[0].tag("tr").length, 3);
+    const rows = tables[1].tag("tbody")[0].tag("tr");
+    assertEquals(rows.length, 2);
+    for (const r of rows) {
+      assertStringIncludes(
+        r.children[1].textContent,
+        "Possible alternate name",
+      );
+    }
+    const heads = mount.tag("h3").map((h) => h.textContent);
+    assertEquals(heads, ["Possible alternate names (2)"]);
+  } finally {
+    w.restore();
+  }
+});
+
+Deno.test("page: the alternate-name table is as accessible as the first: caption, six headers, row headers, its own named focusable region", async () => {
+  const { w, mount } = await page(idle, [...ITEMS, ...CANDIDATES]);
+  try {
+    const t = mount.tag("table")[1];
+    assertEquals(t.tag("caption").length, 1);
+    assert(t.tag("caption")[0].textContent.includes("alternate names"));
+    const cols = t.tag("th").filter((h) => h.getAttribute("scope") === "col");
+    assertEquals(cols.length, 6);
+    for (const r of t.tag("tbody")[0].tag("tr")) {
+      const first = r.children[0] as FakeEl;
+      assertEquals(first.tagName, "th");
+      assertEquals(first.getAttribute("scope"), "row");
+    }
+    const regions = mount.find((e) => e.getAttribute("role") === "region");
+    assertEquals(regions.length, 2);
+    for (const r of regions) assertEquals(r.getAttribute("tabindex"), "0");
+    const names = regions.map((r) => r.getAttribute("aria-label"));
+    assert(names[0] !== names[1], "the two regions need different names");
+  } finally {
+    w.restore();
+  }
+});
+
+Deno.test("page: a possible alternate name links the person and the RDM entry and offers the rerun", async () => {
+  const { w, mount } = await page(idle, [...ITEMS, ...CANDIDATES]);
+  try {
+    const row = mount.tag("table")[1].tag("tbody")[0].tag("tr")[0];
+    const links = row.tag("a").map((a) => a.getAttribute("href"));
+    assert(links.includes("./people/Doe-Jane"));
+    assert(
+      links.includes("https://authors.example.test/api/names/abcde-12345"),
+    );
+    assertEquals(row.tag("button").map((b) => b.textContent), [
+      "Rerun for Doe-Jane",
+    ]);
+    assertStringIncludes(
+      row.children[5].textContent.toLowerCase(),
+      "nothing is wrong",
+    );
+  } finally {
+    w.restore();
+  }
+});
+
+Deno.test("page: the count in the lead sentence is the items to act on, not the suggestions", async () => {
+  const { w, mount } = await page(idle, [...ITEMS, ...CANDIDATES]);
+  try {
+    const lead = mount.find((e) =>
+      e.tagName === "p" && e.textContent.includes("items from the run started")
+    );
+    assertEquals(lead.length, 1);
+    assertStringIncludes(lead[0].textContent, "3 items from the run started");
+  } finally {
+    w.restore();
+  }
+});
+
+Deno.test("page: with no suggestions there is no second heading or table", async () => {
+  const { w, mount } = await page(idle);
+  try {
+    assertEquals(mount.tag("table").length, 1);
+    assertEquals(mount.tag("h3").length, 0);
+  } finally {
+    w.restore();
+  }
+});
+
+Deno.test("page: a run with only suggestions says there is nothing to act on and still lists them", async () => {
+  const { w, mount } = await page(idle, CANDIDATES);
+  try {
+    const tables = mount.tag("table");
+    assertEquals(tables.length, 1);
+    assertEquals(tables[0].tag("tbody")[0].tag("tr").length, 2);
+    const lead = mount.find((e) =>
+      e.tagName === "p" && e.textContent.includes("nothing to act on")
+    );
+    assertEquals(lead.length, 1);
+  } finally {
+    w.restore();
+  }
+});
+
 Deno.test("page: the start button keeps focus when blocked (aria-disabled, never disabled) and says why", async () => {
   const blocked = await page(busy);
   try {
@@ -412,7 +558,10 @@ Deno.test("page: a click files the batch request; a click while blocked sends no
     await new Promise((r) => queueMicrotask(() => r(null)));
     await new Promise((r) => queueMicrotask(() => r(null)));
     assertEquals(free.w.posts.length, 1);
-    assertEquals(free.w.posts[0].body, "report_name=run_people_sync");
+    assertEquals(
+      free.w.posts[0].body,
+      "report_name=run_people_sync&trigger=human",
+    );
     assertStringIncludes(free.w.posts[0].url, "/reports");
   } finally {
     free.w.restore();
@@ -455,7 +604,7 @@ Deno.test("page: a rerun click files the one-person request for that clpid", asy
     await new Promise((r) => queueMicrotask(() => r(null)));
     await new Promise((r) => queueMicrotask(() => r(null)));
     assertEquals(w.posts.map((p) => p.body), [
-      "report_name=run_people_sync_person&clpid=Doe-Jane",
+      "report_name=run_people_sync_person&clpid=Doe-Jane&trigger=human",
     ]);
   } finally {
     w.restore();

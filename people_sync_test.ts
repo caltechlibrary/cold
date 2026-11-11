@@ -935,6 +935,95 @@ Deno.test("items: only the four outcomes get rows, the rest are counted", () => 
   assert(items.every((i) => i.row.outcome !== "info"));
 });
 
+// ---- alt_name_candidate rows (plan, Phase 5 decision 1, 2026-11-11) ---------
+
+const CANDIDATE = {
+  clpid: "Mid-Cy",
+  rdm_id: "r3",
+  action: "alt_name_candidate",
+  outcome: "info",
+  message: "RDM name form 'Mid, C.' could be an alt_name of Mid-Cy",
+  scheme: "alt_name",
+  value: "Mid, C.",
+  detail: {
+    fix: "cold",
+    cold: { "Mid-Cy": { orcid: "", isni: "" } },
+    rdm: { ids: ["r3"], clpids: ["Mid-Cy"], orcids: [], isnis: [] },
+  },
+};
+
+Deno.test("items: an alt_name_candidate gets a row, no_orcid still does not, both are counted", () => {
+  const report: Report = { ...REPORT, plan: [...REPORT.plan, CANDIDATE] };
+  const { items, counts } = itemsFromReport(report, "r1", "t");
+  assertEquals(counts.info, 3);
+  const info = items.filter((i) => i.row.outcome === "info");
+  assertEquals(info.map((i) => [i.row.clpid, i.row.action]), [
+    ["Mid-Cy", "alt_name_candidate"],
+  ]);
+  assertEquals(items.length, 7);
+  assert(!items.some((i) => i.row.action === "no_orcid"));
+});
+
+Deno.test("items: a stored candidate keeps its detail and sorts after every outcome that needs action", () => {
+  const report: Report = { ...REPORT, plan: [...REPORT.plan, CANDIDATE] };
+  const { items } = itemsFromReport(report, "r1", "t");
+  assertEquals(items.map((i) => i.row.outcome), [
+    "needs_human",
+    "needs_repair",
+    "warning",
+    "applied",
+    "applied",
+    "applied",
+    "info",
+  ]);
+  const last = items[items.length - 1];
+  assertEquals(last.key, "r1-00007");
+  assertEquals(last.row.detail, CANDIDATE.detail);
+  assertEquals(last.row.value, "Mid, C.");
+});
+
+Deno.test("items: a compact report keeps its candidate rows and takes counts from plan_counts", () => {
+  const compact: Report = {
+    ...REPORT,
+    compact: true,
+    plan_counts: {
+      warning: 1,
+      applied: 3,
+      needs_human: 1,
+      needs_repair: 1,
+      info: 8269,
+    },
+    plan: [...REPORT.plan.filter((i) => i.outcome !== "info"), CANDIDATE],
+  };
+  const { items, counts } = itemsFromReport(compact, "r1", "t");
+  assertEquals(items.length, 7);
+  assertEquals(counts.info, 8269);
+});
+
+Deno.test("items: a one-person run keeps that person's candidate and not another's", () => {
+  const other = {
+    ...CANDIDATE,
+    clpid: "Zed-Z",
+    rdm_id: "r9",
+    detail: {
+      fix: "cold",
+      cold: { "Zed-Z": { orcid: "", isni: "" } },
+      rdm: { ids: ["r9"], clpids: ["Zed-Z"], orcids: [], isnis: [] },
+    },
+  };
+  const report: Report = {
+    ...REPORT,
+    scope: "Mid-Cy",
+    plan: [...REPORT.plan, CANDIDATE, other],
+  };
+  const { items, counts } = itemsFromReport(report, "r1", "t");
+  assertEquals(
+    items.filter((i) => i.row.outcome === "info").map((i) => i.row.clpid),
+    ["Mid-Cy"],
+  );
+  assertEquals(counts.info, 1);
+});
+
 Deno.test("items: ordered for a person, keyed per run, applied carry what happened", () => {
   const { items } = itemsFromReport(REPORT, "r1", "2026-11-10 09:00:00");
   assertEquals(items.map((i) => i.row.outcome), [

@@ -744,14 +744,24 @@ collections:
       # page. An item's own clpid can be an RDM entry's clpid that COLD does not
       # hold (a conflict), so the COLD people it concerns, named in
       # detail.cold, count too. The parameter is bound once, through the CTE,
-      # because the page passes one field. Bound parameter: clpid.
+      # because the page passes one field. Within one run the most serious
+      # outcome comes first, so a possible alternate name never hides a problem.
+      # Bound parameter: clpid.
       people_sync_latest_item: |
         with q(c) as (select ?)
         select src
         from people_sync_items, q
         where src->>'clpid' = q.c
            or exists (select 1 from json_each(src, '$.detail.cold') where key = q.c)
-        order by src->>'recorded' desc, src->>'run_id' desc
+        order by src->>'recorded' desc, src->>'run_id' desc,
+                 case src->>'outcome'
+                   when 'needs_human' then 0
+                   when 'needs_repair' then 1
+                   when 'warning' then 2
+                   when 'applied' then 3
+                   else 4
+                 end,
+                 src->>'action', src->>'rdm_id'
         limit 1
     keys: true
     read: true

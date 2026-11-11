@@ -12,8 +12,11 @@
 # Environment:
 #
 #   PEOPLE_SYNC_ENV      the env file naming the target (default caltechauthors.env)
-#   PEOPLE_SYNC_TRIGGER  who started it: human or cron (recorded on the run)
-#   COLD_REQUEST_ID      the report request that started it (recorded on the run)
+#   PEOPLE_SYNC_TRIGGER  who started it: human or cron (recorded on the run);
+#                        set by hand, it wins over COLD_TRIGGER
+#   COLD_TRIGGER         the same, set by the report runner from the request
+#   COLD_REQUEST_ID      the report request that started it (set by the report
+#                        runner, recorded on the run)
 #
 # The env file's PEOPLE_SYNC_MODE decides whether anything is written to RDM:
 # dry-run (the default) or apply. Exit codes are people_sync's; see --help.
@@ -21,7 +24,7 @@
 
 if [ -d /Sites/cold ]; then cd /Sites/cold || exit 66; else cd "$(dirname "$0")" || exit 66; fi
 
-ARGS=(--env "${PEOPLE_SYNC_ENV:-caltechauthors.env}" --trigger "${PEOPLE_SYNC_TRIGGER:-unknown}")
+ARGS=(--env "${PEOPLE_SYNC_ENV:-caltechauthors.env}" --trigger "${PEOPLE_SYNC_TRIGGER:-${COLD_TRIGGER:-unknown}}")
 if [ -n "${COLD_REQUEST_ID:-}" ]; then ARGS+=(--request-id "${COLD_REQUEST_ID}"); fi
 if [ -n "${1:-}" ]; then ARGS+=(--scope "$1"); fi
 

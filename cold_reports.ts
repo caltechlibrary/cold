@@ -41,6 +41,65 @@ async function genId(o: object): Promise<string> {
   return (await v5.generate(NAMESPACE_URL, signature)).toString();
 }
 
+/** triggerFrom reads who filed a report request from its form object.
+ *
+ * A request with no trigger is a bare POST, which is what cron sends, so it is
+ * "cron". The page sends "human". Any other value is "unknown": it is recorded
+ * as such, never trusted and never passed to a command as free text.
+ *
+ * @param o {object} the normalized form object of the request
+ * @returns {string} "human", "cron" or "unknown"
+ * @example
+ * triggerFrom({ report_name: "run_people_sync" }); // "cron"
+ * triggerFrom({ report_name: "run_people_sync", trigger: "human" }); // "human"
+ */
+export function triggerFrom(o: object): string {
+  if (!Object.hasOwn(o, "trigger")) return "cron";
+  const v = (o as Record<string, unknown>).trigger;
+  return v === "human" || v === "cron" ? v : "unknown";
+}
+
+/** reportEnv is the per-request environment a report command runs with: the
+ * request's own id and trigger, and its validated recipient list.
+ *
+ * A request stored before triggers existed has none, so it is "unknown".
+ *
+ * @param request {Report} the request being run
+ * @param validatedEmails {string} the recipient list after validation
+ * @returns {Record<string, string>} EMAILS, COLD_REQUEST_ID and COLD_TRIGGER
+ * @example
+ * reportEnv(request, ""); // { EMAILS: "", COLD_REQUEST_ID: "…", COLD_TRIGGER: "human" }
+ */
+export function reportEnv(
+  request: Report,
+  validatedEmails: string,
+): Record<string, string> {
+  return {
+    EMAILS: validatedEmails,
+    COLD_REQUEST_ID: request.id ?? "",
+    COLD_TRIGGER: request.trigger ?? "unknown",
+  };
+}
+
+/** runRequest runs a request's report command with the request's own
+ * environment (see reportEnv).
+ *
+ * @param cmd {Runnable} the report to run
+ * @param request {Report} the request being served
+ * @returns {Promise<string>} the report's link, or an `error://` message
+ * @example
+ * const link = await runRequest(runnable, request);
+ */
+export function runRequest(cmd: Runnable, request: Report): Promise<string> {
+  // EMAILS carries the same validated recipient list send_email will use
+  // below, so an alert script's "Notified:" line reports who will actually
+  // be mailed, not the raw unvalidated request.emails field.
+  const validatedEmails = request.emails
+    ? splitAndValidateEmails(request.emails).join(", ")
+    : "";
+  return cmd.run([], reportEnv(request, validatedEmails));
+}
+
 /**
  * ReportInterface describes a report request obejct.
  */
@@ -66,6 +125,8 @@ export interface ReportInterface {
   status: string;
   // link is the URL to where the report can be found in the COLD web UI
   link: string;
+  // trigger records who filed the request: "human" (the page), "cron" (a bare POST, as cron sends) or "unknown"
+  trigger?: string;
 }
 
 /**
@@ -82,6 +143,7 @@ export class Report implements ReportInterface {
   expire: string = "";
   status: string = "";
   link: string = "";
+  trigger: string = "cron";
   private config_yaml: string = "cold_reports.yaml";
 
   constructor(config_yaml?: string) {
@@ -154,6 +216,7 @@ export class Report implements ReportInterface {
       this.inputs = [];
     }
     this.emails = "emails" in o ? `${o.emails}` : ``;
+    this.trigger = triggerFrom(o);
     const now = new Date();
     const expire_in_days = 7;
     const expire = (new Date()).setDate(
@@ -179,6 +242,7 @@ export class Report implements ReportInterface {
       expire: this.expire,
       status: this.status,
       link: this.link,
+      trigger: this.trigger,
     };
   }
 
@@ -508,6 +572,7 @@ export class Runnable implements RunnableInterface {
         // Use Deno's Command API for safer parameter handling
         const cmd = new Deno.Command(this.cmd, {
           args: validatedInputs,
+          env: envOverrides,
         });
         const { code, stdout, stderr } = await cmd.output();
 
@@ -695,13 +760,7 @@ async function process_request(
   }
   console.log(`INFO: running command ${cmd.cmd} ${cmd.options}`);
   //FIXME: Need to evaluate if inputs are defined then valiate inputs before processing the requested report
-  // EMAILS carries the same validated recipient list send_email will use
-  // below, so an alert script's "Notified:" line reports who will actually
-  // be mailed, not the raw unvalidated request.emails field.
-  const validatedEmails = request.emails
-    ? splitAndValidateEmails(request.emails).join(", ")
-    : "";
-  const link = await cmd.run([], { EMAILS: validatedEmails });
+  const link = await runRequest(cmd, request);
   if (link === undefined || link === "") {
     request.link = "no link returned from report";
     request.status = "error";
