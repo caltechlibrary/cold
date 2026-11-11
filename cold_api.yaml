@@ -176,6 +176,26 @@ collections:
         from people
         where exists (select true from json_each(src, '$.groups') where json_extract(value, '$.clgid') = ?)
         order by src->'family_name' ASC, src->'given_name' asc;
+
+      # The people export the COLD/RDM sync sends to the RDM instance
+      # (DR-0032, DR-0031). Identity fields only, the matcher's input: email,
+      # bio and internal notes never leave COLD. alt_name is always a list.
+      people_sync_export: |
+        select json_object(
+          'clpid', src->>'clpid',
+          'family_name', src->>'family_name',
+          'given_name', src->>'given_name',
+          'orcid', coalesce(src->>'orcid', ''),
+          'isni', coalesce(src->>'isni', ''),
+          'thesis_id', coalesce(src->>'thesis_id', ''),
+          'authors_id', coalesce(src->>'authors_id', ''),
+          'advisors_id', coalesce(src->>'advisors_id', ''),
+          'alt_name', case when json_type(src, '$.alt_name') = 'array'
+                           then json(json_extract(src, '$.alt_name'))
+                           else json_array() end
+        ) as src
+        from people
+        order by src->>'clpid'
     keys: true
     create: true
     read: true
@@ -674,6 +694,70 @@ collections:
     create: true
     update: true
     # This sets versioning behavior
+    versions: true
+  # The COLD/RDM people sync (cold#122, DR-0032). One row per run, one row per
+  # item worth acting on or auditing; the run row carries the counts for
+  # everything else (people with no ORCID, people already in agreement).
+  # Timestamps are "YYYY-MM-DD HH:MM:SS" so string order is time order.
+  - dataset: people_sync_runs.ds
+    query:
+      # The most recent run of any scope, in any state (a run still going
+      # shows as running).
+      people_sync_latest_run: |
+        select src
+        from people_sync_runs
+        order by src->>'started' desc, src->>'run_id' desc
+        limit 1
+
+      # The most recent run covering everyone. A one-person run never
+      # replaces this (DR-0032 decision 4).
+      people_sync_latest_full_run: |
+        select src
+        from people_sync_runs
+        where src->>'scope' = 'all'
+        order by src->>'started' desc, src->>'run_id' desc
+        limit 1
+    keys: true
+    read: true
+    # datasetd requires create,update permissions for support queries
+    create: true
+    update: true
+    versions: true
+  - dataset: people_sync_items.ds
+    query:
+      # The items of one run, the ones a person must act on first. Bound
+      # parameter: run_id.
+      people_sync_run_items: |
+        select src
+        from people_sync_items
+        where src->>'run_id' = ?
+        order by case src->>'outcome'
+                   when 'needs_human' then 0
+                   when 'needs_repair' then 1
+                   when 'warning' then 2
+                   when 'applied' then 3
+                   else 4
+                 end,
+                 src->>'clpid', src->>'recorded'
+
+      # The newest item about one COLD person, across runs, for the person's
+      # page. An item's own clpid can be an RDM entry's clpid that COLD does not
+      # hold (a conflict), so the COLD people it concerns, named in
+      # detail.cold, count too. The parameter is bound once, through the CTE,
+      # because the page passes one field. Bound parameter: clpid.
+      people_sync_latest_item: |
+        with q(c) as (select ?)
+        select src
+        from people_sync_items, q
+        where src->>'clpid' = q.c
+           or exists (select 1 from json_each(src, '$.detail.cold') where key = q.c)
+        order by src->>'recorded' desc, src->>'run_id' desc
+        limit 1
+    keys: true
+    read: true
+    # datasetd requires create,update permissions for support queries
+    create: true
+    update: true
     versions: true
   - dataset: caltechthesis.ds
     query:

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Sync People to RDM</title>
+    <link rel="stylesheet" href="/css/site.css">
+	<link rel="stylesheet" href="/css/webform.css">
+    <link rel="stylesheet" href="/css/spinner.css">
+</head>
+<body>
+<header>
+<a href="http://library.caltech.edu" title="link to Caltech Library Homepage"><img src="/assets/liblogo.gif" alt="Caltech Library logo"></a>
+</header>
+<a href="#main-content" class="visually-hidden">skip to main content</a>
+<nav>
+<ul>
+  <li><a href="/" title="return home">All Library Apps</a></li>
+  <li><a href="./" title="return to dashboard">Dashboard</a></li>
+  <li><a href="https://github.com/caltechlibrary/cold/issues">Report a problem</a></li>
+  <li><a href="./about.html">About</a></li>
+</ul>
+</nav>
+<section id="main-content">
+
+<h1>Sync People to RDM</h1>
+<p>COLD is the authority for who a person is. This page shows the latest sync of COLD's people with the CaltechAUTHORS names vocabulary and what needs a person's attention. RDM's names cannot be edited by hand: fix a person in COLD, then rerun the sync for that person.</p>
+<div id="people_sync">Loading the sync page…</div>
+<p><noscript>JavaScript is required to show the sync status and to start a sync.</noscript></p>
+<script type="module">
+  import { PeopleSyncUI } from "./modules/people_sync_page.js";
+  const baseUrl = URL.parse(window.location.href);
+  baseUrl.pathname = baseUrl.pathname.replace(/rdm_people_sync.html$/g, '');
+  baseUrl.search = "";
+  window.addEventListener('DOMContentLoaded', () => {
+    new PeopleSyncUI({
+      mountElement: document.getElementById("people_sync"),
+      baseUrl: baseUrl,
+      peopleBase: "./people/",
+    });
+  });
+</script>
+<p><a href="./index.html">Back to the dashboard</a></p>
+
+
+</section>
+<footer>
+<span>&copy; 2026 <a href="https://www.library.caltech.edu/copyright">Caltech Library</a></span>
+<address>1200 E California Blvd, Mail Code 2-32, Pasadena, CA 91125-3200</address>
+<span><a href="mailto:library@caltech.edu">Email Us</a></span>
+<span>Phone: <a href="tel:+1-626-395-3405">(626)395-3405</a></span>
+</footer>
+<code><pre></pre></code>
+</body>
+</html>

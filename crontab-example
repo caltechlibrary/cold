@@ -58,3 +58,10 @@
 # a stale check firing overnight or on a weekend would be actionable by no
 # one. Idempotent: running it by hand clears a resolved alert early.
 0 8-17 * * 1-5 /Sites/cold/check_alerts.bash
+
+# COLD/RDM people sync (cold#122, DR-0032). Cron files a report request through
+# the same path as the button, so a cron run and a human run share one queue.
+# NOT enabled by default: it writes to RDM when PEOPLE_SYNC_MODE=apply in the
+# env file. Left commented until Phase 6's rehearsal has set the schedule.
+#
+# 0 6 * * 1-5 curl -s -X POST -d 'report_name=run_people_sync' http://localhost:8111/reports/

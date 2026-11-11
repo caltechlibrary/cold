@@ -35,6 +35,7 @@ It also lets you manage lists of subjects, issn mappings to cannonical names and
 
 - [Search RDM Queue](./rdm_review_queue.html)
 - [Search RDM Records](./rdm_records.html)
+- [Sync People to RDM](./rdm_people_sync.html)
 - [Search CaltechTHESIS](./thesis_search.html)
 
 * [Reports](./reports)

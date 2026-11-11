@@ -465,3 +465,21 @@ a.visually-hidden {
     color: #FF6E1E;
 }
 
+
+/* People sync page and person action (cold#122, DR-0032). State is always
+   stated in words; these rules only add emphasis and never carry meaning alone. */
+/* The site styles every <section> as a shrink-wrapped inline-block with left
+   padding; nested inside the page's own section that overshoots a narrow
+   screen, so the sync page's sections are plain blocks. */
+#people_sync section { display: block; max-width: 100%; padding-left: 0; }
+/* The site's section#main-content is max-width 98% plus 14px of padding, content-box,
+   which overshoots a narrow screen once its content fills the width. Scoped to this page. */
+body:has(#people_sync) section#main-content { box-sizing: border-box; }
+.ps-scroll { overflow-x: auto; max-width: 100%; }
+.ps-items { border-collapse: collapse; }
+.ps-items th, .ps-items td { border: 1px solid #767676; padding: 0.4rem 0.6rem; vertical-align: top; text-align: left; }
+.ps-items caption { text-align: left; font-weight: bold; padding: 0.4rem 0; }
+#ps-facts dt { font-weight: bold; }
+#ps-facts dd { margin: 0 0 0.5rem 0; }
+button[aria-disabled="true"] { opacity: 0.6; cursor: not-allowed; }
+button:focus-visible, .ps-scroll:focus-visible { outline: 3px solid #1a5fb4; outline-offset: 2px; }

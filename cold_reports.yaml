@@ -117,6 +117,24 @@ reports:
     basename: "{{country_name}}_country_collaboration_report"
     append_datestamp: false
     content_type: text/csv
+  # The COLD/RDM people sync (cold#122, DR-0032). The result lives in
+  # people_sync_runs.ds and people_sync_items.ds; the file stored here is only
+  # the run's one-line summary. A sync that finds records needing review
+  # still completes (exit 0); non-zero means it could not run (DR-0014).
+  run_people_sync:
+    cmd: ./run_people_sync.bash
+    basename: people_sync
+    append_datestamp: true
+    content_type: text/plain
+  run_people_sync_person:
+    cmd: ./run_people_sync.bash
+    inputs:
+      - id: clpid
+        type: text
+        required: true
+    basename: "{{clpid}}_people_sync"
+    append_datestamp: true
+    content_type: text/plain
   # Alert reports (cold DR-0028): one generic watermark-staleness script,
   # discovered by check_alerts.bash from the "alert_" key prefix. Adding a
   # new watermark alert is a stanza here, not a new script or reconciler

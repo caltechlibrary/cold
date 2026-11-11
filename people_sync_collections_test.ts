@@ -1,0 +1,288 @@
+/**
+ * people_sync_collections_test.ts tests the two COLD collections behind the
+ * COLD/RDM people sync (cold#122, DR-0032, plan Phase 3): `people_sync_runs.ds`
+ * and `people_sync_items.ds`, and their named queries in cold_api.yaml.
+ *
+ * The test starts its OWN `datasetd` on a free port, in a scratch directory,
+ * with fresh collections and a copy of cold_api.yaml cut down to the collections
+ * under test. It never touches a running COLD, so it needs nothing started
+ * first. It does need `dataset` and `datasetd` on the PATH, as COLD itself does.
+ */
+import { assert, assertEquals } from "@std/assert";
+import {
+  Api,
+  ITEMS,
+  PEOPLE,
+  RUNS,
+  startServer,
+} from "./people_sync_testing.ts";
+
+/** runRow builds a run row as the COLD-side wrapper will write it.
+ *
+ * @param id {string} run id, also the object key
+ * @param scope {string} "all" or "clpid:<id>"
+ * @param started {string} start time, "YYYY-MM-DD HH:MM:SS"
+ * @returns {Record<string, unknown>} the run row
+ * @example
+ * const row = runRow("r1", "all", "2026-11-10 09:00:00");
+ */
+function runRow(id: string, scope: string, started: string) {
+  return {
+    run_id: id,
+    request_id: `req-${id}`,
+    trigger: "human",
+    scope,
+    rdm_url: "https://authors.example.test",
+    state: "completed",
+    started,
+    finished: started,
+    counts: { applied: 1, needs_human: 1, info: 5000 },
+  };
+}
+
+/** itemRow builds an item row as the wrapper will write it.
+ *
+ * @param run_id {string} the run the item belongs to
+ * @param clpid {string} the person
+ * @param outcome {string} applied, needs_human, needs_repair or warning
+ * @param recorded {string} when the item was recorded
+ * @returns {Record<string, unknown>} the item row
+ * @example
+ * const row = itemRow("r1", "Doe-Jane", "needs_human", "2026-11-10 09:00:01");
+ */
+function itemRow(
+  run_id: string,
+  clpid: string,
+  outcome: string,
+  recorded: string,
+) {
+  return {
+    run_id,
+    clpid,
+    rdm_id: `rdm-${clpid}`,
+    action: "add_identifier",
+    outcome,
+    message: `${outcome} for ${clpid}`,
+    before: {},
+    after: {},
+    recorded,
+  };
+}
+
+Deno.test("people sync collections and named queries", async (t) => {
+  const { api, stop } = await startServer();
+  try {
+    await t.step("a run row and its items round-trip", async () => {
+      await api.create(RUNS, "r1", runRow("r1", "all", "2026-11-10 09:00:00"));
+      await api.create(
+        ITEMS,
+        "r1-00001",
+        itemRow("r1", "Doe-Jane", "applied", "2026-11-10 09:00:01"),
+      );
+      const run = await api.read(RUNS, "r1");
+      assertEquals(run.scope, "all");
+      assertEquals(run.counts.info, 5000);
+      const item = await api.read(ITEMS, "r1-00001");
+      assertEquals(item.clpid, "Doe-Jane");
+    });
+
+    await t.step(
+      "latest run and latest full run differ after a one-person run",
+      async () => {
+        await api.create(
+          RUNS,
+          "r2",
+          runRow("r2", "clpid:Doe-Jane", "2026-11-10 10:00:00"),
+        );
+        const latest = await api.query(RUNS, "people_sync_latest_run");
+        assertEquals(latest.length, 1);
+        assertEquals(latest[0].run_id, "r2");
+        const full = await api.query(RUNS, "people_sync_latest_full_run");
+        assertEquals(full.length, 1);
+        assertEquals(full[0].run_id, "r1");
+      },
+    );
+
+    await t.step("no runs at all gives empty lists, not an error", async () => {
+      // A second, empty scratch collection is not needed: the query shape is
+      // covered by a scope nothing matches.
+      const rows = await api.query(ITEMS, "people_sync_run_items", {
+        run_id: "no-such-run",
+      });
+      assertEquals(rows, []);
+    });
+
+    await t.step(
+      "items for a run list needs_human and needs_repair first",
+      async () => {
+        await api.create(
+          RUNS,
+          "r3",
+          runRow("r3", "all", "2026-11-10 11:00:00"),
+        );
+        const rows: [string, string, string][] = [
+          ["r3-00001", "Applied-One", "applied"],
+          ["r3-00002", "Warn-One", "warning"],
+          ["r3-00003", "Repair-One", "needs_repair"],
+          ["r3-00004", "Human-One", "needs_human"],
+          ["r3-00005", "Human-Two", "needs_human"],
+        ];
+        for (const [key, clpid, outcome] of rows) {
+          await api.create(
+            ITEMS,
+            key,
+            itemRow("r3", clpid, outcome, "2026-11-10 11:00:01"),
+          );
+        }
+        const got = await api.query(ITEMS, "people_sync_run_items", {
+          run_id: "r3",
+        });
+        assertEquals(got.map((i) => i.outcome), [
+          "needs_human",
+          "needs_human",
+          "needs_repair",
+          "warning",
+          "applied",
+        ]);
+        // within an outcome, by clpid, so the table is stable between reloads
+        assertEquals(got.slice(0, 2).map((i) => i.clpid), [
+          "Human-One",
+          "Human-Two",
+        ]);
+        // and only this run's items
+        assert(got.every((i) => i.run_id === "r3"));
+      },
+    );
+
+    await t.step(
+      "the per-clpid query returns the newest item, across runs",
+      async () => {
+        await api.create(
+          ITEMS,
+          "r1-00002",
+          itemRow("r1", "Seen-Twice", "warning", "2026-11-10 09:00:02"),
+        );
+        await api.create(
+          ITEMS,
+          "r3-00006",
+          itemRow("r3", "Seen-Twice", "needs_human", "2026-11-10 11:00:02"),
+        );
+        const got = await api.query(ITEMS, "people_sync_latest_item", {
+          clpid: "Seen-Twice",
+        });
+        assertEquals(got.length, 1);
+        assertEquals(got[0].run_id, "r3");
+        assertEquals(got[0].outcome, "needs_human");
+        const none = await api.query(ITEMS, "people_sync_latest_item", {
+          clpid: "Never-Seen",
+        });
+        assertEquals(none, []);
+      },
+    );
+
+    await t.step(
+      "the per-person query finds items that name the person in their detail, not only by the item's own clpid",
+      async () => {
+        await api.create(ITEMS, "r4-00001", {
+          ...itemRow("r4", "Rdm-Old-Id", "needs_human", "2026-11-10 12:00:00"),
+          detail: {
+            fix: "cold",
+            cold: { "Cold-Person": { orcid: "", isni: "" } },
+            rdm: { ids: ["x"], clpids: ["Rdm-Old-Id"], orcids: [], isnis: [] },
+          },
+        });
+        const byCold = await api.query(ITEMS, "people_sync_latest_item", {
+          clpid: "Cold-Person",
+        });
+        assertEquals(byCold.length, 1);
+        assertEquals(byCold[0].clpid, "Rdm-Old-Id");
+        // still found by the clpid the item carries, and not by a stranger's
+        const byOwn = await api.query(ITEMS, "people_sync_latest_item", {
+          clpid: "Rdm-Old-Id",
+        });
+        assertEquals(byOwn.length, 1);
+        const none = await api.query(ITEMS, "people_sync_latest_item", {
+          clpid: "Someone-Else",
+        });
+        assertEquals(none, []);
+        // the newest of the two kinds wins
+        await api.create(ITEMS, "r5-00001", {
+          ...itemRow("r5", "Cold-Person", "warning", "2026-11-10 13:00:00"),
+        });
+        const newest = await api.query(ITEMS, "people_sync_latest_item", {
+          clpid: "Cold-Person",
+        });
+        assertEquals(newest[0].run_id, "r5");
+      },
+    );
+
+    await t.step(
+      "a run over many no-ORCID people stores counts but no rows for them",
+      async () => {
+        // The wrapper's rule (plan Phase 3): only applied, needs_human,
+        // needs_repair and warning get item rows. The run row carries the rest
+        // as counts, and the page reads the count.
+        const run = await api.read(RUNS, "r1");
+        assertEquals(run.counts.info, 5000);
+        const items = await api.query(ITEMS, "people_sync_run_items", {
+          run_id: "r1",
+        });
+        assertEquals(
+          items.filter((i) => i.outcome === "info").length,
+          0,
+        );
+      },
+    );
+
+    await t.step(
+      "the people export carries identity fields only",
+      async () => {
+        await api.create(PEOPLE, "Doe-Jane", {
+          clpid: "Doe-Jane",
+          family_name: "Doe",
+          given_name: "Jane",
+          orcid: "0000-0002-1825-0097",
+          isni: "",
+          thesis_id: "Doe-Jane",
+          authors_id: "",
+          advisors_id: "",
+          alt_name: [{ family_name: "Doe", given_name: "J." }],
+          email: "jane@example.test",
+          bio: "must not leave COLD",
+          internal_notes: "must not leave COLD",
+        });
+        await api.create(PEOPLE, "Roe-Rich", {
+          clpid: "Roe-Rich",
+          family_name: "Roe",
+          given_name: "Rich",
+          orcid: "",
+          isni: "",
+          thesis_id: "",
+          authors_id: "",
+          advisors_id: "",
+        });
+        const got = await api.query(PEOPLE, "people_sync_export");
+        assertEquals(got.length, 2);
+        const jane = got.find((p) => p.clpid === "Doe-Jane");
+        assertEquals(jane.orcid, "0000-0002-1825-0097");
+        assertEquals(jane.alt_name, [{ family_name: "Doe", given_name: "J." }]);
+        assertEquals(Object.keys(jane).sort(), [
+          "advisors_id",
+          "alt_name",
+          "authors_id",
+          "clpid",
+          "family_name",
+          "given_name",
+          "isni",
+          "orcid",
+          "thesis_id",
+        ]);
+        // a person with no alt_name still exports a list, which the matcher expects
+        const roe = got.find((p) => p.clpid === "Roe-Rich");
+        assertEquals(roe.alt_name, []);
+      },
+    );
+  } finally {
+    await stop();
+  }
+});
