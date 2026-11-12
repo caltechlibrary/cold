@@ -189,7 +189,9 @@ collections:
           'isni', coalesce(src->>'isni', ''),
           'thesis_id', coalesce(src->>'thesis_id', ''),
           'authors_id', coalesce(src->>'authors_id', ''),
-          'advisors_id', coalesce(src->>'advisors_id', '')
+          'advisors_id', coalesce(src->>'advisors_id', ''),
+          'caltech', coalesce(src->>'caltech', 0),
+          'jpl', coalesce(src->>'jpl', 0)
         ) as src
         from people
         order by src->>'clpid'
@@ -336,7 +338,7 @@ collections:
       next_request: |
         select json_object('id', src->'id', 'link', src->'link', 'content_type', src->'content_type',
           'report_name', src->'report_name', 'emails', src->'emails', 'status', src->'status',
-          'inputs', src->'inputs',
+          'inputs', src->'inputs', 'trigger', src->'trigger',
           'requested', src->'requested', 'updated', src->'updated') as src
         from reports
         where src->>'status' = 'requested'
@@ -488,7 +490,6 @@ collections:
             where json_extract(value, '$.person_or_org.name') like ?
         )
         order by src->>'created' desc
-
 
       review_queue_by_name: |
         select src
@@ -714,6 +715,21 @@ collections:
         where src->>'scope' = 'all'
         order by src->>'started' desc, src->>'run_id' desc
         limit 1
+
+      # The most recent run that covered one COLD person: a run of everyone, or
+      # that person's own one-person run. Another person's run never counts, and
+      # the match is on the whole scope, not a prefix. A person with nothing to
+      # report has no item row, so this run is how the person page knows an older
+      # item has been superseded. The parameter is bound once, through the CTE,
+      # because the page passes one field.
+      # Bound parameter: clpid.
+      people_sync_latest_run_for: |
+        with q(c) as (select ?)
+        select src
+        from people_sync_runs, q
+        where src->>'scope' = 'all' or src->>'scope' = 'clpid:' || q.c
+        order by src->>'started' desc, src->>'run_id' desc
+        limit 1
     keys: true
     read: true
     # datasetd requires create,update permissions for support queries
@@ -738,9 +754,10 @@ collections:
                  src->>'clpid', src->>'recorded'
 
       # The newest item about one COLD person, across runs, for the person's
-      # page. An item's own clpid can be an RDM entry's clpid that COLD does not
-      # hold (a conflict), so the COLD people it concerns, named in
-      # detail.cold, count too. The parameter is bound once, through the CTE,
+      # page. A replace of a legacy entry that carries two people's clpids is
+      # about both, so the people it lists in detail.persons count too. (An
+      # item stored by an older build can still name its people in detail.cold.)
+      # The parameter is bound once, through the CTE,
       # because the page passes one field. Within one run the most serious
       # outcome comes first, so a warning never hides a problem.
       # Bound parameter: clpid.
@@ -749,6 +766,7 @@ collections:
         select src
         from people_sync_items, q
         where src->>'clpid' = q.c
+           or exists (select 1 from json_each(src, '$.detail.persons') where value = q.c)
            or exists (select 1 from json_each(src, '$.detail.cold') where key = q.c)
         order by src->>'recorded' desc, src->>'run_id' desc,
                  case src->>'outcome'
@@ -770,7 +788,6 @@ collections:
     query:
 
       # --- Vocabulary fetch (populate <select> dropdowns from corpus) ---
-
       get_distinct_divisions: |
         SELECT DISTINCT json_quote(je.value)
         FROM caltechthesis ct, json_each(ct.src, '$.divisions') je

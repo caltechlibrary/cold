@@ -593,12 +593,25 @@ export class Runnable implements RunnableInterface {
         // the validated recipient list, since that must track request.emails
         // rather than a Runnable-level default. Empty strings are harmless
         // for every non-alert report.
-        txt = await $`${this.cmd}`.env({
+        // stdout and stderr are piped and the exit code is read, because
+        // dax's .text() on failure says only "Exited with code: N" and sends
+        // the command's own message to this process's console, so a person
+        // looking at the request would see a number and no reason.
+        const res = await $`${this.cmd}`.env({
           WATERMARK: this.watermark ?? "",
           THRESHOLD_MINUTES: this.threshold_minutes?.toString() ?? "",
           LABEL: this.label ?? "",
           ...envOverrides,
-        }).text();
+        }).stdout("piped").stderr("piped").noThrow();
+        if (res.code !== 0) {
+          throw new Error(
+            res.stderr.trim() || `Exited with code: ${res.code}`,
+          );
+        }
+        // what a successful command says on stderr is still shown on the console
+        if (res.stderr.trim()) console.error(res.stderr.trimEnd());
+        // .text() dropped exactly one trailing newline; keep what a report contains the same
+        txt = res.stdout.endsWith("\n") ? res.stdout.slice(0, -1) : res.stdout;
       }
     } catch (err: unknown) {
       txt = "error://" + String(err);

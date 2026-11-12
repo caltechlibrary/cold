@@ -16,10 +16,19 @@ import {
   serveDir,
 } from "./deps.ts";
 import { handleBrowserAPI } from "./browser_api.ts";
+import { handleRDM, isRdmPath } from "./rdm.ts";
 import { coldHelpText, fmtHelp } from "./helptext.ts";
 import { licenseText, releaseDate, releaseHash, version } from "./version.ts";
 
 const appName: string = "cold";
+
+/** ColdOptions are the program options the router and its handlers share. */
+export interface ColdOptions {
+  debug: boolean;
+  htdocs: string;
+  baseUrl: string;
+  apiUrl: string;
+}
 
 /**
  * ColdReadWriteHandler is a function for handling and dispatching http requests.
@@ -45,14 +54,9 @@ const appName: string = "cold";
  *   });
  * ```
  */
-export function ColdReadWriteHandler(
+function routeRequest(
   req: Request,
-  options: {
-    debug: boolean;
-    htdocs: string;
-    baseUrl: string;
-    apiUrl: string;
-  },
+  options: ColdOptions,
 ): Response | Promise<Response> {
   const fullPathname = new URL(req.url).pathname;
   const basePath = basePathFromUrl(options.baseUrl);
@@ -64,6 +68,11 @@ export function ColdReadWriteHandler(
 
   if (options.debug) console.log("debugging request", req);
   if (options.debug) console.log("debugging options", options);
+  // Dynamic RDM-specific routes: /rdm and /rdm/... only (a boundary match, so
+  // /rdm_people_sync.html and /rdmx stay static). See rdm.ts.
+  if (isRdmPath(pathname)) {
+    return handleRDM(req, pathname);
+  }
   // Handle the various dataset collections management pages.
   if (pathname.startsWith("/rename/people")) {
     return handleRenamePeople(req, options);
@@ -107,10 +116,75 @@ export function ColdReadWriteHandler(
   }
   // NOTE: If there isn't a specific handler implemented then assume you're
   // requesting a static asset.
-  return serveDir(req, {
+  return revalidated(serveDir(req, {
     fsRoot: htdocs,
     urlRoot: basePath.replace(/^\//, ""), // strip /cold prefix when mapping to htdocs
     enableCors: false,
+  }));
+}
+
+/**
+ * ColdReadWriteHandler answers one http request: it routes it (see routeRequest) and then
+ * makes sure the response is never left cacheable by accident. Librarians curate data
+ * through these pages, and a browser showing yesterday's list or a form built from
+ * yesterday's record is worse than a slow page.
+ *
+ * @param {Request} req the request from the http server
+ * @param {ColdOptions} options the program options
+ * @returns {Promise<Response>} the response, always with a Cache-Control policy
+ * @example
+ * Deno.serve((req) => ColdReadWriteHandler(req, options));
+ */
+export function ColdReadWriteHandler(
+  req: Request,
+  options: ColdOptions,
+): Promise<Response> {
+  return noStoreUnlessSet(routeRequest(req, options));
+}
+
+/**
+ * noStoreUnlessSet gives a response `Cache-Control: no-store` unless a handler already
+ * chose a policy, which is then kept (static files use `no-cache`, so a browser
+ * revalidates against the ETag, and the JSON routes use `no-store`).
+ *
+ * @param {Response | Promise<Response>} res the response a handler produced
+ * @returns {Promise<Response>} the same response with a policy
+ * @example
+ * return noStoreUnlessSet(handlePeople(req, options));
+ */
+export async function noStoreUnlessSet(
+  res: Response | Promise<Response>,
+): Promise<Response> {
+  const r = await res;
+  if (r.headers.has("cache-control")) return r;
+  const headers = new Headers(r.headers);
+  headers.set("cache-control", "no-store");
+  return new Response(r.body, {
+    status: r.status,
+    statusText: r.statusText,
+    headers,
+  });
+}
+
+/**
+ * revalidated adds `Cache-Control: no-cache` to a static file response, so a browser asks
+ * the server each time whether its copy is still good (the ETag makes that a 304 when it is).
+ * Without it a browser keeps an imported JavaScript module without asking, and a person
+ * goes on running the old page after a rebuild.
+ *
+ * @param {Promise<Response>} res the static file response from serveDir
+ * @returns {Promise<Response>} the same response with the header set
+ * @example
+ * return revalidated(serveDir(req, options));
+ */
+async function revalidated(res: Promise<Response>): Promise<Response> {
+  const r = await res;
+  const headers = new Headers(r.headers);
+  headers.set("cache-control", "no-cache");
+  return new Response(r.body, {
+    status: r.status,
+    statusText: r.statusText,
+    headers,
   });
 }
 

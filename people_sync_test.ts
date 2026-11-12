@@ -12,11 +12,11 @@ import {
   assertStringIncludes,
 } from "@std/assert";
 import { join } from "@std/path";
-import * as wrapper from "./people_sync.ts";
 import {
   type Config,
   type Exec,
   ExitCode,
+  ITEM_OUTCOMES,
   itemsFromReport,
   loadConfig,
   loadProgram,
@@ -160,9 +160,13 @@ function recorder(
     args: string[],
   ) => { code: number; stdout?: string; stderr?: string },
 ) {
-  const calls: { cmd: string; args: string[] }[] = [];
-  const exec: Exec = (cmd, args) => {
-    calls.push({ cmd, args });
+  const calls: {
+    cmd: string;
+    args: string[];
+    opts?: { timeoutMs?: number };
+  }[] = [];
+  const exec: Exec = (cmd, args, opts) => {
+    calls.push({ cmd, args, opts });
     const r = answer(cmd, args);
     return Promise.resolve({
       code: r.code,
@@ -403,6 +407,11 @@ async function fakeSsm(
   await sh(
     "sudo",
     'while [ "$1" = "-n" ] || [ "$1" = "-u" ]; do if [ "$1" = "-u" ]; then shift 2; else shift; fi; done; if [ "$1" = "bash" ] && [ "$2" = "-lc" ]; then exec bash -c "$3"; fi; exec "$@"',
+  );
+  // timeout [--kill-after=N] LIMIT CMD...: note the limit, run CMD (macOS has no `timeout`)
+  await sh(
+    "timeout",
+    'echo "$1 $2" > "' + root + '/timeout.txt"; shift 2; exec "$@"',
   );
   await sh(
     "sha256sum",
@@ -813,252 +822,389 @@ Deno.test("ssm: aws itself failing (no credentials) is 69", async () => {
   assertStringIncludes(err.message, "Unable to locate credentials");
 });
 
-// ---- compact reports --------------------------------------------------------
-
-Deno.test("items: a compact report's counts come from plan_counts, items from its plan", () => {
-  const compact: Report = {
-    ...REPORT,
-    compact: true,
-    plan_counts: {
-      warning: 1,
-      applied: 3,
-      needs_human: 1,
-      needs_repair: 1,
-      info: 8268,
-    },
-    plan: REPORT.plan.filter((i) => i.outcome !== "info"),
-  };
-  const { items, counts } = itemsFromReport(compact, "r1", "t");
-  assertEquals(items.length, 6);
-  assertEquals(counts.info, 8268);
-  assertEquals(counts.applied, 3);
-});
-
 // ---- the report becomes rows ------------------------------------------------
 
+// A compact report as the program writes it (cold DR-0037): the plan lists what a person would
+// review (updates, removals, warnings, the replaces that change a name or an identifier) and
+// plan_counts / action_counts count everything, so the creates and quiet replaces are only counts.
 const REPORT: Report = {
   mode: "apply",
   scope: null,
   aborted: null,
-  summary: { created: 1, updated: 1 },
+  index: { status: "rebuilt", message: "" },
+  summary: { created: 2, updated: 1, replaced: 2, removed: 1 },
+  compact: true,
+  plan_counts: { warning: 1, needs_human: 1, applied: 6 },
+  action_counts: { create: 2, update: 1, replace: 2, remove: 1 },
   plan: [
     {
       clpid: "Zed-Zoe",
-      rdm_id: "r9",
-      action: "orphan_clpid",
+      rdm_id: null,
+      action: "malformed_identifier",
       outcome: "warning",
       message: "w",
     },
     {
-      clpid: "New-Ann",
-      rdm_id: null,
-      action: "create",
-      outcome: "applied",
-      message: "",
-    },
-    {
-      clpid: "Old-Bob",
-      rdm_id: "r2",
-      action: "add_identifier",
-      outcome: "applied",
-      message: "",
-      scheme: "orcid",
-    },
-    {
-      clpid: "Old-Bob",
-      rdm_id: "r2",
-      action: "add_identifier",
-      outcome: "applied",
-      message: "",
-      scheme: "isni",
-    },
-    {
       clpid: "Mid-Cy",
-      rdm_id: "r3",
-      action: "conflict",
+      rdm_id: "Mid-Cy",
+      action: "id_deleted",
       outcome: "needs_human",
       message: "h",
     },
     {
-      clpid: "Fix-Di",
-      rdm_id: "r4",
-      action: "needs_repair",
-      outcome: "needs_repair",
-      message: "r",
-    },
-    {
-      clpid: "No-One",
-      rdm_id: null,
-      action: "no_orcid",
-      outcome: "info",
+      clpid: "Old-Bob",
+      rdm_id: "Old-Bob",
+      action: "update",
+      outcome: "applied",
       message: "",
+      detail: { changes: ["name"] },
     },
     {
-      clpid: "No-Two",
-      rdm_id: null,
-      action: "no_orcid",
-      outcome: "info",
+      clpid: "Old-Bob",
+      rdm_id: "id-b",
+      action: "replace",
+      outcome: "applied",
+      message: "",
+      detail: {
+        replaced_by: "Old-Bob",
+        persons: ["Old-Bob"],
+        changes: ["name"],
+      },
+    },
+    {
+      clpid: "Gone-Gus",
+      rdm_id: "Gone-Gus",
+      action: "remove",
+      outcome: "applied",
       message: "",
     },
   ],
   results: [
     {
-      clpid: "New-Ann",
-      rdm_id: "New-Ann",
-      action: "create",
-      status: "created",
+      clpid: "Old-Bob",
+      rdm_id: "Old-Bob",
+      action: "update",
+      status: "updated",
       message: "",
     },
     {
       clpid: "Old-Bob",
-      rdm_id: "r2",
-      action: "add_identifier",
-      status: "updated",
+      rdm_id: "id-b",
+      action: "replace",
+      status: "replaced",
+      message: "",
+    },
+    {
+      clpid: "Gone-Gus",
+      rdm_id: "Gone-Gus",
+      action: "remove",
+      status: "removed",
       message: "",
     },
   ],
 };
 
-Deno.test("items: only the four outcomes get rows, the rest are counted", () => {
-  const { items, counts } = itemsFromReport(
+Deno.test("items: warnings, needs_human and applied get rows; creates and quiet replaces are only counted", () => {
+  const { items, counts, actions } = itemsFromReport(
     REPORT,
     "r1",
     "2026-11-10 09:00:00",
   );
-  assertEquals(counts, {
-    warning: 1,
-    applied: 3,
-    needs_human: 1,
-    needs_repair: 1,
-    info: 2,
-  });
-  assertEquals(items.length, 6);
-  assert(items.every((i) => i.row.outcome !== "info"));
-});
-
-// ---- alternate names are out of scope (cold DR-0036 decision 7) --------------
-
-Deno.test("items: an alt_name_candidate from an older report is only counted, like any info item", () => {
-  const candidate = {
-    clpid: "Mid-Cy",
-    rdm_id: "r3",
-    action: "alt_name_candidate",
-    outcome: "info",
-    message: "RDM name form 'Mid, C.' could be an alt_name of Mid-Cy",
-    scheme: "alt_name",
-    value: "Mid, C.",
-  };
-  const report: Report = { ...REPORT, plan: [...REPORT.plan, candidate] };
-  const { items, counts } = itemsFromReport(report, "r1", "t");
-  assertEquals(counts.info, 3);
-  assertEquals(items.length, 6);
-  assert(items.every((i) => i.row.outcome !== "info"));
-});
-
-Deno.test("items: no list of stored info actions exists", () => {
-  assert(!("STORED_INFO_ACTIONS" in wrapper));
+  assertEquals(counts, { warning: 1, needs_human: 1, applied: 6 });
+  assertEquals(actions, { create: 2, update: 1, replace: 2, remove: 1 });
+  assertEquals(items.length, 5);
 });
 
 Deno.test("items: ordered for a person, keyed per run, applied carry what happened", () => {
   const { items } = itemsFromReport(REPORT, "r1", "2026-11-10 09:00:00");
   assertEquals(items.map((i) => i.row.outcome), [
     "needs_human",
-    "needs_repair",
     "warning",
     "applied",
     "applied",
     "applied",
   ]);
   assertEquals(items[0].key, "r1-00001");
-  assertEquals(items[5].key, "r1-00006");
+  assertEquals(items[4].key, "r1-00005");
   const applied = items.filter((i) => i.row.outcome === "applied");
-  assertEquals(applied.map((i) => [i.row.clpid, i.row.status]), [
-    ["New-Ann", "created"],
-    ["Old-Bob", "updated"],
-    ["Old-Bob", "updated"],
+  assertEquals(applied.map((i) => [i.row.action, i.row.clpid, i.row.status]), [
+    ["remove", "Gone-Gus", "removed"],
+    ["replace", "Old-Bob", "replaced"],
+    ["update", "Old-Bob", "updated"],
   ]);
   assertEquals(items[0].row.run_id, "r1");
   assertEquals(items[0].row.recorded, "2026-11-10 09:00:00");
 });
 
-Deno.test("items: an applied item with no result is not_attempted, a dry run says would_", () => {
+Deno.test("items: an update and a replace of one person are told apart by their entry, not mixed up", () => {
   const dry: Report = {
     ...REPORT,
     mode: "dry-run",
     results: [{
-      clpid: "New-Ann",
-      rdm_id: "New-Ann",
-      action: "create",
-      status: "would_create",
+      clpid: "Old-Bob",
+      rdm_id: "id-b",
+      action: "replace",
+      status: "would_replace",
       message: "",
     }],
   };
   const { items } = itemsFromReport(dry, "r1", "t");
-  const st = (c: string) =>
-    items.find((i) => i.row.clpid === c && i.row.outcome === "applied")!.row
-      .status;
-  assertEquals(st("New-Ann"), "would_create");
-  assertEquals(st("Old-Bob"), "not_attempted");
+  const st = (action: string) =>
+    items.find((i) => i.row.action === action)!.row.status;
+  assertEquals(st("replace"), "would_replace");
+  assertEquals(st("update"), "not_attempted");
+  assertEquals(st("remove"), "not_attempted");
 });
 
-Deno.test("items: the matcher's structured detail reaches the stored row unchanged", () => {
-  const detail = {
-    fix: "cold",
-    cold: { "Mid-Cy": { orcid: "0000-0002-0000-0001", isni: "" } },
-    rdm: {
-      ids: ["r3"],
-      clpids: ["Mid-Cy"],
-      orcids: ["0000-0002-0000-0002"],
-      isnis: [],
-    },
-  };
+Deno.test("items: a revive is listed, counted by action, and matched to its result by the entry id", () => {
   const report: Report = {
     ...REPORT,
-    plan: REPORT.plan.map((i) => i.clpid === "Mid-Cy" ? { ...i, detail } : i),
+    plan: [{
+      clpid: "Doiel-M-S",
+      rdm_id: "Doiel-M-S",
+      action: "revive",
+      outcome: "applied",
+      message: "restore entry Doiel-M-S, which was removed and is needed again",
+    }],
+    results: [{
+      clpid: "Doiel-M-S",
+      rdm_id: "Doiel-M-S",
+      action: "revive",
+      status: "revived",
+      message: "",
+    }],
+    compact: undefined,
+    plan_counts: undefined,
+    action_counts: undefined,
   };
-  const { items } = itemsFromReport(report, "r1", "t");
-  const row = items.find((i) => i.row.clpid === "Mid-Cy")!.row;
-  assertEquals(row.detail, detail);
+  const { items, actions } = itemsFromReport(report, "r1", "t");
+  assertEquals(actions, { revive: 1 });
+  assertEquals(items.length, 1);
+  assertEquals(items[0].row.status, "revived");
 });
 
-Deno.test("items: a one-person run keeps items whose own clpid is an RDM clpid but which concern that COLD person", () => {
-  const conflict = {
-    clpid: "Old-Id",
-    rdm_id: "r5",
-    action: "conflict",
-    outcome: "needs_human",
-    message:
-      "RDM clpid Old-Id is not a COLD clpid but its identifiers belong to Alpha-A",
-    detail: {
-      fix: "cold",
-      cold: { "Alpha-A": { orcid: "", isni: "" } },
-      rdm: {},
-    },
-  };
+Deno.test("items: a create is matched to its result by the entry id", () => {
   const report: Report = {
     ...REPORT,
-    scope: "Alpha-A",
-    plan: [conflict, ...REPORT.plan],
+    plan: [{
+      clpid: "New-Ann",
+      rdm_id: "New-Ann",
+      action: "create",
+      outcome: "applied",
+      message: "",
+    }],
+    results: [{
+      clpid: "New-Ann",
+      rdm_id: "New-Ann",
+      action: "create",
+      status: "created",
+      message: "",
+    }],
   };
-  const { items, counts } = itemsFromReport(report, "r1", "t");
-  assertEquals(items.map((i) => i.row.clpid), ["Old-Id"]);
-  assertEquals(counts, { needs_human: 1 });
-  // an unrelated scope still finds nothing of it
   assertEquals(
-    itemsFromReport({ ...report, scope: "Zed-Z" }, "r1", "t").items.length,
+    itemsFromReport(report, "r1", "t").items[0].row.status,
+    "created",
+  );
+});
+
+Deno.test("items: a result message reaches the row", () => {
+  const report: Report = {
+    ...REPORT,
+    results: [{
+      clpid: "Gone-Gus",
+      rdm_id: "Gone-Gus",
+      action: "remove",
+      status: "removed",
+      message: "delete raised X; the entry is gone",
+    }],
+  };
+  const row =
+    itemsFromReport(report, "r1", "t").items.find((i) =>
+      i.row.action === "remove"
+    )!.row;
+  assertEquals(row.result_message, "delete raised X; the entry is gone");
+});
+
+Deno.test("items: the matcher's detail reaches the stored row unchanged", () => {
+  const row =
+    itemsFromReport(REPORT, "r1", "t").items.find((i) =>
+      i.row.action === "replace"
+    )!.row;
+  assertEquals(row.detail, {
+    replaced_by: "Old-Bob",
+    persons: ["Old-Bob"],
+    changes: ["name"],
+  });
+});
+
+Deno.test("items: a report that is not compact is tallied from its plan", () => {
+  const full: Report = {
+    ...REPORT,
+    compact: undefined,
+    plan_counts: undefined,
+    action_counts: undefined,
+    plan: [
+      ...REPORT.plan,
+      {
+        clpid: "New-Ann",
+        rdm_id: "New-Ann",
+        action: "create",
+        outcome: "applied",
+        message: "",
+      },
+    ],
+  };
+  const { counts, actions, items } = itemsFromReport(full, "r1", "t");
+  assertEquals(counts, { warning: 1, needs_human: 1, applied: 4 });
+  assertEquals(actions, { create: 1, update: 1, replace: 1, remove: 1 });
+  assertEquals(items.length, 6);
+});
+
+Deno.test("items: an item of an older report (a conflict or a repair) still renders as a row", () => {
+  const old: Report = {
+    ...REPORT,
+    plan: [...REPORT.plan, {
+      clpid: "Mid-Cy",
+      rdm_id: "r3",
+      action: "conflict",
+      outcome: "needs_human",
+      message: "h",
+    }, {
+      clpid: "Fix-Di",
+      rdm_id: "r4",
+      action: "needs_repair",
+      outcome: "needs_repair",
+      message: "r",
+    }],
+  };
+  const { items } = itemsFromReport(old, "r1", "t");
+  // needs_repair is no longer an outcome: it is not stored; the conflict is.
+  assertEquals(items.length, 6);
+  assert(items.every((i) => i.row.outcome !== "needs_repair"));
+});
+
+Deno.test("items: there is no list of repair outcomes any more", () => {
+  assert(!(ITEM_OUTCOMES as readonly string[]).includes("needs_repair"));
+});
+
+Deno.test("items: a one-person run keeps the person's items and the replace of a legacy entry shared with them", () => {
+  const shared: Report = {
+    ...REPORT,
+    scope: "Alpha-B",
+    plan: [{
+      clpid: "Alpha-A",
+      rdm_id: "id-one",
+      action: "replace",
+      outcome: "applied",
+      message: "",
+      detail: { replaced_by: "Alpha-A", persons: ["Alpha-A", "Alpha-B"] },
+    }, ...REPORT.plan],
+  };
+  const { items } = itemsFromReport(shared, "r1", "t");
+  assertEquals(items.map((i) => i.row.rdm_id), ["id-one"]);
+  assertEquals(
+    itemsFromReport({ ...shared, scope: "Zed-Z" }, "r1", "t").items.length,
     0,
   );
 });
 
 Deno.test("items: a one-person run keeps only that person", () => {
-  const { items, counts } = itemsFromReport(
+  const { items } = itemsFromReport(
     { ...REPORT, scope: "Old-Bob" },
     "r1",
     "t",
   );
   assertEquals(items.length, 2);
   assert(items.every((i) => i.row.clpid === "Old-Bob"));
-  assertEquals(counts, { applied: 2 });
+});
+
+Deno.test("transport: the program runs under a remote timeout of the run limit, so a hung run ends on the host too", async () => {
+  const rec = recorder(happy);
+  await new SshTransport({ ...cfg(), staleSeconds: 90 }, rec.exec).run({
+    program: await program(),
+    people: "[]",
+    apply: true,
+  });
+  const run = rec.calls.find((c) =>
+    c.args[c.args.length - 1].includes("people_rdm_apply.py")
+  )!;
+  assertStringIncludes(
+    run.args[run.args.length - 1],
+    "timeout --kill-after=30 90 uv run python",
+  );
+});
+
+Deno.test("transport: the local ssh call has its own backstop a little past the run limit", async () => {
+  const rec = recorder(happy);
+  await new SshTransport({ ...cfg(), staleSeconds: 90 }, rec.exec).run({
+    program: await program(),
+    people: "[]",
+    apply: false,
+  });
+  const run = rec.calls.find((c) =>
+    c.args[c.args.length - 1].includes("people_rdm_apply.py")
+  )!;
+  assertEquals(run.opts?.timeoutMs, (90 + 120) * 1000);
+  // the quick steps keep their default
+  const mk = rec.calls.find((c) =>
+    c.args[c.args.length - 1].startsWith("mktemp")
+  )!;
+  assertEquals(mk.opts?.timeoutMs, undefined);
+});
+
+Deno.test("ssm: the program runs under a remote timeout of the run limit", async () => {
+  const f = await fakeSsm();
+  await new SsmTransport({ ...ssmCfg(f.checkout), staleSeconds: 90 }, f.exec)
+    .run({ program: await program(), people: "[]", apply: false });
+  assertEquals(
+    (await Deno.readTextFile(join(f.root, "timeout.txt"))).trim(),
+    "--kill-after=30 90",
+  );
+});
+
+Deno.test("ssm: it waits for the program as long as the run limit allows, so it never gives up while the host still runs", () => {
+  const t = new SsmTransport(
+    { ...ssmCfg("/x"), staleSeconds: 600 },
+    () => Promise.reject(new Error("unused")),
+  );
+  assert(t.pollSeconds >= 600 + 30, `waits only ${t.pollSeconds} s`);
+});
+
+Deno.test("run: a program ended by the limit is an error run that says so, and the lock is released", async () => {
+  for (const exit of [124, 137]) {
+    const h = await harness({
+      run: () => Promise.resolve({ code: exit, report: "", stderr: "" }),
+    });
+    const err = await runSync(
+      { ...cfg(), staleSeconds: 90 },
+      { scope: "all", trigger: "", requestId: "" },
+      h,
+    ).then(() => null, (e: unknown) => e);
+    assert(err instanceof SyncError, `exit ${exit}`);
+    assertEquals(err.code, ExitCode.Internal);
+    assertStringIncludes(err.message, "ended after 90 seconds");
+    assertStringIncludes(err.message, "PEOPLE_SYNC_STALE_SECONDS");
+    assertEquals(h.store.history, ["running", "error"]);
+    assertStringIncludes(
+      String([...h.store.runs.values()][0].error),
+      "ended after 90 seconds",
+    );
+    assertEquals(
+      await Deno.stat(h.lockDir).then(() => true, () => false),
+      false,
+    );
+  }
+});
+
+Deno.test("run: a program that exits 124 but left a report is still read as the report it left", async () => {
+  const h = await harness({}, REPORT, 124);
+  const r = await runSync(
+    { ...cfg(), staleSeconds: 90 },
+    { scope: "all", trigger: "", requestId: "" },
+    h,
+  );
+  assertEquals(r.code, ExitCode.Internal);
+  assertEquals(h.store.items.size, 5);
 });
 
 // ---- the lock ---------------------------------------------------------------
@@ -1077,30 +1223,72 @@ Deno.test("lock: a second run is refused with 75, then allowed after release", a
   await b.release();
 });
 
-Deno.test("lock: a dead owner is cleared, a live fresh one is not, an old one is", async () => {
-  const dir = join(await Deno.makeTempDir(), "l");
+/** setOwner makes a lock directory with an owner file, and optionally an old modified time. */
+async function setOwner(
+  dir: string,
+  owner: string | null,
+  ageSeconds = 0,
+): Promise<void> {
   await Deno.mkdir(dir);
-  await Deno.writeTextFile(
-    join(dir, "owner"),
-    `4242 ${new Date().toISOString()}\n`,
+  if (owner !== null) await Deno.writeTextFile(join(dir, "owner"), owner);
+  if (ageSeconds > 0) {
+    const then = new Date(Date.now() - ageSeconds * 1000);
+    await Deno.utime(dir, then, then);
+  }
+}
+
+Deno.test("lock: a dead owner's lock is cleared", async () => {
+  const dir = join(await Deno.makeTempDir(), "l");
+  await setOwner(dir, `4242 ${new Date().toISOString()}\n`);
+  const lock = new Lock(dir, 3600, undefined, () => Promise.resolve(false));
+  await lock.acquire();
+  await lock.release();
+});
+
+Deno.test("lock: a live owner's lock is never broken, however old it is (a hung run ends itself)", async () => {
+  const dir = join(await Deno.makeTempDir(), "l");
+  await setOwner(
+    dir,
+    `4242 ${new Date(Date.now() - 7200_000).toISOString()}\n`,
+    7200,
   );
+  const live = new Lock(dir, 3600, undefined, () => Promise.resolve(true));
+  assertEquals(await code(() => live.acquire()), ExitCode.TempFail);
+  // the lock is still there and still the other run's
   assertEquals(
-    await code(() =>
-      new Lock(dir, 3600, undefined, () => Promise.resolve(true)).acquire()
-    ),
+    (await Deno.readTextFile(join(dir, "owner"))).startsWith("4242 "),
+    true,
+  );
+});
+
+Deno.test("lock: a lock with no owner file is stale only by the age of the directory", async () => {
+  const base = await Deno.makeTempDir();
+  const young = join(base, "young");
+  await setOwner(young, null);
+  assertEquals(
+    await code(() => new Lock(young, 3600).acquire()),
     ExitCode.TempFail,
   );
-  const dead = new Lock(dir, 3600, undefined, () => Promise.resolve(false));
-  await dead.acquire();
-  await dead.release();
-  await Deno.mkdir(dir);
-  await Deno.writeTextFile(
-    join(dir, "owner"),
-    `4242 ${new Date(Date.now() - 7200_000).toISOString()}\n`,
+  const old = join(base, "old");
+  await setOwner(old, null, 7200);
+  const lock = new Lock(old, 3600);
+  await lock.acquire();
+  await lock.release();
+});
+
+Deno.test("lock: an owner file that cannot be read is the same as none", async () => {
+  const base = await Deno.makeTempDir();
+  const junk = join(base, "junk");
+  await setOwner(junk, "not a pid\n");
+  assertEquals(
+    await code(() => new Lock(junk, 3600).acquire()),
+    ExitCode.TempFail,
   );
-  const old = new Lock(dir, 3600, undefined, () => Promise.resolve(true));
-  await old.acquire();
-  await old.release();
+  const oldJunk = join(base, "oldjunk");
+  await setOwner(oldJunk, "not a pid\n", 7200);
+  const lock = new Lock(oldJunk, 3600);
+  await lock.acquire();
+  await lock.release();
 });
 
 // ---- the whole run ------------------------------------------------------------
@@ -1157,9 +1345,20 @@ Deno.test("run: a good run leaves one closed run row, items, counts and the prog
   assertEquals(run.request_id, "q1");
   assertEquals(run.program_hash, h.program.hash);
   assertEquals((run.counts as Record<string, unknown>).people, 3);
-  assertEquals((run.counts as Record<string, unknown>).info, 2);
+  assertEquals((run.counts as Record<string, unknown>).warning, 1);
+  assertEquals((run.counts as Record<string, unknown>).actions, {
+    create: 2,
+    update: 1,
+    replace: 2,
+    remove: 1,
+  });
+  assertEquals(
+    ((run.counts as Record<string, unknown>).index as { status: string })
+      .status,
+    "rebuilt",
+  );
   assert(run.finished !== "");
-  assertEquals(h.store.items.size, 6);
+  assertEquals(h.store.items.size, 5);
   assertEquals(await Deno.stat(h.lockDir).then(() => true, () => false), false);
 });
 
@@ -1191,11 +1390,11 @@ Deno.test("run: an unreachable host leaves the run row error (not running) and t
 Deno.test("run: a program that failed some writes records its items, closes the run as error, exits 70", async () => {
   const bad: Report = {
     ...REPORT,
-    summary: { created: 0, error: 1 },
+    summary: { updated: 0, error: 1 },
     results: [{
-      clpid: "New-Ann",
-      rdm_id: "New-Ann",
-      action: "create",
+      clpid: "Old-Bob",
+      rdm_id: "Old-Bob",
+      action: "update",
       status: "error",
       message: "nope",
     }],
@@ -1208,9 +1407,9 @@ Deno.test("run: a program that failed some writes records its items, closes the 
   );
   assertEquals(r.code, ExitCode.Internal);
   assertEquals([...h.store.runs.values()][0].state, "error");
-  assertEquals(h.store.items.size, 6);
+  assertEquals(h.store.items.size, 5);
   const failed = [...h.store.items.values()].find((i) =>
-    i.clpid === "New-Ann"
+    i.clpid === "Old-Bob" && i.action === "update"
   )!;
   assertEquals(failed.status, "error");
 });
@@ -1315,6 +1514,18 @@ Deno.test("main: a missing env file is 66", async () => {
   );
 });
 
+Deno.test("main: no --env is 78, naming the option; there is no default env file", async () => {
+  const err = await main([]).then(() => null, (e: unknown) => e);
+  assert(err instanceof SyncError);
+  assertEquals(err.code, ExitCode.Config);
+  assertStringIncludes(err.message, "--env");
+  assert(!err.message.includes("no such env file"));
+});
+
+Deno.test("main: help still works without an env file", async () => {
+  assertEquals(await main(["--help"]), 0);
+});
+
 // ---- end to end: real datasetd, fake ssh and scp on the PATH ---------------------
 
 Deno.test("end to end: rows reach datasetd; an unreachable host exits 69 and leaves an error run", async () => {
@@ -1367,7 +1578,7 @@ esac
     const items = await api.query(ITEMS, "people_sync_run_items", {
       run_id: runs[0].run_id,
     });
-    assertEquals(items.length, 6);
+    assertEquals(items.length, 5);
     assertEquals(items[0].outcome, "needs_human");
 
     await new Promise((r) => setTimeout(r, 1100)); // "latest" orders by whole seconds

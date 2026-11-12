@@ -149,13 +149,47 @@ const ITEMS = [
 interface World {
   posts: { url: string; body: string }[];
   intervals: number;
+  fetches: string[];
+  /** fire a document event, such as "visibilitychange" */
+  fire: (type: string) => void;
+  /** what document.visibilityState says */
+  visibility: string;
   restore: () => void;
 }
 
 /** world installs the fake DOM and a fetch that answers like COLD's API. */
-function world(requests: unknown[], items: unknown[] = ITEMS): World {
+interface Extra {
+  /** what /rdm/people_sync/target answers: this body, with targetStatus (default 200) */
+  target?: unknown;
+  targetStatus?: number;
+  /** what the per-person run query and the per-person latest item query return */
+  runFor?: unknown[];
+  latestItem?: unknown[];
+  /** the runs the run queries return (default: the one full run) */
+  runs?: unknown[];
+}
+
+const TARGET = {
+  mode: "dry-run",
+  rdm_url: "https://authors.example.test",
+  transport: "ssm",
+};
+
+function world(
+  requests: unknown[],
+  items: unknown[] = ITEMS,
+  extra: Extra = {},
+): World {
   ids.clear();
-  const w: World = { posts: [], intervals: 0, restore: () => {} };
+  const listeners: Record<string, (() => void)[]> = {};
+  const w: World = {
+    posts: [],
+    intervals: 0,
+    fetches: [],
+    visibility: "visible",
+    fire: (type) => (listeners[type] ?? []).forEach((f) => f()),
+    restore: () => {},
+  };
   const g = globalThis as Record<string, unknown>;
   const saved = {
     document: g.document,
@@ -167,6 +201,12 @@ function world(requests: unknown[], items: unknown[] = ITEMS): World {
   g.document = {
     createElement: (t: string) => new FakeEl(t),
     getElementById: () => null,
+    addEventListener: (type: string, f: () => void) => {
+      (listeners[type] ??= []).push(f);
+    },
+    get visibilityState() {
+      return w.visibility;
+    },
   };
   g.setInterval = () => {
     w.intervals++;
@@ -178,15 +218,34 @@ function world(requests: unknown[], items: unknown[] = ITEMS): World {
   g.setTimeout = () => 0;
   g.fetch = (input: string | URL | Request, init?: RequestInit) => {
     const url = String(input);
+    w.fetches.push(url);
     if (init?.method === "POST") {
       w.posts.push({ url, body: String(init.body) });
       return Promise.resolve(new Response("{}", { status: 200 }));
     }
     const json = (v: unknown) =>
       Promise.resolve(new Response(JSON.stringify(v), { status: 200 }));
+    if (url.includes("rdm/people_sync/target")) {
+      // a fresh Response per call, as fetch gives: a body can only be read once
+      return Promise.resolve(
+        new Response(JSON.stringify(extra.target ?? TARGET), {
+          status: extra.targetStatus ?? 200,
+        }),
+      );
+    }
     if (url.includes("report_list")) return json(requests);
-    if (url.includes("people_sync_latest_full_run")) return json([RUN]);
-    if (url.includes("people_sync_latest_run")) return json([RUN]);
+    if (url.includes("people_sync_latest_run_for")) {
+      return json(extra.runFor ?? [RUN]);
+    }
+    if (url.includes("people_sync_latest_item")) {
+      return json(extra.latestItem ?? []);
+    }
+    if (url.includes("people_sync_latest_full_run")) {
+      return json(extra.runs ?? [RUN]);
+    }
+    if (url.includes("people_sync_latest_run")) {
+      return json(extra.runs ?? [RUN]);
+    }
     if (url.includes("people_sync_run_items")) return json(items);
     return Promise.resolve(new Response("[]", { status: 200 }));
   };
@@ -194,8 +253,12 @@ function world(requests: unknown[], items: unknown[] = ITEMS): World {
   return w;
 }
 
-async function page(requests: unknown[] = [], items: unknown[] = ITEMS) {
-  const w = world(requests, items);
+async function page(
+  requests: unknown[] = [],
+  items: unknown[] = ITEMS,
+  extra: Extra = {},
+) {
+  const w = world(requests, items, extra);
   const { PeopleSyncUI } = await import("./people_sync_page.ts");
   const mount = new FakeEl("div");
   const ui = new PeopleSyncUI({
@@ -285,7 +348,7 @@ Deno.test("page: people link to their COLD page, and an RDM-only item has no lin
       (r.children[0] as FakeEl).tag("a").map((a) => a.getAttribute("href"));
     assertEquals(links(rows[0]), ["./people/Doe-Jane"]);
     assertEquals(links(rows[1]), []);
-    assertStringIncludes(rows[1].children[0].textContent, "no COLD person");
+    assertEquals(rows[1].children[0].textContent, "Nobody-Z");
   } finally {
     w.restore();
   }
@@ -357,6 +420,315 @@ Deno.test("page: every outcome is stated in words, not only by position or colou
   } finally {
     w.restore();
   }
+});
+
+// ---- the next run's target ------------------------------------------------------------
+
+/** fact reads one dt/dd pair from the status area's list. */
+function fact(mount: FakeEl, name: string): string | undefined {
+  const dl = mount.tag("dl")[0];
+  const i = dl.children.findIndex((c) => c.textContent === name);
+  return i < 0 ? undefined : dl.children[i + 1].textContent;
+}
+
+Deno.test("page: the next run's target and mode are shown, labelled as the next run", async () => {
+  const { w, mount } = await page(idle);
+  try {
+    const text = fact(mount, "Next run")!;
+    assertStringIncludes(text, "Dry run");
+    assertStringIncludes(text, "https://authors.example.test");
+    assertStringIncludes(text, "ssm");
+  } finally {
+    w.restore();
+  }
+});
+
+Deno.test("page: an apply target says it will write", async () => {
+  const { w, mount } = await page(idle, ITEMS, {
+    target: {
+      mode: "apply",
+      rdm_url: "https://authors.library.caltech.edu",
+      transport: "ssh",
+    },
+  });
+  try {
+    const text = fact(mount, "Next run")!;
+    assertStringIncludes(text, "Apply");
+    assertStringIncludes(text.toLowerCase(), "write");
+    assertStringIncludes(text, "https://authors.library.caltech.edu");
+  } finally {
+    w.restore();
+  }
+});
+
+Deno.test("page: a target that cannot be read is said as unknown with the reason, and the rest of the page still draws", async () => {
+  const { w, mount } = await page(idle, ITEMS, {
+    target: { error: "PEOPLE_SYNC_ENV is not set for this process" },
+    targetStatus: 503,
+  });
+  try {
+    const text = fact(mount, "Next run")!;
+    assertStringIncludes(text.toLowerCase(), "unknown");
+    assertStringIncludes(text, "PEOPLE_SYNC_ENV");
+    assertEquals(mount.tag("table").length, 1);
+  } finally {
+    w.restore();
+  }
+});
+
+Deno.test("page: the next run's target is shown even before any run is recorded", async () => {
+  const { w, mount } = await page(idle, [], { runs: [] });
+  try {
+    assertStringIncludes(fact(mount, "Next run")!, "Dry run");
+  } finally {
+    w.restore();
+  }
+});
+
+Deno.test("page: a target request that never answers does not stop the rest of the page drawing", async () => {
+  const w = world(idle);
+  const g = globalThis as Record<string, unknown>;
+  const real = g.fetch as typeof fetch;
+  // the target route hangs (for instance a permission prompt in the server's terminal);
+  // the abort signal is the only way out, as with a real fetch
+  g.fetch = (input: string | URL | Request, init?: RequestInit) => {
+    if (String(input).includes("rdm/people_sync/target")) {
+      return new Promise((_, reject) => {
+        init?.signal?.addEventListener(
+          "abort",
+          () => reject(init.signal!.reason),
+        );
+      });
+    }
+    return real(input, init);
+  };
+  try {
+    const { PeopleSyncUI } = await import("./people_sync_page.ts");
+    const mount = new FakeEl("div");
+    const ui = new PeopleSyncUI({
+      mountElement: mount as unknown as HTMLElement,
+      baseUrl: "http://localhost:8111/",
+      peopleBase: "./people/",
+      targetTimeoutMs: 50,
+    });
+    await ui.refresh();
+    assertStringIncludes(fact(mount, "Next run")!.toLowerCase(), "unknown");
+    assertEquals(mount.tag("table").length, 1);
+  } finally {
+    w.restore();
+  }
+});
+
+Deno.test("page: the target is a fact beside the latest run's own mode, so a person can tell them apart", async () => {
+  const { w, mount } = await page(idle);
+  try {
+    assert(fact(mount, "Mode") !== undefined);
+    assert(fact(mount, "Next run") !== undefined);
+  } finally {
+    w.restore();
+  }
+});
+
+// ---- the push's items (cold DR-0037) ------------------------------------------------------
+
+const PUSH_ITEMS = [
+  {
+    run_id: "r-full",
+    clpid: "Doe-Jane",
+    rdm_id: "id-old",
+    action: "replace",
+    outcome: "applied",
+    message: "remove legacy entry id-old, replaced by Doe-Jane",
+    scheme: "",
+    value: "",
+    recorded: "2026-11-12 09:00:00",
+    status: "replaced",
+    result_message: "delete raised X; the entry is gone",
+    before: { name: "Doe, J." },
+    detail: {
+      replaced_by: "Doe-Jane",
+      persons: ["Doe-Jane"],
+      changes: ["name"],
+      names: { "Doe-Jane": "<b>Doe, Jane</b>" },
+    },
+  },
+  {
+    run_id: "r-full",
+    clpid: "Roe-Rich",
+    rdm_id: "Roe-Rich",
+    action: "update",
+    outcome: "applied",
+    message: "update entry Roe-Rich: orcid",
+    scheme: "clpid",
+    value: "Roe-Rich",
+    recorded: "2026-11-12 09:00:00",
+    status: "updated",
+    before: { name: "Roe, Rich" },
+    after: { name: "Roe, Rich" },
+    detail: { changes: ["orcid"] },
+  },
+  {
+    run_id: "r-full",
+    clpid: "Gone-G",
+    rdm_id: "Gone-G",
+    action: "remove",
+    outcome: "applied",
+    message: "remove entry Gone-G: it is not a COLD person's entry",
+    scheme: "",
+    value: "",
+    recorded: "2026-11-12 09:00:00",
+    status: "removed",
+    before: { name: "Gone, G." },
+  },
+  {
+    run_id: "r-full",
+    clpid: "Bad-Bo",
+    rdm_id: null,
+    action: "malformed_identifier",
+    outcome: "warning",
+    message: "COLD isni '3626 6637' is not well formed; not written",
+    scheme: "isni",
+    value: "3626 6637",
+    recorded: "2026-11-12 09:00:00",
+  },
+];
+
+const PUSH_RUN = {
+  ...RUN,
+  mode: "apply",
+  counts: {
+    people: 9238,
+    warning: 1,
+    applied: 9300,
+    actions: { create: 9238, update: 1, replace: 8797, remove: 28 },
+    index: { status: "rebuilt", message: "" },
+    results: {},
+  },
+};
+
+Deno.test("page: a replace shows the old name in RDM and COLD's name in COLD, as text, and no link to a removed entry", async () => {
+  const { w, mount } = await page(idle, PUSH_ITEMS);
+  try {
+    const row = mount.tag("table")[0].tag("tbody")[0].tag("tr")[0];
+    assertStringIncludes(row.children[3].textContent, "<b>Doe, Jane</b>");
+    assertStringIncludes(row.children[4].textContent, "Doe, J.");
+    assertEquals((row.children[4] as FakeEl).tag("a").length, 0);
+    assertStringIncludes(row.children[1].textContent, "Legacy entry removed");
+    assertStringIncludes(row.children[2].textContent, "Replace a legacy entry");
+    assertStringIncludes(row.children[2].textContent, "the entry is gone");
+    assertEquals(mount.tag("b").length, 0);
+  } finally {
+    w.restore();
+  }
+});
+
+Deno.test("page: an updated entry links to the entry in RDM and says what changed", async () => {
+  const { w, mount } = await page(idle, PUSH_ITEMS);
+  try {
+    const row = mount.tag("table")[0].tag("tbody")[0].tag("tr")[1];
+    const links = (row.children[4] as FakeEl).tag("a");
+    assertEquals(links.map((a) => a.getAttribute("href")), [
+      "https://authors.example.test/api/names/Roe-Rich",
+    ]);
+    assertStringIncludes(
+      links[0].getAttribute("aria-label") ?? "",
+      "signed in",
+    );
+    assertStringIncludes(row.children[2].textContent, "Update the entry");
+    assertStringIncludes(row.children[2].textContent, "orcid");
+  } finally {
+    w.restore();
+  }
+});
+
+Deno.test("page: no row ever says there is 'no COLD person'; a removal says it is an RDM entry and a malformed identifier links its person", async () => {
+  const { w, mount } = await page(idle, [...PUSH_ITEMS, ...ITEMS]);
+  try {
+    const table = mount.tag("table")[0];
+    assert(!table.textContent.includes("no COLD person"), "misleading wording");
+    const rows = table.tag("tbody")[0].tag("tr");
+    const who = (clpid: string) =>
+      rows.find((r) => r.children[0].textContent.includes(clpid))!
+        .children[0] as FakeEl;
+    assertEquals(who("Gone-G").textContent, "RDM entry Gone-G");
+    assertEquals(who("Gone-G").tag("a").length, 0);
+    const bad = who("Bad-Bo");
+    assertEquals(bad.tag("a").map((a) => a.getAttribute("href")), [
+      "./people/Bad-Bo",
+    ]);
+    assertEquals(bad.tag("a").map((a) => a.textContent), ["Bad-Bo"]);
+  } finally {
+    w.restore();
+  }
+});
+
+Deno.test("page: a removal and a malformed identifier read in words, and the malformed one offers the rerun", async () => {
+  const { w, mount } = await page(idle, PUSH_ITEMS);
+  try {
+    const rows = mount.tag("table")[0].tag("tbody")[0].tag("tr");
+    assertStringIncludes(rows[2].children[1].textContent, "Removed from RDM");
+    assertStringIncludes(rows[2].children[0].textContent, "Gone-G");
+    assertEquals((rows[2].children[4] as FakeEl).tag("a").length, 0);
+    assertEquals(
+      (rows[3].children[5] as FakeEl).tag("button").map((b) => b.textContent),
+      ["Rerun for Bad-Bo"],
+    );
+  } finally {
+    w.restore();
+  }
+});
+
+Deno.test("page: the counts line gives the actions and the index, and never mentions repairs or nothing-to-do people", async () => {
+  const { w, mount } = await page(idle, PUSH_ITEMS);
+  w.restore();
+  void mount;
+  const { countsText } = await import("./people_sync_page.ts");
+  const text = countsText(PUSH_RUN);
+  assertStringIncludes(text, "9238 people examined");
+  assertStringIncludes(text, "9238 created");
+  assertStringIncludes(text, "8797 legacy entries replaced");
+  assertStringIncludes(text, "28 removed");
+  assertStringIncludes(text, "1 updated");
+  assertStringIncludes(text, "index rebuilt");
+  assert(!text.includes("repair"));
+  assert(!text.includes("nothing to do"));
+});
+
+Deno.test("page: the counts line of an older run still reports its repairs", async () => {
+  const { countsText } = await import("./people_sync_page.ts");
+  const text = countsText({ ...RUN, counts: { people: 3, needs_repair: 2 } });
+  assertStringIncludes(text, "2 need repair in RDM");
+});
+
+Deno.test("page: the counts line says how many removed entries were restored, and says nothing when none were", async () => {
+  const { countsText } = await import("./people_sync_page.ts");
+  const applied = countsText({
+    ...PUSH_RUN,
+    counts: {
+      people: 5,
+      actions: { create: 1, update: 0, revive: 2, replace: 0, remove: 0 },
+    },
+  });
+  assertStringIncludes(applied, "2 restored");
+  const dry = countsText({
+    ...PUSH_RUN,
+    mode: "dry-run",
+    counts: { people: 5, actions: { revive: 2 } },
+  });
+  assertStringIncludes(dry, "2 to restore");
+  assert(
+    !countsText(PUSH_RUN).includes("restore"),
+    "mentioned a restore when there were none",
+  );
+});
+
+Deno.test("page: a failed index rebuild is said in the counts line", async () => {
+  const { countsText } = await import("./people_sync_page.ts");
+  const text = countsText({
+    ...PUSH_RUN,
+    counts: { people: 1, index: { status: "error", message: "queue is down" } },
+  });
+  assertStringIncludes(text, "index rebuild failed");
 });
 
 Deno.test("page: only a COLD-fixable item offers a rerun, labelled with the person", async () => {
@@ -586,6 +958,124 @@ Deno.test("person action: a failed request's reason is shown on the person page,
     assertStringIncludes(status.textContent, "ssh: connect timed out");
     const b = mount.tag("button")[0];
     assertEquals(b.getAttribute("aria-disabled"), "false"); // a failed run does not block a retry
+  } finally {
+    w.restore();
+  }
+});
+
+/** The real timer, captured before any world() replaces the global one with a no-op. */
+const realSetTimeout = globalThis.setTimeout;
+
+/** flush lets the fake fetches and the redraw that follows them settle. */
+const flush = () => new Promise<void>((r) => realSetTimeout(r, 20));
+
+// ---- the person page's latest outcome stays current ------------------------------------------
+
+const OLD_WARNING = {
+  run_id: "r-old",
+  clpid: "Doe-Jane",
+  rdm_id: null,
+  action: "malformed_identifier",
+  outcome: "warning",
+  message: "COLD isni '3626 6637' is not well formed; not written",
+  scheme: "isni",
+  value: "3626 6637",
+  recorded: "2026-11-12 18:31:23",
+};
+
+/** personPage mounts the person page's sync action over the fake world. */
+async function personPage(extra: Extra) {
+  const w = world(idle, ITEMS, extra);
+  const { PeopleSyncPersonUI } = await import("./people_sync_person.ts");
+  const mount = new FakeEl("div");
+  const ui = new PeopleSyncPersonUI({
+    mountElement: mount as unknown as HTMLElement,
+    baseUrl: "http://localhost:8111/",
+    clpid: "Doe-Jane",
+  });
+  await ui.refresh();
+  const outcome = () => mount.tag("p").at(-1)!.textContent;
+  return { w, mount, ui, outcome };
+}
+
+Deno.test("person page: once a newer sync covered the person and found nothing, the old warning is not shown as their outcome", async () => {
+  const { w, outcome } = await personPage({
+    runFor: [{
+      ...RUN,
+      run_id: "r-new",
+      mode: "dry-run",
+      started: "2026-11-12 18:42:52",
+    }],
+    latestItem: [OLD_WARNING],
+  });
+  try {
+    assertStringIncludes(outcome().toLowerCase(), "nothing to report");
+    assertStringIncludes(outcome(), "2026-11-12 18:42:52");
+    assert(!outcome().includes("not well formed"), outcome());
+  } finally {
+    w.restore();
+  }
+});
+
+Deno.test("person page: an item from the latest run covering the person is still shown", async () => {
+  const { w, outcome } = await personPage({
+    runFor: [{ ...RUN, run_id: "r-old" }],
+    latestItem: [OLD_WARNING],
+  });
+  try {
+    assertStringIncludes(outcome(), "not well formed");
+    assertStringIncludes(outcome(), "Latest outcome (2026-11-12 18:31:23)");
+  } finally {
+    w.restore();
+  }
+});
+
+Deno.test("person page: it asks for the run that covered this person, by clpid", async () => {
+  const { w } = await personPage({ runFor: [RUN] });
+  try {
+    const asked = w.fetches.filter((u) =>
+      u.includes("people_sync_latest_run_for")
+    );
+    assertEquals(asked.length >= 1, true);
+    assertStringIncludes(asked[0], "clpid=Doe-Jane");
+  } finally {
+    w.restore();
+  }
+});
+
+Deno.test("person page: coming back to the tab refreshes the outcome without a reload, and a hidden tab sends nothing", async () => {
+  const { w, outcome } = await personPage({
+    runFor: [{ ...RUN, run_id: "r-old" }],
+    latestItem: [OLD_WARNING],
+  });
+  try {
+    const before = w.fetches.length;
+    w.visibility = "hidden";
+    w.fire("visibilitychange");
+    await flush();
+    assertEquals(w.fetches.length, before, "a hidden tab must send nothing");
+    w.visibility = "visible";
+    w.fire("visibilitychange");
+    await flush();
+    assert(w.fetches.length > before, "returning to the tab must refresh");
+    assertStringIncludes(outcome(), "not well formed");
+  } finally {
+    w.restore();
+  }
+});
+
+Deno.test("sync page: coming back to the tab refreshes it too, and a hidden tab sends nothing", async () => {
+  const { w } = await page(idle);
+  try {
+    const before = w.fetches.length;
+    w.visibility = "hidden";
+    w.fire("visibilitychange");
+    await flush();
+    assertEquals(w.fetches.length, before);
+    w.visibility = "visible";
+    w.fire("visibilitychange");
+    await flush();
+    assert(w.fetches.length > before);
   } finally {
     w.restore();
   }

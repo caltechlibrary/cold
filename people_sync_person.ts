@@ -4,11 +4,12 @@
  * viewed, and that person's latest recorded outcome. Browser code; the logic is
  * in people_sync_view.ts and the shared client in people_sync_page.ts.
  *
- * A person with nothing to report has no item row, so "no outcome recorded"
- * is a normal answer, not an error.
+ * A person with nothing to report has no item row, so the outcome is judged against the
+ * latest run that covered the person: an older item has been superseded by a run that
+ * reported nothing.
  */
 import { SyncClient } from "./people_sync_page.ts";
-import { itemView, syncView } from "./people_sync_view.ts";
+import { personOutcomeText, syncView } from "./people_sync_view.ts";
 
 /** PeopleSyncPersonUI fills one element with the sync action for one person. */
 export class PeopleSyncPersonUI {
@@ -47,15 +48,21 @@ export class PeopleSyncPersonUI {
       this.start();
     });
     this.refresh();
+    // A sync filed elsewhere (the sync page, another tab, cron) is picked up when
+    // the person comes back to this tab. A hidden tab sends nothing.
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") this.refresh();
+    });
   }
 
   /** refresh reads the latest request and this person's latest outcome. */
   async refresh(): Promise<void> {
     try {
-      const [request, run, item] = await Promise.all([
+      const [request, run, item, covering] = await Promise.all([
         this.client.latestRequest(),
         this.client.latestRun(),
         this.client.latestItem(this.clpid),
+        this.client.latestRunFor(this.clpid),
       ]);
       const view = syncView(request, run);
       const busy = view.state === "pending" || view.state === "running";
@@ -65,14 +72,7 @@ export class PeopleSyncPersonUI {
         ? view.headline
         : "";
       if (this.status.textContent !== text) this.status.textContent = text;
-      const line = item === undefined
-        ? "No sync outcome is recorded for this person (a person with nothing to report has none)."
-        : (() => {
-          const v = itemView(item, "./");
-          return `Latest outcome (${item.recorded}): ${v.outcomeLabel}${
-            v.statusLabel ? `, ${v.statusLabel}` : ""
-          }. ${v.message}`;
-        })();
+      const line = personOutcomeText(item, covering);
       if (this.outcome.textContent !== line) this.outcome.textContent = line;
       if (busy && this.timer === undefined) {
         this.timer = setInterval(

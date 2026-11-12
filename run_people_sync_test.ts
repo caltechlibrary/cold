@@ -1,84 +1,134 @@
 /**
- * run_people_sync_test.ts tests the shim run_people_sync.bash: the report
- * runner hands it the request's id and trigger in COLD_REQUEST_ID and
- * COLD_TRIGGER (plan Phase 5 decision 2), and it must turn them into the
- * wrapper's --request-id and --trigger. The shim runs from a scratch copy with
- * a fake ./bin/people_sync that prints the arguments it was given.
+ * run_people_sync_test.ts
+ *
+ * Tests for run_people_sync.bash, the shim the report runner, cron and a person
+ * call. It has no default env file (cold DR-0037 plan, Phase 5 finding 4): a run
+ * that does not say which RDM it targets must not start, and the reason must reach
+ * the report runner on stderr, which turns it into the request's error message.
+ * The script is copied into a scratch directory beside a fake `bin/people_sync`
+ * that prints the arguments it was given.
  *
  * Run:
  *   deno test --allow-read --allow-write --allow-run --allow-env run_people_sync_test.ts
  */
 
-import { assertEquals } from "@std/assert";
+import { assertEquals, assertStringIncludes } from "@std/assert";
 import * as path from "@std/path";
 
-const SHIM = path.fromFileUrl(
+const SCRIPT = path.fromFileUrl(
   new URL("./run_people_sync.bash", import.meta.url),
 );
 
+/** hostHasCold is true on the production host, where the shim changes to /Sites/cold. */
+const hostHasCold = (() => {
+  try {
+    return Deno.statSync("/Sites/cold").isDirectory;
+  } catch {
+    return false;
+  }
+})();
+
 /**
- * runShim runs a scratch copy of the shim with a fake wrapper and returns the
- * arguments the wrapper received, one per element.
+ * makeShim copies the script next to a fake program that echoes its arguments.
  *
- * @param env {Record<string, string>} the environment the shim runs with
- * @param args {string[]} the shim's own arguments
- * @returns {Promise<string[]>} the wrapper's arguments
+ * @returns {Promise<string>} the scratch directory holding run_people_sync.bash and bin/people_sync
  * @example
- * const got = await runShim({ COLD_TRIGGER: "human" }, []);
+ * const dir = await makeShim();
  */
-async function runShim(
-  env: Record<string, string>,
-  args: string[],
-): Promise<string[]> {
+async function makeShim(): Promise<string> {
   const dir = await Deno.makeTempDir({ prefix: "shim_" });
-  await Deno.copyFile(SHIM, path.join(dir, "run_people_sync.bash"));
+  await Deno.copyFile(SCRIPT, path.join(dir, "run_people_sync.bash"));
+  await Deno.chmod(path.join(dir, "run_people_sync.bash"), 0o755);
   await Deno.mkdir(path.join(dir, "bin"));
   await Deno.writeTextFile(
     path.join(dir, "bin", "people_sync"),
-    `#!/bin/bash\nfor a in "$@"; do printf '%s\\n' "$a"; done\n`,
+    `#!/bin/bash\nprintf 'ARGS:%s\\n' "$*"\n`,
     { mode: 0o755 },
   );
-  const r = await new Deno.Command("bash", {
+  return dir;
+}
+
+/**
+ * runShim runs the copied shim with exactly the given environment.
+ *
+ * @param dir {string} the directory makeShim made
+ * @param env {Record<string, string>} the whole environment (nothing is inherited)
+ * @param args {string[]} the shim's arguments
+ * @returns {Promise<{code: number, out: string, err: string}>} exit code and output
+ * @example
+ * const r = await runShim(dir, { PEOPLE_SYNC_ENV: "x.env" }, ["Doe-Jane"]);
+ */
+async function runShim(
+  dir: string,
+  env: Record<string, string>,
+  args: string[] = [],
+) {
+  const out = await new Deno.Command("/bin/bash", {
     args: [path.join(dir, "run_people_sync.bash"), ...args],
-    env,
+    env: { PATH: "/usr/bin:/bin", ...env },
     clearEnv: true,
     stdout: "piped",
     stderr: "piped",
   }).output();
-  assertEquals(r.code, 0, new TextDecoder().decode(r.stderr));
-  return new TextDecoder().decode(r.stdout).split("\n").filter((s) => s);
+  return {
+    code: out.code,
+    out: new TextDecoder().decode(out.stdout),
+    err: new TextDecoder().decode(out.stderr),
+  };
 }
 
-/** value returns the argument after a flag. */
-function value(got: string[], flag: string): string | undefined {
-  const i = got.indexOf(flag);
-  return i < 0 ? undefined : got[i + 1];
-}
-
-Deno.test("shim: the runner's request id and trigger reach the wrapper", async () => {
-  const got = await runShim(
-    { COLD_REQUEST_ID: "req-9", COLD_TRIGGER: "human" },
-    [],
-  );
-  assertEquals(value(got, "--request-id"), "req-9");
-  assertEquals(value(got, "--trigger"), "human");
+Deno.test({
+  name:
+    "shim: with PEOPLE_SYNC_ENV unset it exits 78, names the setting, and runs nothing",
+  ignore: hostHasCold,
+  fn: async () => {
+    const dir = await makeShim();
+    const r = await runShim(dir, {});
+    assertEquals(r.code, 78);
+    assertStringIncludes(r.err, "PEOPLE_SYNC_ENV");
+    assertEquals(r.out, "");
+  },
 });
 
-Deno.test("shim: PEOPLE_SYNC_TRIGGER, set by hand, wins over the runner's", async () => {
-  const got = await runShim(
-    { COLD_TRIGGER: "human", PEOPLE_SYNC_TRIGGER: "cron" },
-    [],
-  );
-  assertEquals(value(got, "--trigger"), "cron");
+Deno.test({
+  name: "shim: an empty PEOPLE_SYNC_ENV is the same as unset",
+  ignore: hostHasCold,
+  fn: async () => {
+    const dir = await makeShim();
+    const r = await runShim(dir, { PEOPLE_SYNC_ENV: "" });
+    assertEquals(r.code, 78);
+    assertEquals(r.out, "");
+  },
 });
 
-Deno.test("shim: with nothing set the trigger is unknown and no request id is passed", async () => {
-  const got = await runShim({}, []);
-  assertEquals(value(got, "--trigger"), "unknown");
-  assertEquals(got.includes("--request-id"), false);
+Deno.test({
+  name: "shim: the message says what to set and that there is no default",
+  ignore: hostHasCold,
+  fn: async () => {
+    const r = await runShim(await makeShim(), {});
+    assertStringIncludes(r.err.toLowerCase(), "no default");
+    assertStringIncludes(r.err, "caltechauthors.env");
+  },
 });
 
-Deno.test("shim: a clpid argument becomes --scope", async () => {
-  const got = await runShim({ COLD_TRIGGER: "human" }, ["Doe-Jane"]);
-  assertEquals(value(got, "--scope"), "Doe-Jane");
+Deno.test({
+  name:
+    "shim: with the setting present the program gets that env file, the trigger and the request id",
+  ignore: hostHasCold,
+  fn: async () => {
+    const r = await runShim(
+      await makeShim(),
+      {
+        PEOPLE_SYNC_ENV: "people_sync_dev.env",
+        COLD_TRIGGER: "human",
+        COLD_REQUEST_ID: "q7",
+      },
+      ["Doe-Jane"],
+    );
+    assertEquals(r.code, 0);
+    assertStringIncludes(r.out, "--env people_sync_dev.env");
+    assertStringIncludes(r.out, "--trigger human");
+    assertStringIncludes(r.out, "--request-id q7");
+    assertStringIncludes(r.out, "--scope Doe-Jane");
+  },
 });

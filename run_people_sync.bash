@@ -11,7 +11,8 @@
 #
 # Environment:
 #
-#   PEOPLE_SYNC_ENV      the env file naming the target (default caltechauthors.env)
+#   PEOPLE_SYNC_ENV      the env file naming the target. REQUIRED: there is no default, so
+#                        a run never targets an RDM by accident (exit 78 without it)
 #   PEOPLE_SYNC_TRIGGER  who started it: human or cron (recorded on the run);
 #                        set by hand, it wins over COLD_TRIGGER
 #   COLD_TRIGGER         the same, set by the report runner from the request
@@ -24,7 +25,12 @@
 
 if [ -d /Sites/cold ]; then cd /Sites/cold || exit 66; else cd "$(dirname "$0")" || exit 66; fi
 
-ARGS=(--env "${PEOPLE_SYNC_ENV:-caltechauthors.env}" --trigger "${PEOPLE_SYNC_TRIGGER:-${COLD_TRIGGER:-unknown}}")
+if [ -z "${PEOPLE_SYNC_ENV:-}" ]; then
+    echo "run_people_sync.bash: PEOPLE_SYNC_ENV is not set. It names the env file for the target RDM (for example caltechauthors.env) and there is no default; set it in the environment of the report runner or cron." >&2
+    exit 78
+fi
+
+ARGS=(--env "${PEOPLE_SYNC_ENV}" --trigger "${PEOPLE_SYNC_TRIGGER:-${COLD_TRIGGER:-unknown}}")
 if [ -n "${COLD_REQUEST_ID:-}" ]; then ARGS+=(--request-id "${COLD_REQUEST_ID}"); fi
 if [ -n "${1:-}" ]; then ARGS+=(--scope "$1"); fi
 

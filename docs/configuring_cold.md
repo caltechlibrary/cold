@@ -31,6 +31,35 @@ Browser / Front-end web server (Apache2 + Shibboleth)
 
 `cold` (the middleware) receives every browser request. It routes `/api/...` calls directly to `datasetd`, handles object management pages (`/people`, `/groups`, etc.) by talking to `datasetd` on behalf of the browser, and routes `/reports` to its own report-request handler. `cold_reports` is a separate long-running process that polls the report queue and executes report commands.
 
+### Caching
+
+Librarians curate data through these pages, so a browser must never show yesterday's list, or a form built from yesterday's record. `cold` therefore sets a cache policy on **every** response:
+
+| Response | Policy |
+|---|---|
+| The data pages and JSON routes (`/people`, `/groups`, `/funders`, `/subjects`, `/journals`, `/thesis_options`, `/doi_prefix`, `/reports`, `/rename/people`, `/api/...`, `/rdm/...`) | `Cache-Control: no-store` (each handler sets it) |
+| Static files from `htdocs/` (pages, JavaScript modules, CSS, generated report files) | `Cache-Control: no-cache`: the browser asks the server each time, and the `ETag` makes that a `304` when the file is unchanged |
+| Anything else (a 404, an error) | `Cache-Control: no-store`, added by the router when a handler set none |
+
+A handler's own policy is never overridden. The front-end web server must not undo this: do not add `Expires`, `Header set Cache-Control` or `mod_expires` rules for COLD's paths in the Apache configuration. To check a deployment, `curl -s -D - -o /dev/null https://HOST/cold/people` should show `Cache-Control: no-store`, and the same for a module such as `/cold/modules/people_sync_page.js` should show `no-cache` and an `ETag`.
+
+After a rebuild with `deno task htdocs` (or a single bundle task), a browser that cached a page before this policy existed may keep its old copy for a while. Reload once bypassing the cache (Shift-reload); from then on it revalidates.
+
+### Routes under `/rdm/...`
+
+Dynamic routes that are specific to RDM live under `/rdm/...` and are handled by `rdm.ts`. Static RDM pages stay in `htdocs/` as `rdm_*.html` (for example `rdm_people_sync.html`). A path reaches the `/rdm` handler only when it is `/rdm` or begins `/rdm/`: `/rdm_people_sync.html`, `/rdm.html` and `/rdmx` are not routed there and are served as static files. Report stanzas stay under `/reports`.
+
+| Route | Answers |
+|---|---|
+| `GET /rdm/people_sync/target` | Where the **next** people sync will go: `{"mode", "rdm_url", "transport"}`. It reads the env file named by `PEOPLE_SYNC_ENV` in the `cold` process's own environment and returns only those three settings; the host, instance id, AWS profile, checkout, run user and every other key stay in the file. JSON, never cached. `503` with a reason when `PEOPLE_SYNC_ENV` is unset, the file cannot be read, or the sync would refuse it. |
+
+The ten older top-level prefixes (`/people`, `/groups`, `/funders`, `/subjects`, `/journals`, `/thesis_options`, `/doi_prefix`, `/reports`, `/directory_api`, `/api`, and `/rename/people`) keep their looser `startsWith` match, so a path that merely begins with one of those words is routed to that handler (`/people_sync.html` was once served as the People list that way). That is a known hardening note, not a change made here.
+
+### Settings the people sync needs in the environment
+
+- `PEOPLE_SYNC_ENV` is **required** and has no default: it names the env file for the target RDM (for example `caltechauthors.env`). `run_people_sync.bash` exits 78 without it and says so on stderr, which the report runner shows as the request's error. Set it in the environment of `cold_reports` (and of cron) **and** of `cold`, because `cold` reads the same file to show the sync page where the next run will go.
+- `PEOPLE_SYNC_STALE_SECONDS` (default 3600) is the **longest a run may take**. The instance-side program runs under `timeout` at that limit, so a hung run ends on the RDM host too, and the lock is released and the reason recorded. A lock whose owner process is alive is never broken, however old.
+
 ---
 
 ## cold_api.yaml — the data layer

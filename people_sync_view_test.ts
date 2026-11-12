@@ -16,11 +16,13 @@ import {
   itemView,
   latestSyncRequest,
   personHref,
+  personOutcomeText,
   reviewCount,
   type RunRow,
   startRequest,
   type SyncRequest,
   syncView,
+  targetText,
 } from "./people_sync_view.ts";
 
 function run(over: Partial<RunRow> = {}): RunRow {
@@ -272,6 +274,528 @@ Deno.test("personHref points at the person's page and encodes awkward clpids", (
   );
   assert(!personHref("./people/", "a/b?c#d").includes("?"));
   assert(!personHref("./people/", "a/b?c#d").includes("#"));
+});
+
+// ---- a person's latest outcome (the person page) ---------------------------------------------
+
+Deno.test("personOutcomeText: an item from the latest run covering the person is their outcome", () => {
+  const text = personOutcomeText(
+    pushItem({
+      run_id: "r2",
+      outcome: "warning",
+      action: "malformed_identifier",
+      rdm_id: null,
+      status: undefined,
+      detail: undefined,
+    }),
+    run({ run_id: "r2" }),
+  );
+  assertStringIncludes(text, "Latest outcome (2026-11-12 09:00:00)");
+  assertStringIncludes(text, "Warning");
+  assertStringIncludes(text, "update entry Doe-Jane: name");
+});
+
+Deno.test("personOutcomeText: an item from an OLDER run is not their outcome once a newer run covered them and reported nothing", () => {
+  // The person's ISNI was fixed in COLD: the newer run reports nothing, so no item row exists for it.
+  const text = personOutcomeText(
+    pushItem({
+      run_id: "r1",
+      message: "COLD isni '3626 6637' is not well formed",
+    }),
+    run({ run_id: "r2", mode: "dry-run", started: "2026-11-12 18:42:52" }),
+  );
+  assertStringIncludes(text, "2026-11-12 18:42:52");
+  assertStringIncludes(text.toLowerCase(), "nothing to report");
+  assertStringIncludes(text.toLowerCase(), "dry run");
+  assert(!text.includes("not well formed"), "the stale item is still shown");
+});
+
+Deno.test("personOutcomeText: no item at all, but a run covered them: nothing to report, said with the run's time and mode", () => {
+  const dry = personOutcomeText(
+    undefined,
+    run({ mode: "dry-run", started: "2026-11-12 18:42:52" }),
+  );
+  assertStringIncludes(dry, "2026-11-12 18:42:52");
+  assertStringIncludes(dry.toLowerCase(), "nothing to report");
+  assertStringIncludes(dry.toLowerCase(), "dry run");
+  const applied = personOutcomeText(
+    undefined,
+    run({ mode: "apply", started: "2026-11-12 18:42:52" }),
+  );
+  assertStringIncludes(applied.toLowerCase(), "applied");
+  assert(!applied.toLowerCase().includes("dry run"));
+});
+
+Deno.test("personOutcomeText: never covered by any run, it says so", () => {
+  const text = personOutcomeText(undefined, undefined);
+  assertStringIncludes(text.toLowerCase(), "not been covered");
+});
+
+Deno.test("personOutcomeText: a run that failed says it failed, with its reason, instead of an older item", () => {
+  const text = personOutcomeText(
+    pushItem({ run_id: "r1" }),
+    run({
+      run_id: "r2",
+      state: "error",
+      error: "ssh: connect timed out",
+      started: "2026-11-12 18:42:52",
+    }),
+  );
+  assertStringIncludes(text.toLowerCase(), "failed");
+  assertStringIncludes(text, "ssh: connect timed out");
+  assert(!text.includes("update entry"), "an older item hides the failure");
+});
+
+Deno.test("personOutcomeText: a run still going is said as going, not as nothing to report", () => {
+  const text = personOutcomeText(
+    undefined,
+    run({ state: "running", finished: "" }),
+  );
+  assertStringIncludes(text.toLowerCase(), "running");
+  assert(!text.toLowerCase().includes("nothing to report"));
+});
+
+Deno.test("personOutcomeText: text from the program stays text", () => {
+  const text = personOutcomeText(
+    pushItem({ run_id: "r2", message: "<img src=x onerror=alert(1)>" }),
+    run({ run_id: "r2" }),
+  );
+  assertStringIncludes(text, "<img src=x onerror=alert(1)>");
+});
+
+// ---- the next run's target (plan Phase 5 decision 3) --------------------------------------
+
+Deno.test("targetText: a dry run says nothing will change, and where it will look", () => {
+  const text = targetText({
+    mode: "dry-run",
+    rdm_url: "https://authors.example.test",
+    transport: "ssm",
+  });
+  assertStringIncludes(text, "Dry run");
+  assertStringIncludes(text, "https://authors.example.test");
+  assertStringIncludes(text, "ssm");
+  assertStringIncludes(text.toLowerCase(), "change nothing");
+});
+
+Deno.test("targetText: an apply says it will write, and where", () => {
+  const text = targetText({
+    mode: "apply",
+    rdm_url: "https://authors.library.caltech.edu",
+    transport: "ssh",
+  });
+  assertStringIncludes(text, "Apply");
+  assertStringIncludes(text.toLowerCase(), "write");
+  assertStringIncludes(text, "https://authors.library.caltech.edu");
+});
+
+Deno.test("targetText: the two modes read differently, so nothing rests on colour or position", () => {
+  const a = targetText({ mode: "dry-run", rdm_url: "u", transport: "ssh" });
+  const b = targetText({ mode: "apply", rdm_url: "u", transport: "ssh" });
+  assert(a !== b);
+});
+
+Deno.test("targetText: an unknown mode is said as unknown, never as a dry run", () => {
+  const text = targetText({ mode: "banana", rdm_url: "u", transport: "ssh" });
+  assert(!text.includes("Dry run"));
+  assertStringIncludes(text, "banana");
+  assertStringIncludes(text.toLowerCase(), "unknown");
+});
+
+Deno.test("targetText: a failure to read the target is said, with the reason", () => {
+  const text = targetText({
+    error: "PEOPLE_SYNC_ENV is not set for this process",
+  });
+  assertStringIncludes(text.toLowerCase(), "unknown");
+  assertStringIncludes(text, "PEOPLE_SYNC_ENV");
+});
+
+Deno.test("targetText: text from the server stays text, never markup", () => {
+  assertEquals(
+    targetText({ error: "<img src=x onerror=alert(1)>" }).includes(
+      "<img src=x onerror=alert(1)>",
+    ),
+    true,
+  );
+});
+
+// ---- items of the push (cold DR-0037) ----------------------------------------------------
+
+const BASE = "https://authors.example.test";
+
+function pushItem(over: Partial<ItemRow> = {}): ItemRow {
+  return {
+    run_id: "r1",
+    clpid: "Doe-Jane",
+    rdm_id: "Doe-Jane",
+    action: "update",
+    outcome: "applied",
+    message: "update entry Doe-Jane: name",
+    scheme: "",
+    value: "",
+    recorded: "2026-11-12 09:00:00",
+    status: "updated",
+    before: { name: "Doe, J." },
+    after: { name: "Doe, Jane" },
+    detail: { changes: ["name"] },
+    ...over,
+  };
+}
+
+Deno.test("push item: an update links the person and the entry, and shows the name before and after", () => {
+  const v = itemView(pushItem(), "./people/", BASE);
+  assertEquals(v.people, [{ clpid: "Doe-Jane", href: "./people/Doe-Jane" }]);
+  assertEquals(v.nameChange, { from: "Doe, J.", to: "Doe, Jane" });
+  assertEquals(v.rdmLinks.map((l) => l.href), [`${BASE}/api/names/Doe-Jane`]);
+  assertEquals(v.rerun, []);
+  assertEquals(v.statusLabel, "Updated in RDM");
+  assertEquals(v.actionLabel, "Update the entry");
+});
+
+Deno.test("push item: an update that changes no name shows no name change", () => {
+  const v = itemView(
+    pushItem({ detail: { changes: ["orcid"] }, after: { name: "Doe, J." } }),
+    "./people/",
+    BASE,
+  );
+  assertEquals(v.nameChange, null);
+});
+
+Deno.test("push item: a link to a names entry says it needs a signed-in RDM user", () => {
+  const link = itemView(pushItem(), "./people/", BASE).rdmLinks[0];
+  for (const text of [link.label, link.title]) {
+    assertStringIncludes(text, "Doe-Jane");
+    assertStringIncludes(text, "JSON API");
+    assertStringIncludes(text, "not a metadata record");
+    assertStringIncludes(text, "signed in");
+  }
+  assertEquals(link.label.startsWith("Doe-Jane"), true);
+});
+
+Deno.test("push item: a created entry links to the entry, a would-be one does not", () => {
+  const made = itemView(
+    pushItem({ action: "create", status: "created", before: null }),
+    "./people/",
+    BASE,
+  );
+  assertEquals(made.rdmLinks.length, 1);
+  const would = itemView(
+    pushItem({ action: "create", status: "would_create", before: null }),
+    "./people/",
+    BASE,
+  );
+  assertEquals(would.rdmLinks, []);
+  assertStringIncludes(would.statusLabel.toLowerCase(), "would");
+});
+
+Deno.test("push item: a revive says the entry was restored, links the person and the entry, and offers no rerun", () => {
+  const revived = itemView(
+    pushItem({
+      action: "revive",
+      status: "revived",
+      before: null,
+      detail: { changes: ["restored"] },
+    }),
+    "./people/",
+    BASE,
+  );
+  assertEquals(revived.actionLabel, "Restore a removed entry");
+  assertEquals(revived.statusLabel, "Entry restored in RDM");
+  assertEquals(revived.people, [{
+    clpid: "Doe-Jane",
+    href: "./people/Doe-Jane",
+  }]);
+  assertEquals(revived.rdmLinks.map((l) => l.href), [
+    `${BASE}/api/names/Doe-Jane`,
+  ]);
+  assertEquals(revived.rerun, []);
+  assertEquals(revived.nameChange, null);
+  const would = itemView(
+    pushItem({ action: "revive", status: "would_revive", before: null }),
+    "./people/",
+    BASE,
+  );
+  assertStringIncludes(would.statusLabel.toLowerCase(), "would");
+  assertEquals(would.rdmLinks, []); // the entry is still a removed one in a dry run
+});
+
+Deno.test("push item: a replace lists its people, shows the old name against COLD's, and links no entry", () => {
+  const v = itemView(
+    pushItem({
+      action: "replace",
+      rdm_id: "abcde-12345",
+      status: "replaced",
+      before: { name: "Doe, J." },
+      after: null,
+      detail: {
+        replaced_by: "Beta-B",
+        persons: ["Beta-B", "Alpha-A"],
+        changes: ["Alpha-A: name"],
+        names: { "Alpha-A": "Alpha, Ann", "Beta-B": "Beta, Bo" },
+      },
+    }),
+    "./people/",
+    BASE,
+  );
+  assertEquals(v.people.map((p) => p.clpid), ["Alpha-A", "Beta-B"]);
+  assertEquals(v.nameChange, { from: "Doe, J.", to: "Alpha, Ann; Beta, Bo" });
+  assertEquals(v.rdmLinks, []);
+  assertEquals(v.statusLabel, "Legacy entry removed in RDM");
+  assertEquals(v.rerun, []);
+});
+
+Deno.test("push item: a replace that changes no name shows no name change", () => {
+  const v = itemView(
+    pushItem({
+      action: "replace",
+      detail: {
+        replaced_by: "Doe-Jane",
+        persons: ["Doe-Jane"],
+        changes: ["orcid"],
+        names: { "Doe-Jane": "Doe, Jane" },
+      },
+    }),
+    "./people/",
+  );
+  assertEquals(v.nameChange, null);
+});
+
+Deno.test("push item: a removal names the entry, links no COLD person and no entry", () => {
+  const v = itemView(
+    pushItem({
+      action: "remove",
+      clpid: "Gone-G",
+      rdm_id: "Gone-G",
+      status: "removed",
+      detail: undefined,
+    }),
+    "./people/",
+    BASE,
+  );
+  assertEquals(v.people, []);
+  assertEquals(v.rdmLinks, []);
+  assertEquals(v.statusLabel, "Removed from RDM");
+  assertEquals(v.clpid, "Gone-G");
+});
+
+Deno.test("push item: a malformed identifier is fixed in COLD and the person can be pushed again", () => {
+  const v = itemView(
+    pushItem({
+      action: "malformed_identifier",
+      outcome: "warning",
+      rdm_id: null,
+      status: undefined,
+      detail: undefined,
+    }),
+    "./people/",
+  );
+  assertEquals(v.fixInCold, true);
+  assertEquals(v.rerun, ["Doe-Jane"]);
+  assertStringIncludes(v.fixNote, "COLD");
+  assertEquals(v.people.length, 1);
+});
+
+Deno.test("push item: a deleted id needs a person and offers no rerun", () => {
+  const v = itemView(
+    pushItem({
+      action: "id_deleted",
+      outcome: "needs_human",
+      status: undefined,
+      detail: { legacy_ids: [] },
+    }),
+    "./people/",
+    BASE,
+  );
+  assertEquals(v.fixInCold, false);
+  assertEquals(v.rerun, []);
+  assertStringIncludes(v.fixNote.toLowerCase(), "removed entry");
+  assertEquals(v.people.length, 1);
+});
+
+Deno.test("push item: an entry with stale keys links the entry and says the fix is outside COLD", () => {
+  const v = itemView(
+    pushItem({
+      action: "stale_entry",
+      outcome: "needs_human",
+      status: undefined,
+      detail: undefined,
+    }),
+    "./people/",
+    BASE,
+  );
+  assertEquals(v.rdmLinks.length, 1);
+  assertEquals(v.fixInCold, false);
+  assertStringIncludes(v.fixNote.toLowerCase(), "outside cold");
+});
+
+Deno.test("push item: a person COLD does not hold is not linked and the note says when a deletion reaches RDM", () => {
+  const v = itemView(
+    pushItem({
+      action: "not_in_cold",
+      outcome: "needs_human",
+      rdm_id: null,
+      status: undefined,
+      detail: undefined,
+    }),
+    "./people/",
+  );
+  assertEquals(v.people, []);
+  assertEquals(v.rerun, []);
+  assertStringIncludes(v.fixNote.toLowerCase(), "next full");
+});
+
+Deno.test("whoLabel: a row with no COLD person says what it is, and never that there is 'no COLD person'", () => {
+  const label = (over: Partial<ItemRow>) =>
+    itemView(pushItem(over), "./people/").whoLabel;
+  // a removed entry is an RDM entry; its clpid is not a COLD person's
+  assertEquals(
+    label({
+      action: "remove",
+      clpid: "Gone-G",
+      rdm_id: "Gone-G",
+      status: "removed",
+    }),
+    "RDM entry Gone-G",
+  );
+  assertEquals(
+    label({ action: "remove", clpid: "Old-Id", rdm_id: "abcde-12345" }),
+    "RDM entry abcde-12345",
+  );
+  // asked to push someone COLD does not hold: that is exactly what it is
+  assertEquals(
+    label({
+      action: "not_in_cold",
+      outcome: "needs_human",
+      clpid: "Nobody-Z",
+      rdm_id: null,
+    }),
+    "Nobody-Z (not in COLD)",
+  );
+  // an item from an earlier build: just the id it carries
+  assertEquals(
+    label({
+      action: "orphan_clpid",
+      outcome: "warning",
+      clpid: "Nobody-Z",
+      detail: { fix: "rdm" },
+    }),
+    "Nobody-Z",
+  );
+  assertEquals(
+    label({
+      action: "orphan_clpid",
+      outcome: "warning",
+      clpid: "",
+      rdm_id: "abcde-12345",
+      detail: { fix: "rdm" },
+    }),
+    "RDM entry abcde-12345",
+  );
+  assertEquals(
+    label({
+      action: "orphan_clpid",
+      outcome: "warning",
+      clpid: "",
+      rdm_id: null,
+      detail: { fix: "rdm" },
+    }),
+    "(no person named)",
+  );
+});
+
+Deno.test("whoLabel: a row that links a COLD person has no label, and no label anywhere says 'no COLD person'", () => {
+  const linked = itemView(
+    pushItem({
+      action: "malformed_identifier",
+      outcome: "warning",
+      rdm_id: null,
+      detail: undefined,
+    }),
+    "./people/",
+  );
+  assertEquals(linked.people.length, 1);
+  assertEquals(linked.whoLabel, "");
+  for (
+    const action of [
+      "create",
+      "update",
+      "replace",
+      "remove",
+      "malformed_identifier",
+      "id_deleted",
+      "stale_entry",
+      "not_in_cold",
+      "conflict",
+      "orphan_clpid",
+    ]
+  ) {
+    for (const clpid of ["", "X-Y"]) {
+      for (const rdm_id of [null, "r1"]) {
+        const v = itemView(pushItem({ action, clpid, rdm_id }), "./people/");
+        assert(
+          !v.whoLabel.toLowerCase().includes("no cold person"),
+          `${action}/${clpid}/${rdm_id}`,
+        );
+      }
+    }
+  }
+});
+
+Deno.test("push item: every action has its own words, and every status the push can report", () => {
+  const actions = [
+    "create",
+    "update",
+    "replace",
+    "remove",
+    "malformed_identifier",
+    "id_deleted",
+    "stale_entry",
+    "not_in_cold",
+  ];
+  const labels = new Set(
+    actions.map((a) =>
+      itemView(pushItem({ action: a }), "./people/").actionLabel
+    ),
+  );
+  assertEquals(labels.size, actions.length);
+  const statuses = [
+    "created",
+    "updated",
+    "replaced",
+    "removed",
+    "would_create",
+    "would_update",
+    "would_replace",
+    "would_remove",
+    "skipped",
+    "error",
+    "not_attempted",
+  ];
+  const words = new Set(
+    statuses.map((s) =>
+      itemView(pushItem({ status: s }), "./people/").statusLabel
+    ),
+  );
+  assertEquals(words.size, statuses.length);
+  for (const w of words) assert(w.length > 3);
+});
+
+Deno.test("push item: an action an older build stored keeps its own name as its label", () => {
+  assertEquals(
+    itemView(pushItem({ action: "conflict" }), "./people/").actionLabel,
+    "conflict",
+  );
+});
+
+Deno.test("push item: the result message is carried as text, and a name with markup stays text", () => {
+  const v = itemView(
+    pushItem({
+      before: { name: "<b>x</b>" },
+      result_message: "<img src=x>",
+    } as Partial<ItemRow>),
+    "./people/",
+  );
+  assertEquals(v.nameChange?.from, "<b>x</b>");
+  assertEquals(v.resultMessage, "<img src=x>");
 });
 
 // ---- an item row a person can act on ------------------------------------------------------

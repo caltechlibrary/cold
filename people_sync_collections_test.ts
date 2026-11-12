@@ -44,7 +44,7 @@ function runRow(id: string, scope: string, started: string) {
  *
  * @param run_id {string} the run the item belongs to
  * @param clpid {string} the person
- * @param outcome {string} applied, needs_human, needs_repair or warning
+ * @param outcome {string} applied, needs_human or warning
  * @param recorded {string} when the item was recorded
  * @returns {Record<string, unknown>} the item row
  * @example
@@ -60,7 +60,7 @@ function itemRow(
     run_id,
     clpid,
     rdm_id: `rdm-${clpid}`,
-    action: "add_identifier",
+    action: "update",
     outcome,
     message: `${outcome} for ${clpid}`,
     before: {},
@@ -181,14 +181,15 @@ Deno.test("people sync collections and named queries", async (t) => {
     );
 
     await t.step(
-      "the per-person query finds items that name the person in their detail, not only by the item's own clpid",
+      "the per-person query finds a replace that lists the person among its persons, not only by the item's own clpid",
       async () => {
         await api.create(ITEMS, "r4-00001", {
-          ...itemRow("r4", "Rdm-Old-Id", "needs_human", "2026-11-10 12:00:00"),
+          ...itemRow("r4", "Rdm-Old-Id", "applied", "2026-11-10 12:00:00"),
+          action: "replace",
           detail: {
-            fix: "cold",
-            cold: { "Cold-Person": { orcid: "", isni: "" } },
-            rdm: { ids: ["x"], clpids: ["Rdm-Old-Id"], orcids: [], isnis: [] },
+            replaced_by: "Rdm-Old-Id",
+            persons: ["Rdm-Old-Id", "Cold-Person"],
+            changes: ["name"],
           },
         });
         const byCold = await api.query(ITEMS, "people_sync_latest_item", {
@@ -249,6 +250,49 @@ Deno.test("people sync collections and named queries", async (t) => {
           "Warn-Abe",
           "Warn-Zed",
         ]);
+      },
+    );
+
+    await t.step(
+      "the newest run that covered one person is a full run or that person's own run, never another person's",
+      async () => {
+        const run = (id: string, scope: string, at: string) =>
+          api.create(RUNS, id, runRow(id, scope, at));
+        await run("c1", "all", "2026-12-01 09:00:00");
+        await run("c2", "clpid:Cover-A", "2026-12-01 10:00:00");
+        const own = await api.query(RUNS, "people_sync_latest_run_for", {
+          clpid: "Cover-A",
+        });
+        assertEquals(own.map((r) => r.run_id), ["c2"]); // their own run is newer than the full one
+        await run("c3", "all", "2026-12-01 11:00:00");
+        const full = await api.query(RUNS, "people_sync_latest_run_for", {
+          clpid: "Cover-A",
+        });
+        assertEquals(full.map((r) => r.run_id), ["c3"]); // a newer full run covers everyone
+        await run("c4", "clpid:Cover-B", "2026-12-01 12:00:00");
+        const other = await api.query(RUNS, "people_sync_latest_run_for", {
+          clpid: "Cover-A",
+        });
+        assertEquals(other.map((r) => r.run_id), ["c3"]); // another person's run never counts
+        const b = await api.query(RUNS, "people_sync_latest_run_for", {
+          clpid: "Cover-B",
+        });
+        assertEquals(b.map((r) => r.run_id), ["c4"]);
+      },
+    );
+
+    await t.step(
+      "the per-person run query matches the whole clpid, not a prefix",
+      async () => {
+        await api.create(
+          RUNS,
+          "c5",
+          runRow("c5", "clpid:Cover-ABC", "2026-12-02 09:00:00"),
+        );
+        const got = await api.query(RUNS, "people_sync_latest_run_for", {
+          clpid: "Cover-AB",
+        });
+        assertEquals(got.map((r) => r.run_id).includes("c5"), false);
       },
     );
 
@@ -337,6 +381,8 @@ Deno.test("people sync collections and named queries", async (t) => {
           thesis_id: "",
           authors_id: "",
           advisors_id: "",
+          caltech: true,
+          jpl: false,
         });
         const got = await api.query(PEOPLE, "people_sync_export");
         assertEquals(got.length, 2);
@@ -345,16 +391,23 @@ Deno.test("people sync collections and named queries", async (t) => {
         assertEquals(Object.keys(jane).sort(), [
           "advisors_id",
           "authors_id",
+          "caltech",
           "clpid",
           "family_name",
           "given_name",
           "isni",
+          "jpl",
           "orcid",
           "thesis_id",
         ]);
+        // the affiliation flags are exported (cold DR-0037); absent means false
+        assertEquals(Boolean(jane.caltech), false);
+        assertEquals(Boolean(jane.jpl), false);
         // alternate names are out of scope (cold DR-0036): never exported
         const roe = got.find((p) => p.clpid === "Roe-Rich");
         assert(!("alt_name" in roe));
+        assertEquals(Boolean(roe.caltech), true);
+        assertEquals(Boolean(roe.jpl), false);
       },
     );
   } finally {

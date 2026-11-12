@@ -12,6 +12,7 @@ import { parse, stringify } from "@std/yaml";
 export const RUNS = "people_sync_runs.ds";
 export const ITEMS = "people_sync_items.ds";
 export const PEOPLE = "people.ds";
+export const REPORTS = "reports.ds";
 
 /** freePort returns a TCP port nothing is listening on.
  *
@@ -121,9 +122,10 @@ async function run(cwd: string, cmd: string[]): Promise<void> {
  *
  * @returns {Promise<{api: Api, stop: () => Promise<void>}>} the client and a stopper
  * @example
- * const { api, stop } = await startServer();
+ * const { api, stop } = await startServer();          // the people sync collections
+ * const { api: a2 } = await startServer([REPORTS]);    // and the report queue as well
  */
-export async function startServer(): Promise<
+export async function startServer(extra: string[] = []): Promise<
   { api: Api; stop: () => Promise<void>; port: number }
 > {
   const dir = await Deno.makeTempDir({ prefix: "people_sync_test_" });
@@ -132,7 +134,7 @@ export async function startServer(): Promise<
     await Deno.readTextFile(new URL("./cold_api.yaml", import.meta.url)),
     // deno-lint-ignore no-explicit-any
   ) as any;
-  const wanted = [RUNS, ITEMS, PEOPLE];
+  const wanted = [RUNS, ITEMS, PEOPLE, ...extra];
   const collections = cfg.collections.filter(
     // deno-lint-ignore no-explicit-any
     (c: any) => wanted.includes(c.dataset),

@@ -10,7 +10,7 @@
  *   deno test --allow-run --allow-read --allow-write cold_reports_test.ts
  */
 
-import { assertEquals } from "@std/assert";
+import { assert, assertEquals, assertStringIncludes } from "@std/assert";
 import {
   Inputs,
   Report,
@@ -250,4 +250,53 @@ Deno.test("request_report: the trigger is stored with the request, so the runner
   const r = new Report("cold_reports.yaml");
   await r.request_report({ report_name: "run_people_sync", trigger: "human" });
   assertEquals((r.asObject() as { trigger: string }).trigger, "human");
+});
+
+// ---- a failed command says why (the batch path, no inputs) --------------------------
+//
+// A report with no inputs runs through dax, which reports only "Exited with code: N"
+// and sends the script's own message to the runner's console. The one-person sync
+// (with an input) already put stderr in the request's error. The batch button must
+// too, or a person sees "code 78" and nothing else.
+
+/** scriptRunnable builds a no-input text report over a script with the given body. */
+async function scriptRunnable(name: string, body: string): Promise<Runnable> {
+  const dir = await Deno.makeTempDir();
+  const scriptPath = `${dir}/${name}.bash`;
+  await Deno.writeTextFile(scriptPath, `#!/usr/bin/env bash\n${body}\n`);
+  await Deno.chmod(scriptPath, 0o755);
+  return new Runnable(name, scriptPath, name, [], false, "text/plain");
+}
+
+Deno.test("Runnable.run() with no inputs: a failing command's own message is in the error", async () => {
+  const r = await scriptRunnable(
+    "fail_with_reason",
+    `echo 'PEOPLE_SYNC_ENV is not set' >&2\nexit 78`,
+  );
+  const link = await r.run([]);
+  assert(link.startsWith("error://"), link);
+  assertStringIncludes(link, "PEOPLE_SYNC_ENV is not set");
+});
+
+Deno.test("Runnable.run() with no inputs: a command that fails quietly still gives its exit code", async () => {
+  const r = await scriptRunnable("fail_quietly", `exit 3`);
+  const link = await r.run([]);
+  assert(link.startsWith("error://"), link);
+  assertStringIncludes(link, "3");
+});
+
+Deno.test("Runnable.run() with no inputs: stdout is written exactly as before, one trailing newline dropped", async () => {
+  // dax's .text() dropped exactly one trailing newline; the fix must not change what a report contains.
+  const r = await scriptRunnable("quiet_ok", `printf 'a,b\\n1,2\\n\\n'`);
+  const link = await r.run([]);
+  assertEquals(await readAndRemove(link), "a,b\n1,2\n");
+  const r2 = await scriptRunnable("no_newline", `printf 'x'`);
+  assertEquals(await readAndRemove(await r2.run([])), "x");
+});
+
+Deno.test("Runnable.run() with no inputs: a command that succeeds but writes to stderr still succeeds", async () => {
+  const r = await scriptRunnable("noisy_ok", `echo 'a note' >&2\nprintf 'ok'`);
+  const link = await r.run([]);
+  assert(!link.startsWith("error://"), link);
+  assertEquals(await readAndRemove(link), "ok");
 });

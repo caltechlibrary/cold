@@ -46,11 +46,10 @@ export const PROGRAM_FILES = [
   "people_rdm_export_names.py",
 ] as const;
 
-/** Outcomes that get an item row (plan Phase 3); everything else is a count. */
+/** Outcomes that get an item row; every item is also counted (cold DR-0037). */
 export const ITEM_OUTCOMES = [
   "applied",
   "needs_human",
-  "needs_repair",
   "warning",
 ] as const;
 
@@ -299,6 +298,25 @@ export function remoteRunCommand(cfg: Config, inner: string): string {
   }`;
 }
 
+/** programCommand builds the command that runs the instance-side program under
+ * `timeout`, so a run that hangs ends on the host as well as here. The limit is
+ * PEOPLE_SYNC_STALE_SECONDS; `--kill-after` follows with a hard kill 30 seconds
+ * later. Without it a wrapper that gave up would leave the program running, and a
+ * second writer could start beside it.
+ *
+ * @param cfg {Config} the deployment settings
+ * @param args {string} the program's arguments, already quoted
+ * @returns {string} the string handed to ssh or SSM
+ * @example
+ * programCommand(cfg, "'/tmp/d/people_rdm_apply.py' --compact");
+ */
+export function programCommand(cfg: Config, args: string): string {
+  return remoteRunCommand(
+    cfg,
+    `timeout --kill-after=30 ${cfg.staleSeconds} uv run python ${args}`,
+  );
+}
+
 /** Transport moves the program to the RDM host, runs it and brings the report back. */
 export interface Transport {
   preflight(): Promise<void>;
@@ -313,8 +331,12 @@ const SSH_OPTS = ["-o", "BatchMode=yes", "-o", "ConnectTimeout=15"];
 export class SshTransport implements Transport {
   constructor(public cfg: Config, public exec: Exec = defaultExec) {}
 
-  private ssh(remote: string) {
-    return this.exec("ssh", [...SSH_OPTS, this.cfg.rdmHost, remote]);
+  private ssh(remote: string, timeoutMs?: number) {
+    return this.exec(
+      "ssh",
+      [...SSH_OPTS, this.cfg.rdmHost, remote],
+      timeoutMs ? { timeoutMs } : undefined,
+    );
   }
 
   private unavailable(what: string, r: { code: number; stderr: string }) {
@@ -387,8 +409,10 @@ export class SshTransport implements Transport {
       args.push("--compact");
       if (req.apply) args.push("--apply");
       if (req.scope) args.push("--scope", shellQuote(req.scope));
+      // The host ends the program at the limit; this call's own backstop is a little later.
       const run = await this.ssh(
-        remoteRunCommand(this.cfg, `uv run python ${args.join(" ")}`),
+        programCommand(this.cfg, args.join(" ")),
+        (cfg.staleSeconds + 120) * 1000,
       );
       if (run.code === 255) throw this.unavailable("the connection", run);
       // The report is owned by the run user and private, so read it as that user.
@@ -473,7 +497,8 @@ export class SsmTransport implements Transport {
     public exec: Exec = defaultExec,
     public sleep: (ms: number) => Promise<void> = (ms) =>
       new Promise((r) => setTimeout(r, ms)),
-    public pollSeconds = 1800,
+    // Never give up before the host has: the program is ended there at the run limit.
+    public pollSeconds = cfg.staleSeconds + 180,
   ) {}
 
   private aws(args: string[], timeoutMs = 60_000) {
@@ -679,7 +704,7 @@ export class SsmTransport implements Transport {
       if (req.apply) args.push("--apply");
       if (req.scope) args.push("--scope", shellQuote(req.scope));
       const run = await this.remote(
-        remoteRunCommand(cfg, `uv run python ${args.join(" ")}`),
+        programCommand(cfg, args.join(" ")),
         "the program",
       );
       // 4. pack the report on the instance (it is private to the run user)
@@ -774,44 +799,48 @@ export interface Report {
   results: Result[];
   summary: Record<string, number>;
   aborted: string | null;
-  /** set by --compact: `plan` has no info items and plan_counts counts every outcome */
+  /** the names index rebuild after a full push that wrote something, else null */
+  index?: { status: string; message: string } | null;
+  /** set by --compact: `plan` lists only what a person would review */
   compact?: boolean;
+  /** with --compact: every item counted by outcome */
   plan_counts?: Record<string, number>;
+  /** with --compact: the applied create, update, replace and remove items, counted */
+  action_counts?: Record<string, number>;
 }
 
-/** aboutPerson reports whether a plan item concerns one COLD person. An item's
- * own clpid is not enough: on a conflict it can be the RDM entry's clpid, which
- * COLD does not hold, while the COLD person it concerns is named in detail.cold.
- * Dropping those from a one-person run would make an unresolved problem look
- * resolved.
+/** aboutPerson reports whether a plan item concerns one COLD person: its own
+ * clpid, or one of the persons a replace names (a legacy entry can carry the
+ * clpids of two people).
  *
  * @param item {PlanItem} a plan item
  * @param clpid {string} a COLD clpid
- * @returns {boolean} true when the item carries that clpid or names that person
+ * @returns {boolean} true when the item carries that clpid or lists that person
  * @example
- * aboutPerson({ clpid: "Old-Id", detail: { cold: { "Alpha-A": {} } } }, "Alpha-A"); // true
+ * aboutPerson({ clpid: "A-A", detail: { persons: ["A-A", "A-B"] } }, "A-B"); // true
  */
 export function aboutPerson(item: PlanItem, clpid: string): boolean {
-  const cold = (item.detail as { cold?: Record<string, unknown> } | undefined)
-    ?.cold;
-  return item.clpid === clpid ||
-    (cold !== undefined && Object.hasOwn(cold, clpid));
+  const persons = (item.detail as { persons?: string[] } | undefined)?.persons;
+  return item.clpid === clpid || (persons?.includes(clpid) ?? false);
 }
 
-/** itemsFromReport turns a report into the item rows to store and the
- * per-outcome counts for the run row (plan Phase 3).
+const APPLIED_ACTIONS = ["create", "update", "revive", "replace", "remove"];
+
+/** itemsFromReport turns a report into the item rows to store and the counts
+ * for the run row.
  *
- * Only applied, needs_human, needs_repair and warning get a row; every `info`
- * item is counted. An applied item carries the status of
- * what happened to it. A one-person run keeps only that person's items and
- * counts.
+ * Only applied, needs_human and warning items get a row; with a compact report
+ * the program has already left out the creates and the replaces that change
+ * nothing a person would review, and counted them. An applied item carries the
+ * status of what happened to it, found by its action and its entry id. A
+ * one-person run keeps only that person's items.
  *
  * @param report {Report} the parsed report
  * @param runId {string} the run the rows belong to
  * @param recorded {string} "YYYY-MM-DD HH:MM:SS"
- * @returns {{items: {key: string, row: Record<string, unknown>}[], counts: Record<string, number>}} rows and counts
+ * @returns {{items: {key: string, row: Record<string, unknown>}[], counts: Record<string, number>, actions: Record<string, number>}} rows, counts by outcome, and counts by applied action
  * @example
- * const { items, counts } = itemsFromReport(report, "r1", "2026-11-10 09:00:00");
+ * const { items, counts, actions } = itemsFromReport(report, "r1", "2026-11-10 09:00:00");
  */
 export function itemsFromReport(
   report: Report,
@@ -820,45 +849,48 @@ export function itemsFromReport(
 ): {
   items: { key: string; row: Record<string, unknown> }[];
   counts: Record<string, number>;
+  actions: Record<string, number>;
 } {
   const scope = report.scope;
   const plan = report.plan.filter((i) =>
     scope == null || aboutPerson(i, scope)
   );
-  const byEntry = new Map<string, Result>();
-  const byCreate = new Map<string, Result>();
-  for (const r of report.results) {
-    if (r.action === "create") byCreate.set(r.clpid, r);
-    else if (r.rdm_id != null) byEntry.set(r.rdm_id, r);
-  }
+  const idOf = (x: { action: string; rdm_id: string | null; clpid: string }) =>
+    `${x.action}:${x.rdm_id ?? x.clpid}`;
+  const done = new Map<string, Result>();
+  for (const r of report.results) done.set(idOf(r), r);
   const counts: Record<string, number> = {};
+  const actions: Record<string, number> = {};
   const rows: Record<string, unknown>[] = [];
   const keep = new Set<string>(ITEM_OUTCOMES);
   for (const it of plan) {
     counts[it.outcome] = (counts[it.outcome] ?? 0) + 1;
+    if (it.outcome === "applied" && APPLIED_ACTIONS.includes(it.action)) {
+      actions[it.action] = (actions[it.action] ?? 0) + 1;
+    }
     if (!keep.has(it.outcome)) continue;
     const row: Record<string, unknown> = { run_id: runId, ...it, recorded };
     if (it.outcome === "applied") {
-      const res = it.action === "create"
-        ? byCreate.get(it.clpid)
-        : byEntry.get(String(it.rdm_id));
+      const res = done.get(idOf(it));
       row.status = res?.status ?? "not_attempted";
       if (res?.message) row.result_message = res.message;
     }
     rows.push(row);
   }
   const order = (o: unknown) => {
-    const i = ["needs_human", "needs_repair", "warning", "applied", "info"]
-      .indexOf(String(o));
+    const i = ["needs_human", "warning", "applied"].indexOf(String(o));
     return i < 0 ? 9 : i;
   };
   rows.sort((a, b) =>
     order(a.outcome) - order(b.outcome) ||
-    String(a.clpid).localeCompare(String(b.clpid))
+    String(a.clpid).localeCompare(String(b.clpid)) ||
+    String(a.action).localeCompare(String(b.action))
   );
   if (report.compact && report.plan_counts) {
     for (const k of Object.keys(counts)) delete counts[k];
     Object.assign(counts, report.plan_counts);
+    for (const k of Object.keys(actions)) delete actions[k];
+    Object.assign(actions, report.action_counts ?? {});
   }
   return {
     items: rows.map((row, i) => ({
@@ -866,6 +898,7 @@ export function itemsFromReport(
       row,
     })),
     counts,
+    actions,
   };
 }
 
@@ -958,8 +991,9 @@ export class Lock {
   ) {}
 
   /** acquire takes the lock or throws TempFail when another run holds it. A
-   * lock whose owner is gone, or which is older than the stale window, is
-   * cleared first. */
+   * lock whose owner is gone is cleared first. A lock whose owner is alive is
+   * never broken, however old (a run that hangs ends itself at its limit and
+   * releases it). Only a lock with no readable owner is judged by its age. */
   async acquire(): Promise<void> {
     for (let attempt = 0; attempt < 2; attempt++) {
       try {
@@ -980,15 +1014,22 @@ export class Lock {
           .trim().split(" ");
         pid = Number(p);
         when = Date.parse(t);
-      } catch { /* no owner file: treat as unknown and stale by age below */ }
-      const age = Number.isFinite(when)
-        ? (this.now().getTime() - when) / 1000
-        : Infinity;
-      const dead = pid > 0 && !(await this.pidAlive(pid));
-      if (dead || age > this.staleSeconds) {
+      } catch { /* no owner file */ }
+      if (!(pid > 0)) {
+        // The owner is unknown: only the age of the lock directory can say it is stale.
+        const mtime = (await Deno.stat(this.dir).catch(() => null))?.mtime;
+        const age = mtime
+          ? (this.now().getTime() - mtime.getTime()) / 1000
+          : Infinity;
+        if (age > this.staleSeconds) {
+          await Deno.remove(this.dir, { recursive: true });
+          continue;
+        }
+      } else if (!(await this.pidAlive(pid))) {
         await Deno.remove(this.dir, { recursive: true });
         continue;
       }
+      // A live owner is never broken, however old: the run ends itself at its limit.
       throw new SyncError(
         ExitCode.TempFail,
         `another people sync is running (pid ${pid || "unknown"}, since ${
@@ -1090,6 +1131,14 @@ export async function runSync(
       scope: scopeClpid || undefined,
     });
     if (res.report === "") {
+      if (res.code === 124 || res.code === 137) {
+        throw new SyncError(
+          ExitCode.Internal,
+          `the program was ended after ${cfg.staleSeconds} seconds (exit ${res.code}), the limit set by ` +
+            `PEOPLE_SYNC_STALE_SECONDS, and left no report; RDM may hold a partial push, and ` +
+            `the next full push completes it`,
+        );
+      }
       throw new SyncError(
         res.code === 69 ? ExitCode.Unavailable : ExitCode.Internal,
         `the program exited ${res.code} and left no report: ${res.stderr.trim()}`,
@@ -1101,13 +1150,19 @@ export async function runSync(
     } catch {
       throw new SyncError(ExitCode.Internal, "the report is not JSON");
     }
-    const { items, counts } = itemsFromReport(report, runId, stamp(now()));
+    const { items, counts, actions } = itemsFromReport(
+      report,
+      runId,
+      stamp(now()),
+    );
     for (const it of items) await store.putItem(it.key, it.row);
     const failed = res.code !== 0 || report.aborted != null;
     run.counts = {
       ...counts,
       people: scopeClpid ? 1 : people.length,
+      actions,
       results: report.summary,
+      ...(report.index ? { index: report.index } : {}),
     };
     run.state = failed ? "error" : "completed";
     if (failed) {
@@ -1141,7 +1196,7 @@ people_sync_items.ds. The default is a dry run; PEOPLE_SYNC_MODE=apply in the
 env file turns writing on.
 
 OPTIONS
-  -e, --env FILE       env file (default caltechauthors.env)
+  -e, --env FILE       env file naming the target (required; there is no default)
   -s, --scope CLPID    sync one person (default: everyone)
       --trigger NAME   who started it: human, cron (recorded; default unknown)
       --request-id ID  the report request that started it (recorded)
@@ -1159,7 +1214,8 @@ ENV FILE KEYS
   RDM_RUN_USER         the user the program runs as (ubuntu)
   IRDMTOOLS_SCRIPTS    irdmtools scripts directory (../irdmtools/scripts)
   PEOPLE_SYNC_MODE     dry-run (default) or apply
-  PEOPLE_SYNC_STALE_SECONDS  age after which a lock is stale (3600)
+  PEOPLE_SYNC_STALE_SECONDS  the longest a run may take (3600): the program is ended on the host
+                       at this limit and the lock released; a lock with a live owner is never broken
   COLD_API_URL         COLD's datasetd (http://localhost:8112)
 
 EXIT STATUS
@@ -1181,7 +1237,7 @@ export async function main(argv: string[]): Promise<number> {
     string: ["env", "scope", "trigger", "request-id"],
     boolean: ["help", "version", "license"],
     alias: { e: "env", s: "scope", h: "help", v: "version", l: "license" },
-    default: { env: "caltechauthors.env", trigger: "unknown" },
+    default: { trigger: "unknown" },
     unknown: (arg) => {
       if (arg.startsWith("-")) {
         throw new SyncError(ExitCode.Usage, `unknown option ${arg}`);
@@ -1203,6 +1259,13 @@ export async function main(argv: string[]): Promise<number> {
   }
   if (a._.length > 0) {
     throw new SyncError(ExitCode.Usage, "no arguments are taken; see --help");
+  }
+  if (!a.env) {
+    throw new SyncError(
+      ExitCode.Config,
+      "no env file: pass --env FILE. There is no default, so a run never " +
+        "targets an RDM by accident",
+    );
   }
   let text: string;
   try {

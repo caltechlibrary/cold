@@ -41,8 +41,16 @@ export interface RunRow {
   irdmtools_version?: string;
 }
 
-/** Detail is the structured part of an item (irdmtools people_rdm_match.py). */
+/** Detail is the structured part of an item (irdmtools people_rdm_match.py).
+ * `fix`, `cold` and `rdm` belong to items an earlier build stored; the push
+ * (cold DR-0037) records `changes`, and on a replace `persons`, `replaced_by`
+ * and `names` (COLD's name form for each person). */
 export interface Detail {
+  changes?: string[];
+  persons?: string[];
+  replaced_by?: string;
+  names?: Record<string, string>;
+  legacy_ids?: string[];
   fix?: "cold" | "rdm";
   cold?: Record<string, { orcid: string; isni: string }>;
   rdm?: {
@@ -65,6 +73,10 @@ export interface ItemRow {
   value: string;
   recorded: string;
   status?: string;
+  result_message?: string;
+  /** the entry as it was, and as the push wrote it, where the action has one */
+  before?: Record<string, unknown> | null;
+  after?: Record<string, unknown> | null;
   detail?: Detail;
 }
 
@@ -85,6 +97,70 @@ export interface SyncView {
   canStart: boolean;
   dryRun: boolean;
   reviewCount: number;
+}
+
+/** personOutcomeText says, for the person page, what the latest sync that
+ * covered this person found. A person with nothing to report has no item row,
+ * so an item can only be called their outcome when it belongs to the latest
+ * run that covered them: an older item has been superseded by a run that
+ * reported nothing (the person's problem was fixed), and showing it as current
+ * would make a fixed record look broken.
+ *
+ * @param item {ItemRow|undefined} the newest item recorded for the person, if any
+ * @param run {RunRow|undefined} the newest run that covered the person: a full run or their own
+ * @returns {string} one sentence for the person page
+ * @example
+ * personOutcomeText(undefined, run); // "Latest sync (2026-11-12 18:42:52, dry run: RDM was not changed): nothing to report for this person."
+ */
+export function personOutcomeText(
+  item: ItemRow | undefined,
+  run: RunRow | undefined,
+): string {
+  if (!run) return "This person has not been covered by a sync yet.";
+  if (run.state === "running") {
+    return `A sync that covers this person is running (started ${run.started}).`;
+  }
+  if (run.state === "error") {
+    return `The last sync that covered this person failed (${run.started}): ${
+      run.error || "no reason was recorded"
+    }.`;
+  }
+  if (item && item.run_id === run.run_id) {
+    const v = itemView(item, "./");
+    return `Latest outcome (${item.recorded}): ${v.outcomeLabel}${
+      v.statusLabel ? `, ${v.statusLabel}` : ""
+    }. ${v.message}`;
+  }
+  const how = run.mode === "dry-run"
+    ? "dry run: RDM was not changed"
+    : "applied";
+  return `Latest sync (${run.started}, ${how}): nothing to report for this person.`;
+}
+
+/** NextTarget is what `/rdm/people_sync/target` answers: where the next run goes. */
+export interface NextTarget {
+  mode: string;
+  rdm_url: string;
+  transport: string;
+}
+
+/** targetText says in words where the next sync will go and whether it will
+ * write, or that it cannot tell. Nothing rests on colour or position.
+ *
+ * @param t {NextTarget|{error: string}} the target, or why it could not be read
+ * @returns {string} one sentence for the status area
+ * @example
+ * targetText({ mode: "dry-run", rdm_url: "https://a.test", transport: "ssm" });
+ * // "Dry run: the next run will read RDM at https://a.test (over ssm) and change nothing"
+ */
+export function targetText(t: NextTarget | { error: string }): string {
+  if ("error" in t) return `The next run's target is unknown: ${t.error}`;
+  const where = `RDM at ${t.rdm_url} (over ${t.transport})`;
+  if (t.mode === "dry-run") {
+    return `Dry run: the next run will read ${where} and change nothing`;
+  }
+  if (t.mode === "apply") return `Apply: the next run will write to ${where}`;
+  return `Unknown mode "${t.mode}" for the next run at ${where}; treat it as writing`;
 }
 
 /** reviewCount counts the items in a run that need a person: needs_human,
@@ -280,6 +356,14 @@ export interface ItemView {
   rerun: string[];
   fixInCold: boolean;
   fixNote: string;
+  /** what the action does, in words (the stored action when it is not one of the push's) */
+  actionLabel: string;
+  /** the name RDM held and the name COLD gives, when the push changes a name */
+  nameChange: { from: string; to: string } | null;
+  /** the program's message about what happened to the item, as text */
+  resultMessage: string;
+  /** what the row is about when it links no COLD person (an RDM entry, say); "" when it links one */
+  whoLabel: string;
 }
 
 /** rdmLinkText words an RDM entry link: what it opens, and what it is not.
@@ -295,7 +379,7 @@ export interface ItemView {
  */
 export function rdmLinkText(id: string): { label: string; title: string } {
   const text =
-    `${id}, JSON API entry for a person in RDM, not a metadata record`;
+    `${id}, JSON API entry for a person in RDM, not a metadata record; you must be signed in to RDM to read it`;
   return { label: text, title: text };
 }
 
@@ -321,18 +405,103 @@ const OUTCOME_LABEL: Record<string, string> = {
   needs_human: "Needs a person to decide",
   needs_repair: "Needs repair in RDM",
   warning: "Warning",
-  applied: "Applied change",
+  applied: "Change made by the push",
+};
+
+const ACTION_LABEL: Record<string, string> = {
+  create: "Create the entry",
+  update: "Update the entry",
+  revive: "Restore a removed entry",
+  replace: "Replace a legacy entry",
+  remove: "Remove an entry COLD does not hold",
+  malformed_identifier: "Malformed identifier in COLD",
+  id_deleted: "Entry id used by a removed entry",
+  stale_entry: "Entry has keys RDM rejects",
+  not_in_cold: "Person not in COLD",
 };
 
 const STATUS_LABEL: Record<string, string> = {
   would_create: "Would be created (dry run)",
   would_update: "Would be updated (dry run)",
+  would_revive: "Removed entry would be restored (dry run)",
+  would_replace: "Legacy entry would be removed (dry run)",
+  would_remove: "Would be removed (dry run)",
   created: "Created in RDM",
   updated: "Updated in RDM",
+  revived: "Entry restored in RDM",
+  replaced: "Legacy entry removed in RDM",
+  removed: "Removed from RDM",
   skipped: "Skipped: RDM changed since the plan was made",
   error: "Failed",
   not_attempted: "Not attempted",
 };
+
+const HOW_TO_FIX: Record<string, { inCold: boolean; note: string }> = {
+  malformed_identifier: {
+    inCold: true,
+    note:
+      "Fix the ORCID or ISNI in COLD, then push the person again. Until then the value is not written to RDM.",
+  },
+  id_deleted: {
+    inCold: false,
+    note:
+      "RDM holds a removed entry with this id, so the person cannot be written under it. A person has to decide: restore the entry in RDM or give the person a different id. This stays listed until then.",
+  },
+  stale_entry: {
+    inCold: false,
+    note:
+      "The fix is outside COLD: the entry in RDM carries keys the service rejects, so it cannot be updated. This stays listed until it is corrected there.",
+  },
+  not_in_cold: {
+    inCold: false,
+    note:
+      "COLD does not hold this person, so nothing was pushed. A person deleted in COLD leaves RDM at the next full push.",
+  },
+};
+
+const PERSON_ACTIONS = [
+  "create",
+  "update",
+  "malformed_identifier",
+  "id_deleted",
+  "stale_entry",
+];
+
+/** whoLabel says what a row is about when no COLD person is linked. It names
+ * the thing the row really concerns and never suggests the person is missing
+ * from COLD, which would send a reader to look for the problem in RDM.
+ */
+function whoLabel(item: ItemRow): string {
+  if (item.action === "remove") return `RDM entry ${item.rdm_id ?? item.clpid}`;
+  if (item.action === "not_in_cold") return `${item.clpid} (not in COLD)`;
+  if (item.clpid) return item.clpid;
+  if (item.rdm_id) return `RDM entry ${item.rdm_id}`;
+  return "(no person named)";
+}
+
+function nameOf(rec: Record<string, unknown> | null | undefined): string {
+  const n = rec?.name;
+  return typeof n === "string" ? n : "";
+}
+
+/** nameChangeOf finds the name RDM held and the name COLD gives, when the
+ * push changes one: an update has both, a replace has the legacy entry's name
+ * and COLD's form for each person it names.
+ */
+function nameChangeOf(item: ItemRow): { from: string; to: string } | null {
+  const changes = item.detail?.changes ?? [];
+  const renames = changes.some((c) => c === "name" || c.endsWith(": name"));
+  if (!renames) return null;
+  if (item.action === "update") {
+    return { from: nameOf(item.before), to: nameOf(item.after) };
+  }
+  if (item.action === "replace") {
+    const names = item.detail?.names ?? {};
+    const to = Object.keys(names).sort().map((c) => names[c]).join("; ");
+    return { from: nameOf(item.before), to };
+  }
+  return null;
+}
 
 /** itemView turns a stored item into a row a person can act on: the COLD
  * people to open, both sides of the disagreement, where the fix can be made
@@ -345,7 +514,7 @@ const STATUS_LABEL: Record<string, string> = {
  * @example
  * const v = itemView(item, "./people/");
  */
-export function itemView(
+function itemViewCore(
   item: ItemRow,
   peopleBase: string,
   rdmBase = "",
@@ -355,6 +524,7 @@ export function itemView(
     outcomeLabel: OUTCOME_LABEL[item.outcome] ?? item.outcome,
     statusLabel: item.status ? (STATUS_LABEL[item.status] ?? item.status) : "",
     action: item.action,
+    actionLabel: ACTION_LABEL[item.action] ?? item.action,
     message: item.message,
     clpid: item.clpid,
     people: [],
@@ -364,12 +534,46 @@ export function itemView(
     rerun: [],
     fixInCold: false,
     fixNote: "",
+    nameChange: nameChangeOf(item),
+    resultMessage: item.result_message ?? "",
+    whoLabel: "",
+  };
+  const entryLink = (id: string | null) => {
+    const href = id ? rdmEntryHref(rdmBase, id) : "";
+    return id && href ? [{ id, href, ...rdmLinkText(id) }] : [];
   };
   if (item.outcome === "applied") {
-    // An applied item is about a COLD person by construction.
+    const persons = item.action === "replace"
+      ? [...(item.detail?.persons ?? [item.clpid])].sort()
+      : item.action === "remove"
+      ? []
+      : [item.clpid];
+    const exists = item.action === "update" ||
+      ((item.action === "create" || item.action === "revive") &&
+        (item.status === "created" || item.status === "revived"));
     return {
       ...base,
-      people: [{ clpid: item.clpid, href: personHref(peopleBase, item.clpid) }],
+      people: persons.map((c) => ({
+        clpid: c,
+        href: personHref(peopleBase, c),
+      })),
+      rdmLinks: exists ? entryLink(item.rdm_id) : [],
+    };
+  }
+  const how = item.detail?.fix === undefined
+    ? HOW_TO_FIX[item.action]
+    : undefined;
+  if (how !== undefined) {
+    const person = PERSON_ACTIONS.includes(item.action) && item.clpid !== "";
+    return {
+      ...base,
+      people: person
+        ? [{ clpid: item.clpid, href: personHref(peopleBase, item.clpid) }]
+        : [],
+      rdmLinks: item.action === "stale_entry" ? entryLink(item.rdm_id) : [],
+      rerun: how.inCold && person ? [item.clpid] : [],
+      fixInCold: how.inCold,
+      fixNote: how.note,
     };
   }
   const d = item.detail;
@@ -397,4 +601,23 @@ export function itemView(
       ? "Fix this in COLD, then rerun the sync for the person. If the RDM value is the wrong one, correcting it is outside COLD."
       : "The fix is outside COLD: the entry lives in RDM, and this stays listed until it is corrected there.",
   };
+}
+
+/** itemView turns a stored item into a row a person can act on (see itemViewCore
+ * for the parts), and says what the row is about when it links no COLD person.
+ *
+ * @param item {ItemRow} the stored item
+ * @param peopleBase {string} the People area relative to the page, such as "./people/"
+ * @param rdmBase {string} the RDM instance the run targeted
+ * @returns {ItemView} the row
+ * @example
+ * const v = itemView(item, "./people/", "https://authors.example.test");
+ */
+export function itemView(
+  item: ItemRow,
+  peopleBase: string,
+  rdmBase = "",
+): ItemView {
+  const v = itemViewCore(item, peopleBase, rdmBase);
+  return { ...v, whoLabel: v.people.length === 0 ? whoLabel(item) : "" };
 }

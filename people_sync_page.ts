@@ -17,18 +17,20 @@ import {
   type ItemView,
   itemView,
   latestSyncRequest,
+  type NextTarget,
   personHref,
   type RunRow,
   startRequest,
   type SyncRequest,
   type SyncView,
   syncView,
+  targetText,
 } from "./people_sync_view.ts";
 
 /** SyncClient talks to COLD's browser API and report queue. */
 export class SyncClient {
   api: ClientAPI;
-  constructor(baseUrl: string | URL) {
+  constructor(baseUrl: string | URL, public targetTimeoutMs = 5000) {
     this.api = new ClientAPI(String(baseUrl));
   }
 
@@ -60,6 +62,17 @@ export class SyncClient {
     return Array.isArray(rows) ? rows[0] : undefined;
   }
 
+  /** latestRunFor returns the newest run that covered one person: a run of
+   * everyone, or that person's own run. */
+  async latestRunFor(clpid: string): Promise<RunRow | undefined> {
+    const rows = await this.getJSON<RunRow[]>(
+      `api/people_sync_runs.ds/people_sync_latest_run_for/clpid?clpid=${
+        encodeURIComponent(clpid)
+      }`,
+    );
+    return Array.isArray(rows) ? rows[0] : undefined;
+  }
+
   /** runItems returns a run's items, those needing a person first. */
   async runItems(runId: string): Promise<ItemRow[]> {
     const rows = await this.getJSON<ItemRow[]>(
@@ -78,6 +91,39 @@ export class SyncClient {
       }`,
     );
     return Array.isArray(rows) ? rows[0] : undefined;
+  }
+
+  /** target asks where the NEXT run will go. It never throws: a failure comes
+   * back as `{ error }` so the page can say the target is unknown. */
+  async target(): Promise<NextTarget | { error: string }> {
+    try {
+      // A target that never answers must not hold the rest of the page back.
+      const resp = await fetch(this.url("rdm/people_sync/target"), {
+        headers: { "Accept": "application/json" },
+        signal: AbortSignal.timeout(this.targetTimeoutMs),
+      });
+      const body = await resp.json().catch(() => ({}));
+      if (!resp.ok) {
+        return {
+          error: typeof body?.error === "string"
+            ? body.error
+            : `HTTP ${resp.status}`,
+        };
+      }
+      return body as NextTarget;
+    } catch (err) {
+      const timedOut = err instanceof DOMException &&
+        err.name === "TimeoutError";
+      return {
+        error: timedOut
+          ? `the server did not answer within ${
+            this.targetTimeoutMs / 1000
+          } seconds`
+          : err instanceof Error
+          ? err.message
+          : String(err),
+      };
+    }
   }
 
   /** latestRequest returns the newest sync request in the report queue. */
@@ -125,6 +171,57 @@ function setIfChanged(e: HTMLElement, text: string): void {
   if (e.textContent !== text) e.textContent = text;
 }
 
+/** countsText says what a run counted, in words: the people examined, what needs
+ * a person, what the push did (or would do, in a dry run) and how the names index
+ * rebuild went. A run stored by an earlier build reports its repairs and its
+ * changes as a single number.
+ *
+ * @param run {RunRow} the run
+ * @returns {string} one sentence for the status area
+ * @example
+ * countsText(run); // "100 people examined; 1 need a person, 0 warnings; 3 created, ..."
+ */
+export function countsText(run: RunRow): string {
+  const c = run.counts ?? {};
+  const n = (k: string) => (typeof c[k] === "number" ? c[k] as number : 0);
+  const out = [
+    `${n("people")} people examined; ${n("needs_human")} need a person, ${
+      n("warning")
+    } warnings`,
+  ];
+  if (n("needs_repair") > 0) {
+    out[0] += `, ${n("needs_repair")} need repair in RDM`;
+  }
+  const a = (c.actions ?? null) as Record<string, number> | null;
+  if (a) {
+    const k = (x: string) => a[x] ?? 0;
+    const dry = run.mode === "dry-run";
+    out.push(
+      dry
+        ? `${k("create")} to create, ${k("update")} to update, ${
+          k("replace")
+        } legacy entries to replace, ${k("remove")} to remove`
+        : `${k("create")} created, ${k("update")} updated, ${
+          k("replace")
+        } legacy entries replaced, ${k("remove")} removed`,
+    );
+    // Removed entries that COLD holds again (cold DR-0039): said only when there were some.
+    if (k("revive") > 0) {
+      out[out.length - 1] += dry
+        ? `, ${k("revive")} to restore`
+        : `, ${k("revive")} restored`;
+    }
+  } else {
+    out.push(`${n("applied")} changes`);
+  }
+  const index = c.index as { status?: string; message?: string } | undefined;
+  if (index?.status === "rebuilt") out.push("names index rebuilt");
+  else if (index?.status === "error") {
+    out.push(`names index rebuild failed: ${index.message ?? ""}`);
+  }
+  return out.join("; ");
+}
+
 /** coldText describes what COLD holds for one person, in words. */
 function coldText(c: { clpid: string; orcid: string; isni: string }): string {
   const parts = [
@@ -162,13 +259,19 @@ export class PeopleSyncUI {
       mountElement: HTMLElement;
       baseUrl: string | URL;
       peopleBase?: string;
+      targetTimeoutMs?: number;
     },
   ) {
     this.mount = options.mountElement;
-    this.client = new SyncClient(options.baseUrl);
+    this.client = new SyncClient(options.baseUrl, options.targetTimeoutMs);
     this.peopleBase = options.peopleBase ?? "./people/";
     this.build();
     this.refresh();
+    // A sync filed elsewhere (another tab, cron) is picked up when the person
+    // comes back to this tab. A hidden tab sends nothing.
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") this.refresh();
+    });
   }
 
   private build(): void {
@@ -198,12 +301,13 @@ export class PeopleSyncUI {
 
   /** refresh reads the request queue and the latest runs and redraws. */
   async refresh(): Promise<void> {
-    let request, latest, full;
+    let request, latest, full, target;
     try {
-      [request, latest, full] = await Promise.all([
+      [request, latest, full, target] = await Promise.all([
         this.client.latestRequest(),
         this.client.latestRun(),
         this.client.latestFullRun(),
+        this.client.target(),
       ]);
     } catch (err) {
       setIfChanged(
@@ -217,7 +321,7 @@ export class PeopleSyncUI {
     const view = syncView(request, latest);
     this.view = view;
     setIfChanged(this.status, view.headline);
-    this.drawFacts(latest, full);
+    this.drawFacts(latest, full, target);
     this.setButton(view);
     await this.drawItems(latest, full);
     this.poll(view);
@@ -246,11 +350,18 @@ export class PeopleSyncUI {
     );
   }
 
-  private drawFacts(latest?: RunRow, full?: RunRow): void {
+  private drawFacts(
+    latest?: RunRow,
+    full?: RunRow,
+    target?: NextTarget | { error: string },
+  ): void {
     this.facts.replaceChildren();
     const add = (k: string, v: string) => {
       this.facts.append(el("dt", k), el("dd", v));
     };
+    // Where the NEXT run will go, from the env file the shim uses (plan Phase 5
+    // decision 3): the gate before any production button.
+    if (target) add("Next run", targetText(target));
     if (!latest) {
       add("Target", "no run recorded yet");
       return;
@@ -276,16 +387,7 @@ export class PeopleSyncUI {
     if (full && full.run_id !== latest.run_id) {
       add("Last full sync", `started ${full.started}, ${full.state}`);
     }
-    const c = latest.counts ?? {};
-    const n = (k: string) => (typeof c[k] === "number" ? c[k] as number : 0);
-    add(
-      "Counts",
-      `${n("people")} people examined; ${n("needs_human")} need a person, ${
-        n("needs_repair")
-      } need repair in RDM, ${n("warning")} warnings, ${
-        n("applied")
-      } changes, ${n("info")} with nothing to do`,
-    );
+    add("Counts", countsText(latest));
     if (latest.program_hash) {
       add(
         "Program",
@@ -389,9 +491,7 @@ export class PeopleSyncUI {
     const tr = el("tr");
     const who = el("th", "", { scope: "row" });
     if (v.people.length === 0) {
-      who.textContent = v.clpid
-        ? `${v.clpid} (no COLD person)`
-        : "(no COLD person)";
+      who.textContent = v.whoLabel;
     }
     v.people.forEach((p, i) => {
       if (i > 0) who.append(", ");
@@ -399,16 +499,37 @@ export class PeopleSyncUI {
     });
     const outcome = el("td", v.outcomeLabel);
     if (v.statusLabel) outcome.append(el("br"), v.statusLabel);
-    const found = el("td", v.message);
+    const found = el("td");
+    if (v.actionLabel !== v.action) found.append(v.actionLabel, el("br"));
+    found.append(v.message);
+    if (v.resultMessage) found.append(el("br"), v.resultMessage);
     const cold = el("td");
-    if (v.cold.length === 0) cold.textContent = "Nothing to show";
+    if (v.nameChange) cold.textContent = `Name: ${v.nameChange.to}`;
+    else if (v.cold.length === 0) cold.textContent = "Nothing to show";
     v.cold.forEach((c, i) => {
       if (i > 0) cold.append(el("br"));
       cold.append(coldText(c));
     });
     const rdm = el("td");
-    if (v.rdm === null) rdm.textContent = "Nothing to show";
-    else {
+    const entryLinks = () =>
+      v.rdmLinks.forEach((link, i) => {
+        if (i > 0) rdm.append(", ");
+        rdm.append(
+          el("a", link.id, {
+            href: link.href,
+            "aria-label": link.label,
+            title: link.title,
+          }),
+        );
+      });
+    if (v.rdm === null) {
+      if (v.nameChange) rdm.append(`Name: ${v.nameChange.from}`);
+      if (v.rdmLinks.length > 0) {
+        if (v.nameChange) rdm.append(el("br"));
+        rdm.append("Entry ");
+        entryLinks();
+      } else if (!v.nameChange) rdm.textContent = "Nothing to show";
+    } else {
       // The entry ids link to the entry in RDM; the other lines are text.
       rdm.append("Entry ");
       v.rdm.ids.forEach((id, i) => {

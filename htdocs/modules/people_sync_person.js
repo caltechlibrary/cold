@@ -167,6 +167,21 @@ var SYNC_REPORT_NAMES = [
   "run_people_sync",
   "run_people_sync_person"
 ];
+function personOutcomeText(item, run) {
+  if (!run) return "This person has not been covered by a sync yet.";
+  if (run.state === "running") {
+    return `A sync that covers this person is running (started ${run.started}).`;
+  }
+  if (run.state === "error") {
+    return `The last sync that covered this person failed (${run.started}): ${run.error || "no reason was recorded"}.`;
+  }
+  if (item && item.run_id === run.run_id) {
+    const v = itemView(item, "./");
+    return `Latest outcome (${item.recorded}): ${v.outcomeLabel}${v.statusLabel ? `, ${v.statusLabel}` : ""}. ${v.message}`;
+  }
+  const how = run.mode === "dry-run" ? "dry run: RDM was not changed" : "applied";
+  return `Latest sync (${run.started}, ${how}): nothing to report for this person.`;
+}
 function reviewCount(run) {
   const c = run?.counts ?? {};
   return [
@@ -227,7 +242,8 @@ function syncView(request, run) {
 function startRequest(clpid) {
   if (clpid === void 0) {
     return new URLSearchParams({
-      report_name: "run_people_sync"
+      report_name: "run_people_sync",
+      trigger: "human"
     });
   }
   if (!isValidClpid(clpid)) {
@@ -235,14 +251,15 @@ function startRequest(clpid) {
   }
   return new URLSearchParams({
     report_name: "run_people_sync_person",
-    clpid
+    clpid,
+    trigger: "human"
   });
 }
 function personHref(base, clpid) {
   return `${base.replace(/\/*$/, "/")}${encodeURIComponent(clpid)}`;
 }
 function rdmLinkText(id) {
-  const text = `${id}, JSON API entry for a person in RDM, not a metadata record`;
+  const text = `${id}, JSON API entry for a person in RDM, not a metadata record; you must be signed in to RDM to read it`;
   return {
     label: text,
     title: text
@@ -255,23 +272,97 @@ var OUTCOME_LABEL = {
   needs_human: "Needs a person to decide",
   needs_repair: "Needs repair in RDM",
   warning: "Warning",
-  applied: "Applied change"
+  applied: "Change made by the push"
+};
+var ACTION_LABEL = {
+  create: "Create the entry",
+  update: "Update the entry",
+  revive: "Restore a removed entry",
+  replace: "Replace a legacy entry",
+  remove: "Remove an entry COLD does not hold",
+  malformed_identifier: "Malformed identifier in COLD",
+  id_deleted: "Entry id used by a removed entry",
+  stale_entry: "Entry has keys RDM rejects",
+  not_in_cold: "Person not in COLD"
 };
 var STATUS_LABEL = {
   would_create: "Would be created (dry run)",
   would_update: "Would be updated (dry run)",
+  would_revive: "Removed entry would be restored (dry run)",
+  would_replace: "Legacy entry would be removed (dry run)",
+  would_remove: "Would be removed (dry run)",
   created: "Created in RDM",
   updated: "Updated in RDM",
+  revived: "Entry restored in RDM",
+  replaced: "Legacy entry removed in RDM",
+  removed: "Removed from RDM",
   skipped: "Skipped: RDM changed since the plan was made",
   error: "Failed",
   not_attempted: "Not attempted"
 };
-function itemView(item, peopleBase, rdmBase = "") {
+var HOW_TO_FIX = {
+  malformed_identifier: {
+    inCold: true,
+    note: "Fix the ORCID or ISNI in COLD, then push the person again. Until then the value is not written to RDM."
+  },
+  id_deleted: {
+    inCold: false,
+    note: "RDM holds a removed entry with this id, so the person cannot be written under it. A person has to decide: restore the entry in RDM or give the person a different id. This stays listed until then."
+  },
+  stale_entry: {
+    inCold: false,
+    note: "The fix is outside COLD: the entry in RDM carries keys the service rejects, so it cannot be updated. This stays listed until it is corrected there."
+  },
+  not_in_cold: {
+    inCold: false,
+    note: "COLD does not hold this person, so nothing was pushed. A person deleted in COLD leaves RDM at the next full push."
+  }
+};
+var PERSON_ACTIONS = [
+  "create",
+  "update",
+  "malformed_identifier",
+  "id_deleted",
+  "stale_entry"
+];
+function whoLabel(item) {
+  if (item.action === "remove") return `RDM entry ${item.rdm_id ?? item.clpid}`;
+  if (item.action === "not_in_cold") return `${item.clpid} (not in COLD)`;
+  if (item.clpid) return item.clpid;
+  if (item.rdm_id) return `RDM entry ${item.rdm_id}`;
+  return "(no person named)";
+}
+function nameOf(rec) {
+  const n = rec?.name;
+  return typeof n === "string" ? n : "";
+}
+function nameChangeOf(item) {
+  const changes = item.detail?.changes ?? [];
+  const renames = changes.some((c) => c === "name" || c.endsWith(": name"));
+  if (!renames) return null;
+  if (item.action === "update") {
+    return {
+      from: nameOf(item.before),
+      to: nameOf(item.after)
+    };
+  }
+  if (item.action === "replace") {
+    const names = item.detail?.names ?? {};
+    const to = Object.keys(names).sort().map((c) => names[c]).join("; ");
+    return {
+      from: nameOf(item.before),
+      to
+    };
+  }
+  return null;
+}
+function itemViewCore(item, peopleBase, rdmBase = "") {
   const base = {
     outcome: item.outcome,
     outcomeLabel: OUTCOME_LABEL[item.outcome] ?? item.outcome,
     statusLabel: item.status ? STATUS_LABEL[item.status] ?? item.status : "",
     action: item.action,
+    actionLabel: ACTION_LABEL[item.action] ?? item.action,
     message: item.message,
     clpid: item.clpid,
     people: [],
@@ -280,17 +371,56 @@ function itemView(item, peopleBase, rdmBase = "") {
     rdmLinks: [],
     rerun: [],
     fixInCold: false,
-    fixNote: ""
+    fixNote: "",
+    nameChange: nameChangeOf(item),
+    resultMessage: item.result_message ?? "",
+    whoLabel: ""
+  };
+  const entryLink = (id) => {
+    const href = id ? rdmEntryHref(rdmBase, id) : "";
+    return id && href ? [
+      {
+        id,
+        href,
+        ...rdmLinkText(id)
+      }
+    ] : [];
   };
   if (item.outcome === "applied") {
+    const persons = item.action === "replace" ? [
+      ...item.detail?.persons ?? [
+        item.clpid
+      ]
+    ].sort() : item.action === "remove" ? [] : [
+      item.clpid
+    ];
+    const exists = item.action === "update" || (item.action === "create" || item.action === "revive") && (item.status === "created" || item.status === "revived");
     return {
       ...base,
-      people: [
+      people: persons.map((c) => ({
+        clpid: c,
+        href: personHref(peopleBase, c)
+      })),
+      rdmLinks: exists ? entryLink(item.rdm_id) : []
+    };
+  }
+  const how = item.detail?.fix === void 0 ? HOW_TO_FIX[item.action] : void 0;
+  if (how !== void 0) {
+    const person = PERSON_ACTIONS.includes(item.action) && item.clpid !== "";
+    return {
+      ...base,
+      people: person ? [
         {
           clpid: item.clpid,
           href: personHref(peopleBase, item.clpid)
         }
-      ]
+      ] : [],
+      rdmLinks: item.action === "stale_entry" ? entryLink(item.rdm_id) : [],
+      rerun: how.inCold && person ? [
+        item.clpid
+      ] : [],
+      fixInCold: how.inCold,
+      fixNote: how.note
     };
   }
   const d = item.detail;
@@ -328,11 +458,20 @@ function itemView(item, peopleBase, rdmBase = "") {
     fixNote: fixInCold ? "Fix this in COLD, then rerun the sync for the person. If the RDM value is the wrong one, correcting it is outside COLD." : "The fix is outside COLD: the entry lives in RDM, and this stays listed until it is corrected there."
   };
 }
+function itemView(item, peopleBase, rdmBase = "") {
+  const v = itemViewCore(item, peopleBase, rdmBase);
+  return {
+    ...v,
+    whoLabel: v.people.length === 0 ? whoLabel(item) : ""
+  };
+}
 
 // people_sync_page.ts
 var SyncClient = class {
+  targetTimeoutMs;
   api;
-  constructor(baseUrl) {
+  constructor(baseUrl, targetTimeoutMs = 5e3) {
+    this.targetTimeoutMs = targetTimeoutMs;
     this.api = new ClientAPI(String(baseUrl));
   }
   url(path) {
@@ -357,6 +496,12 @@ var SyncClient = class {
     const rows = await this.getJSON("api/people_sync_runs.ds/people_sync_latest_full_run");
     return Array.isArray(rows) ? rows[0] : void 0;
   }
+  /** latestRunFor returns the newest run that covered one person: a run of
+   * everyone, or that person's own run. */
+  async latestRunFor(clpid) {
+    const rows = await this.getJSON(`api/people_sync_runs.ds/people_sync_latest_run_for/clpid?clpid=${encodeURIComponent(clpid)}`);
+    return Array.isArray(rows) ? rows[0] : void 0;
+  }
   /** runItems returns a run's items, those needing a person first. */
   async runItems(runId) {
     const rows = await this.getJSON(`api/people_sync_items.ds/people_sync_run_items/run_id?run_id=${encodeURIComponent(runId)}`);
@@ -366,6 +511,30 @@ var SyncClient = class {
   async latestItem(clpid) {
     const rows = await this.getJSON(`api/people_sync_items.ds/people_sync_latest_item/clpid?clpid=${encodeURIComponent(clpid)}`);
     return Array.isArray(rows) ? rows[0] : void 0;
+  }
+  /** target asks where the NEXT run will go. It never throws: a failure comes
+   * back as `{ error }` so the page can say the target is unknown. */
+  async target() {
+    try {
+      const resp = await fetch(this.url("rdm/people_sync/target"), {
+        headers: {
+          "Accept": "application/json"
+        },
+        signal: AbortSignal.timeout(this.targetTimeoutMs)
+      });
+      const body = await resp.json().catch(() => ({}));
+      if (!resp.ok) {
+        return {
+          error: typeof body?.error === "string" ? body.error : `HTTP ${resp.status}`
+        };
+      }
+      return body;
+    } catch (err) {
+      const timedOut = err instanceof DOMException && err.name === "TimeoutError";
+      return {
+        error: timedOut ? `the server did not answer within ${this.targetTimeoutMs / 1e3} seconds` : err instanceof Error ? err.message : String(err)
+      };
+    }
   }
   /** latestRequest returns the newest sync request in the report queue. */
   async latestRequest() {
@@ -422,24 +591,25 @@ var PeopleSyncPersonUI = class {
       this.start();
     });
     this.refresh();
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") this.refresh();
+    });
   }
   /** refresh reads the latest request and this person's latest outcome. */
   async refresh() {
     try {
-      const [request, run, item] = await Promise.all([
+      const [request, run, item, covering] = await Promise.all([
         this.client.latestRequest(),
         this.client.latestRun(),
-        this.client.latestItem(this.clpid)
+        this.client.latestItem(this.clpid),
+        this.client.latestRunFor(this.clpid)
       ]);
       const view = syncView(request, run);
       const busy = view.state === "pending" || view.state === "running";
       this.button.setAttribute("aria-disabled", String(busy));
       const text = busy || view.state === "error" || view.state === "stalled" ? view.headline : "";
       if (this.status.textContent !== text) this.status.textContent = text;
-      const line = item === void 0 ? "No sync outcome is recorded for this person (a person with nothing to report has none)." : (() => {
-        const v = itemView(item, "./");
-        return `Latest outcome (${item.recorded}): ${v.outcomeLabel}${v.statusLabel ? `, ${v.statusLabel}` : ""}. ${v.message}`;
-      })();
+      const line = personOutcomeText(item, covering);
       if (this.outcome.textContent !== line) this.outcome.textContent = line;
       if (busy && this.timer === void 0) {
         this.timer = setInterval(() => this.refresh(), 5e3);
