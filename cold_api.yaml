@@ -179,7 +179,9 @@ collections:
 
       # The people export the COLD/RDM sync sends to the RDM instance
       # (DR-0032, DR-0031). Identity fields only, the matcher's input: email,
-      # bio, internal notes and alt_name never leave COLD (DR-0036).
+      # bio, internal notes and alt_name never leave COLD (DR-0036). The ror
+      # field is exported: with the caltech and jpl boxes it decides the
+      # person's affiliations (DR-0040).
       people_sync_export: |
         select json_object(
           'clpid', src->>'clpid',
@@ -190,6 +192,7 @@ collections:
           'thesis_id', coalesce(src->>'thesis_id', ''),
           'authors_id', coalesce(src->>'authors_id', ''),
           'advisors_id', coalesce(src->>'advisors_id', ''),
+          'ror', coalesce(src->>'ror', ''),
           'caltech', coalesce(src->>'caltech', 0),
           'jpl', coalesce(src->>'jpl', 0)
         ) as src

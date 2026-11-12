@@ -367,6 +367,7 @@ Deno.test("people sync collections and named queries", async (t) => {
           thesis_id: "Doe-Jane",
           authors_id: "",
           advisors_id: "",
+          ror: "https://ror.org/05dxps055",
           alt_name: [{ family_name: "Doe", given_name: "J." }], // stays in COLD
           email: "jane@example.test",
           bio: "must not leave COLD",
@@ -398,8 +399,12 @@ Deno.test("people sync collections and named queries", async (t) => {
           "isni",
           "jpl",
           "orcid",
+          "ror",
           "thesis_id",
         ]);
+        // the ROR is exported as COLD holds it, and drives the person's
+        // affiliations (cold DR-0040); a person without one exports ""
+        assertEquals(jane.ror, "https://ror.org/05dxps055");
         // the affiliation flags are exported (cold DR-0037); absent means false
         assertEquals(Boolean(jane.caltech), false);
         assertEquals(Boolean(jane.jpl), false);
@@ -408,6 +413,7 @@ Deno.test("people sync collections and named queries", async (t) => {
         assert(!("alt_name" in roe));
         assertEquals(Boolean(roe.caltech), true);
         assertEquals(Boolean(roe.jpl), false);
+        assertEquals(roe.ror, "");
       },
     );
   } finally {
