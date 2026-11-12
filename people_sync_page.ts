@@ -19,7 +19,6 @@ import {
   latestSyncRequest,
   personHref,
   type RunRow,
-  splitItems,
   startRequest,
   type SyncRequest,
   type SyncView,
@@ -320,20 +319,17 @@ export class PeopleSyncUI {
       return;
     }
     this.results.dataset.run = shown.run_id + shown.finished;
-    const { action, candidates } = splitItems(items);
     const h = el("h2", "Items from the last full sync", { id: "ps-items-h" });
     const lead = el(
       "p",
       items.length === 0
         ? "This run has nothing to list."
-        : action.length === 0
-        ? `The run started ${shown.started} has nothing to act on.`
-        : `${action.length} items from the run started ${shown.started}. ` +
+        : `${items.length} items from the run started ${shown.started}. ` +
           "Items that need a person come first. To correct one, follow the link to the " +
           "person in COLD, fix it there, then use Rerun for that person.",
     );
     this.results.replaceChildren(h, lead);
-    this.drawTables(action, candidates, shown);
+    this.results.append(this.table(items, shown));
     if (latest && full && latest.run_id !== full.run_id) {
       await this.drawScoped(latest);
     }
@@ -352,49 +348,19 @@ export class PeopleSyncUI {
       );
       return;
     }
-    const { action, candidates } = splitItems(items);
-    this.drawTables(action, candidates, run);
+    this.results.append(this.table(items, run));
   }
 
-  /** drawTables adds the table of items to act on, then, apart from it under
-   * its own heading, the table of possible alternate names. */
-  private drawTables(
-    action: ItemRow[],
-    candidates: ItemRow[],
-    run: RunRow,
-  ): void {
-    if (action.length > 0) this.results.append(this.table(action, run));
-    if (candidates.length === 0) return;
-    this.results.append(
-      el("h3", `Possible alternate names (${candidates.length})`),
-      el(
-        "p",
-        "RDM holds these name forms for the person and COLD does not. They are suggestions, " +
-          "not problems; nothing was changed.",
-      ),
-      this.table(candidates, run, "Possible alternate names"),
-    );
-  }
-
-  private table(
-    items: ItemRow[],
-    run: RunRow,
-    kind = "Items",
-  ): HTMLElement {
+  private table(items: ItemRow[], run: RunRow): HTMLElement {
     const wrap = el("div", "", {
       role: "region",
-      "aria-label": `${kind} from the run started ${run.started}`,
+      "aria-label": `Items from the run started ${run.started}`,
       tabindex: "0",
       class: "ps-scroll",
     });
     const t = el("table", "", { class: "ps-items" });
     t.append(
-      el(
-        "caption",
-        kind === "Items"
-          ? `Sync items, run started ${run.started}`
-          : `${kind}, run started ${run.started}`,
-      ),
+      el("caption", `Sync items, run started ${run.started}`),
     );
     const head = el("tr");
     for (

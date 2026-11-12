@@ -217,7 +217,7 @@ Deno.test("people sync collections and named queries", async (t) => {
     );
 
     await t.step(
-      "possible alternate names sort after every other outcome in a run's items",
+      "items sort by severity, then clpid, so the table is stable between reloads",
       async () => {
         await api.create(
           RUNS,
@@ -225,15 +225,15 @@ Deno.test("people sync collections and named queries", async (t) => {
           runRow("r6", "all", "2026-11-11 08:00:00"),
         );
         const rows: [string, string, string][] = [
-          ["r6-00001", "Alt-Zed", "info"],
+          ["r6-00001", "Warn-Zed", "warning"],
           ["r6-00002", "Applied-Two", "applied"],
-          ["r6-00003", "Alt-Abe", "info"],
+          ["r6-00003", "Warn-Abe", "warning"],
           ["r6-00004", "Human-Three", "needs_human"],
         ];
         for (const [key, clpid, outcome] of rows) {
           await api.create(ITEMS, key, {
             ...itemRow("r6", clpid, outcome, "2026-11-11 08:00:01"),
-            action: outcome === "info" ? "alt_name_candidate" : "conflict",
+            action: "conflict",
           });
         }
         const got = await api.query(ITEMS, "people_sync_run_items", {
@@ -241,24 +241,26 @@ Deno.test("people sync collections and named queries", async (t) => {
         });
         assertEquals(got.map((i) => i.outcome), [
           "needs_human",
+          "warning",
+          "warning",
           "applied",
-          "info",
-          "info",
         ]);
-        // and by clpid inside the group, so the table is stable between reloads
-        assertEquals(got.slice(2).map((i) => i.clpid), ["Alt-Abe", "Alt-Zed"]);
+        assertEquals(got.slice(1, 3).map((i) => i.clpid), [
+          "Warn-Abe",
+          "Warn-Zed",
+        ]);
       },
     );
 
     await t.step(
-      "a person with a problem and a suggestion in the same run gets the problem as their latest item, whichever was stored first",
+      "a person with a needs_human item and a warning in the same run gets the needs_human item as their latest, whichever was stored first",
       async () => {
-        // The suggestion is stored FIRST in one case and LAST in the other, so a
+        // The warning is stored FIRST in one case and LAST in the other, so a
         // query that left ties to scan order could not pass both.
         const at = "2026-11-11 09:00:01";
         await api.create(ITEMS, "r7-00001", {
-          ...itemRow("r7", "Both-One", "info", at),
-          action: "alt_name_candidate",
+          ...itemRow("r7", "Both-One", "warning", at),
+          action: "orphan_clpid",
         });
         await api.create(ITEMS, "r7-00002", {
           ...itemRow("r7", "Both-One", "needs_human", at),
@@ -269,8 +271,8 @@ Deno.test("people sync collections and named queries", async (t) => {
           action: "conflict",
         });
         await api.create(ITEMS, "r7-00004", {
-          ...itemRow("r7", "Both-Two", "info", at),
-          action: "alt_name_candidate",
+          ...itemRow("r7", "Both-Two", "warning", at),
+          action: "orphan_clpid",
         });
         for (const clpid of ["Both-One", "Both-Two"]) {
           const got = await api.query(ITEMS, "people_sync_latest_item", {
@@ -279,19 +281,10 @@ Deno.test("people sync collections and named queries", async (t) => {
           assertEquals(got.length, 1);
           assertEquals(got[0].outcome, "needs_human", clpid);
         }
-        // a person with only a suggestion still gets it
-        await api.create(ITEMS, "r7-00005", {
-          ...itemRow("r7", "Only-Alt", "info", at),
-          action: "alt_name_candidate",
-        });
-        const only = await api.query(ITEMS, "people_sync_latest_item", {
-          clpid: "Only-Alt",
-        });
-        assertEquals(only[0].action, "alt_name_candidate");
-        // newest still wins over severity: a newer suggestion beats an older problem
+        // newest still wins over severity: a newer warning beats an older problem
         await api.create(ITEMS, "r8-00001", {
-          ...itemRow("r8", "Both-One", "info", "2026-11-11 10:00:00"),
-          action: "alt_name_candidate",
+          ...itemRow("r8", "Both-One", "warning", "2026-11-11 10:00:00"),
+          action: "orphan_clpid",
         });
         const newer = await api.query(ITEMS, "people_sync_latest_item", {
           clpid: "Both-One",
@@ -330,7 +323,7 @@ Deno.test("people sync collections and named queries", async (t) => {
           thesis_id: "Doe-Jane",
           authors_id: "",
           advisors_id: "",
-          alt_name: [{ family_name: "Doe", given_name: "J." }],
+          alt_name: [{ family_name: "Doe", given_name: "J." }], // stays in COLD
           email: "jane@example.test",
           bio: "must not leave COLD",
           internal_notes: "must not leave COLD",
@@ -349,10 +342,8 @@ Deno.test("people sync collections and named queries", async (t) => {
         assertEquals(got.length, 2);
         const jane = got.find((p) => p.clpid === "Doe-Jane");
         assertEquals(jane.orcid, "0000-0002-1825-0097");
-        assertEquals(jane.alt_name, [{ family_name: "Doe", given_name: "J." }]);
         assertEquals(Object.keys(jane).sort(), [
           "advisors_id",
-          "alt_name",
           "authors_id",
           "clpid",
           "family_name",
@@ -361,9 +352,9 @@ Deno.test("people sync collections and named queries", async (t) => {
           "orcid",
           "thesis_id",
         ]);
-        // a person with no alt_name still exports a list, which the matcher expects
+        // alternate names are out of scope (cold DR-0036): never exported
         const roe = got.find((p) => p.clpid === "Roe-Rich");
-        assertEquals(roe.alt_name, []);
+        assert(!("alt_name" in roe));
       },
     );
   } finally {

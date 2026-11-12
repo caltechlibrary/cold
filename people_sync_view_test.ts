@@ -10,6 +10,7 @@ import {
   assertStringIncludes,
   assertThrows,
 } from "@std/assert";
+import * as view from "./people_sync_view.ts";
 import {
   type ItemRow,
   itemView,
@@ -17,7 +18,6 @@ import {
   personHref,
   reviewCount,
   type RunRow,
-  splitItems,
   startRequest,
   type SyncRequest,
   syncView,
@@ -317,69 +317,20 @@ Deno.test("item: a COLD-fixable problem links the COLD person, shows both sides 
   assertEquals(v.fixInCold, true);
 });
 
-// ---- possible alternate names (plan, Phase 5 decision 1, 2026-11-11) ------------------------
+// ---- alternate names are out of scope (cold DR-0036 decision 7) ------------------------
 
-function candidate(over: Partial<ItemRow> = {}): ItemRow {
-  return item({
-    action: "alt_name_candidate",
-    outcome: "info",
-    message: "RDM name form 'Doe, J.' could be an alt_name of Doe-Jane",
-    scheme: "alt_name",
-    value: "Doe, J.",
-    ...over,
-  });
-}
-
-Deno.test("item: a possible alternate name is labelled as one, not as a problem", () => {
-  const v = itemView(candidate(), "./people/");
-  assertEquals(v.outcomeLabel, "Possible alternate name");
-  assertStringIncludes(v.message, "Doe, J.");
+Deno.test("view: nothing sets alternate names apart any more", () => {
+  assert(!("splitItems" in view));
+  assert(!("isAltNameCandidate" in view));
 });
 
-Deno.test("item: a possible alternate name links the person, shows both sides and offers the rerun", () => {
-  const v = itemView(candidate(), "./people/");
-  assertEquals(v.people, [{ clpid: "Doe-Jane", href: "./people/Doe-Jane" }]);
-  assertEquals(v.rdm?.ids, ["abcde-12345"]);
-  assertEquals(v.rdm?.clpids, ["Doe-Jane"]);
-  assertEquals(v.rerun, ["Doe-Jane"]);
-  assertEquals(v.fixInCold, true);
-});
-
-Deno.test("item: a possible alternate name says what to do and that nothing is wrong in RDM", () => {
-  const note = itemView(candidate(), "./people/").fixNote.toLowerCase();
-  assertStringIncludes(note, "alternate name");
-  assertStringIncludes(note, "nothing is wrong");
-  // and it is not the generic conflict wording
-  assert(!note.includes("if the rdm value is the wrong one"));
-});
-
-Deno.test("item: a candidate stored without detail still says so plainly", () => {
-  const v = itemView(candidate({ detail: undefined }), "./people/");
-  assertEquals(v.outcomeLabel, "Possible alternate name");
-  assertStringIncludes(v.fixNote, "No detail was recorded");
-});
-
-Deno.test("split: possible alternate names are set apart, every other item stays in order", () => {
-  const a = item({ clpid: "A-A" });
-  const c1 = candidate({ clpid: "B-B" });
-  const w = item({ clpid: "C-C", outcome: "warning", action: "orphan_clpid" });
-  const c2 = candidate({ clpid: "D-D" });
-  const out = splitItems([a, c1, w, c2]);
-  assertEquals(out.action.map((i) => i.clpid), ["A-A", "C-C"]);
-  assertEquals(out.candidates.map((i) => i.clpid), ["B-B", "D-D"]);
-});
-
-Deno.test("split: only an info item with that action counts as a candidate", () => {
-  // the same action on a non-info outcome, and an info item of another action
-  const odd1 = item({ action: "alt_name_candidate", outcome: "warning" });
-  const odd2 = item({ action: "no_orcid", outcome: "info" });
-  const out = splitItems([odd1, odd2]);
-  assertEquals(out.candidates, []);
-  assertEquals(out.action.length, 2);
-});
-
-Deno.test("split: nothing in, nothing out", () => {
-  assertEquals(splitItems([]), { action: [], candidates: [] });
+Deno.test("item: an alt_name_candidate stored by an earlier build reads like any other item", () => {
+  const v = itemView(
+    item({ action: "alt_name_candidate", outcome: "info" }),
+    "./people/",
+  );
+  assertEquals(v.outcomeLabel, "info");
+  assert(!v.fixNote.toLowerCase().includes("alternate name"));
 });
 
 Deno.test("item: a problem that is only in RDM says the fix is outside COLD and offers no rerun", () => {

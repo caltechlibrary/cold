@@ -179,7 +179,7 @@ collections:
 
       # The people export the COLD/RDM sync sends to the RDM instance
       # (DR-0032, DR-0031). Identity fields only, the matcher's input: email,
-      # bio and internal notes never leave COLD. alt_name is always a list.
+      # bio, internal notes and alt_name never leave COLD (DR-0036).
       people_sync_export: |
         select json_object(
           'clpid', src->>'clpid',
@@ -189,10 +189,7 @@ collections:
           'isni', coalesce(src->>'isni', ''),
           'thesis_id', coalesce(src->>'thesis_id', ''),
           'authors_id', coalesce(src->>'authors_id', ''),
-          'advisors_id', coalesce(src->>'advisors_id', ''),
-          'alt_name', case when json_type(src, '$.alt_name') = 'array'
-                           then json(json_extract(src, '$.alt_name'))
-                           else json_array() end
+          'advisors_id', coalesce(src->>'advisors_id', '')
         ) as src
         from people
         order by src->>'clpid'
@@ -745,7 +742,7 @@ collections:
       # hold (a conflict), so the COLD people it concerns, named in
       # detail.cold, count too. The parameter is bound once, through the CTE,
       # because the page passes one field. Within one run the most serious
-      # outcome comes first, so a possible alternate name never hides a problem.
+      # outcome comes first, so a warning never hides a problem.
       # Bound parameter: clpid.
       people_sync_latest_item: |
         with q(c) as (select ?)

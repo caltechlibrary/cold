@@ -375,7 +375,7 @@ Deno.test("page: only a COLD-fixable item offers a rerun, labelled with the pers
   }
 });
 
-// ---- possible alternate names (plan, Phase 5 decision 1, 2026-11-11) ----------------------
+// ---- items stored by an earlier build (cold DR-0036: alternate names are out of scope) -------
 
 const CANDIDATES = [
   {
@@ -417,105 +417,26 @@ const CANDIDATES = [
   },
 ];
 
-Deno.test("page: possible alternate names get their own heading and table, apart from the items to act on", async () => {
+Deno.test("page: an alt_name_candidate row from an earlier build is one more row in the one table, with no second heading", async () => {
   const { w, mount } = await page(idle, [...ITEMS, ...CANDIDATES]);
   try {
-    const tables = mount.tag("table");
-    assertEquals(tables.length, 2);
-    // the first table is exactly the items that were there before
-    assertEquals(tables[0].tag("tbody")[0].tag("tr").length, 3);
-    const rows = tables[1].tag("tbody")[0].tag("tr");
-    assertEquals(rows.length, 2);
-    for (const r of rows) {
-      assertStringIncludes(
-        r.children[1].textContent,
-        "Possible alternate name",
-      );
-    }
-    const heads = mount.tag("h3").map((h) => h.textContent);
-    assertEquals(heads, ["Possible alternate names (2)"]);
-  } finally {
-    w.restore();
-  }
-});
-
-Deno.test("page: the alternate-name table is as accessible as the first: caption, six headers, row headers, its own named focusable region", async () => {
-  const { w, mount } = await page(idle, [...ITEMS, ...CANDIDATES]);
-  try {
-    const t = mount.tag("table")[1];
-    assertEquals(t.tag("caption").length, 1);
-    assert(t.tag("caption")[0].textContent.includes("alternate names"));
-    const cols = t.tag("th").filter((h) => h.getAttribute("scope") === "col");
-    assertEquals(cols.length, 6);
-    for (const r of t.tag("tbody")[0].tag("tr")) {
-      const first = r.children[0] as FakeEl;
-      assertEquals(first.tagName, "th");
-      assertEquals(first.getAttribute("scope"), "row");
-    }
-    const regions = mount.find((e) => e.getAttribute("role") === "region");
-    assertEquals(regions.length, 2);
-    for (const r of regions) assertEquals(r.getAttribute("tabindex"), "0");
-    const names = regions.map((r) => r.getAttribute("aria-label"));
-    assert(names[0] !== names[1], "the two regions need different names");
-  } finally {
-    w.restore();
-  }
-});
-
-Deno.test("page: a possible alternate name links the person and the RDM entry and offers the rerun", async () => {
-  const { w, mount } = await page(idle, [...ITEMS, ...CANDIDATES]);
-  try {
-    const row = mount.tag("table")[1].tag("tbody")[0].tag("tr")[0];
-    const links = row.tag("a").map((a) => a.getAttribute("href"));
-    assert(links.includes("./people/Doe-Jane"));
-    assert(
-      links.includes("https://authors.example.test/api/names/abcde-12345"),
-    );
-    assertEquals(row.tag("button").map((b) => b.textContent), [
-      "Rerun for Doe-Jane",
-    ]);
-    assertStringIncludes(
-      row.children[5].textContent.toLowerCase(),
-      "nothing is wrong",
-    );
-  } finally {
-    w.restore();
-  }
-});
-
-Deno.test("page: the count in the lead sentence is the items to act on, not the suggestions", async () => {
-  const { w, mount } = await page(idle, [...ITEMS, ...CANDIDATES]);
-  try {
+    assertEquals(mount.tag("table").length, 1);
+    assertEquals(mount.tag("h3").length, 0);
+    assertEquals(mount.tag("table")[0].tag("tbody")[0].tag("tr").length, 5);
     const lead = mount.find((e) =>
       e.tagName === "p" && e.textContent.includes("items from the run started")
     );
-    assertEquals(lead.length, 1);
-    assertStringIncludes(lead[0].textContent, "3 items from the run started");
+    assertStringIncludes(lead[0].textContent, "5 items from the run started");
   } finally {
     w.restore();
   }
 });
 
-Deno.test("page: with no suggestions there is no second heading or table", async () => {
+Deno.test("page: there is one table and no second heading", async () => {
   const { w, mount } = await page(idle);
   try {
     assertEquals(mount.tag("table").length, 1);
     assertEquals(mount.tag("h3").length, 0);
-  } finally {
-    w.restore();
-  }
-});
-
-Deno.test("page: a run with only suggestions says there is nothing to act on and still lists them", async () => {
-  const { w, mount } = await page(idle, CANDIDATES);
-  try {
-    const tables = mount.tag("table");
-    assertEquals(tables.length, 1);
-    assertEquals(tables[0].tag("tbody")[0].tag("tr").length, 2);
-    const lead = mount.find((e) =>
-      e.tagName === "p" && e.textContent.includes("nothing to act on")
-    );
-    assertEquals(lead.length, 1);
   } finally {
     w.restore();
   }

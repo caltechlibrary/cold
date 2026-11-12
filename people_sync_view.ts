@@ -324,38 +324,6 @@ const OUTCOME_LABEL: Record<string, string> = {
   applied: "Applied change",
 };
 
-const ALT_NAME_LABEL = "Possible alternate name";
-
-/** isAltNameCandidate reports whether an item is a possible alternate name:
- * RDM holds a name form COLD does not. It is a suggestion, not a problem, so
- * the page sets it apart (plan Phase 5 decision 1).
- *
- * @param item {ItemRow} a stored item
- * @returns {boolean} true for an `info` item whose action is `alt_name_candidate`
- * @example
- * isAltNameCandidate({ ...row, outcome: "info", action: "alt_name_candidate" }); // true
- */
-export function isAltNameCandidate(item: ItemRow): boolean {
-  return item.outcome === "info" && item.action === "alt_name_candidate";
-}
-
-/** splitItems separates the possible alternate names from every other item,
- * keeping the stored order within each group.
- *
- * @param items {ItemRow[]} a run's stored items
- * @returns {{action: ItemRow[], candidates: ItemRow[]}} the items to act on or read, and the possible alternate names
- * @example
- * const { action, candidates } = splitItems(items);
- */
-export function splitItems(
-  items: ItemRow[],
-): { action: ItemRow[]; candidates: ItemRow[] } {
-  const action: ItemRow[] = [];
-  const candidates: ItemRow[] = [];
-  for (const i of items) (isAltNameCandidate(i) ? candidates : action).push(i);
-  return { action, candidates };
-}
-
 const STATUS_LABEL: Record<string, string> = {
   would_create: "Would be created (dry run)",
   would_update: "Would be updated (dry run)",
@@ -384,9 +352,7 @@ export function itemView(
 ): ItemView {
   const base: ItemView = {
     outcome: item.outcome,
-    outcomeLabel: isAltNameCandidate(item)
-      ? ALT_NAME_LABEL
-      : OUTCOME_LABEL[item.outcome] ?? item.outcome,
+    outcomeLabel: OUTCOME_LABEL[item.outcome] ?? item.outcome,
     statusLabel: item.status ? (STATUS_LABEL[item.status] ?? item.status) : "",
     action: item.action,
     message: item.message,
@@ -427,9 +393,7 @@ export function itemView(
     }),
     rerun: fixInCold ? clpids : [],
     fixInCold,
-    fixNote: isAltNameCandidate(item)
-      ? "If the person uses this name form, add it to their alternate names in COLD, then rerun the sync for the person. Nothing is wrong in RDM; this is only a suggestion."
-      : fixInCold
+    fixNote: fixInCold
       ? "Fix this in COLD, then rerun the sync for the person. If the RDM value is the wrong one, correcting it is outside COLD."
       : "The fix is outside COLD: the entry lives in RDM, and this stays listed until it is corrected there.",
   };

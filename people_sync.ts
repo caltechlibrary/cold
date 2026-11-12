@@ -54,11 +54,6 @@ export const ITEM_OUTCOMES = [
   "warning",
 ] as const;
 
-/** `info` actions that also get an item row (plan Phase 5 decision 1,
- * 2026-11-11): a possible alternate name is something a person may act on.
- * Every other `info` item (a person with no ORCID) is only counted. */
-export const STORED_INFO_ACTIONS = ["alt_name_candidate"] as const;
-
 /** Config is the per-deployment setting the sync runs with (DR-0033). */
 export interface Config {
   rdmHost: string;
@@ -806,9 +801,8 @@ export function aboutPerson(item: PlanItem, clpid: string): boolean {
 /** itemsFromReport turns a report into the item rows to store and the
  * per-outcome counts for the run row (plan Phase 3).
  *
- * Only applied, needs_human, needs_repair and warning get a row, and so does
- * an `info` item whose action is in STORED_INFO_ACTIONS (an alt_name_candidate);
- * every other `info` item is counted. An applied item carries the status of
+ * Only applied, needs_human, needs_repair and warning get a row; every `info`
+ * item is counted. An applied item carries the status of
  * what happened to it. A one-person run keeps only that person's items and
  * counts.
  *
@@ -840,13 +834,9 @@ export function itemsFromReport(
   const counts: Record<string, number> = {};
   const rows: Record<string, unknown>[] = [];
   const keep = new Set<string>(ITEM_OUTCOMES);
-  const keepInfo = new Set<string>(STORED_INFO_ACTIONS);
   for (const it of plan) {
     counts[it.outcome] = (counts[it.outcome] ?? 0) + 1;
-    if (
-      !keep.has(it.outcome) &&
-      !(it.outcome === "info" && keepInfo.has(it.action))
-    ) continue;
+    if (!keep.has(it.outcome)) continue;
     const row: Record<string, unknown> = { run_id: runId, ...it, recorded };
     if (it.outcome === "applied") {
       const res = it.action === "create"
