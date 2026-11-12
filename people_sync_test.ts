@@ -285,6 +285,7 @@ Deno.test("transport: apply and scope reach the command, quoted", async () => {
     program: await program(),
     people: "[]",
     apply: true,
+    runId: "r1",
     scope: "O'Brien-Pat",
   });
   const run = rec.calls.map((c) => c.args[c.args.length - 1]).find((a) =>
@@ -314,6 +315,7 @@ Deno.test("transport: the work directories are removed even when the program fai
     program: await program(),
     people: "[]",
     apply: true,
+    runId: "r1",
   });
   assertEquals(res.code, 70);
   const last = rec.calls[rec.calls.length - 1].args.pop()!;
@@ -335,6 +337,7 @@ Deno.test("transport: a dropped connection is 69 and still cleans up", async () 
         program: prog,
         people: "[]",
         apply: true,
+        runId: "r1",
       }),
     SyncError,
   );
@@ -440,8 +443,9 @@ dir=$(dirname "$script")
 for f in people_rdm_match.py people_rdm_apply.py people_rdm_export_names.py people.json; do [ -f "$dir/$f" ] || { echo "missing $f" >&2; exit 98; }; done
 echo "$@" > "${root}/args.txt"
 cp "$dir/people.json" "${root}/people_seen.json"
-while [ $# -gt 0 ]; do [ "$1" = "--out" ] && out="$2"; shift; done
+while [ $# -gt 0 ]; do [ "$1" = "--out" ] && out="$2"; [ "$1" = "--dump" ] && dump="$2"; shift; done
 umask 077
+[ -z "\${dump:-}" ] || echo pre-image > "$dump"
 cp "${root}/report_body.json" "$out"
 exit ${opts.programExit ?? 0}`,
   );
@@ -561,6 +565,7 @@ Deno.test("ssm: apply and scope reach the program; compact is always on", async 
     program: await program(),
     people: "[]",
     apply: true,
+    runId: "r1",
     scope: "O'Brien-Pat",
   });
   const args = (await Deno.readTextFile(join(f.root, "args.txt"))).trim();
@@ -601,6 +606,7 @@ Deno.test("ssm: the program's own exit code and its report come back when it fai
     program: await program(),
     people: "[]",
     apply: true,
+    runId: "r1",
   });
   assertEquals(res.code, 70);
   assert(res.report.length > 0);
@@ -1129,6 +1135,7 @@ Deno.test("transport: the program runs under a remote timeout of the run limit, 
     program: await program(),
     people: "[]",
     apply: true,
+    runId: "r1",
   });
   const run = rec.calls.find((c) =>
     c.args[c.args.length - 1].includes("people_rdm_apply.py")
@@ -1609,4 +1616,190 @@ esac
     await stop();
     await Deno.remove(work, { recursive: true });
   }
+});
+
+
+// ---- the pre-image survives the run (cold#122, DR-0037 decision 7, DR-0038) -------
+
+Deno.test("config: PEOPLE_SYNC_PREIMAGE_DIR defaults to /var/tmp/people_sync_preimages and must be an absolute plain path", async () => {
+  assertEquals(cfg().preimageDir, "/var/tmp/people_sync_preimages");
+  assertEquals(
+    cfg("PEOPLE_SYNC_PREIMAGE_DIR=/srv/preimages\n").preimageDir,
+    "/srv/preimages",
+  );
+  for (const bad of ["relative/dir", "/a b", "/a;rm -rf /", "/a'b"]) {
+    assertEquals(
+      await code(() => cfg(`PEOPLE_SYNC_PREIMAGE_DIR=${bad}\n`)),
+      ExitCode.Config,
+    );
+  }
+});
+
+const DUMP_DIR = "/var/tmp/people_sync_preimages";
+
+Deno.test("transport: an apply keeps its pre-image in a private directory the run user owns, made before the program runs", async () => {
+  const rec = recorder(happy);
+  await new SshTransport(cfg(), rec.exec).run({
+    program: await program(),
+    people: "[]",
+    apply: true,
+    runId: "20261112-abc12345",
+  });
+  const cmds = rec.calls.map((c) => c.args[c.args.length - 1]);
+  const mk = cmds.findIndex((c) => c.includes("install -d -m 700"));
+  const prog = cmds.findIndex((c) => c.includes("people_rdm_apply.py"));
+  assert(mk >= 0, "the pre-image directory was never made");
+  assert(mk < prog, "the directory must exist before the program runs");
+  assertStringIncludes(cmds[mk], "sudo -n -u ubuntu");
+  assertStringIncludes(cmds[mk], DUMP_DIR);
+  assertStringIncludes(cmds[prog], "--dump");
+  assertStringIncludes(cmds[prog], `${DUMP_DIR}/20261112-abc12345.dump.jsonl`);
+  // the cleanup removes the work directories and never the pre-image directory
+  for (const c of cmds.filter((c) => c.includes("rm -rf"))) {
+    assert(!c.includes("preimages"), `cleanup touches the pre-image: ${c}`);
+  }
+});
+
+Deno.test("transport: after an apply the pre-images beyond the newest 20 are pruned, as the run user", async () => {
+  const rec = recorder(happy);
+  await new SshTransport(cfg(), rec.exec).run({
+    program: await program(),
+    people: "[]",
+    apply: true,
+    runId: "r1",
+  });
+  const cmds = rec.calls.map((c) => c.args[c.args.length - 1]);
+  const prog = cmds.findIndex((c) => c.includes("people_rdm_apply.py"));
+  const prune = cmds.findIndex((c) => c.includes("tail -n +21"));
+  assert(prune > prog, "pruning comes after the run, so the new dump is kept");
+  assertStringIncludes(cmds[prune], "sudo -n -u ubuntu");
+  assertStringIncludes(cmds[prune], DUMP_DIR);
+});
+
+Deno.test("transport: a dry run writes no pre-image and makes no directory for one", async () => {
+  const rec = recorder(happy);
+  await new SshTransport(cfg(), rec.exec).run({
+    program: await program(),
+    people: "[]",
+    apply: false,
+    runId: "r1",
+  });
+  for (const c of rec.calls.map((c) => c.args[c.args.length - 1])) {
+    assert(!c.includes("--dump"), `a dry run passed --dump: ${c}`);
+    assert(
+      !c.includes("preimages"),
+      `a dry run touched the pre-image dir: ${c}`,
+    );
+  }
+});
+
+Deno.test("transport: an apply with no run id is an internal error and nothing is run", async () => {
+  const rec = recorder(happy);
+  const c = await code(async () =>
+    await new SshTransport(cfg(), rec.exec).run({
+      program: await program(),
+      people: "[]",
+      apply: true,
+    })
+  );
+  assertEquals(c, ExitCode.Internal);
+  assert(
+    !rec.calls.some((x) =>
+      x.args[x.args.length - 1].includes("people_rdm_apply.py")
+    ),
+    "the program ran without a place for its pre-image",
+  );
+});
+
+Deno.test("transport: a pre-image directory that cannot be made is 69 and the program never runs", async () => {
+  const rec = recorder((cmd, args) => {
+    if (args[args.length - 1].includes("install -d -m 700")) {
+      return { code: 1, stderr: "install: cannot change permissions" };
+    }
+    return happy(cmd, args);
+  });
+  const c = await code(async () =>
+    await new SshTransport(cfg(), rec.exec).run({
+      program: await program(),
+      people: "[]",
+      apply: true,
+      runId: "r1",
+    })
+  );
+  assertEquals(c, ExitCode.Unavailable);
+  assert(
+    !rec.calls.some((x) =>
+      x.args[x.args.length - 1].includes("people_rdm_apply.py")
+    ),
+    "the program ran although its pre-image could not be kept",
+  );
+});
+
+Deno.test("ssm: an apply keeps the pre-image after the work directories are removed, mode 700, and prunes to the newest 20", async () => {
+  const f = await fakeSsm();
+  const pre = join(f.root, "pre");
+  await Deno.mkdir(pre);
+  for (let i = 0; i < 25; i++) {
+    const name = join(pre, `old${String(i).padStart(2, "0")}.dump.jsonl`);
+    await Deno.writeTextFile(name, "x");
+    const t = new Date(Date.UTC(2026, 0, 1, 0, i));
+    await Deno.utime(name, t, t);
+  }
+  await new SsmTransport({ ...ssmCfg(f.checkout), preimageDir: pre }, f.exec)
+    .run({
+      program: await program(),
+      people: "[]",
+      apply: true,
+      runId: "20261112-new00001",
+    });
+  const args = (await Deno.readTextFile(join(f.root, "args.txt"))).trim();
+  assertStringIncludes(args, `--dump ${pre}/20261112-new00001.dump.jsonl`);
+  const names = [...Deno.readDirSync(pre)].map((e) => e.name).sort();
+  assertEquals(names.length, 20);
+  assert(
+    names.includes("20261112-new00001.dump.jsonl"),
+    "the new dump was pruned",
+  );
+  assert(!names.includes("old00.dump.jsonl"), "the oldest dump survived");
+  assertEquals((await Deno.stat(pre)).mode! & 0o777, 0o700);
+  assertEquals(
+    await Deno.readTextFile(join(pre, "20261112-new00001.dump.jsonl")),
+    "pre-image\n",
+  );
+});
+
+Deno.test("run: the run id reaches the transport, and the pre-image path the program reports is kept on the run row", async () => {
+  let seen = "";
+  const h = await harness(
+    {
+      run: (req) => {
+        seen = req.runId ?? "";
+        return Promise.resolve({
+          code: 0,
+          report: JSON.stringify({
+            ...REPORT,
+            mode: "apply",
+            dump: `${DUMP_DIR}/${req.runId}.dump.jsonl`,
+          }),
+          stderr: "",
+        });
+      },
+    },
+  );
+  await runSync({ ...cfg(), mode: "apply" }, {
+    scope: "all",
+    trigger: "human",
+    requestId: "q1",
+  }, h);
+  const run = [...h.store.runs.values()][0];
+  assert(seen !== "", "the transport was given no run id");
+  assertEquals(seen, run.run_id);
+  assertEquals(run.preimage, `${DUMP_DIR}/${seen}.dump.jsonl`);
+});
+
+Deno.test("run: a dry run's report has no dump and the run row records no pre-image", async () => {
+  const h = await harness({}, { ...REPORT, dump: null } as Report);
+  await runSync(cfg(), { scope: "all", trigger: "cron", requestId: "q1" }, h);
+  const run = [...h.store.runs.values()][0];
+  assertEquals("preimage" in run, false);
 });

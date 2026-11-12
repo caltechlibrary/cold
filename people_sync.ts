@@ -67,6 +67,8 @@ export interface Config {
   transport: "ssh" | "ssm";
   apiUrl: string;
   staleSeconds: number;
+  /** where an apply's pre-image dump is kept on the RDM host */
+  preimageDir: string;
 }
 
 /** Exec runs a program and returns what it printed; tests replace it. */
@@ -213,6 +215,11 @@ export function loadConfig(
       "",
     ),
     staleSeconds: stale,
+    preimageDir: check(
+      "PEOPLE_SYNC_PREIMAGE_DIR",
+      env.PEOPLE_SYNC_PREIMAGE_DIR?.trim() || PREIMAGE_DIR,
+      /^\/[A-Za-z0-9._\/-]+$/,
+    ),
   };
 }
 
@@ -317,11 +324,84 @@ export function programCommand(cfg: Config, args: string): string {
   );
 }
 
+/** PREIMAGE_DIR is where an apply's pre-image dump is kept on the RDM host unless
+ * PEOPLE_SYNC_PREIMAGE_DIR says otherwise. It is outside the work directories, which are
+ * removed after every run, because the dump is the way back from a push (DR-0037
+ * decision 7, DR-0038). */
+export const PREIMAGE_DIR = "/var/tmp/people_sync_preimages";
+
+/** PREIMAGE_KEEP is how many pre-image dumps are kept on the host; after an apply the
+ * older ones are removed. */
+export const PREIMAGE_KEEP = 20;
+
+/** preimageSetupCommand builds the command that makes the pre-image directory, private to
+ * the run user, which is the user the program (and so its dump) runs as.
+ *
+ * @param cfg {Config} the deployment settings
+ * @returns {string} a shell command for ssh or SSM
+ * @example
+ * preimageSetupCommand(cfg); // "sudo -n -u ubuntu install -d -m 700 '/var/tmp/people_sync_preimages'"
+ */
+export function preimageSetupCommand(cfg: Config): string {
+  return `sudo -n -u ${cfg.rdmRunUser} install -d -m 700 ${
+    shellQuote(cfg.preimageDir)
+  }`;
+}
+
+/** preimagePruneCommand builds the command that removes all but the newest PREIMAGE_KEEP
+ * dumps from the pre-image directory.
+ *
+ * @param cfg {Config} the deployment settings
+ * @returns {string} a shell command for ssh or SSM
+ * @example
+ * preimagePruneCommand(cfg); // "sudo -n -u ubuntu sh -c '...tail -n +21...'"
+ */
+export function preimagePruneCommand(cfg: Config): string {
+  const inner =
+    `ls -1t ${cfg.preimageDir}/*.dump.jsonl 2>/dev/null | tail -n +${
+      PREIMAGE_KEEP + 1
+    } | while IFS= read -r f; do rm -f "$f"; done`;
+  return `sudo -n -u ${cfg.rdmRunUser} sh -c ${shellQuote(inner)}`;
+}
+
+/** preimageArgs gives the arguments that make the program write its pre-image into the
+ * pre-image directory: none for a dry run, which writes nothing. An apply must have a run
+ * id, which names the file, so a dump is never written over another.
+ *
+ * @param cfg {Config} the deployment settings
+ * @param req {{apply: boolean, runId?: string}} the request
+ * @returns {string[]} quoted arguments to add to the program's command line
+ * @example
+ * preimageArgs(cfg, { apply: true, runId: "r1" }); // ["--dump", "'/var/tmp/people_sync_preimages/r1.dump.jsonl'"]
+ */
+export function preimageArgs(
+  cfg: Config,
+  req: { apply: boolean; runId?: string },
+): string[] {
+  if (!req.apply) return [];
+  if (!req.runId || !/^[A-Za-z0-9-]+$/.test(req.runId)) {
+    throw new SyncError(
+      ExitCode.Internal,
+      "an apply needs a run id to name its pre-image, and none was given; nothing was run",
+    );
+  }
+  return [
+    "--dump",
+    shellQuote(`${cfg.preimageDir}/${req.runId}.dump.jsonl`),
+  ];
+}
+
 /** Transport moves the program to the RDM host, runs it and brings the report back. */
 export interface Transport {
   preflight(): Promise<void>;
   run(
-    req: { program: Program; people: string; apply: boolean; scope?: string },
+    req: {
+      program: Program;
+      people: string;
+      apply: boolean;
+      scope?: string;
+      runId?: string;
+    },
   ): Promise<{ code: number; report: string; stderr: string }>;
 }
 
@@ -363,9 +443,16 @@ export class SshTransport implements Transport {
   /** run ships the set, runs the program and fetches the report. The code is
    * the program's exit code; the working directories are removed either way. */
   async run(
-    req: { program: Program; people: string; apply: boolean; scope?: string },
+    req: {
+      program: Program;
+      people: string;
+      apply: boolean;
+      scope?: string;
+      runId?: string;
+    },
   ): Promise<{ code: number; report: string; stderr: string }> {
     const { cfg } = this;
+    if (req.apply) preimageArgs(cfg, req); // refuse before anything is shipped or made
     const mk = await this.ssh("mktemp -d /tmp/people_sync.XXXXXX");
     const dir = mk.stdout.trim();
     if (mk.code !== 0 || !/^\/tmp\/people_sync\.[A-Za-z0-9]+$/.test(dir)) {
@@ -407,7 +494,13 @@ export class SshTransport implements Transport {
         `${out}/report.json`,
       ].map(shellQuote);
       args.push("--compact");
-      if (req.apply) args.push("--apply");
+      if (req.apply) {
+        args.push("--apply", ...preimageArgs(cfg, req));
+        const pd = await this.ssh(preimageSetupCommand(cfg));
+        if (pd.code !== 0) {
+          throw this.unavailable("making the pre-image directory", pd);
+        }
+      }
       if (req.scope) args.push("--scope", shellQuote(req.scope));
       // The host ends the program at the limit; this call's own backstop is a little later.
       const run = await this.ssh(
@@ -415,6 +508,8 @@ export class SshTransport implements Transport {
         (cfg.staleSeconds + 120) * 1000,
       );
       if (run.code === 255) throw this.unavailable("the connection", run);
+      // The work directories go in the finally below; the pre-image does not.
+      if (req.apply) await this.ssh(preimagePruneCommand(cfg)).catch(() => {});
       // The report is owned by the run user and private, so read it as that user.
       const rep = await this.ssh(
         `sudo -n -u ${cfg.rdmRunUser} cat ${out}/report.json`,
@@ -619,9 +714,16 @@ export class SsmTransport implements Transport {
   /** run uploads the set and the people file, runs the program as the run
    * user, and fetches the report. The code is the program's exit code. */
   async run(
-    req: { program: Program; people: string; apply: boolean; scope?: string },
+    req: {
+      program: Program;
+      people: string;
+      apply: boolean;
+      scope?: string;
+      runId?: string;
+    },
   ): Promise<{ code: number; report: string; stderr: string }> {
     const { cfg } = this;
+    if (req.apply) preimageArgs(cfg, req); // refuse before anything is shipped or made
     const mk = await this.remote(
       `set -eu; W=$(mktemp -d /tmp/people_sync.XXXXXX); chmod 755 "$W"; ` +
         `O=$(sudo -n -u ${cfg.rdmRunUser} mktemp -d /tmp/people_sync_out.XXXXXX); ` +
@@ -701,12 +803,26 @@ export class SsmTransport implements Transport {
         `${out}/report.json`,
       ].map(shellQuote);
       args.push("--compact");
-      if (req.apply) args.push("--apply");
+      if (req.apply) {
+        args.push("--apply", ...preimageArgs(cfg, req));
+        const pd = await this.remote(
+          preimageSetupCommand(cfg),
+          "making the pre-image directory",
+        );
+        if (pd.code !== 0) {
+          throw this.unavailable("making the pre-image directory", pd);
+        }
+      }
       if (req.scope) args.push("--scope", shellQuote(req.scope));
       const run = await this.remote(
         programCommand(cfg, args.join(" ")),
         "the program",
       );
+      // The work directories go in the finally below; the pre-image does not.
+      if (req.apply) {
+        await this.remote(preimagePruneCommand(cfg), "pruning old pre-images")
+          .catch(() => {});
+      }
       // 4. pack the report on the instance (it is private to the run user)
       const pack = await this.remote(
         `set -eu; if [ -f "${out}/report.json" ]; then ` +
@@ -807,6 +923,8 @@ export interface Report {
   plan_counts?: Record<string, number>;
   /** with --compact: the applied create, update, replace and remove items, counted */
   action_counts?: Record<string, number>;
+  /** an apply's pre-image file on the RDM host; null on a dry run */
+  dump?: string | null;
 }
 
 /** aboutPerson reports whether a plan item concerns one COLD person: its own
@@ -1129,6 +1247,7 @@ export async function runSync(
       people: JSON.stringify(people),
       apply: cfg.mode === "apply",
       scope: scopeClpid || undefined,
+      runId,
     });
     if (res.report === "") {
       if (res.code === 124 || res.code === 137) {
@@ -1164,6 +1283,10 @@ export async function runSync(
       results: report.summary,
       ...(report.index ? { index: report.index } : {}),
     };
+    // Where the pre-image is, so a restore can find it (an apply only; a dry run has none).
+    if (typeof report.dump === "string" && report.dump !== "") {
+      run.preimage = report.dump;
+    }
     run.state = failed ? "error" : "completed";
     if (failed) {
       run.error = report.aborted ??
@@ -1216,6 +1339,8 @@ ENV FILE KEYS
   PEOPLE_SYNC_MODE     dry-run (default) or apply
   PEOPLE_SYNC_STALE_SECONDS  the longest a run may take (600): the program is ended on the host
                        at this limit and the lock released; a lock with a live owner is never broken
+  PEOPLE_SYNC_PREIMAGE_DIR  where an apply keeps its pre-image on the RDM host (/var/tmp/people_sync_preimages,
+                       mode 700, owned by the run user); the newest 20 are kept, and the run records the path
   COLD_API_URL         COLD's datasetd (http://localhost:8112)
 
 EXIT STATUS
