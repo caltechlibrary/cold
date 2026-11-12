@@ -110,8 +110,8 @@ Deno.test("config: no target refuses (66), a present but wrong file is 78", asyn
   );
 });
 
-Deno.test("config: PEOPLE_SYNC_STALE_SECONDS defaults to 320 and can be set", async () => {
-  assertEquals((await cfg("")).staleSeconds, 320);
+Deno.test("config: PEOPLE_SYNC_STALE_SECONDS defaults to 360 and can be set", async () => {
+  assertEquals((await cfg("")).staleSeconds, 360);
   assertEquals((await cfg("PEOPLE_SYNC_STALE_SECONDS=900\n")).staleSeconds, 900);
 });
 

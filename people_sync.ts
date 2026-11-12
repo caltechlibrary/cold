@@ -187,7 +187,7 @@ export function loadConfig(
       `PEOPLE_SYNC_MODE must be dry-run or apply, not ${JSON.stringify(mode)}`,
     );
   }
-  const stale = Number(env.PEOPLE_SYNC_STALE_SECONDS ?? "320");
+  const stale = Number(env.PEOPLE_SYNC_STALE_SECONDS ?? "360");
   if (!Number.isFinite(stale) || stale <= 0) {
     throw new SyncError(
       ExitCode.Config,
@@ -1214,7 +1214,7 @@ ENV FILE KEYS
   RDM_RUN_USER         the user the program runs as (ubuntu)
   IRDMTOOLS_SCRIPTS    irdmtools scripts directory (../irdmtools/scripts)
   PEOPLE_SYNC_MODE     dry-run (default) or apply
-  PEOPLE_SYNC_STALE_SECONDS  the longest a run may take (320): the program is ended on the host
+  PEOPLE_SYNC_STALE_SECONDS  the longest a run may take (360): the program is ended on the host
                        at this limit and the lock released; a lock with a live owner is never broken
   COLD_API_URL         COLD's datasetd (http://localhost:8112)
 
