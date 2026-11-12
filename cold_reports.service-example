@@ -7,6 +7,9 @@ ConditionPathExists=!/Sites/cold/cold_not_to_be_run
 [Service]
 WorkingDirectory=/Sites/cold
 ExecStart=/Sites/cold/bin/cold_reports
+# The COLD/RDM people push needs the env file that names the target (docs/rdm_people_push.md).
+# Uncomment, and set the same value for cold, cold_reports and cron.
+#Environment=PEOPLE_SYNC_ENV=caltechauthors.env
 Type=simple
 Restart=always
 

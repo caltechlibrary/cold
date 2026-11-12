@@ -59,6 +59,8 @@ The ten older top-level prefixes (`/people`, `/groups`, `/funders`, `/subjects`,
 
 - `PEOPLE_SYNC_ENV` is **required** and has no default: it names the env file for the target RDM (for example `caltechauthors.env`). `run_people_sync.bash` exits 78 without it and says so on stderr, which the report runner shows as the request's error. Set it in the environment of `cold_reports` (and of cron) **and** of `cold`, because `cold` reads the same file to show the sync page where the next run will go.
 - `PEOPLE_SYNC_STALE_SECONDS` (default 600) is the **longest a run may take**. The instance-side program runs under `timeout` at that limit, so a hung run ends on the RDM host too, and the lock is released and the reason recorded. A lock whose owner process is alive is never broken, however old.
+- `PEOPLE_SYNC_PREIMAGE_DIR` (default `/var/tmp/people_sync_preimages`) is where an apply keeps its **pre-image** on the RDM host: mode 700, owned by the run user, one `RUNID.dump.jsonl` per apply, the newest 20 kept. It goes in the target env file (with `RDM_URL` and the rest), not in the service environment. It must be an absolute path of plain characters (exit 78 otherwise). See [the way back](rdm_people_push.md#the-way-back).
+- The `cold` binary must be built with `--allow-env=PEOPLE_SYNC_ENV` (the `deno task cold.ts` build and every `release_*` task do); without it `cold` cannot read the env file and the sync page cannot say where the next run will go.
 
 ---
 

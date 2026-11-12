@@ -79,6 +79,54 @@ chmod +t htdocs/rpt
 
 NOTE: The TypeScript services need to be compile before running them with Systemd.
 
+## Deploying the people push to RDM
+
+The people push ([rdm_people_push.md](rdm_people_push.md)) writes COLD's people to an RDM instance's names list. It needs
+four things in place beyond the steps above. Do them in order, and **do not skip the dry run**.
+
+1. **Install COLD and irdmtools together.** The program that writes to RDM is `scripts/people_rdm_*.py` in the irdmtools
+   repository, and `cold` ships it to the RDM host on every run from `IRDMTOOLS_SCRIPTS` (default `../irdmtools/scripts`, so
+   `/Sites/irdmtools` beside `/Sites/cold`). Every COLD release is paired with an irdmtools release; pull both on the host
+   and compare the versions before the first run. Each run row records the version and a hash of the files it shipped.
+2. **Build `cold` and `people_sync` fresh.** `deno task build` builds both. `cold` needs `--allow-env=PEOPLE_SYNC_ENV`, which
+   its build task and every release task grant. `run_people_sync.bash` prefers `./bin/people_sync` when it exists, so a stale
+   binary silently runs old code: rebuild after every pull.
+3. **Write the target env file** (for example `caltechauthors.env` in `/Sites/cold`, untracked) naming the instance; every key
+   is described in `cold.env-example` and `people_sync --help`. The ones that matter:
+
+   | Key | Value |
+   |---|---|
+   | `RDM_URL` | the instance's public URL, recorded on every run |
+   | `PEOPLE_SYNC_TRANSPORT` | `ssh` (production, from this host) |
+   | `RDM_HOST` | the instance's ssh host; key authentication, no prompt |
+   | `PEOPLE_SYNC_MODE` | **`dry-run`** until the review below is done; then `apply` |
+   | `PEOPLE_SYNC_STALE_SECONDS` | the longest a run may take (default 600) |
+   | `PEOPLE_SYNC_PREIMAGE_DIR` | where an apply keeps its pre-image on the RDM host (default `/var/tmp/people_sync_preimages`) |
+
+   The ssh user needs `sudo -n -u ubuntu` on the RDM host (the run user, `RDM_RUN_USER`) and `uv` for it.
+4. **Point the services at the env file.** `PEOPLE_SYNC_ENV` has no default. Set it in the environment of **`cold`** (which reads
+   the file to show where the next run will go), of **`cold_reports`** (which runs the push) and of cron. In each systemd unit:
+
+   ~~~ini
+   [Service]
+   Environment=PEOPLE_SYNC_ENV=caltechauthors.env
+   ~~~
+
+   then `sudo systemctl daemon-reload` and restart `cold` and `cold_reports`. The `*.service-example` files carry the line
+   commented out. Restart `cold_api` too after any change to `cold_api.yaml`, because `datasetd` serves its queries as loaded.
+5. **The front end must not add caching.** No `Expires`, `Header set Cache-Control` or `mod_expires` rule for COLD's paths
+   (see [Caching](configuring_cold.md#caching)); a librarian must never see a stale sync page.
+
+### First run against an instance
+
+1. Check what the page says. Open `rdm_people_sync.html`: *Next run* must name the instance and mode you expect.
+2. From the command line, run a **dry run** (`PEOPLE_SYNC_MODE=dry-run`) and read the report: the counts, every removal, every
+   warning. Review it with the people who own that instance.
+3. On the RDM host, take a **table dump** of `name_metadata` and keep it (see [the way back](rdm_people_push.md#the-way-back)).
+4. Set `PEOPLE_SYNC_MODE=apply`, restart nothing (the mode is read from the file on each run), and run the push. The page's
+   next-run line now says *Apply*.
+5. Confirm the run row has a `preimage` path and that the file exists on the RDM host.
+
 ## Apache 2 and Shibboleth
 
 **COLD** is designed to be a reverse proxy target. Using Apache you need to to include the following code in the main host definition.
