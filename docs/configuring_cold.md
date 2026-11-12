@@ -58,7 +58,7 @@ The ten older top-level prefixes (`/people`, `/groups`, `/funders`, `/subjects`,
 ### Settings the people sync needs in the environment
 
 - `PEOPLE_SYNC_ENV` is **required** and has no default: it names the env file for the target RDM (for example `caltechauthors.env`). `run_people_sync.bash` exits 78 without it and says so on stderr, which the report runner shows as the request's error. Set it in the environment of `cold_reports` (and of cron) **and** of `cold`, because `cold` reads the same file to show the sync page where the next run will go.
-- `PEOPLE_SYNC_STALE_SECONDS` (default 360) is the **longest a run may take**. The instance-side program runs under `timeout` at that limit, so a hung run ends on the RDM host too, and the lock is released and the reason recorded. A lock whose owner process is alive is never broken, however old.
+- `PEOPLE_SYNC_STALE_SECONDS` (default 600) is the **longest a run may take**. The instance-side program runs under `timeout` at that limit, so a hung run ends on the RDM host too, and the lock is released and the reason recorded. A lock whose owner process is alive is never broken, however old.
 
 ---
 
