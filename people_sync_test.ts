@@ -1803,3 +1803,27 @@ Deno.test("run: a dry run's report has no dump and the run row records no pre-im
   const run = [...h.store.runs.values()][0];
   assertEquals("preimage" in run, false);
 });
+
+// ---- the compiled `cold` may read PEOPLE_SYNC_ENV, in every build ------------------
+
+Deno.test("deno.json: every task that compiles cold.ts grants --allow-env=PEOPLE_SYNC_ENV, so a release shows the sync target", async () => {
+  const tasks = JSON.parse(await Deno.readTextFile("deno.json")).tasks as Record<
+    string,
+    string
+  >;
+  let seen = 0;
+  for (const [name, line] of Object.entries(tasks)) {
+    for (const step of line.split(";")) {
+      const words = step.trim().split(/\s+/);
+      if (words[0] !== "deno" || words[1] !== "compile") continue;
+      if (words[words.length - 1] !== "cold.ts") continue;
+      seen++;
+      assert(
+        words.includes("--allow-env=PEOPLE_SYNC_ENV"),
+        `${name}: compiles cold.ts without --allow-env=PEOPLE_SYNC_ENV`,
+      );
+    }
+  }
+  // the build task and the six release targets
+  assertEquals(seen, 7);
+});
