@@ -13,7 +13,8 @@ import { parse as parseEnvText } from "@std/dotenv";
 import { parseArgs } from "@std/cli/parse-args";
 import { join, resolve } from "@std/path";
 import { isValidClpid } from "./validator.ts";
-import { licenseText, version } from "./version.ts";
+import { licenseText, releaseDate, releaseHash, version } from "./version.ts";
+import { fmtHelp, peopleSyncHelpText } from "./helptext.ts";
 
 /** ExitCode holds the exit codes this tool can return (workspace DR-0014). */
 export const ExitCode = {
@@ -1308,49 +1309,6 @@ export async function runSync(
   }
 }
 
-const HELP = `
-people_sync - run the COLD/RDM people sync and record the result in COLD
-
-USAGE: people_sync [OPTIONS]
-
-Exports COLD's people, ships the irdmtools program to the RDM host, runs it
-there, and writes a run row and item rows to people_sync_runs.ds and
-people_sync_items.ds. The default is a dry run; PEOPLE_SYNC_MODE=apply in the
-env file turns writing on.
-
-OPTIONS
-  -e, --env FILE       env file naming the target (required; there is no default)
-  -s, --scope CLPID    sync one person (default: everyone)
-      --trigger NAME   who started it: human, cron (recorded; default unknown)
-      --request-id ID  the report request that started it (recorded)
-  -h, --help           show this help
-  -v, --version        show the version
-  -l, --license        show the license
-
-ENV FILE KEYS
-  PEOPLE_SYNC_TRANSPORT  ssh (default) or ssm (AWS Systems Manager)
-  RDM_HOST             ssh host of the RDM instance (required for ssh)
-  RDM_INSTANCE_ID      EC2 instance id i-... (required for ssm)
-  AWS_REGION, AWS_PROFILE  optional, for the aws CLI (ssm)
-  RDM_URL (required)   the target's public URL, recorded on every run
-  RDM_CHECKOUT         the RDM checkout on that host (/Sites/caltechauthors)
-  RDM_RUN_USER         the user the program runs as (ubuntu)
-  IRDMTOOLS_SCRIPTS    irdmtools scripts directory (../irdmtools/scripts)
-  PEOPLE_SYNC_MODE     dry-run (default) or apply
-  PEOPLE_SYNC_STALE_SECONDS  the longest a run may take (600): the program is ended on the host
-                       at this limit and the lock released; a lock with a live owner is never broken
-  PEOPLE_SYNC_PREIMAGE_DIR  where an apply keeps its pre-image on the RDM host (/var/tmp/people_sync_preimages,
-                       mode 700, owned by the run user); the newest 20 are kept, and the run records the path
-  COLD_API_URL         COLD's datasetd (http://localhost:8112)
-
-EXIT STATUS
-  0 completed (items needing a person are in the page, not an error)
-  2 usage    66 no env file, no target or no program files
-  69 RDM host or COLD API unreachable, or the pre-image directory could not be made
-  70 the program failed or a write failed
-  74 a COLD write failed    75 another sync holds the lock    78 bad env file
-`;
-
 /** main is the command line entry point.
  *
  * @param argv {string[]} the arguments
@@ -1372,7 +1330,15 @@ export async function main(argv: string[]): Promise<number> {
     },
   });
   if (a.help) {
-    console.log(HELP);
+    console.log(
+      fmtHelp(
+        peopleSyncHelpText,
+        "people_sync",
+        version,
+        releaseDate,
+        releaseHash,
+      ),
+    );
     return ExitCode.Ok;
   }
   if (a.version) {

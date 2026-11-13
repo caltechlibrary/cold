@@ -71,6 +71,7 @@ compile: check $(TS_MODS)
 	bin/generate_technical_reports_rpt$(EXT) --help >docs/generate_technical_reports_rpt.1.md
 	bin/ror_import$(EXT) --help >docs/ror_import.1.md
 	bin/cold_api_test$(EXT) --help >docs/cold_api_test.1.md
+	bin/people_sync$(EXT) --help >docs/people_sync.1.md
 
 check: $(TS_MODS)
 	deno task check

@@ -37,6 +37,7 @@ import {
   type Transport,
 } from "./people_sync.ts";
 import { ITEMS, RUNS, startServer } from "./people_sync_testing.ts";
+import { releaseDate, releaseHash, version } from "./version.ts";
 
 const ENV = "RDM_HOST=rdm.example.test\nRDM_URL=https://authors.example.test\n";
 
@@ -1865,4 +1866,23 @@ Deno.test("deno.json: every release task builds the same programs, so no platfor
   for (const [name, line] of release) {
     assertEquals(names(line), want, `${name} differs from release_linux_x86_64`);
   }
+});
+
+Deno.test("help: --help is the man page, headed with the build's version and hash, so make compile can write docs/people_sync.1.md from it", async () => {
+  const lines: string[] = [];
+  const log = console.log;
+  console.log = (...a: unknown[]) => void lines.push(a.join(" "));
+  try {
+    assertEquals(await main(["--help"]), 0);
+  } finally {
+    console.log = log;
+  }
+  const text = lines.join("\n");
+  const rows = text.split("\n");
+  assertEquals(rows[0], `%people_sync(1) user manual | ${version} ${releaseHash}`);
+  assertEquals(rows[2], `% ${releaseDate}`);
+  for (const h of ["# NAME", "# SYNOPSIS", "# OPTIONS", "# EXIT STATUS"]) {
+    assert(rows.includes(h), `the man page has no ${h} section`);
+  }
+  assert(!text.includes("{version}") && !text.includes("{release_hash}"));
 });
