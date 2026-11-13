@@ -1847,3 +1847,22 @@ Deno.test("help: EXIT STATUS documents every code the tool returns, and 69 names
   }
   assertStringIncludes(status, "pre-image");
 });
+
+Deno.test("deno.json: every release task builds the same programs, so no platform's zip lacks or renames one", async () => {
+  const tasks = JSON.parse(await Deno.readTextFile("deno.json")).tasks as Record<
+    string,
+    string
+  >;
+  const names = (line: string) =>
+    [...line.matchAll(/--output dist\/bin\/([A-Za-z0-9_]+)(?:\.exe)?\s/g)]
+      .map((m) => m[1]).sort();
+  const release = Object.entries(tasks).filter(([k]) =>
+    k.startsWith("release_")
+  );
+  const want = names(tasks["release_linux_x86_64"]);
+  assert(want.length >= 14, "the reference task builds too few programs");
+  assertEquals(release.length, 6);
+  for (const [name, line] of release) {
+    assertEquals(names(line), want, `${name} differs from release_linux_x86_64`);
+  }
+});
