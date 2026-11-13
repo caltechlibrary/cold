@@ -100,12 +100,24 @@ six things in place beyond the steps above. Do them in order, and **do not skip 
    |---|---|
    | `RDM_URL` | the instance's public URL, recorded on every run |
    | `PEOPLE_SYNC_TRANSPORT` | `ssh` (production, from this host) |
-   | `RDM_HOST` | the instance's ssh host; key authentication, no prompt |
+   | `RDM_HOST` | the ssh host of **the one instance** that holds the RDM checkout (`RDM_CHECKOUT`); key authentication, no prompt. Do not name a load balancer: the push writes to one instance's names tables and keeps its pre-image there |
    | `PEOPLE_SYNC_MODE` | **`dry-run`** until the review below is done; then `apply` |
-   | `PEOPLE_SYNC_STALE_SECONDS` | the longest a run may take (default 600) |
+   | `PEOPLE_SYNC_STALE_SECONDS` | the longest a run may take (default 600). A full push of every person can take more than nine minutes, so set **900** for CaltechAUTHORS. A run ended at the limit leaves RDM with a partial push; a rerun finishes it |
    | `PEOPLE_SYNC_PREIMAGE_DIR` | where an apply keeps its pre-image on the RDM host (default `/var/tmp/people_sync_preimages`) |
 
    The ssh user needs `sudo -n -u ubuntu` on the RDM host (the run user, `RDM_RUN_USER`) and `uv` for it.
+
+   **Set up ssh for the account that runs `cold_reports`.** `people_sync` runs ssh with `BatchMode=yes`, so it never asks to
+   trust a host or for a password; an untrusted key fails the preflight with `Host key verification failed` (exit 255). Where
+   `cold_reports` runs as root, as it does on `apps`, ssh uses `/root/.ssh`, not your login's. As that account, once:
+
+   1. Make a key (`ssh-keygen -t ed25519`) and add its public key to `authorized_keys` of the ssh user on the RDM host.
+   2. Connect once, interactively, and check the fingerprint it shows against the instance's own before you answer `yes`:
+      `sudo ssh -o ConnectTimeout=15 RDM_HOST true` (with the `user@` part if `RDM_HOST` has one). Do not seed `known_hosts`
+      with `ssh-keyscan`: it trusts whatever answers.
+   3. Check `sudo ssh-keygen -F RDM_HOST` prints a line. A host key that later changes (a rebuilt instance) fails the same way.
+
+   Do this before you switch the mode to `apply`.
 5. **Point the services at the env file.** `PEOPLE_SYNC_ENV` has no default. Set it in the environment of **`cold`** (which reads
    the file to show where the next run will go), of **`cold_reports`** (which runs the push) and of cron. In each systemd unit:
 
@@ -126,7 +138,11 @@ six things in place beyond the steps above. Do them in order, and **do not skip 
    warning. Review it with the people who own that instance.
 3. On the RDM host, take a **table dump** of `name_metadata` and keep it (see [the way back](rdm_people_push.md#the-way-back)).
 4. Set `PEOPLE_SYNC_MODE=apply`, restart nothing (the mode is read from the file on each run), and run the push. The page's
-   next-run line now says *Apply*.
+   next-run line now says *Apply*. A full push takes **ten minutes or more** on CaltechAUTHORS and the page does not change
+   until it ends. It is not hung: `ps` shows `people_sync` and an `ssh ... people_rdm_apply.py --apply` child, and the
+   instance-side limit is `PEOPLE_SYNC_STALE_SECONDS`. Do not press the button again (a second press is refused by the lock,
+   exit 75) and do not kill the run. Edits to the env file, such as the limit, take effect on the next run without restarting
+   `cold`, `cold_api` or `cold_reports`; only the `PEOPLE_SYNC_ENV` variable itself, set in the systemd unit, needs a restart.
 5. Confirm the run row has a `preimage` path and that the file exists on the RDM host.
 
 ## Apache 2 and Shibboleth
