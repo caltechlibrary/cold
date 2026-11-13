@@ -1,4 +1,4 @@
-%people_sync(1) user manual | 0.2.0
+%people_sync(1) user manual | 0.2.0 0f0b59f
 % R. S. Doiel
 % 2026-11-12
 
