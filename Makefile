@@ -70,6 +70,7 @@ compile: check $(TS_MODS)
 	bin/generate_country_collaboration_rpt$(EXT) --help >docs/generate_country_collaboration_rpt.1.md
 	bin/generate_technical_reports_rpt$(EXT) --help >docs/generate_technical_reports_rpt.1.md
 	bin/ror_import$(EXT) --help >docs/ror_import.1.md
+	bin/cold_api_test$(EXT) --help >docs/cold_api_test.1.md
 
 check: $(TS_MODS)
 	deno task check
@@ -156,8 +157,55 @@ clean:
 # version.ts and CITATION.cff are refreshed here rather than in `build`, so
 # that cmt is required only when cutting a release. Listed before `build`
 # because compile embeds version.ts.
-release: clean version.ts CITATION.cff build man distribute_docs dist/Linux-x86_64 dist/Linux-aarch64 dist/macOS-x86_64 dist/macOS-arm64 dist/Windows-x86_64
-	echo "Ready to do ./release.bash"
+release: clean version.ts CITATION.cff build man distribute_docs dist/Linux-x86_64 dist/Linux-aarch64 dist/macOS-x86_64 dist/macOS-arm64 dist/Windows-x86_64 release-check
+	echo "release-check passed. Ready to do ./release.bash (or ./release.bash --dry-run first)"
+
+# The zip files `release` builds, and the programs the release_* deno tasks put in each.
+# PROGRAMS above also lists generate_collaborator_rpt and publications_by_person_identifiers,
+# which those tasks do not build (they were not in v0.1.0 either): add them to both
+# when they should ship.
+RELEASE_PLATFORMS = Linux-x86_64 Linux-aarch64 macOS-x86_64 macOS-arm64 Windows-x86_64
+
+RELEASE_PROGRAMS = cold cold_reports directory_sync journal_vocabulary group_vocabulary people_vocabulary division_people thesis_option_vocabulary ror_import cold_api_test generate_collaborator_affiliations_rpt generate_country_collaboration_rpt generate_technical_reports_rpt people_sync
+
+# release-check stops the release unless version.ts, CITATION.cff, both installers, every
+# manual page in docs/ and every zip file carry the version in codemeta.json and the hash
+# in version.ts, and every zip carries every program. The hash is the commit the release
+# was built from; it is compared with version.ts, not with HEAD, so the check still holds
+# after a later commit (such as release.bash's own). It must be a commit in this repository.
+release-check: .FORCE
+	@HASH=$$(sed -n "s/^releaseHash: string = '\([^']*\)'.*/\1/p" version.ts); \
+	if [ -z "$$HASH" ]; then echo "error: version.ts has no releaseHash" >&2; exit 1; fi; \
+	if ! git cat-file -e "$$HASH^{commit}" 2>/dev/null; then \
+		echo "error: version.ts hash $$HASH is not a commit in this repository" >&2; exit 1; fi; \
+	if ! grep -q "^export const version: string = '$(VERSION)'" version.ts; then \
+		echo "error: version.ts does not carry version $(VERSION)" >&2; exit 1; fi; \
+	if ! grep -q '^version: $(VERSION)' CITATION.cff; then \
+		echo "error: CITATION.cff does not carry version $(VERSION)" >&2; exit 1; fi; \
+	for FNAME in installer.sh installer.ps1; do \
+		if ! grep -q 'VERSION.*"$(VERSION)"' $$FNAME; then \
+			echo "error: $$FNAME does not carry version $(VERSION)" >&2; exit 1; fi; \
+	done; \
+	for FNAME in docs/*.?.md; do \
+		if ! head -1 $$FNAME | grep -Eq "[|] $(VERSION) +$$HASH"; then \
+			echo "error: $$FNAME does not carry version $(VERSION) $$HASH: $$(head -1 $$FNAME)" >&2; exit 1; fi; \
+	done; \
+	COUNT=0; \
+	for NAME in $(RELEASE_PLATFORMS); do \
+		ZIP=dist/$(PROJECT)-v$(VERSION)-$$NAME.zip; \
+		SUFFIX=""; case "$$NAME" in Windows*) SUFFIX=".exe";; esac; \
+		if [ ! -f $$ZIP ]; then echo "error: missing $$ZIP" >&2; exit 1; fi; \
+		for FNAME in $(RELEASE_PROGRAMS); do \
+			if ! unzip -Z1 $$ZIP | grep -qx "bin/$$FNAME$$SUFFIX"; then \
+				echo "error: $$ZIP does not carry bin/$$FNAME$$SUFFIX" >&2; exit 1; fi; \
+		done; \
+		for PAGE in $$(unzip -Z1 $$ZIP '*.1.md'); do \
+			if ! unzip -p $$ZIP $$PAGE | head -1 | grep -Eq "[|] $(VERSION) +$$HASH"; then \
+				echo "error: $$ZIP $$PAGE does not carry version $(VERSION) $$HASH" >&2; exit 1; fi; \
+		done; \
+		COUNT=$$((COUNT + 1)); \
+	done; \
+	echo "release-check: version.ts, CITATION.cff, installers, docs/ and $$COUNT zip files carry $(VERSION) $$HASH"
 
 setup_dist: .FORCE
 	@rm -fR dist
