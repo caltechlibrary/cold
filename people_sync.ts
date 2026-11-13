@@ -1346,7 +1346,8 @@ ENV FILE KEYS
 EXIT STATUS
   0 completed (items needing a person are in the page, not an error)
   2 usage    66 no env file, no target or no program files
-  69 RDM host or COLD API unreachable    70 the program failed or a write failed
+  69 RDM host or COLD API unreachable, or the pre-image directory could not be made
+  70 the program failed or a write failed
   74 a COLD write failed    75 another sync holds the lock    78 bad env file
 `;
 

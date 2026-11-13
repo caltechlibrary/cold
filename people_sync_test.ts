@@ -1827,3 +1827,23 @@ Deno.test("deno.json: every task that compiles cold.ts grants --allow-env=PEOPLE
   // the build task and the six release targets
   assertEquals(seen, 7);
 });
+
+Deno.test("help: EXIT STATUS documents every code the tool returns, and 69 names the pre-image directory", async () => {
+  const lines: string[] = [];
+  const log = console.log;
+  console.log = (...a: unknown[]) => void lines.push(a.join(" "));
+  try {
+    assertEquals(await main(["--help"]), 0);
+  } finally {
+    console.log = log;
+  }
+  const text = lines.join("\n");
+  const status = text.slice(text.indexOf("EXIT STATUS"));
+  for (const c of [0, 2, 66, 69, 70, 74, 75, 78]) {
+    assert(
+      new RegExp(`(^|\\s)${c}\\s`).test(status),
+      `EXIT STATUS does not document ${c}`,
+    );
+  }
+  assertStringIncludes(status, "pre-image");
+});
