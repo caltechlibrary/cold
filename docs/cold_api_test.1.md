@@ -1,6 +1,6 @@
-%cold_api_test(1) user manual | 0.0.32 d0fecd6
+%cold_api_test(1) user manual | 0.2.0 e7d4e17
 % R. S.Doiel
-% 2025-05-16
+% 2026-11-12
 
 # NAME
 
