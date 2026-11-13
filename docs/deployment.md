@@ -3,9 +3,8 @@
 
 Deploying cold on a remote system requires manual setup.  You will need the following software to successfully build and deploy.
 
-- Deno >= 2.7 (for compiling COLD; 2.7 is where this project's browser-module
-  bundling moved to `deno bundle`)
-- Dataset >= 2.1.23
+- Deno >= 2.8.2 (for compiling COLD; browser-module bundling uses `deno bundle`)
+- Dataset >= 2.5.1
 - Pandoc >= 3.1 (for `installer.sh`/`installer.ps1` and the man pages)
 - GNU Make
 - Git
@@ -82,7 +81,7 @@ NOTE: The TypeScript services need to be compile before running them with System
 ## Deploying the people push to RDM
 
 The people push ([rdm_people_push.md](rdm_people_push.md)) writes COLD's people to an RDM instance's names list. It needs
-four things in place beyond the steps above. Do them in order, and **do not skip the dry run**.
+six things in place beyond the steps above. Do them in order, and **do not skip the dry run**.
 
 1. **Install COLD and irdmtools together.** The program that writes to RDM is `scripts/people_rdm_*.py` in the irdmtools
    repository, and `cold` ships it to the RDM host on every run from `IRDMTOOLS_SCRIPTS` (default `../irdmtools/scripts`, so
@@ -91,7 +90,10 @@ four things in place beyond the steps above. Do them in order, and **do not skip
 2. **Build `cold` and `people_sync` fresh.** `deno task build` builds both. `cold` needs `--allow-env=PEOPLE_SYNC_ENV`, which
    its build task and every release task grant. `run_people_sync.bash` prefers `./bin/people_sync` when it exists, so a stale
    binary silently runs old code: rebuild after every pull.
-3. **Write the target env file** (for example `caltechauthors.env` in `/Sites/cold`, untracked) naming the instance; every key
+3. **Create the two run collections** if they do not exist: in `/Sites/cold`, `dataset init people_sync_runs.ds` and
+   `dataset init people_sync_items.ds` (they are the last two commands of `deno task setup`, which a new deployment has already
+   run). They are not tracked in git. Restart `cold_api` afterwards: `datasetd` reads `cold_api.yaml` and the collections at start.
+4. **Write the target env file** (for example `caltechauthors.env` in `/Sites/cold`, untracked) naming the instance; every key
    is described in `cold.env-example` and `people_sync --help`. The ones that matter:
 
    | Key | Value |
@@ -104,7 +106,7 @@ four things in place beyond the steps above. Do them in order, and **do not skip
    | `PEOPLE_SYNC_PREIMAGE_DIR` | where an apply keeps its pre-image on the RDM host (default `/var/tmp/people_sync_preimages`) |
 
    The ssh user needs `sudo -n -u ubuntu` on the RDM host (the run user, `RDM_RUN_USER`) and `uv` for it.
-4. **Point the services at the env file.** `PEOPLE_SYNC_ENV` has no default. Set it in the environment of **`cold`** (which reads
+5. **Point the services at the env file.** `PEOPLE_SYNC_ENV` has no default. Set it in the environment of **`cold`** (which reads
    the file to show where the next run will go), of **`cold_reports`** (which runs the push) and of cron. In each systemd unit:
 
    ~~~ini
@@ -114,7 +116,7 @@ four things in place beyond the steps above. Do them in order, and **do not skip
 
    then `sudo systemctl daemon-reload` and restart `cold` and `cold_reports`. The `*.service-example` files carry the line
    commented out. Restart `cold_api` too after any change to `cold_api.yaml`, because `datasetd` serves its queries as loaded.
-5. **The front end must not add caching.** No `Expires`, `Header set Cache-Control` or `mod_expires` rule for COLD's paths
+6. **The front end must not add caching.** No `Expires`, `Header set Cache-Control` or `mod_expires` rule for COLD's paths
    (see [Caching](configuring_cold.md#caching)); a librarian must never see a stale sync page.
 
 ### First run against an instance

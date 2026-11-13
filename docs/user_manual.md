@@ -27,6 +27,7 @@
 - [generate_collaborator_rpt](generate_collaborator_rpt.1.md)
 - [generate_country_collaboration_rpt](generate_country_collaboration_rpt.1.md)
 - [publications_by_person_identifiers](publications_by_person_identifiers.1.md)
+- [people_sync](people_sync.1.md)
 - [journal_vocabulary](journal_vocabulary.1.md)
 - [thesis_option_vocabulary](thesis_option_vocabulary.1.md)
 - [group_vocabulary](group_vocabulary.1.md)
