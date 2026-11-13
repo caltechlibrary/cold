@@ -228,6 +228,19 @@ bug
 next
 ----
 
+- No binary releases of cold, starting with v0.2.1 (RSDOIEL, 2026-11-12)
+  - Why: v0.2.0's five zips came to 2.3 GB (418 to 494 MB each: every Deno binary embeds the runtime, and a zip holds 14 of them) and the upload took over fifteen minutes. A deployment is a clone plus `deno task build` on the host (`docs/deployment.md`), so the zips are not what a deployment uses.
+  - A release from v0.2.1 is the tag, the release notes from `codemeta.json`, and the source. Nothing below is done yet; decide each as the release process is reworked.
+  - [ ] `Makefile`: `release` drops the `dist/*` platform targets; `release-check` keeps the version, hash, installer and man-page checks and loses the zip checks (`RELEASE_PLATFORMS`, `RELEASE_PROGRAMS`); decide whether `distribute_docs` and `man` stay
+  - [ ] `deno.json`: the six `release_*` tasks go, and so does the test in `people_sync_test.ts` that checks them (it guards the macOS x86_64 task that shipped `bin/cold_api_tests` from v0.1.0)
+  - [ ] `release.bash`: it requires `dist/*.zip`, writes their checksums and uploads them; a source-only release is `gh release create` with the notes, or a tag alone (decide which)
+  - [ ] Remove `installer.sh` and `installer.ps1` for v0.2.1 (RSDOIEL, 2026-11-12: they install a release zip, so they have no purpose without one). That takes with it the two `installer.*` rules and their `build` prerequisites in the `Makefile`, `codemeta-bash-installer.tmpl` and `codemeta-ps1-installer.tmpl`, the two installer checks in `release-check`, and `installer.sh installer.ps1` in `release.bash`'s `PREP_FILES`
+  - [ ] `INSTALL.md`: drop the "experimental installer.sh" paragraph and both one-liners (`curl .../installer.sh | sh`, `irm .../installer.ps1 | iex`) and describe the one way to install: clone, `deno task setup` (new deployment), `deno task build`, then the steps in `docs/deployment.md`
+  - [ ] `README.md`: remove the **Download** link (`releases/latest`) and any other mention of installing from the zip files; point at `INSTALL.md` instead. A grep for zip, installer, download and binary finds only `INSTALL.md` lines 21 to 32 and this README line; also read the README's release-notes sections
+  - [ ] `codemeta.json` `downloadUrl` points at `releases/latest`: point it at the repository (the source is what a release is now)
+  - [ ] `docs/release_process.md` and `docs/deployment.md` (it says to build from a clone; say that is the only way)
+  - [ ] Deployments still need the binaries: `deno task build` on each host stays, and `bin/people_sync` must be rebuilt after a pull (`run_people_sync.bash` prefers it)
+  - irdmtools is not affected: its Go zips are a few MB and stay
 - Drop the undocumented `all=1` query param on CaltechAUTHORS API calls -- RESOLVED 2026-08-25, see `decisions/0007-drop-the-undocumented-all-1-query-parameter-from.md` (DR-0007). Confirmed against the live API rather than inferred: `all=1` returns identical totals and identical record ids to both the baseline and an invented parameter, while `allversions=1` does change the result -- so it is unrecognized and silently ignored. Each site now has a regression test asserting the parameter's absence, since removing a no-op has no observable runtime effect to confirm.
   - [x] `publications_by_person_identifiers.ts` (`buildRecordsQueryUrl`)
   - [x] `generate_collaborator_rpt.ts` (`buildRecordsQueryUrl`)
