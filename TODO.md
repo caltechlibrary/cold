@@ -228,6 +228,24 @@ bug
 next
 ----
 
+- [ ] Move to datasetd's strict status codes in the next release (dataset v2.5.2 and ts_dataset v2.5.2 are released;
+  dataset DR-0001, ts_dataset DR-0001, workspace DR-0020). Nothing changes until both settings are turned on:
+  COLD imports `../ts_dataset/mod.ts` and already runs ts_dataset 2.5.2 with `strictStatus` off.
+  - [ ] Audit the call sites first (about 40 `ds.read/create/update/delete/query`). With strict on, `read()` of a
+    missing key is `undefined`, not `{}`; code that reads `{}` as "no such object" must change. A repeated
+    `create()` is a `DatasetError` (conflict), not a silent overwrite; an `update()` or `delete()` of a missing key is
+    a `DatasetError` (not_found), not `true`. Failures throw instead of returning `false`, `[]` or `undefined`.
+  - [ ] The vocabulary generators (`group_vocabulary.ts`, `people_vocabulary.ts`, `thesis_option_vocabulary.ts`,
+    `journal_vocabulary.ts`) check for `undefined` and then print an empty vocabulary and exit 0. With strict they
+    fail loudly, which is what is wanted: check each caller's handling and the exit code (DR-0014: not_found 1,
+    unavailable 69, invalid 65 or 2). Also `generate_country_collaboration_rpt.ts` (`results ?? []`),
+    `cold_reports.ts`, `journals.ts`, `subjects.ts`, `groups.ts`, `funders.ts` and `utils.ts`.
+    `generate_technical_reports_rpt.ts` already tells the cases apart, on purpose.
+  - [ ] Set `strict_status: true` in `cold_api.yaml` (the datasetd settings; `cold_reports.yaml` is not one) and pass
+    `{ strictStatus: true }` wherever a `Dataset` is built. Call `await ds.checkStrict()` once at start up: a strict
+    client against a datasetd that is not strict reads a missing key as `{}` and misleads.
+  - [ ] Test against a datasetd 2.5.2 with strict on, in `deno task test` and by hand on the dev host.
+
 - No binary releases of cold, starting with v0.2.1 (RSDOIEL, 2026-11-12)
   - Why: v0.2.0's five zips came to 2.3 GB (418 to 494 MB each: every Deno binary embeds the runtime, and a zip holds 14 of them) and the upload took over fifteen minutes. A deployment is a clone plus `deno task build` on the host (`docs/deployment.md`), so the zips are not what a deployment uses.
   - A release from v0.2.1 is the tag, the release notes from `codemeta.json`, and the source. Nothing below is done yet; decide each as the release process is reworked.
